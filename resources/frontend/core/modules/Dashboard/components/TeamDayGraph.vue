@@ -1,5 +1,5 @@
 <template>
-    <div ref="canvas" class="canvas">
+    <div class="canvas-wrapper">
         <div
             v-show="hoverPopup.show && !clickPopup.show"
             :style="{
@@ -68,11 +68,10 @@
             @showNext="showNext"
             @showPrevious="showPrevious"
         />
-        <div class="scroll-area-wrapper">
-            <div ref="scrollArea" class="scroll-area"></div>
-        </div>
-        <div ref="scrollbarTop" class="scrollbar-top" @scroll="onScroll">
-            <div :style="{ width: `${contentWidth()}px` }" />
+        <div ref="canvas" class="canvas" @pointerdown="onDown">
+            <div ref="scrollbarTop" class="scrollbar-top" @scroll="onScroll">
+                <div :style="{ width: `${totalWidth}px` }" />
+            </div>
         </div>
     </div>
 </template>
@@ -82,7 +81,6 @@
     import ScreenshotModal from '@/components/ScreenshotModal';
     import IntervalService from '@/services/resource/time-interval.service';
     import { formatDurationString } from '@/utils/time';
-    import throttle from 'lodash/throttle';
     import moment from 'moment-timezone';
     import { mapGetters } from 'vuex';
     import { SVG } from '@svgdotjs/svg.js';
@@ -91,11 +89,11 @@
 
     const titleHeight = 20;
     const subtitleHeight = 20;
-    const rowHeight = 64;
+    const rowHeight = 65;
     const columns = 24;
-    const minColumnWidth = 85;
+    const minColumnWidth = 42;
     const popupWidth = 270;
-    const canvasPadding = 24;
+    const canvasPadding = 20;
     const defaultCornerOffset = 15;
 
     export default {
@@ -138,8 +136,8 @@
                     user: null,
                     interval: null,
                 },
-                lastPosX: 0,
-                offsetX: 0,
+                totalWidth: 0,
+                scrollPos: 0,
             };
         },
         computed: {
@@ -158,9 +156,6 @@
             window.removeEventListener('resize', this.onResize);
             window.removeEventListener('mousedown', this.onClick);
             window.removeEventListener('keydown', this.onKeyDown);
-            document.removeEventListener('pointermove', this.onMove);
-            document.removeEventListener('pointerup', this.onUp);
-            document.removeEventListener('pointercancel', this.onUp);
         },
         methods: {
             formatDuration: formatDurationString,
@@ -228,64 +223,65 @@
                 return this.users.length * rowHeight;
             },
             canvasWidth() {
-                if (!this.$refs.canvas) {
-                    return 500;
-                }
                 return this.$refs.canvas.clientWidth;
             },
             columnWidth() {
                 return Math.max(minColumnWidth, this.canvasWidth() / columns);
             },
-            contentWidth() {
-                return columns * this.columnWidth();
+            async contentWidth() {
+                await this.$nextTick();
+                this.totalWidth = columns * this.columnWidth();
+                return this.totalWidth;
             },
             onDown(e) {
-                if (e.buttons & 1) {
-                    this.draw.selection = false;
-                    this.lastPosX = e.clientX;
-                    document.addEventListener('pointermove', this.onMove);
-                    document.addEventListener('pointerup', this.onUp);
-                    document.addEventListener('pointercancel', this.onUp);
-                }
+                this.$refs.canvas.addEventListener('pointermove', this.onMove);
+                this.$refs.canvas.addEventListener('pointerup', this.onUp, { once: true });
+                this.$refs.canvas.addEventListener('pointercancel', this.onCancel, { once: true });
             },
 
-            maxScrollX() {
-                return this.contentWidth() - this.canvasWidth();
+            async maxScrollX() {
+                return (await this.contentWidth()) - this.canvasWidth();
             },
-            onMove(e) {
-                if (e.buttons & 1) {
-                    const deltaX = e.clientX - this.lastPosX;
-                    this.offsetX -= deltaX;
-                    this.offsetX = Math.min(this.maxScrollX(), Math.max(this.offsetX, 0));
-                    this.lastPosX = e.clientX;
-                    this.setScroll(this.offsetX);
+            async scrollCanvas(movementX, setScroll = true) {
+                const canvas = this.$refs.canvas;
+                const clientWidth = canvas.clientWidth;
+                const entireWidth = await this.contentWidth();
+                const height = this.height();
+                const newScrollPos = this.scrollPos - movementX;
+                if (newScrollPos <= 0) {
+                    this.scrollPos = 0;
+                } else if (newScrollPos >= entireWidth - clientWidth) {
+                    this.scrollPos = entireWidth - clientWidth;
+                } else {
+                    this.scrollPos = newScrollPos;
                 }
+                setScroll ? this.setScroll() : null;
+                this.draw.viewbox(this.scrollPos, 20, clientWidth, height);
+            },
+            async onMove(e) {
+                this.$refs.canvas.setPointerCapture(e.pointerId);
+                await this.scrollCanvas(e.movementX);
             },
             onUp(e) {
-                document.removeEventListener('pointermove', this.onMove);
-                document.removeEventListener('pointerup', this.onUp);
-                document.removeEventListener('pointercancel', this.onUp);
+                this.$refs.canvas.removeEventListener('pointermove', this.onMove);
+            },
+            onCancel(e) {
+                this.$refs.canvas.removeEventListener('pointermove', this.onMove);
             },
             onScroll(e) {
-                this.setScroll(e.target.scrollLeft);
+                this.scrollCanvas(this.scrollPos - this.$refs.scrollbarTop.scrollLeft, false);
             },
-            setScroll(x) {
-                const canvasContainer = this.$refs.canvas;
-                const width = canvasContainer.clientWidth;
-                const height = canvasContainer.clientHeight;
-                this.$refs.scrollbarTop.scrollLeft = x;
-                this.draw.viewbox(x, -3, width, height);
+            async setScroll(x = null) {
+                await this.$nextTick();
+                this.$refs.scrollbarTop.scrollLeft = x ?? this.scrollPos;
             },
-            resetScroll() {
-                this.setScroll(0);
-            },
-            drawGrid: throttle(function () {
+            async drawGrid() {
                 if (typeof this.draw === 'undefined') return;
                 this.draw.clear();
                 const canvasContainer = this.$refs.canvas;
                 const width = canvasContainer.clientWidth;
-                const height = this.users.length * rowHeight;
-                const columnWidth = width / columns;
+                const height = this.height();
+                const columnWidth = this.columnWidth();
                 const draw = this.draw;
                 draw.addTo(canvasContainer).size(width, height + titleHeight + subtitleHeight);
                 if (height <= 0) {
@@ -294,27 +290,19 @@
                 this.draw.viewbox(0, 20, width, height);
                 // Background
                 const rectBackground = draw
-                    .rect(this.contentWidth(), height - 1)
+                    .rect(await this.contentWidth(), height - 1)
                     .move(0, titleHeight + subtitleHeight)
                     .radius(20)
                     .fill('#FAFAFA')
                     .stroke({ color: '#DFE5ED', width: 1 })
                     .on('mousedown', () => this.$emit('outsideClick'));
-                rectBackground.on('mousedown', e => {
-                    this.onDown(e);
-                    e.stopPropagation();
-                });
-                rectBackground.on('scroll', e => {
-                    this.onScroll(e);
-                    e.stopPropagation();
-                });
                 draw.add(rectBackground);
                 for (let column = 0; column < columns; ++column) {
                     const date = moment().startOf('day').add(column, 'hours');
                     let left = this.columnWidth() * column;
                     // Column headers - hours
                     draw.text(date.format('h'))
-                        .move(left + columnWidth / 2 + 15, 0)
+                        .move(left + columnWidth / 2, 0)
                         .size(columnWidth, titleHeight)
                         .attr({
                             'text-anchor': 'middle',
@@ -324,7 +312,7 @@
                         });
                     // Column headers - am/pm
                     draw.text(date.format('A'))
-                        .move(left + columnWidth / 2 + 15, titleHeight - 5)
+                        .move(left + columnWidth / 2, titleHeight - 5)
                         .size(columnWidth, subtitleHeight)
                         .attr({
                             'text-anchor': 'middle',
@@ -344,19 +332,22 @@
 
                 const maxLeftOffset = width - popupWidth + 2 * canvasPadding;
                 const clipPath = draw
-                    .rect(this.contentWidth(), height - 1)
+                    .rect(await this.contentWidth(), height - 1)
                     .move(0, titleHeight + subtitleHeight)
                     .radius(20)
                     .attr({
                         absolutePositioned: true,
                     });
                 const squaresGroup = draw.group().clipWith(clipPath);
-                this.users.forEach((user, row) => {
+                for (const user of this.users) {
+                    const row = this.users.indexOf(user);
                     const top = row * rowHeight + titleHeight + subtitleHeight;
 
                     // Horizontal grid lines
                     if (row > 0) {
-                        draw.line(0, 0, this.contentWidth(), 0).move(0, top).stroke({ color: '#DFE5ED', width: 1 });
+                        draw.line(0, 0, await this.contentWidth(), 0)
+                            .move(0, top)
+                            .stroke({ color: '#DFE5ED', width: 1 });
                     }
 
                     // Intervals
@@ -381,15 +372,25 @@
                                 });
 
                             rectInterval.on('mouseover', e => {
-                                const rectBBox = rectInterval.bbox();
-                                const popupX = Math.max(rectBBox.x, canvasPadding / 2) - this.offsetX;
-                                const popupY = rectBBox.y - 10;
+                                const popupY = rectInterval.bbox().y - rectInterval.bbox().height;
+                                const canvasRight = this.$refs.canvas.getBoundingClientRect().right;
+                                const rectMiddleX = rectInterval.rbox().cx - defaultCornerOffset / 2;
+                                const minLeft = this.$refs.canvas.getBoundingClientRect().left;
+                                const left =
+                                    rectMiddleX > canvasRight
+                                        ? canvasRight - defaultCornerOffset / 2
+                                        : rectMiddleX < minLeft
+                                          ? minLeft - defaultCornerOffset / 2
+                                          : rectMiddleX;
+                                const maxRight = canvasRight - popupWidth + 2 * canvasPadding;
+                                const popupX = left > maxRight ? maxRight : left < minLeft ? minLeft : left;
+                                const arrowX = defaultCornerOffset + left - popupX;
                                 this.hoverPopup = {
                                     show: true,
                                     x: popupX,
                                     y: popupY,
                                     event,
-                                    borderX: defaultCornerOffset,
+                                    borderX: arrowX,
                                 };
                             });
                             rectInterval.on('mouseout', e => {
@@ -401,11 +402,11 @@
                             rectInterval.on('mousedown', e => {
                                 this.$emit('selectedIntervals', event);
                                 const rectBBox = rectInterval.bbox();
-                                const popupX = Math.max(rectBBox.x, canvasPadding / 2) - this.offsetX;
+                                const popupX = Math.max(rectBBox.x, canvasPadding / 2) + this.scrollPos;
                                 const popupY = rectBBox.y - 50;
                                 this.clickPopup = {
                                     show: true,
-                                    x: popupX,
+                                    x: rectInterval.rbox().cx - defaultCornerOffset / 2,
                                     y: popupY,
                                     event,
                                     borderX: defaultCornerOffset + e.target.attributes.x.value - maxLeftOffset,
@@ -415,16 +416,16 @@
                             squaresGroup.add(rectInterval);
                         });
                     }
-                });
-            }, 100),
-            onResize: throttle(function () {
+                }
+            },
+            onResize: function () {
                 const canvasContainer = this.$refs.canvas;
                 const width = canvasContainer.clientWidth;
-                const height = this.users.length * rowHeight;
+                const height = this.height();
                 this.draw.size(width, height);
-                this.draw.viewbox(0, 20, width, height);
+                this.setScroll(0);
                 this.drawGrid();
-            }, 100),
+            },
             onClick(e) {
                 if (e.button !== 0 || (e.target && e.target.closest('.popup'))) {
                     return;
@@ -456,7 +457,7 @@
         },
         watch: {
             start() {
-                this.resetScroll();
+                this.setScroll(0);
             },
             users() {
                 this.onResize();
@@ -472,88 +473,48 @@
 </script>
 
 <style lang="scss" scoped>
+    .popup {
+        background: #ffffff;
+        border: 0;
+        border-radius: 20px;
+        box-shadow: 0px 7px 64px rgba(0, 0, 0, 0.07);
+        display: block;
+        padding: 10px;
+        position: absolute;
+        text-align: center;
+        width: 270px;
+        z-index: 3;
+        & .corner {
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 10px solid #ffffff;
+            bottom: -10px;
+            content: ' ';
+            display: block;
+            height: 0;
+            left: 15px;
+            position: absolute;
+            width: 0;
+            z-index: 1;
+        }
+    }
     .canvas {
         position: relative;
         user-select: none;
+        touch-action: pan-y;
+        cursor: move;
         &::v-deep canvas {
             box-sizing: content-box;
-        }
-
-        .popup {
-            background: #ffffff;
-            border: 0;
-
-            border-radius: 20px;
-
-            box-shadow: 0px 7px 64px rgba(0, 0, 0, 0.07);
-            display: block;
-
-            padding: 10px;
-
-            position: absolute;
-
-            text-align: center;
-
-            width: 270px;
-
-            z-index: 3;
-
-            & .corner {
-                border-left: 15px solid transparent;
-
-                border-right: 15px solid transparent;
-                border-top: 10px solid #ffffff;
-
-                bottom: -10px;
-                content: ' ';
-                display: block;
-
-                height: 0;
-                left: 15px;
-
-                position: absolute;
-                width: 0;
-
-                z-index: 1;
-            }
-        }
-        .scroll-area-wrapper {
-            position: absolute;
-            top: 0;
-            left: 0;
-            display: block;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            pointer-events: none;
-        }
-
-        .scroll-area {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: -6px;
-            bottom: -6px;
-            display: block;
-            overflow: auto;
-            scrollbar-width: thin;
-
-            &::-webkit-scrollbar {
-                display: none;
-            }
         }
         .scrollbar-top {
             position: absolute;
             left: 0;
-            top: -25px;
+            top: -1.5rem;
             width: 100%;
             height: 10px;
             overflow-x: auto;
         }
         .scrollbar-top {
-            scrollbar-color: #2e2ef9 transparent;
-            scrollbar-width: thin;
-
             & > div {
                 height: 1px;
             }
@@ -573,6 +534,13 @@
             &::-webkit-scrollbar-thumb {
                 background: #2e2ef9;
                 border-radius: 3px;
+            }
+        }
+    }
+    @media (max-width: 720px) {
+        .canvas {
+            .scrollbar-top {
+                top: -1rem;
             }
         }
     }
