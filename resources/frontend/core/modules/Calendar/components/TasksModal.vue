@@ -18,6 +18,8 @@
 <script>
     import moment from 'moment';
 
+    const MODAL_VISIBLE_CLASS = 'modal-visible';
+
     export default {
         props: {
             date: {
@@ -28,6 +30,18 @@
                 type: Array,
                 required: true,
             },
+        },
+        watch: {
+            visible(value) {
+                if (value) {
+                    document.body.classList.add(MODAL_VISIBLE_CLASS);
+                } else {
+                    document.body.classList.remove(MODAL_VISIBLE_CLASS);
+                }
+            },
+        },
+        beforeDestroy() {
+            document.body.classList.remove(MODAL_VISIBLE_CLASS);
         },
         computed: {
             visible() {
@@ -55,6 +69,8 @@
         width: 100%;
         height: 100%;
 
+        overflow: auto;
+
         padding: 0.75em 24px;
 
         z-index: 10;
@@ -69,5 +85,11 @@
             flex: 1;
             text-align: center;
         }
+    }
+</style>
+
+<style lang="scss">
+    body.modal-visible {
+        overflow: hidden;
     }
 </style>
