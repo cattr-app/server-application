@@ -4,67 +4,67 @@
             <div v-if="intervals.length" class="time-interval-edit-panel">
                 <div class="container-fluid">
                     <div class="row flex-middle flex-between">
-                        <div class="col-4">
+                        <div class="time-interval-edit-panel__time col-4">
                             {{ $t('field.selected') }}:
                             <strong>{{ formattedTotalTime }}</strong>
                         </div>
-                        <div class="col-12">
-                            <div class="flex flex-end">
-                                <at-button
-                                    :disabled="disabledButtons"
-                                    class="time-interval-edit-panel__btn"
-                                    @click="openAddNewTaskModal"
-                                >
-                                    {{ $t('control.add_new_task') }}
-                                </at-button>
+                        <div class="time-interval-edit-panel__buttons col-12 flex flex-end">
+                            <at-button
+                                :disabled="disabledButtons"
+                                class="time-interval-edit-panel__btn"
+                                @click="openAddNewTaskModal"
+                            >
+                                {{ $t('control.add_new_task') }}
+                            </at-button>
 
-                                <at-button
-                                    :disabled="disabledButtons"
-                                    class="time-interval-edit-panel__btn"
-                                    @click="openChangeTaskModal"
-                                >
-                                    {{ $t('control.edit_intervals') }}
-                                </at-button>
+                            <at-button
+                                :disabled="disabledButtons"
+                                class="time-interval-edit-panel__btn"
+                                @click="openChangeTaskModal"
+                            >
+                                {{ $t('control.edit_intervals') }}
+                            </at-button>
 
-                                <at-button
-                                    :disabled="disabledButtons"
-                                    class="time-interval-edit-panel__btn"
-                                    type="error"
-                                    @click="deleteTimeIntervals"
-                                >
-                                    <i class="icon icon-trash" />
-                                    {{ $t('control.delete') }}
-                                </at-button>
+                            <at-button
+                                :disabled="disabledButtons"
+                                class="time-interval-edit-panel__btn"
+                                type="error"
+                                @click="deleteTimeIntervals"
+                            >
+                                <i class="icon icon-trash" />
+                                {{ $t('control.delete') }}
+                            </at-button>
 
-                                <div class="divider" />
+                            <div class="divider" />
 
-                                <at-button class="time-interval-edit-panel__btn" @click="$emit('close')">
-                                    {{ $t('control.cancel') }}
-                                </at-button>
-                            </div>
+                            <at-button class="time-interval-edit-panel__btn" @click="$emit('close')">
+                                {{ $t('control.cancel') }}
+                            </at-button>
                         </div>
                     </div>
                 </div>
             </div>
         </transition>
 
-        <template v-if="showAddNewTaskModal">
-            <AddNewTaskModal
-                :disableButtons="disabledButtons"
-                :showModal="showAddNewTaskModal"
-                @cancel="onAddNewTaskModalCancel"
-                @confirm="onAddNewTaskModalConfirm"
-            />
-        </template>
+        <div class="modals">
+            <template v-if="showAddNewTaskModal">
+                <AddNewTaskModal
+                    :disableButtons="disabledButtons"
+                    :showModal="showAddNewTaskModal"
+                    @cancel="onAddNewTaskModalCancel"
+                    @confirm="onAddNewTaskModalConfirm"
+                />
+            </template>
 
-        <template v-if="showChangeTaskModal">
-            <ChangeTaskModal
-                :disableButtons="disabledButtons"
-                :showModal="showChangeTaskModal"
-                @cancel="onChangeTaskModalCancel"
-                @confirm="onChangeTaskModalConfirm"
-            />
-        </template>
+            <template v-if="showChangeTaskModal">
+                <ChangeTaskModal
+                    :disableButtons="disabledButtons"
+                    :showModal="showChangeTaskModal"
+                    @cancel="onChangeTaskModalCancel"
+                    @confirm="onChangeTaskModalConfirm"
+                />
+            </template>
+        </div>
     </div>
 </template>
 
@@ -242,18 +242,35 @@
         right: 0;
         left: 0;
 
-        &__btn {
-            margin-right: $layout-01;
-
-            &:last-child {
-                margin-right: 0;
-            }
+        &__buttons {
+            gap: $layout-01;
         }
     }
 
+    @media (max-width: 790px) {
+        .time-interval-edit-panel {
+            &__time {
+                flex-basis: 100%;
+                max-width: 100%;
+            }
+            &__buttons {
+                flex-basis: 100%;
+                max-width: 100%;
+                flex-wrap: wrap;
+            }
+        }
+    }
+    @media (max-width: 720px) {
+        .divider {
+            display: none;
+        }
+        .modals ::v-deep .at-modal {
+            max-width: 100%;
+        }
+    }
     .divider {
         background-color: $gray-4;
         width: 1px;
-        margin-right: $layout-01;
+        flex-shrink: 0;
     }
 </style>
