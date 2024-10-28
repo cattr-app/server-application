@@ -96,9 +96,9 @@
                 }));
             },
             onDateChange({ start, end }) {
-                (this.start = moment(start).startOf('month').format(ISO8601_DATE_FORMAT)),
-                    (this.end = moment(end).endOf('month').format(ISO8601_DATE_FORMAT)),
-                    this.load();
+                this.start = moment(start).startOf('month').format(ISO8601_DATE_FORMAT);
+                this.end = moment(end).endOf('month').format(ISO8601_DATE_FORMAT);
+                this.load();
             },
             onProjectsChange(projects) {
                 this.projects = projects;
