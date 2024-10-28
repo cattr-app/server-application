@@ -24,7 +24,7 @@
             v-show="clickPopup.show"
             :style="{
                 left: `${clickPopup.x - 30}px`,
-                bottom: `${height() - clickPopup.y + 10}px`,
+                bottom: `${height() - clickPopup.y + 50}px`,
             }"
             class="popup"
         >
@@ -401,15 +401,25 @@
                             });
                             rectInterval.on('mousedown', e => {
                                 this.$emit('selectedIntervals', event);
-                                const rectBBox = rectInterval.bbox();
-                                const popupX = Math.max(rectBBox.x, canvasPadding / 2) + this.scrollPos;
-                                const popupY = rectBBox.y - 50;
+                                const popupY = rectInterval.bbox().y - rectInterval.bbox().height;
+                                const canvasRight = this.$refs.canvas.getBoundingClientRect().right;
+                                const rectMiddleX = rectInterval.rbox().cx - defaultCornerOffset / 2;
+                                const minLeft = this.$refs.canvas.getBoundingClientRect().left;
+                                const left =
+                                    rectMiddleX > canvasRight
+                                        ? canvasRight - defaultCornerOffset / 2
+                                        : rectMiddleX < minLeft
+                                          ? minLeft - defaultCornerOffset / 2
+                                          : rectMiddleX;
+                                const maxRight = canvasRight - popupWidth + 2 * canvasPadding;
+                                const popupX = left > maxRight ? maxRight : left < minLeft ? minLeft : left;
+                                const arrowX = defaultCornerOffset + left - popupX;
                                 this.clickPopup = {
                                     show: true,
-                                    x: rectInterval.rbox().cx - defaultCornerOffset / 2,
+                                    x: popupX,
                                     y: popupY,
                                     event,
-                                    borderX: defaultCornerOffset + e.target.attributes.x.value - maxLeftOffset,
+                                    borderX: arrowX,
                                 };
                                 e.stopPropagation();
                             });
