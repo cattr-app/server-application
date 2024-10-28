@@ -1,7 +1,7 @@
 <template>
     <div v-if="visible" class="tasks-modal">
         <div class="tasks-modal__header">
-            <h4 class="tasks-modal__title">{{ $t('calendar.tasks', { date: formatDate(date) }) }}</h4>
+            <h4 class="tasks-modal__title">{{ $t('calendar.tasks', { date: formattedDate }) }}</h4>
             <at-button @click="close"><i class="icon icon-x"></i></at-button>
         </div>
 
@@ -47,13 +47,13 @@
             visible() {
                 return this.tasks.length > 0;
             },
+            formattedDate() {
+                return moment(this.date).format('LL');
+            },
         },
         methods: {
             close() {
                 this.$emit('close');
-            },
-            formatDate(date) {
-                return moment(date).format('LL');
             },
         },
     };
