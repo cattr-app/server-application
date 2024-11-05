@@ -55,14 +55,15 @@
                     const draw = this.draw;
                     draw.addTo(canvasContainer).size(width, headerHeight + rowHeight * 6);
 
-                    draw.rect(width - 2, (lastDay.diff(firstDay, 'weeks') + 1) * rowHeight - 1)
+                    draw.rect(width - 2, rows * rowHeight - 1)
                         .move(1, headerHeight)
                         .radius(20)
                         .fill('#FAFAFA')
                         .stroke({ color: '#dfe5ed', width: 1 });
                     for (let column = 0; column < columns; column++) {
                         const date = firstDay.clone().locale(this.$i18n.locale).add(column, 'days');
-                        draw.text(date.format('dddd').toUpperCase())
+                        const dateFormat = window.matchMedia('(max-width: 880px)').matches ? 'ddd' : 'dddd';
+                        draw.text(date.format(dateFormat).toUpperCase())
                             .move(column * columnWidth + columnWidth / 2, -5)
                             .width(columnWidth)
                             .height(headerHeight)
@@ -150,12 +151,12 @@
                         const dateKey = date.format('YYYY-MM-DD');
                         if (timePerDay[dateKey]) {
                             draw.text(this.formatDuration(timePerDay[dateKey]))
-                                .move(cellLeft + 13, cellTop + rowHeight - 30)
+                                .move(cellLeft, cellTop + rowHeight - 30)
                                 .attr({
                                     'text-anchor': 'inherit',
                                     'font-family': 'Nunito, sans-serif',
-                                    'font-size': 15,
                                     'font-weight': isInSelection ? 600 : 400,
+                                    'my-text-type': 'time',
                                     fill: '#59566E',
                                 });
                         }
@@ -193,5 +194,21 @@
     .canvas ::v-deep svg {
         user-select: none;
         width: 100%;
+        text[my-text-type='time'] {
+            font-size: 0.9rem;
+            transform: translateX(13px);
+        }
+        @media (max-width: 980px) {
+            text[my-text-type='time'] {
+                font-size: 0.7rem;
+                transform: translateX(7px);
+            }
+        }
+        @media (max-width: 430px) {
+            text[my-text-type='time'] {
+                font-size: 0.6rem;
+                transform: translateX(3px);
+            }
+        }
     }
 </style>

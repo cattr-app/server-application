@@ -1,10 +1,7 @@
 <template>
-    <div ref="canvas" class="canvas">
+    <div ref="canvas" class="canvas" @pointerdown="onDown">
         <div ref="scrollbarTop" class="scrollbar-top" @scroll="onScroll">
-            <div :style="{ width: `${contentWidth()}px` }" />
-        </div>
-        <div class="scroll-area-wrapper">
-            <div ref="scrollArea" class="scroll-area" @pointerdown="onDown" @scroll="onScroll"></div>
+            <div :style="{ width: `${totalWidth}px` }" />
         </div>
     </div>
 </template>
@@ -14,7 +11,6 @@
     import { formatDurationString } from '@/utils/time';
     import { mapGetters } from 'vuex';
     import { SVG } from '@svgdotjs/svg.js';
-    import { debounce } from 'lodash';
 
     const defaultColorConfig = [
         {
@@ -37,7 +33,7 @@
 
     const titleHeight = 20;
     const subtitleHeight = 20;
-    const rowHeight = 64;
+    const rowHeight = 65;
     const minColumnWidth = 85;
     export default {
         name: 'TeamTableGraph',
@@ -63,6 +59,8 @@
             return {
                 lastPosX: 0,
                 offsetX: 0,
+                totalWidth: 0,
+                scrollPos: 0,
             };
         },
         computed: {
@@ -87,22 +85,21 @@
         },
         beforeDestroy() {
             window.removeEventListener('resize', this.onResize);
-            document.removeEventListener('pointermove', this.onMove);
-            document.removeEventListener('pointerup', this.onUp);
-            document.removeEventListener('pointercancel', this.onUp);
         },
         methods: {
+            height() {
+                return this.users.length * rowHeight;
+            },
             canvasWidth() {
-                if (!this.$refs.canvas) {
-                    return 500;
-                }
                 return this.$refs.canvas.clientWidth;
             },
             columnWidth() {
                 return Math.max(minColumnWidth, this.canvasWidth() / this.columns);
             },
-            contentWidth() {
-                return this.columns * this.columnWidth();
+            async contentWidth() {
+                await this.$nextTick();
+                this.totalWidth = this.columns * this.columnWidth();
+                return this.totalWidth;
             },
             isDateWithinRange(dateString, startDate, endDate) {
                 const date = new Date(dateString);
@@ -122,63 +119,65 @@
                 return color;
             },
             onDown(e) {
-                if (e.buttons & 1) {
-                    this.draw.selection = false;
-                    this.lastPosX = e.clientX;
-                    document.addEventListener('pointermove', this.onMove);
-                    document.addEventListener('pointerup', this.onUp);
-                    document.addEventListener('pointercancel', this.onUp);
-                }
+                this.$refs.canvas.addEventListener('pointermove', this.onMove);
+                this.$refs.canvas.addEventListener('pointerup', this.onUp, { once: true });
+                this.$refs.canvas.addEventListener('pointercancel', this.onCancel, { once: true });
             },
-            maxScrollX() {
-                return this.contentWidth() - this.canvasWidth();
+            async maxScrollX() {
+                return (await this.contentWidth()) - this.canvasWidth();
             },
-            onMove(e) {
-                if (e.buttons & 1) {
-                    const deltaX = e.clientX - this.lastPosX;
-                    this.offsetX -= deltaX;
-                    this.offsetX = Math.min(this.maxScrollX(), Math.max(this.offsetX, 0));
-                    this.lastPosX = e.clientX;
-                    this.setScroll(this.offsetX);
+            async scrollCanvas(movementX, setScroll = true) {
+                const canvas = this.$refs.canvas;
+                const clientWidth = canvas.clientWidth;
+                const entireWidth = await this.contentWidth();
+                const height = this.height();
+                const newScrollPos = this.scrollPos - movementX;
+                if (newScrollPos <= 0) {
+                    this.scrollPos = 0;
+                } else if (newScrollPos >= entireWidth - clientWidth) {
+                    this.scrollPos = entireWidth - clientWidth;
+                } else {
+                    this.scrollPos = newScrollPos;
                 }
+                setScroll ? await this.setScroll() : null;
+                this.draw.viewbox(this.scrollPos, 20, clientWidth, height);
+            },
+            async onMove(e) {
+                this.$refs.canvas.setPointerCapture(e.pointerId);
+                await this.scrollCanvas(e.movementX);
             },
             onUp(e) {
-                document.removeEventListener('pointermove', this.onMove);
-                document.removeEventListener('pointerup', this.onUp);
-                document.removeEventListener('pointercancel', this.onUp);
+                this.$refs.canvas.removeEventListener('pointermove', this.onMove);
+            },
+            onCancel(e) {
+                this.$refs.canvas.removeEventListener('pointermove', this.onMove);
             },
             onScroll(e) {
-                this.setScroll(e.target.scrollLeft);
+                this.scrollCanvas(this.scrollPos - this.$refs.scrollbarTop.scrollLeft, false);
             },
-            setScroll(x) {
-                const canvasContainer = this.$refs.canvas;
-                const width = canvasContainer.clientWidth;
-                const height = canvasContainer.clientHeight;
-                this.$refs.scrollbarTop.scrollLeft = x;
-                this.draw.viewbox(x, 0, width, height - 10);
-            },
-            resetScroll() {
-                this.setScroll(0);
+            async setScroll(x = null) {
+                await this.$nextTick();
+                this.$refs.scrollbarTop.scrollLeft = x ?? this.scrollPos;
             },
             formatDuration: formatDurationString,
-            drawGrid: debounce(function () {
+            drawGrid: async function () {
                 if (typeof this.draw === 'undefined') return;
                 this.draw.clear();
                 const draw = this.draw;
                 const canvasContainer = this.$refs.canvas;
                 const width = canvasContainer.clientWidth;
-                const columnWidth = width / this.columns;
-                const height = this.users.length * rowHeight;
+                const columnWidth = this.columnWidth();
+                const height = this.height();
                 if (height <= 0) {
                     return;
                 }
                 const start = moment(this.start, 'YYYY-MM-DD');
 
-                const cursor = this.contentWidth() > this.canvasWidth() ? 'move' : 'default';
+                const cursor = (await this.contentWidth()) > this.canvasWidth() ? 'move' : 'default';
                 draw.addTo(canvasContainer).size(width, height + titleHeight + subtitleHeight);
                 draw.viewbox(0, 20, width, height);
                 // Background
-                draw.rect(this.contentWidth() - 1, height - 1)
+                draw.rect((await this.contentWidth()) - 1, height - 1)
                     .move(0, titleHeight + subtitleHeight)
                     .radius(20)
                     .fill('#fafafa')
@@ -247,22 +246,22 @@
                     filteredData[key] = filteredInnerObject;
                 }
                 const clipPath = draw
-                    .rect(this.contentWidth() - 1, height - 1)
+                    .rect((await this.contentWidth()) - 1, height - 1)
                     .move(0, titleHeight + subtitleHeight)
                     .radius(20)
                     .attr({
                         absolutePositioned: true,
                     });
                 const squaresGroup = draw.group().clipWith(clipPath);
-                this.users.forEach((user, row) => {
+                for (const [row, user] of this.users.entries()) {
                     const top = row * rowHeight + titleHeight + subtitleHeight;
                     const userTime = filteredData[user.id];
 
                     if (userTime) {
-                        Object.keys(userTime).forEach((day, i) => {
+                        for (const day of Object.keys(userTime)) {
                             const column = -start.diff(day, 'days');
                             const duration = userTime[day];
-                            const left = (column * this.contentWidth()) / this.columns;
+                            const left = (column * (await this.contentWidth())) / this.columns;
                             const total = 60 * 60 * this.workingHours;
                             const progress = duration / total;
                             const height = Math.ceil(Math.min(progress, 1) * (rowHeight - 1));
@@ -293,11 +292,11 @@
                                     cursor: cursor,
                                     hoverCursor: cursor,
                                 });
-                        });
+                        }
                     }
                     // Horizontal grid lines
                     if (row > 0) {
-                        draw.line(0, 0, this.contentWidth(), 0)
+                        draw.line(0, 0, await this.contentWidth(), 0)
                             .move(0, top)
                             .stroke({ color: '#dfe5ed', width: 1 })
                             .attr({
@@ -305,22 +304,23 @@
                                 hoverCursor: cursor,
                             });
                     }
-                });
-            }, 100),
-            onResize: debounce(function () {
+                }
+            },
+            onResize: function () {
                 const canvasContainer = this.$refs.canvas;
                 const width = canvasContainer.clientWidth;
-                const height = this.users.length * rowHeight;
-                this.draw.viewbox(0, 20, width, height);
+                const height = this.height();
+                this.draw.size(width, height);
+                this.setScroll(0);
                 this.drawGrid();
-            }, 100),
+            },
         },
         watch: {
             start() {
-                this.resetScroll();
+                this.setScroll(0);
             },
             end() {
-                this.resetScroll();
+                this.setScroll(0);
             },
             users() {
                 this.onResize();
@@ -332,12 +332,9 @@
     };
 </script>
 <style lang="scss" scoped>
-    .canvas::v-deep .canvas {
-        user-select: none;
-        box-sizing: content-box;
-    }
     .canvas {
         user-select: none;
+        touch-action: pan-y;
         height: 100%;
         position: relative;
         width: 100%;
@@ -345,25 +342,13 @@
     .scrollbar-top {
         position: absolute;
         left: 0;
-        top: -25px;
+        top: -1.5rem;
         width: 100%;
         height: 10px;
         overflow-x: auto;
     }
 
-    .scrollbar-bottom {
-        position: absolute;
-        left: 0;
-        bottom: -5px;
-        width: 100%;
-        overflow-x: auto;
-    }
-
-    .scrollbar-bottom,
     .scrollbar-top {
-        scrollbar-color: #2e2ef9 transparent;
-        scrollbar-width: thin;
-
         & > div {
             height: 1px;
         }
@@ -385,36 +370,11 @@
             border-radius: 3px;
         }
     }
-
-    .scroll-area-wrapper {
-        position: absolute;
-        top: 0;
-        left: 0;
-        display: block;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        cursor: move;
-    }
-
-    .scroll-area {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: -6px;
-        bottom: -6px;
-        display: block;
-        overflow: auto;
-        scrollbar-width: thin;
-
-        &::-webkit-scrollbar {
-            display: none;
+    @media (max-width: 720px) {
+        .canvas {
+            .scrollbar-top {
+                top: -1rem;
+            }
         }
-    }
-
-    .scroll-area-inner {
-        display: block;
-        width: 100%;
-        height: 100%;
     }
 </style>

@@ -1,25 +1,23 @@
 <template>
-    <div ref="canvas" class="canvas">
+    <div class="canvas-wrapper">
         <div
             v-show="hoverPopup.show && !clickPopup.show"
             :style="{
                 left: `${hoverPopup.x - 30}px`,
-                bottom: `${height - hoverPopup.y + 10}px`,
+                bottom: `${hoverPopup.y}px`,
             }"
             class="popup"
         >
-            <template v-if="hoverPopup.event">
-                <div>
-                    {{ hoverPopup.event.task_name }}
-                    ({{ hoverPopup.event.project_name }})
-                </div>
+            <div v-if="hoverPopup.event">
+                {{ hoverPopup.event.task_name }}
+                ({{ hoverPopup.event.project_name }})
+            </div>
 
-                <div>
-                    {{ formatDuration(hoverPopup.event.duration) }}
-                </div>
-            </template>
+            <div v-if="hoverPopup.event">
+                {{ formatDuration(hoverPopup.event.duration) }}
+            </div>
 
-            <a :style="{ left: `${hoverPopup.borderX}px` }" class="corner" />
+            <a :style="{ left: `${hoverPopup.borderX}px` }" class="corner"></a>
         </div>
 
         <div
@@ -27,7 +25,7 @@
             :data-offset="`${clickPopup.borderX}px`"
             :style="{
                 left: `${clickPopup.x - 30}px`,
-                bottom: `${height - clickPopup.y + 10}px`,
+                bottom: `${clickPopup.y}px`,
             }"
             class="popup"
         >
@@ -68,11 +66,15 @@
             @showNext="showNext"
             @showPrevious="showPrevious"
         />
+        <div ref="canvas" class="canvas" @pointerdown="onDown">
+            <div ref="scrollbarTop" class="scrollbar-top" @scroll="onScroll">
+                <div :style="{ width: `${totalWidth}px` }" />
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
-    import throttle from 'lodash/throttle';
     import moment from 'moment-timezone';
     import { formatDurationString } from '@/utils/time';
     import Screenshot from '@/components/Screenshot';
@@ -85,9 +87,9 @@
     const subtitleHeight = 20;
     const timelineHeight = 80;
     const columns = 24;
-
+    const minColumnWidth = 37;
     const popupWidth = 270;
-    const canvasPadding = 24;
+    const canvasPadding = 20;
     const defaultCornerOffset = 15;
 
     export default {
@@ -164,6 +166,8 @@
                     task: null,
                     show: false,
                 },
+                scrollPos: 0,
+                totalWidth: 0,
             };
         },
         mounted() {
@@ -231,18 +235,68 @@
                     }
                 }
             },
-            drawGrid: throttle(function () {
+            canvasWidth() {
+                return this.$refs.canvas.clientWidth;
+            },
+            columnWidth() {
+                return Math.max(minColumnWidth, this.canvasWidth() / columns);
+            },
+            async contentWidth() {
+                await this.$nextTick();
+                this.totalWidth = columns * this.columnWidth();
+                return this.totalWidth;
+            },
+            onDown(e) {
+                this.$refs.canvas.addEventListener('pointermove', this.onMove);
+                this.$refs.canvas.addEventListener('pointerup', this.onUp, { once: true });
+                this.$refs.canvas.addEventListener('pointercancel', this.onCancel, { once: true });
+            },
+            async scrollCanvas(movementX, setScroll = true) {
+                const canvas = this.$refs.canvas;
+                const clientWidth = canvas.clientWidth;
+                const entireWidth = await this.contentWidth();
+                const height = this.height;
+                const newScrollPos = this.scrollPos - movementX;
+                if (newScrollPos <= 0) {
+                    this.scrollPos = 0;
+                } else if (newScrollPos >= entireWidth - clientWidth) {
+                    this.scrollPos = entireWidth - clientWidth;
+                } else {
+                    this.scrollPos = newScrollPos;
+                }
+                setScroll ? await this.setScroll() : null;
+                this.draw.viewbox(this.scrollPos, 0, clientWidth, height);
+            },
+            async onMove(e) {
+                this.$refs.canvas.setPointerCapture(e.pointerId);
+                await this.scrollCanvas(e.movementX);
+            },
+            onUp(e) {
+                this.$refs.canvas.removeEventListener('pointermove', this.onMove);
+            },
+            onCancel(e) {
+                this.$refs.canvas.removeEventListener('pointermove', this.onMove);
+            },
+            onScroll(e) {
+                this.scrollCanvas(this.scrollPos - this.$refs.scrollbarTop.scrollLeft, false);
+            },
+            async setScroll(x = null) {
+                await this.$nextTick();
+                this.$refs.scrollbarTop.scrollLeft = x ?? this.scrollPos;
+            },
+            drawGrid: async function () {
                 if (typeof this.draw === 'undefined') return;
                 this.draw.clear();
                 const draw = this.draw;
                 // const width = draw.width();
                 const canvasContainer = this.$refs.canvas;
                 const width = canvasContainer.clientWidth;
-                const columnWidth = width / columns;
-                draw.addTo(canvasContainer).size(width, '100%');
+                const columnWidth = this.columnWidth();
+                draw.addTo(canvasContainer).size(width, this.height);
+                this.draw.viewbox(0, 0, width, this.height);
                 // Background
                 this.draw
-                    .rect(width - 1, timelineHeight - 1)
+                    .rect(await this.contentWidth(), timelineHeight - 1)
                     .move(0, titleHeight + subtitleHeight)
                     .radius(20)
                     .fill('#fafafa')
@@ -251,7 +305,7 @@
                 const maxLeftOffset = width - popupWidth + 2 * canvasPadding;
                 const minLeftOffset = canvasPadding / 2;
                 const clipPath = draw
-                    .rect(width - 1, timelineHeight - 1)
+                    .rect(await this.contentWidth(), timelineHeight - 1)
                     .move(0, titleHeight + subtitleHeight)
                     .radius(20)
                     .attr({
@@ -311,7 +365,7 @@
 
                     const width = ((Math.max(event.duration, 60) + 120) * columnWidth) / 60 / 60;
 
-                    const rect = draw
+                    const rectInterval = draw
                         .rect(width, 30)
                         .move(Math.floor(leftOffset * columnWidth), titleHeight + subtitleHeight + 22)
                         .radius(3)
@@ -333,60 +387,72 @@
                         .width(width)
                         .height(30);
 
-                    rect.on('mouseover', e => {
-                        if (e.target.attributes.x.value > maxLeftOffset) {
-                            this.hoverPopup = {
-                                show: true,
-                                x: maxLeftOffset,
-                                y: e.target.attributes.y.value,
-                                event,
-                                borderX: defaultCornerOffset + e.target.attributes.x.value - maxLeftOffset,
-                            };
-                        } else {
-                            this.hoverPopup = {
-                                show: true,
-                                x: e.target.attributes.x < minLeftOffset ? minLeftOffset : e.target.attributes.x.value,
-                                y: e.target.attributes.y.value - 38,
-                                borderX: defaultCornerOffset,
-                                event,
-                            };
-                        }
+                    rectInterval.on('mouseover', e => {
+                        const popupY =
+                            document.body.getBoundingClientRect().height - rectInterval.rbox().y + defaultCornerOffset;
+                        const canvasRight = this.$refs.canvas.getBoundingClientRect().right;
+                        const rectMiddleX = rectInterval.rbox().cx;
+                        const minLeft = this.$refs.canvas.getBoundingClientRect().left;
+                        const left =
+                            rectMiddleX > canvasRight
+                                ? canvasRight - defaultCornerOffset / 2
+                                : rectMiddleX < minLeft
+                                  ? minLeft
+                                  : rectMiddleX;
+                        const maxRight = canvasRight - popupWidth + 2 * canvasPadding;
+                        const popupX =
+                            left > maxRight ? maxRight : left <= minLeft ? minLeft + defaultCornerOffset : left;
+                        const arrowX = defaultCornerOffset + left - popupX;
+                        this.hoverPopup = {
+                            show: true,
+                            x: popupX,
+                            y: popupY,
+                            event,
+                            borderX: arrowX,
+                        };
                     });
 
-                    rect.on('mouseout', e => {
+                    rectInterval.on('mouseout', e => {
                         this.hoverPopup = {
                             ...this.hoverPopup,
                             show: false,
                         };
                     });
 
-                    rect.on('mousedown', e => {
+                    rectInterval.on('mousedown', e => {
                         this.$emit('selectedIntervals', event);
+                        const { left: canvasLeft, right: canvasRight } = this.$refs.canvas.getBoundingClientRect();
+                        const rectBox = rectInterval.rbox();
+                        const popupY =
+                            document.body.getBoundingClientRect().height - rectInterval.rbox().y + defaultCornerOffset;
+                        const rectMiddleX = rectBox.cx;
 
-                        if (e.target.attributes.x.value > maxLeftOffset) {
-                            this.clickPopup = {
-                                show: true,
-                                x: maxLeftOffset,
-                                y: e.target.attributes.y.value - 38,
-                                event,
-                                borderX: defaultCornerOffset + e.target.attributes.x.value - maxLeftOffset,
-                            };
-                        } else {
-                            this.clickPopup = {
-                                show: true,
-                                x: e.target.attributes.x.value,
-                                y: e.target.attributes.y.value - 38,
-                                event,
-                                borderX: defaultCornerOffset,
-                            };
-                        }
+                        // Determine initial left position within canvas bounds
+                        const left =
+                            rectMiddleX > canvasRight
+                                ? canvasRight - defaultCornerOffset / 2
+                                : Math.max(rectMiddleX, canvasLeft);
 
+                        // Calculate maximum allowed position for popup's left
+                        const maxRight = canvasRight - popupWidth + 2 * canvasPadding;
+                        const popupX = left > maxRight ? maxRight : Math.max(left, canvasLeft + defaultCornerOffset);
+
+                        // Calculate the position for the arrow in the popup
+                        const arrowX = defaultCornerOffset + left - popupX;
+
+                        this.clickPopup = {
+                            show: true,
+                            x: popupX,
+                            y: popupY,
+                            event,
+                            borderX: arrowX,
+                        };
                         e.stopPropagation();
                     });
 
-                    draw.add(rect);
+                    draw.add(rectInterval);
                 });
-            }),
+            },
             onClick(e) {
                 if (
                     (e.target &&
@@ -407,9 +473,9 @@
                     }
                 }
             },
-            onResize: throttle(function () {
+            onResize: function () {
                 this.drawGrid();
-            }, 100),
+            },
             async onRemove() {
                 try {
                     await this.intervalService.deleteItem(this.modal.interval.id);
@@ -439,49 +505,73 @@
 </script>
 
 <style lang="scss" scoped>
+    .popup {
+        background: #ffffff;
+        border: 0;
+        border-radius: 20px;
+        box-shadow: 0px 7px 64px rgba(0, 0, 0, 0.07);
+        display: block;
+        padding: 10px;
+        position: absolute;
+        text-align: center;
+        width: 270px;
+        z-index: 3;
+        & .corner {
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 10px solid #ffffff;
+            bottom: -10px;
+            content: ' ';
+            display: block;
+            height: 0;
+            left: 15px;
+            position: absolute;
+            width: 0;
+            z-index: 1;
+        }
+    }
     .canvas {
         position: relative;
         user-select: none;
+        touch-action: pan-y;
+        cursor: move;
         &::v-deep canvas {
             box-sizing: content-box;
         }
+    }
+    .scrollbar-top {
+        position: absolute;
+        left: 0;
+        top: -1rem;
+        width: 100%;
+        height: 10px;
+        overflow-x: auto;
+    }
+    .scrollbar-top {
+        & > div {
+            height: 1px;
+        }
 
-        .popup {
-            background: #fff;
-            border: 0;
+        &::-webkit-scrollbar {
+            height: 7px;
+        }
 
-            border-radius: 20px;
+        &::-webkit-scrollbar-track {
+            background: transparent;
+        }
 
-            box-shadow: 0px 7px 64px rgba(0, 0, 0, 0.07);
-            display: block;
+        &::-webkit-scrollbar-button {
+            display: none;
+        }
 
-            padding: 10px;
-
-            position: absolute;
-
-            text-align: center;
-
-            width: 270px;
-
-            z-index: 1;
-
-            & .corner {
-                border-left: 15px solid transparent;
-
-                border-right: 15px solid transparent;
-                border-top: 10px solid #fff;
-
-                bottom: -10px;
-                content: ' ';
-                display: block;
-
-                height: 0;
-
-                position: absolute;
-                width: 0;
-
-                z-index: 1;
-            }
+        &::-webkit-scrollbar-thumb {
+            background: #2e2ef9;
+            border-radius: 3px;
+        }
+    }
+    @media (max-width: 1110px) {
+        .scrollbar-top {
+            top: -0.5rem;
         }
     }
 </style>
