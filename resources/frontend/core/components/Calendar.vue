@@ -501,6 +501,14 @@
         }
     }
 
+    @media (max-width: 750px) {
+        .datepicker-wrapper {
+            &--range {
+                width: 320px;
+            }
+        }
+    }
+
     .datepicker__footer {
         text-align: left;
     }
