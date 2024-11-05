@@ -255,7 +255,7 @@
                 } else {
                     this.scrollPos = newScrollPos;
                 }
-                setScroll ? this.setScroll() : null;
+                setScroll ? await this.setScroll() : null;
                 this.draw.viewbox(this.scrollPos, 20, clientWidth, height);
             },
             async onMove(e) {
