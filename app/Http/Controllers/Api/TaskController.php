@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Enums\TaskRelationType;
 use App\Exceptions\Entities\TaskRelationException;
 use App\Http\Middleware\RegisterModulesEvents;
+use App\Http\Requests\Task\CalendarRequest;
 use App\Http\Requests\Task\CreateRelationRequest;
 use App\Http\Requests\Task\CreateTaskRequest;
 use App\Http\Requests\Task\DestroyTaskRequest;
@@ -20,12 +21,15 @@ use Filter;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Http\JsonResponse;
 use CatEvent;
 use Illuminate\Http\Response;
 use MessagePack\MessagePack;
+use DB;
 use Settings;
 use Throwable;
 
@@ -649,5 +653,171 @@ class TaskController extends ItemController
             'Content-type: application/octet-stream',
             'Content-Disposition: attachment; filename=ProjectsAndTasks.cattr'
         ]);
+    }
+
+    protected const ISO8601_DATE_FORMAT = 'Y-m-d';
+
+    /**
+     * @param CalendarRequest $request
+     * @return JsonResponse
+     *
+     * @throws Throwable
+     * @api             {get} /tasks/calendar Calendar
+     * @apiDescription  Get calendar report data
+     *
+     * @apiVersion      4.0.0
+     * @apiName         Calendar
+     * @apiGroup        Task
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiParam {Integer|Integer[]} project_id Filter by project ids
+     * @apiParam {ISO8601}           start_at   Start date
+     * @apiParam {ISO8601}           end_at     End date
+     *
+     * @apiParamExample {json} Request Example
+     *  {
+     *    "project_id": 1,
+     *    "start_at": "2024-10-01",
+     *    "end_at": "2024-10-31"
+     *  }
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "status": 200,
+     *    "success": true,
+     *    "data": {
+     *      "tasks": {
+     *        "1": {
+     *          "id": 1,
+     *          "task_name": "Eveniet non laudantium pariatur quia.",
+     *          "project_id": 1,
+     *          "start_date": "2024-10-03",
+     *          "due_date": "2024-10-03"
+     *        }
+     *      },
+     *      "tasks_by_day": [
+     *        {
+     *          "date": "2024-10-03",
+     *          "month": 10,
+     *          "day": 3,
+     *          "task_ids": [1]
+     *        }
+     *      ],
+     *      "tasks_by_week": [
+     *        {
+     *          "days": [30, 1, 2, 3, 4, 5, 6],
+     *          "tasks": [
+     *            {
+     *              "task_id": 1,
+     *              "start_week_day": 3,
+     *              "end_week_day": 3
+     *            }
+     *          ]
+     *        }
+     *      ]
+     *    }
+     *  }
+     *
+     * @apiUse         400Error
+     * @apiUse         ValidationError
+     * @apiUse         UnauthorizedError
+     * @apiUse         ForbiddenError
+     */
+    public function calendar(CalendarRequest $request): JsonResponse
+    {
+        $requestData = $request->validated();
+
+        $startAt = Carbon::parse($requestData['start_at'])->startOfWeek();
+        $endAt = Carbon::parse($requestData['end_at'])->endOfWeek();
+
+        /** @var Builder $query */
+        $query = Task::query()
+            ->select(
+                'id',
+                'task_name',
+                'project_id',
+                DB::raw('COALESCE(start_date, due_date) AS start_date'),
+                DB::raw('COALESCE(due_date, start_date) AS due_date'),
+            )
+            ->where(static fn(Builder $query) => $query
+                ->whereNotNull('start_date')
+                ->orWhereNotNull('due_date'))
+            ->where(static fn(Builder $query) => $query
+                ->whereBetween('start_date', [$startAt, $endAt])
+                ->orWhereBetween('due_date', [$startAt, $endAt])
+                ->orWhereBetween(DB::raw(DB::escape($startAt->format(static::ISO8601_DATE_FORMAT))), [DB::raw('start_date'), DB::raw('due_date')])
+                ->orWhereBetween(DB::raw(DB::escape($endAt->format(static::ISO8601_DATE_FORMAT))), [DB::raw('start_date'), DB::raw('due_date')]))
+            ->orderBy('start_date')
+            ->orderBy('id');
+
+        if (isset($requestData['project_id'])) {
+            if (is_array($requestData['project_id'])) {
+                $query->whereIn('project_id', array_values($requestData['project_id']));
+            } else {
+                $query->where('project_id', (int)$requestData['project_id']);
+            }
+        }
+
+        /** @var \Illuminate\Support\Collection<int, Task> $tasks */
+        $tasks = $query->get()->keyBy('id');
+
+        $tasksByDay = [];
+        $tasksByWeek = [];
+
+        $period = CarbonPeriod::create($startAt, '1 day', $endAt);
+        foreach ($period as $date) {
+            $tasksByDay[$date->format(static::ISO8601_DATE_FORMAT)] = [
+                'date' => $date->format(static::ISO8601_DATE_FORMAT),
+                'day' => (int)$date->format('d'),
+                'month' => (int)$date->format('m'),
+                'task_ids' => [],
+            ];
+        }
+
+        $period = CarbonPeriod::create($startAt, '7 days', $endAt);
+        foreach ($period as $date) {
+            $week = $date->format(static::ISO8601_DATE_FORMAT);
+            $tasksByWeek[$week] = [
+                'days' => [],
+                'tasks' => [],
+            ];
+
+            $weekPeriod = CarbonPeriod::create($date, '1 day', $date->clone()->addDays(7))->excludeEndDate();
+            foreach ($weekPeriod as $day) {
+                $tasksByWeek[$week]['days'][] = (int)$day->format('d');
+            }
+        }
+
+        foreach ($tasks as $task) {
+            $task->mergeCasts([
+                'start_date' => 'date:' . static::ISO8601_DATE_FORMAT,
+                'due_date' => 'date:' . static::ISO8601_DATE_FORMAT,
+            ]);
+
+            $startDate = $task->start_date->greaterThan($startAt) ? $task->start_date : $startAt;
+            $endDate = $task->due_date->lessThan($endAt) ? $task->due_date : $endAt;
+
+            $period = new CarbonPeriod($startDate, '1 day', $endDate);
+            foreach ($period as $date) {
+                $tasksByDay[$date->format(static::ISO8601_DATE_FORMAT)]['task_ids'][] = $task->id;
+            }
+
+            $period = new CarbonPeriod($startDate->startOfWeek(), '7 days', $endDate);
+            foreach ($period as $date) {
+                $tasksByWeek[$date->format(static::ISO8601_DATE_FORMAT)]['tasks'][] = [
+                    'task_id' => $task->id,
+                    'start_week_day' => $task->start_date->greaterThan($date) ? $task->start_date->diffInDays($date) : 0,
+                    'end_week_day' => $task->due_date->lessThan($date->clone()->addDays(7)) ? $task->due_date->diffInDays($date) : 6,
+                ];
+            }
+        }
+
+        return responder()->success([
+            'tasks' => $tasks,
+            'tasks_by_day' => array_values($tasksByDay),
+            'tasks_by_week' => array_values($tasksByWeek),
+        ])->respond();
     }
 }
