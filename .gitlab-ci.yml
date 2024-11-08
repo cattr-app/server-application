@@ -55,6 +55,8 @@ pages :
   stage: pages
   when: manual
   image: node:18-alpine
+  only:
+    - tags
   before_script:
     - apk add yarn
     - yarn
