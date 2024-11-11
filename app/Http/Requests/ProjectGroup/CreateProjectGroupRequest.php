@@ -16,7 +16,7 @@ class CreateProjectGroupRequest extends CattrFormRequest
     {
         return [
             'name' => 'required|string',
-            'parent_id' => 'sometimes|integer|exists:project_groups,id',
+            'parent_id' => 'nullable|sometimes|integer|exists:project_groups,id',
         ];
     }
 }
