@@ -30,9 +30,9 @@
     "group": "Группа",
     "no_group_selected": "Группа не выбрана",
     "loading_groups": "Загружаем группы",
-    "no_groups_found": "Для {query} группы не найдены",
-    "fast_create_group": "Быстро создать группу {query}",
-    "to_create_group": "Перейти к созданию группы {query}",
+    "no_groups_found": "Группа {query} не найдена",
+    "fast_create_group": "Создать группу {query}",
+    "to_create_group": "Создать в новом окне",
     "type_to_search_for_group": "Начните печатать, чтобы найти группу."
   },
   "control": {

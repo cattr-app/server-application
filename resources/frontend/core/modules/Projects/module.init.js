@@ -406,44 +406,23 @@ export function init(context) {
             title: 'field.group',
             key: 'group',
             render: (h, data) => {
-                let currentGroup = ref({
-                    id: data.item.group?.id || '',
-                    name: data.item.group?.name || '',
-                });
-
-                let value = ref(data.item.group?.name || '');
+                if (!data.item.can.update) {
+                    return h('span', data.item.group?.name ?? '');
+                }
 
                 return h(GroupSelect, {
                     props: {
-                        value,
-                        currentGroup,
+                        value: data.item.group,
                         clearable: true,
                         project: data.item,
                     },
                     on: {
-                        input(val) {
-                            value.value = val;
-                        },
-                        setCurrent(group) {
-                            currentGroup.value = group;
-
-                            if (group !== '') {
-                                new ProjectService().save({
-                                    id: data.item.id,
-                                    group: group.id,
-                                });
-                            }
-                        },
-                        createGroup(group) {
-                            value.value = group.name;
-                            currentGroup.value = {
-                                id: group.id,
-                                name: group.name,
-                            };
+                        input(value) {
+                            data.item.group = value;
 
                             new ProjectService().save({
                                 id: data.item.id,
-                                group: group.id,
+                                group: data.item.group.id,
                             });
                         },
                     },

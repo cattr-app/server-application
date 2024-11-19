@@ -30,9 +30,9 @@
     "group": "Group",
     "no_group_selected": "No group selected",
     "loading_groups": "Loading groups",
-    "no_groups_found": "No groups found for {query}",
-    "fast_create_group": "Quickly create a group {query}",
-    "to_create_group": "Go to create group {query}",
+    "no_groups_found": "No groups {query} found",
+    "fast_create_group": "Create a group {query}",
+    "to_create_group": "Create in a new window",
     "type_to_search_for_group": "Start typing to search for a group."
   },
   "control": {

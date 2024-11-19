@@ -1,14 +1,12 @@
 <template>
     <div ref="groupSelect" class="group-select" @click="onActive">
-        <div v-show="isActive === false">{{ model == '' ? $t('field.no_group_selected') : model }}</div>
         <v-select
-            v-show="isActive === true"
             v-model="model"
             :options="options"
             :filterable="false"
-            label="label"
+            label="name"
             :clearable="true"
-            :reduce="option => option.label"
+            :reduce="option => option.name"
             :components="{ Deselect, OpenIndicator }"
             :dropdownShouldOpen="dropdownShouldOpen"
             @open="onOpen"
@@ -16,14 +14,14 @@
             @search="onSearch"
             @option:selecting="handleSelecting"
         >
-            <template #option="{ id, label, depth, current }">
+            <template #option="{ id, name, depth, current }">
                 <span class="option" :class="{ 'option--current': current }">
                     <span class="option__text">
                         <span v-if="depth > 0" class="option__depth">{{ getSpaceByDepth(depth) }}</span>
-                        <span>{{ ucfirst(label) }}</span>
+                        <span>{{ ucfirst(name) }}</span>
                         <span @click.stop>
                             <router-link
-                                class="option__text__link"
+                                class="option__link"
                                 :to="{ name: 'ProjectGroups.crud.groups.edit', params: { id: id } }"
                                 target="_blank"
                             >
@@ -34,23 +32,18 @@
                 </span>
             </template>
 
-            <template #no-options="{ search, searching }">
-                <template v-if="searching">
-                    <span>{{ $t('field.no_groups_found', { query: search }) }}</span>
-                </template>
-                <em v-else>{{ $t('field.no_groups_found', { query: search }) }}</em>
-                <template>
-                    <at-button v-show="query !== ''" type="primary" class="no-option" size="large" @click="createGroup">
-                        <span class="icon icon-plus-circle"></span>
-                        {{ $t('field.fast_create_group', { query: search }) }}
-                    </at-button>
-                </template>
-                <template>
-                    <at-button type="primary" class="no-option" size="large" @click="navigateToCreateGroup">
-                        <span class="icon icon-plus-circle"></span>
-                        {{ $t('field.to_create_group', { query: search }) }}
-                    </at-button>
-                </template>
+            <template #no-options="{ search }">
+                <span>{{ $t('field.no_groups_found', { query: search }) }}</span>
+
+                <at-button v-show="query !== ''" type="primary" class="no-option" size="small" @click="createGroup">
+                    <span class="icon icon-plus-circle"></span>
+                    {{ $t('field.fast_create_group', { query: search }) }}
+                </at-button>
+
+                <at-button type="primary" class="no-option" size="small" @click="navigateToCreateGroup">
+                    <span class="icon icon-plus-circle"></span>
+                    {{ $t('field.to_create_group', { query: search }) }}
+                </at-button>
             </template>
 
             <template #list-footer>
@@ -63,24 +56,23 @@
 </template>
 
 <script>
-    import { ucfirst } from '@/utils/string';
     import ProjectGroupsService from '@/services/resource/project-groups.service';
-    import vSelect from 'vue-select';
+    import { ucfirst } from '@/utils/string';
     import { mapGetters } from 'vuex';
+    import vSelect from 'vue-select';
     import debounce from 'lodash/debounce';
 
     const service = new ProjectGroupsService();
 
     export default {
         name: 'GroupSelect',
+        components: {
+            vSelect,
+        },
         props: {
             value: {
-                type: [String, Object],
-                default: '',
-            },
-            currentGroup: {
                 type: [Object],
-                required: true,
+                default: null,
             },
             clearable: {
                 type: Boolean,
@@ -91,54 +83,65 @@
                 required: true,
             },
         },
-        components: {
-            vSelect,
-        },
         data() {
             return {
-                isActive: false,
                 isSelectOpen: false,
                 totalPages: 0,
                 currentPage: 0,
                 query: '',
                 lastSearchQuery: '',
-                localCurrentGroup: null,
+                Deselect: { render: h => h('i', { class: 'icon icon-x' }) },
             };
+        },
+        computed: {
+            ...mapGetters('projectGroups', ['groups']),
+            model: {
+                get() {
+                    return this.value;
+                },
+                set(option) {
+                    if (typeof option === 'object') {
+                        this.$emit('input', option);
+                    }
+                },
+            },
+            options() {
+                if (!this.groups.has(this.lastSearchQuery)) {
+                    return [];
+                }
+
+                return this.groups.get(this.lastSearchQuery).map(({ id, name, depth }) => ({
+                    id,
+                    name,
+                    depth,
+                    current: id === this.value?.id,
+                }));
+            },
+            hasNextPage() {
+                return this.currentPage < this.totalPages;
+            },
+            OpenIndicator() {
+                return {
+                    render: h =>
+                        h('i', {
+                            class: {
+                                icon: true,
+                                'icon-chevron-down': !this.isSelectOpen,
+                                'icon-chevron-up': this.isSelectOpen,
+                            },
+                        }),
+                };
+            },
         },
         created() {
             this.search = debounce(this.search, 350);
         },
         mounted() {
             this.observer = new IntersectionObserver(this.infiniteScroll);
-
-            const onClickOutside = e => {
-                const opened = this.$el.contains(e.target);
-                if (!opened) {
-                    this.onClose();
-                }
-            };
-
-            document.addEventListener('click', onClickOutside);
-            this.$on('hook:beforeDestroy', () => document.removeEventListener('click', onClickOutside));
+            document.addEventListener('click', this.onClickOutside);
         },
-        watch: {
-            async valueAndQuery(newValue) {
-                if (newValue.value === '') {
-                    this.localCurrentGroup != null
-                        ? (this.localCurrentGroup.current = false)
-                        : (this.localCurrentGroup = null);
-                    this.$emit('setCurrent', '');
-                } else if (newValue.value !== this.currentGroup.name) {
-                    this.$emit('setCurrent', {
-                        id: this.localCurrentGroup.id,
-                        name: this.localCurrentGroup.label,
-                    });
-                }
-
-                if (newValue.value === '' && newValue.query === '') {
-                    this.search();
-                }
-            },
+        beforeDestroy() {
+            document.removeEventListener('click', this.onClickOutside);
         },
         methods: {
             ucfirst,
@@ -153,15 +156,15 @@
                 return this.isSelectOpen;
             },
             async createGroup() {
+                const query = this.query;
                 this.query = '';
                 this.onClose();
 
                 try {
-                    const { data } = await service.save({ name: this.query }, true);
-                    this.$emit('createGroup', {
-                        id: data.data.id,
-                        name: data.data.name,
-                    });
+                    const { data } = await service.save({ name: query }, true);
+                    this.model = data.data;
+
+                    document.activeElement.blur();
                 } catch (e) {
                     // TODO
                 }
@@ -170,11 +173,6 @@
                 return ''.padStart(depth, '-');
             },
             onActive() {
-                if (!this.project.can.update) {
-                    return;
-                }
-
-                this.isActive = true;
                 this.onOpen();
                 this.$refs.groupSelect.parentElement.style.zIndex = 1;
             },
@@ -184,11 +182,6 @@
                 this.observe();
             },
             onClose() {
-                this.isActive = false;
-                if (this.model == null) {
-                    this.model = typeof this.currentGroup == 'object' ? this.currentGroup.name : this.currentGroup;
-                }
-
                 this.$refs.groupSelect.parentElement.style.zIndex = 0;
                 this.isSelectOpen = false;
                 this.observer.disconnect();
@@ -212,13 +205,8 @@
                 this.observe();
             },
             handleSelecting(option) {
-                if (this.localCurrentGroup != null) {
-                    this.localCurrentGroup.current = false;
-                }
-
-                option.current = true;
-                this.localCurrentGroup = option;
                 this.onClose();
+                this.model = option;
             },
             async infiniteScroll([{ isIntersecting, target }]) {
                 if (isIntersecting) {
@@ -247,57 +235,11 @@
 
                 this.currentPage++;
             },
-        },
-        computed: {
-            model: {
-                get() {
-                    return this.value;
-                },
-                set(option) {
-                    this.$emit('input', option);
-                },
-            },
-            ...mapGetters('projectGroups', ['groups']),
-            options() {
-                if (!this.groups.has(this.lastSearchQuery)) {
-                    return [];
+            onClickOutside(e) {
+                const opened = this.$el.contains(e.target);
+                if (!opened) {
+                    this.onClose();
                 }
-
-                return this.groups.get(this.lastSearchQuery).map(({ id, name, depth }) => ({
-                    id,
-                    label: name,
-                    depth,
-                    current: id === this.currentGroup?.id,
-                }));
-            },
-            valueAndQuery() {
-                return {
-                    value: this.value,
-                    query: this.query,
-                };
-            },
-            Deselect() {
-                return {
-                    render: createElement =>
-                        createElement('i', {
-                            class: 'icon icon-x',
-                        }),
-                };
-            },
-            OpenIndicator() {
-                return {
-                    render: createElement =>
-                        createElement('i', {
-                            class: {
-                                icon: true,
-                                'icon-chevron-down': !this.isSelectOpen,
-                                'icon-chevron-up': this.isSelectOpen,
-                            },
-                        }),
-                };
-            },
-            hasNextPage() {
-                return this.currentPage < this.totalPages;
             },
         },
     };
@@ -306,21 +248,25 @@
 <style lang="scss" scoped>
     .group-select {
         border-radius: 5px;
+        width: 100%;
 
         &::v-deep {
-            &:hover {
-                .vs__clear {
-                    display: inline-block;
-                }
-                .vs__open-indicator {
-                    display: none;
-                }
+            .v-select {
+                height: 100%;
             }
 
-            .vs--open {
-                .vs__open-indicator {
-                    display: inline-block;
-                }
+            .vs__selected-options {
+                display: block;
+                white-space: pre;
+            }
+
+            .vs__selected,
+            .vs__search {
+                display: inline;
+            }
+
+            .vs--open .vs__search {
+                width: 100%;
             }
 
             .vs__actions {
@@ -350,12 +296,11 @@
             }
 
             .vs__dropdown-menu {
-                width: 360px;
+                scrollbar-width: none;
+
                 &::-webkit-scrollbar {
                     display: none;
                 }
-
-                scrollbar-width: none;
             }
         }
     }
@@ -380,7 +325,7 @@
             z-index: 2;
         }
 
-        &__text__link {
+        &__link {
             font-size: 15px;
         }
     }
@@ -390,10 +335,12 @@
         cursor: pointer;
         display: block;
         width: 100%;
+
         & div {
             word-break: break-all;
             white-space: initial;
             line-height: 20px;
+
             &::before {
                 margin-right: 5px;
             }
