@@ -3,14 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Helpers\QueryHelper;
-use App\Http\Requests\Project\EditProjectRequest;
 use App\Http\Requests\ProjectGroup\CreateProjectGroupRequest;
 use App\Http\Requests\ProjectGroup\DestroyProjectGroupRequest;
 use App\Http\Requests\ProjectGroup\EditProjectGroupRequest;
 use App\Http\Requests\ProjectGroup\ListProjectGroupRequest;
 use App\Http\Requests\ProjectGroup\ShowProjectGroupRequest;
 use App\Models\ProjectGroup;
-use Event;
+use CatEvent;
 use Exception;
 use Filter;
 use Illuminate\Http\JsonResponse;
@@ -35,7 +34,7 @@ class ProjectGroupController extends ItemController
 
         $itemsQuery = $this->getQuery($requestData);
 
-        Event::dispatch(Filter::getBeforeActionEventName(), $requestData);
+        CatEvent::dispatch(Filter::getBeforeActionEventName(), $requestData);
 
         $itemsQuery->withDepth()->withCount('projects')->defaultOrder();
 
@@ -46,7 +45,7 @@ class ProjectGroupController extends ItemController
             $items,
         );
 
-        Event::dispatch(Filter::getAfterActionEventName(), [$items, $requestData]);
+        CatEvent::dispatch(Filter::getAfterActionEventName(), [$items, $requestData]);
 
         return responder()->success($items)->respond();
     }
@@ -90,7 +89,7 @@ class ProjectGroupController extends ItemController
     public function create(CreateProjectGroupRequest $request): JsonResponse
     {
         if ($parent_id = $request->safe(['parent_id'])['parent_id'] ?? null) {
-            Event::listen(
+            CatEvent::listen(
                 Filter::getAfterActionEventName(),
                 static fn(ProjectGroup $group) => $group->parent()->associate($parent_id)->save(),
             );
@@ -120,7 +119,7 @@ class ProjectGroupController extends ItemController
      */
     public function edit(EditProjectGroupRequest $request): JsonResponse
     {
-        Event::listen(
+        CatEvent::listen(
             Filter::getAfterActionEventName(),
             static function (ProjectGroup $group) use ($request) {
                 if ($parent_id = $request->input('parent_id', null)) {
