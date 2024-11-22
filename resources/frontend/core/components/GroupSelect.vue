@@ -34,7 +34,9 @@
 
             <template #no-options="{ search }">
                 <span>{{ $t('field.no_groups_found', { query: search }) }}</span>
+            </template>
 
+            <template #list-footer="{ search }">
                 <at-button v-show="query !== ''" type="primary" class="no-option" size="small" @click="createGroup">
                     <span class="icon icon-plus-circle"></span>
                     {{ $t('field.fast_create_group', { query: search }) }}
@@ -44,9 +46,7 @@
                     <span class="icon icon-plus-circle"></span>
                     {{ $t('field.to_create_group', { query: search }) }}
                 </at-button>
-            </template>
 
-            <template #list-footer>
                 <li v-show="hasNextPage" ref="load" class="option__infinite-loader">
                     {{ $t('field.loading_groups') }} <i class="icon icon-loader"></i>
                 </li>
