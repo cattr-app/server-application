@@ -78,10 +78,6 @@
                 type: Boolean,
                 default: () => false,
             },
-            project: {
-                type: Object,
-                required: true,
-            },
         },
         data() {
             return {

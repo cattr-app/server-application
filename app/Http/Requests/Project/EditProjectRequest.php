@@ -31,7 +31,7 @@ class EditProjectRequest extends CattrFormRequest
             'phases' => 'sometimes|array',
             'phases.*.id' => 'sometimes|required|exists:project_phases,id',
             'phases.*.name' => 'required|string|min:1|max:255',
-            'group' => 'sometimes|nullable|integer|exists:project_groups,id',
+            'group_id' => 'sometimes|nullable|integer|exists:project_groups,id',
         ];
     }
 }

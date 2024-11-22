@@ -10,9 +10,7 @@ import { store } from '@/store';
 import Statuses from './components/Statuses';
 import Phases from './components/Phases.vue';
 import Vue from 'vue';
-import Groups from './components/Groups';
 import GroupSelect from '@/components/GroupSelect';
-import { ref } from 'vue';
 
 export const ModuleConfig = {
     routerPrefix: 'projects',
@@ -269,28 +267,16 @@ export function init(context) {
         {
             label: 'field.group',
             key: 'group',
-            render: (h, data) => {
-                if (typeof data.values.group == 'object') {
-                    data.setValue('_currentGroup', data.values.group);
-                }
-                let currentGroup = ref(data.values?._currentGroup || '');
-
-                let value = ref(data.currentValue?.id || data.currentValue || '');
-
-                return h(Groups, {
+            render(h, data) {
+                return h(GroupSelect, {
                     props: {
-                        currentGroup,
-                        value,
+                        value: data.values.group,
                         clearable: true,
                     },
                     on: {
-                        input(val) {
-                            data.inputHandler(val);
-                            value.value = val;
-                        },
-                        setCurrent(group) {
-                            data.setValue('_currentGroup', group);
-                            currentGroup.value = group;
+                        input(value) {
+                            data.values.group = value;
+                            data.values.group_id = value.id;
                         },
                     },
                 });
@@ -414,7 +400,6 @@ export function init(context) {
                     props: {
                         value: data.item.group,
                         clearable: true,
-                        project: data.item,
                     },
                     on: {
                         input(value) {
@@ -422,7 +407,7 @@ export function init(context) {
 
                             new ProjectService().save({
                                 id: data.item.id,
-                                group: data.item.group.id,
+                                group_id: data.item.group.id,
                             });
                         },
                     },

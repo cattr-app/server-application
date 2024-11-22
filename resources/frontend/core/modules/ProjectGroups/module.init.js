@@ -1,7 +1,8 @@
 import ProjectGroupsService from '@/services/resource/project-groups.service';
-import Groups from '../Projects/components/Groups';
+import GroupSelect from '@/components/GroupSelect';
+import ProjectService from '@/services/resource/project.service';
 import i18n from '@/i18n';
-import Vue, { h, ref } from 'vue';
+import Vue from 'vue';
 
 export const ModuleConfig = {
     routerPrefix: 'project-groups',
@@ -37,26 +38,15 @@ export function init(context) {
             label: 'field.parent_group',
             key: 'parent_id',
             render: (h, data) => {
-                if (data.values.group_parent) {
-                    data.setValue('_currentGroup', data.values.group_parent);
-                }
-
-                let currentGroup = ref(data.values._currentGroup || '');
-
-                let value = ref(data.currentValue?.id || data.currentValue || '');
-
-                return h(Groups, {
+                return h(GroupSelect, {
                     props: {
-                        currentGroup,
-                        value,
+                        value: data.values.group_parent,
                         clearable: true,
                     },
                     on: {
                         input(value) {
-                            data.inputHandler(value);
-                        },
-                        setCurrent(group) {
-                            data.setValue('_currentGroup', group);
+                            data.values.group_parent = value;
+                            data.values.parent_id = value.id;
                         },
                     },
                 });
