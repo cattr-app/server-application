@@ -24,6 +24,7 @@
                                 class="option__link"
                                 :to="{ name: 'ProjectGroups.crud.groups.edit', params: { id: id } }"
                                 target="_blank"
+                                rel="opener"
                             >
                                 <i class="icon icon-external-link" />
                             </router-link>

@@ -27,9 +27,7 @@
                                     </at-button>
                                 </template>
                             </template>
-                            <at-button size="large" class="control-item" @click="$router.go(-1)"
-                                >{{ $t('control.back') }}
-                            </at-button>
+                            <BackButton size="large" class="control-item">{{ $t('control.back') }}</BackButton>
                         </div>
                     </div>
 
@@ -261,6 +259,7 @@
 </template>
 
 <script>
+    import BackButton from '@/components/BackButton';
     import RenderableField from '@/components/RenderableField';
     import ResourceSelect from '@/components/ResourceSelect';
     import { ValidationObserver, ValidationProvider } from 'vee-validate';
@@ -269,6 +268,7 @@
     export default {
         name: 'EditView',
         components: {
+            BackButton,
             RenderableField,
             ResourceSelect,
             ValidationProvider,
