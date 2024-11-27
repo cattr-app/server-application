@@ -693,6 +693,8 @@ class TaskController extends ItemController
      *          "id": 1,
      *          "task_name": "Eveniet non laudantium pariatur quia.",
      *          "project_id": 1,
+     *          "estimate": null,
+     *          "total_spent_time": 0,
      *          "start_date": "2024-10-03",
      *          "due_date": "2024-10-03"
      *        }
@@ -707,7 +709,15 @@ class TaskController extends ItemController
      *      ],
      *      "tasks_by_week": [
      *        {
-     *          "days": [30, 1, 2, 3, 4, 5, 6],
+     *          "days": [
+     *            { "day": 30, "month": 9 },
+     *            { "day": 1, "month": 10 },
+     *            { "day": 2, "month": 10 },
+     *            { "day": 3, "month": 10 },
+     *            { "day": 4, "month": 10 },
+     *            { "day": 5, "month": 10 },
+     *            { "day": 6, "month": 10 }
+     *          ],
      *          "tasks": [
      *            {
      *              "task_id": 1,
@@ -738,9 +748,11 @@ class TaskController extends ItemController
                 'id',
                 'task_name',
                 'project_id',
+                'estimate',
                 DB::raw('COALESCE(start_date, due_date) AS start_date'),
                 DB::raw('COALESCE(due_date, start_date) AS due_date'),
             )
+            ->withSum(['workers as total_spent_time'], 'duration')
             ->where(static fn(Builder $query) => $query
                 ->whereNotNull('start_date')
                 ->orWhereNotNull('due_date'))
@@ -786,7 +798,10 @@ class TaskController extends ItemController
 
             $weekPeriod = CarbonPeriod::create($date, '1 day', $date->clone()->addDays(7))->excludeEndDate();
             foreach ($weekPeriod as $day) {
-                $tasksByWeek[$week]['days'][] = (int)$day->format('d');
+                $tasksByWeek[$week]['days'][] = [
+                    'day' => (int)$day->format('d'),
+                    'month' => (int)$day->format('m'),
+                ];
             }
         }
 

@@ -50,6 +50,10 @@
                 this.svg.viewbox(0, 0, width, height);
             }, 100),
             draw: throttle(function () {
+                const borderColor = '#eeeef5';
+                const blockColor = '#fff';
+                const textColor = 'rgb(63, 83, 110)';
+
                 /** @type {Svg} */
                 const svg = this.svg;
                 svg.clear();
@@ -65,14 +69,14 @@
                         const rect = group
                             .rect(`${cellWidth.toFixed(2)}%`, cellHeight)
                             .move(`${horizontalOffset.toFixed(2)}%`, verticalOffset)
-                            .fill('#fff')
-                            .stroke('#F4F4FF');
+                            .fill(blockColor)
+                            .stroke(borderColor);
 
                         group
                             .text(add => add.tspan(this.$t(`calendar.days.${day}`)))
                             .font({ anchor: 'middle', size: 16 })
                             .amove(`${(horizontalOffset + cellWidth / 2).toFixed(2)}%`, verticalOffset + cellHeight / 2)
-                            .fill('rgb(177, 177, 190)')
+                            .fill(textColor)
                             .clipWith(rect.clone());
 
                         horizontalOffset += cellWidth;
@@ -93,15 +97,15 @@
                         const rect = group
                             .rect(`${cellWidth.toFixed(2)}%`, 2 * cellHeight)
                             .move(`${horizontalOffset.toFixed(2)}%`, verticalOffset)
-                            .fill('#fff')
-                            .stroke('#F4F4FF')
+                            .fill(blockColor)
+                            .stroke(borderColor)
                             .on('click', onClick);
 
                         const text = group
                             .text(add => add.tspan(day.toString()))
                             .font({ anchor: 'middle', size: 16 })
                             .amove(`${(horizontalOffset + cellWidth / 2).toFixed(2)}%`, verticalOffset + cellHeight / 2)
-                            .fill('rgb(63, 83, 110)')
+                            .fill(textColor)
                             .clipWith(rect.clone())
                             .on('click', onClick);
 

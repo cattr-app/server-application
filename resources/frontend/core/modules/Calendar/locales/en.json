@@ -12,6 +12,20 @@
       "saturday": "Sat",
       "sunday": "Sun"
     },
+    "months": {
+      "january": "Jan.",
+      "february": "Feb.",
+      "april": "Apr.",
+      "march": "Mar.",
+      "may": "May.",
+      "june": "Jun.",
+      "july": "Jul.",
+      "august": "Aug.",
+      "september": "Sep.",
+      "october": "Oct.",
+      "november": "Nov.",
+      "december": "Dec."
+    },
     "tasks": "Tasks {date}",
     "show_all": "Show all",
     "show_first": "Show first 5 tasks"

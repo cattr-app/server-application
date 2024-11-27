@@ -12,6 +12,20 @@
       "saturday": "Сб.",
       "sunday": "Вс."
     },
+    "months": {
+      "january": "Янв.",
+      "february": "Февр.",
+      "april": "Апр.",
+      "march": "Март",
+      "may": "Май",
+      "june": "Июнь",
+      "july": "Июль",
+      "august": "Авг.",
+      "september": "Сент.",
+      "october": "Окт.",
+      "november": "Нояб.",
+      "december": "Дек."
+    },
     "tasks": "Задачи {date}",
     "show_all": "Показать всё",
     "show_first": "Показать первые 5 задач"
