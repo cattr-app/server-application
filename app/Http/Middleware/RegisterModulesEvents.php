@@ -4,12 +4,15 @@ namespace App\Http\Middleware;
 
 use App;
 use App\Events\ChangeEvent;
+use App\Filters\AttachmentFilter;
 use App\Models\Project;
 use App\Models\ProjectGroup;
 use App\Models\Task;
 use App\Models\TaskHistory;
 use App\Models\TimeInterval;
+use App\Observers\AttachmentObserver;
 use CatEvent;
+use Filter;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -81,6 +84,10 @@ class RegisterModulesEvents
                 }
             });
         });
+
+        // CatEvent and Filter are scoped to request, subscribe on every request for it to work with laravel octane
+        Filter::subscribe(AttachmentFilter::class);
+        CatEvent::subscribe(AttachmentObserver::class);
 
         collect(Module::allEnabled())->each(static function (\Nwidart\Modules\Module $module) {
             App::call([preg_grep("/ModuleServiceProvider$/i", $module->get('providers'))[0], 'registerEvents']);

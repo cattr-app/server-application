@@ -7,6 +7,7 @@ use App\Models\Priority;
 use App\Models\Status;
 use App\Models\Task;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class TaskFactory extends Factory
@@ -32,6 +33,8 @@ class TaskFactory extends Factory
             'important' => fake()->boolean,
             'priority_id' => Priority::inRandomOrder()->first()->id,
             'status_id' => Status::inRandomOrder()->first()->id,
+            'start_date' => fake()->optional(0.8)->passthrough(Carbon::now()),
+            'due_date' => fake()->optional(0.8)->passthrough(Carbon::now()->addDays(fake()->numberBetween(1, 40))),
         ];
     }
 }

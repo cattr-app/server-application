@@ -174,6 +174,8 @@ Route::group([
             ->name('tasks.destroy');
         $router->post('tasks/activity', [TaskActivityController::class, 'index'])
             ->name('task.activity');
+        $router->get('tasks/calendar', [TaskController::class, 'calendar'])
+            ->name('tasks.calendar');
 
         // Gantt routes
         $router->post('tasks/create-relation', [TaskController::class, 'createRelation'])

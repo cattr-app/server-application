@@ -1,0 +1,19 @@
+{
+  "navigation": {
+    "calendar": "Календарь"
+  },
+  "calendar": {
+    "days": {
+      "monday": "Пн.",
+      "tuesday": "Вт.",
+      "wednesday": "Ср.",
+      "thursday": "Чт.",
+      "friday": "Пт.",
+      "saturday": "Сб.",
+      "sunday": "Вс."
+    },
+    "tasks": "Задачи {date}",
+    "show_all": "Показать всё",
+    "show_first": "Показать первые 5 задач"
+  }
+}

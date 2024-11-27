@@ -12,6 +12,7 @@
     "enable_status": "Enable status in project",
     "override_color": "Override color",
     "tasks": "Tasks",
+    "kanban": "Kanban",
     "project_tasks": "Project tasks",
     "add_task": "Add task"
   },
@@ -36,7 +37,9 @@
     "type_to_search_for_group": "Start typing to search for a group."
   },
   "control": {
-    "task-list": "Task List"
+    "task-list": "Task List",
+    "project-list": "Project List",
+    "of": "of"
   },
   "project-roles-description": {
     "auditor": "Read access to assigned projects, create and view all the assigned project's tasks, view all the project users' activity",

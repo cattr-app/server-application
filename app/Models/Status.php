@@ -49,6 +49,7 @@ class Status extends Model
         'name',
         'active',
         'color',
+        'order',
     ];
 
     /**
@@ -58,6 +59,7 @@ class Status extends Model
         'name' => 'string',
         'active' => 'boolean',
         'color' => 'string',
+        'order' => 'integer',
     ];
 
     public static function getTableName(): string
