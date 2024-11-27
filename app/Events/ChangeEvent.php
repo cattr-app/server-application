@@ -111,7 +111,8 @@ class ChangeEvent implements ShouldBroadcast, ShouldDispatchAfterCommit
                     'workers',
                     'workers.user:id,full_name',
                     'workers.task:id,task_name',
-                    'phases' => fn($q) => $q->withCount('tasks')
+                    'phases' => fn($q) => $q->withCount('tasks'),
+                    'group',
                 ])
                 ->loadCount('tasks')
                 ->append(['can'])
