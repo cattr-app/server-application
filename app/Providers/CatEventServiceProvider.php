@@ -18,7 +18,6 @@ class CatEventServiceProvider extends ServiceProvider implements DeferrableProvi
      */
     public function boot(): void
     {
-        CatEvent::subscribe(AttachmentObserver::class);
     }
 
     public function register(): void
