@@ -75,10 +75,6 @@
                 type: [Object],
                 default: null,
             },
-            clearable: {
-                type: Boolean,
-                default: () => false,
-            },
         },
         data() {
             return {
@@ -275,10 +271,7 @@
             }
 
             .vs__clear {
-                padding-right: 0;
-                margin-right: 0;
-                position: absolute;
-                right: 0;
+                display: block;
             }
 
             .vs__open-indicator {

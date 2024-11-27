@@ -269,14 +269,10 @@ export function init(context) {
             key: 'group',
             render(h, data) {
                 return h(GroupSelect, {
-                    props: {
-                        value: data.values.group,
-                        clearable: true,
-                    },
+                    props: { value: data.values.group },
                     on: {
                         input(value) {
-                            data.values.group = value;
-                            data.values.group_id = value.id;
+                            Vue.set(data.values, 'group', value);
                         },
                     },
                 });
@@ -397,17 +393,14 @@ export function init(context) {
                 }
 
                 return h(GroupSelect, {
-                    props: {
-                        value: data.item.group,
-                        clearable: true,
-                    },
+                    props: { value: data.item.group },
                     on: {
                         input(value) {
                             data.item.group = value;
 
                             new ProjectService().save({
                                 id: data.item.id,
-                                group_id: data.item.group.id,
+                                group: data.item.group?.id ?? null,
                             });
                         },
                     },

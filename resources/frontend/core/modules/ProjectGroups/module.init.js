@@ -39,14 +39,11 @@ export function init(context) {
             key: 'parent_id',
             render: (h, data) => {
                 return h(GroupSelect, {
-                    props: {
-                        value: data.values.group_parent,
-                        clearable: true,
-                    },
+                    props: { value: data.values.group_parent },
                     on: {
                         input(value) {
                             data.values.group_parent = value;
-                            data.values.parent_id = value.id;
+                            data.values.parent_id = value?.id ?? null;
                         },
                     },
                 });

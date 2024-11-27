@@ -219,8 +219,8 @@ class ProjectController extends ItemController
     public function create(CreateProjectRequest $request): JsonResponse
     {
         Filter::listen(Filter::getRequestFilterName(), static function ($requestData) {
-            if (isset($requestData['group_id'])) {
-                $requestData['group'] = $requestData['group_id'];
+            if (isset($requestData['group']) && is_array($requestData['group'])) {
+                $requestData['group'] = $requestData['group']['id'];
             }
 
             return $requestData;
@@ -398,8 +398,8 @@ class ProjectController extends ItemController
     public function edit(EditProjectRequest $request): JsonResponse
     {
         Filter::listen(Filter::getRequestFilterName(), static function ($requestData) {
-            if (isset($requestData['group_id'])) {
-                $requestData['group'] = $requestData['group_id'];
+            if (isset($requestData['group']) && is_array($requestData['group'])) {
+                $requestData['group'] = $requestData['group']['id'];
             }
 
             return $requestData;

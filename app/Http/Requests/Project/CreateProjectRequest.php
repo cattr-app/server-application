@@ -5,6 +5,7 @@ namespace App\Http\Requests\Project;
 use App\Enums\ScreenshotsState;
 use App\Models\Project;
 use App\Http\Requests\CattrFormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
 class CreateProjectRequest extends CattrFormRequest
@@ -27,7 +28,8 @@ class CreateProjectRequest extends CattrFormRequest
             'statuses.*.color' => 'sometimes|nullable|string|regex:/^#[a-f0-9]{6}$/i',
             'phases' => 'sometimes|array',
             'phases.*.name' => 'required|string|min:1|max:255',
-            'group_id' => 'sometimes|nullable|integer|exists:project_groups,id',
+            'group' => Rule::when(!is_array($this->input('group')), 'sometimes|nullable|integer|exists:project_groups,id'),
+            'group.id' => Rule::when(is_array($this->input('group')), 'sometimes|nullable|integer|exists:project_groups,id'),
         ];
     }
 }
