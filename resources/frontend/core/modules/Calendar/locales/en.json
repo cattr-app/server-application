@@ -26,6 +26,15 @@
       "november": "Nov.",
       "december": "Dec."
     },
+    "task": {
+      "name": "Name",
+      "status": "Status",
+      "priority": "Priority",
+      "estimate": "Estimate",
+      "total_spent_time": "Total spent time",
+      "start_date": "Start date",
+      "due_date": "Due date"
+    },
     "tasks": "Tasks {date}",
     "show_all": "Show all",
     "show_first": "Show first 5 tasks"

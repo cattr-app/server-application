@@ -1,9 +1,58 @@
 <template>
-    <div ref="container"></div>
+    <div class="calendar">
+        <div ref="container" class="calendar__svg"></div>
+
+        <div
+            v-show="hoverPopup.show"
+            :style="{
+                left: `${hoverPopup.x}px`,
+                top: `${hoverPopup.y}px`,
+            }"
+            class="calendar__popup popup"
+        >
+            <template v-if="hoverPopup.task">
+                <p class="popup__row">
+                    <span class="popup__key">{{ $t('calendar.task.name') }}</span>
+                    <span class="popup__value">{{ hoverPopup.task.task_name }}</span>
+                </p>
+
+                <p class="popup__row">
+                    <span class="popup__key">{{ $t('calendar.task.status') }}</span>
+                    <span class="popup__value">{{ hoverPopup.task.status.name }}</span>
+                </p>
+
+                <p class="popup__row">
+                    <span class="popup__key">{{ $t('calendar.task.priority') }}</span>
+                    <span class="popup__value">{{ hoverPopup.task.priority.name }}</span>
+                </p>
+
+                <p class="popup__row">
+                    <span class="popup__key">{{ $t('calendar.task.estimate') }}</span>
+                    <span class="popup__value">{{ formatDuration(hoverPopup.task.estimate) }}</span>
+                </p>
+
+                <p class="popup__row">
+                    <span class="popup__key">{{ $t('calendar.task.total_spent_time') }}</span>
+                    <span class="popup__value">{{ formatDuration(hoverPopup.task.total_spent_time) }}</span>
+                </p>
+
+                <p class="popup__row">
+                    <span class="popup__key">{{ $t('calendar.task.start_date') }}</span>
+                    <span class="popup__value">{{ hoverPopup.task.start_date }}</span>
+                </p>
+
+                <p class="popup__row">
+                    <span class="popup__key">{{ $t('calendar.task.due_date') }}</span>
+                    <span class="popup__value">{{ hoverPopup.task.due_date }}</span>
+                </p>
+            </template>
+        </div>
+    </div>
 </template>
 
 <script>
     import { Svg, SVG } from '@svgdotjs/svg.js';
+    import { formatDurationString } from '@/utils/time';
     import throttle from 'lodash/throttle';
 
     const msInDay = 24 * 60 * 60 * 1000;
@@ -39,6 +88,16 @@
                 default: true,
             },
         },
+        data() {
+            return {
+                hoverPopup: {
+                    show: false,
+                    x: 0,
+                    y: 0,
+                    task: null,
+                },
+            };
+        },
         created() {
             window.addEventListener('resize', this.resize);
         },
@@ -63,6 +122,9 @@
             },
         },
         methods: {
+            formatDuration(value) {
+                return value !== null ? formatDurationString(value) : '—';
+            },
             resize: throttle(function () {
                 const { container } = this.$refs;
 
@@ -146,33 +208,50 @@
                 };
 
                 /**
-                 * @param {number} taskId
-                 * @param {string} taskName
-                 * @param {number} estimate
-                 * @param {number} totalSpentTime
-                 * @param {string} dueDate
+                 * @param {Object} task
                  * @param {number} startWeekDay
                  * @param {number} endWeekDay
                  */
-                const drawTaskRow = (taskId, taskName, estimate, totalSpentTime, dueDate, startWeekDay, endWeekDay) => {
+                const drawTaskRow = (task, startWeekDay, endWeekDay) => {
                     const width = cellWidth * (endWeekDay - startWeekDay + 1);
                     horizontalOffset = cellWidth * startWeekDay;
 
                     group.rect(`100%`, cellHeight).move(0, verticalOffset).fill(backgroundColor).stroke(borderColor);
 
-                    const link = group.link(`/tasks/view/${taskId}`);
+                    const link = group.link(`/tasks/view/${task.id}`);
 
                     const taskHorizontalPadding = 0.2;
                     const taskVerticalPadding = 3;
+
+                    const onMouseOver = event => {
+                        const rectBBox = rect.bbox();
+                        const popupX = event.clientX;
+                        const popupY = rectBBox.y - 10;
+                        this.hoverPopup = {
+                            show: true,
+                            x: popupX,
+                            y: popupY,
+                            task,
+                        };
+                    };
+
+                    const onMouseOut = event => {
+                        this.hoverPopup = {
+                            ...this.hoverPopup,
+                            show: false,
+                        };
+                    };
 
                     const rect = link
                         .rect(`${width - 2 * taskHorizontalPadding}%`, cellHeight - 2 * taskVerticalPadding)
                         .move(`${horizontalOffset + taskHorizontalPadding}%`, verticalOffset + taskVerticalPadding)
                         .fill(blockColor)
-                        .stroke(borderColor);
+                        .stroke(borderColor)
+                        .on('mouseover', onMouseOver)
+                        .on('mouseout', onMouseOut);
 
                     let pxOffset = 0;
-                    if (new Date(dueDate).getTime() + msInDay < new Date().getTime()) {
+                    if (new Date(task.due_date).getTime() + msInDay < new Date().getTime()) {
                         pxOffset += 2 * taskVerticalPadding;
                         link.rect(cellHeight - 4 * taskVerticalPadding, cellHeight - 4 * taskVerticalPadding)
                             .move(
@@ -183,12 +262,14 @@
                             .fill('#FF5569')
                             .stroke(borderColor)
                             .rx(4)
-                            .ry(4);
+                            .ry(4)
+                            .on('mouseover', onMouseOver)
+                            .on('mouseout', onMouseOut);
 
                         pxOffset += cellHeight - 4 * taskVerticalPadding;
                     }
 
-                    if (estimate !== null && totalSpentTime > estimate) {
+                    if (task.estimate !== null && Number(task.total_spent_time) > Number(task.estimate)) {
                         pxOffset += 2 * taskVerticalPadding;
                         link.rect(cellHeight - 4 * taskVerticalPadding, cellHeight - 4 * taskVerticalPadding)
                             .move(
@@ -199,17 +280,21 @@
                             .fill('#FFC82C')
                             .stroke(borderColor)
                             .rx(4)
-                            .ry(4);
+                            .ry(4)
+                            .on('mouseover', onMouseOver)
+                            .on('mouseout', onMouseOut);
 
                         pxOffset += cellHeight - 4 * taskVerticalPadding;
                     }
 
-                    link.text(add => add.tspan(taskName).dmove(8, 0))
+                    link.text(add => add.tspan(task.task_name).dmove(8, 0))
                         .font({ anchor: 'start', size: 16 })
                         .amove(`${horizontalOffset + taskHorizontalPadding}%`, verticalOffset + cellHeight / 2)
                         .transform({ translateX: pxOffset })
                         .fill(textColor)
-                        .clipWith(rect.clone());
+                        .clipWith(rect.clone())
+                        .on('mouseover', onMouseOver)
+                        .on('mouseout', onMouseOut);
 
                     verticalOffset += cellHeight;
                 };
@@ -219,23 +304,58 @@
                 for (const { days, tasks } of this.tasksByWeek) {
                     drawDaysRow(days);
 
-                    for (const {
-                        task: { id, task_name, estimate, total_spent_time, due_date },
-                        start_week_day,
-                        end_week_day,
-                    } of this.showAll ? tasks : tasks.slice(0, maxTasks)) {
-                        drawTaskRow(
-                            id,
-                            task_name,
-                            estimate,
-                            Number(total_spent_time),
-                            due_date,
-                            start_week_day,
-                            end_week_day,
-                        );
+                    for (const { task, start_week_day, end_week_day } of this.showAll
+                        ? tasks
+                        : tasks.slice(0, maxTasks)) {
+                        drawTaskRow(task, start_week_day, end_week_day);
                     }
                 }
             }, 100),
         },
     };
 </script>
+
+<style lang="scss" scoped>
+    .calendar {
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        position: relative;
+
+        &__svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        &__popup {
+            background: #ffffff;
+            border-radius: 20px;
+            border: 0;
+            box-shadow: 0px 7px 64px rgba(0, 0, 0, 0.07);
+
+            position: absolute;
+            display: block;
+            padding: 10px;
+            width: 100%;
+            max-width: 320px;
+
+            pointer-events: none;
+
+            z-index: 1;
+        }
+    }
+
+    .popup {
+        &__row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        &__value {
+            font-weight: bold;
+            text-align: right;
+        }
+    }
+</style>

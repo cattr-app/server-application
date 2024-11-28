@@ -748,10 +748,14 @@ class TaskController extends ItemController
                 'id',
                 'task_name',
                 'project_id',
+                'status_id',
+                'priority_id',
                 'estimate',
                 DB::raw('COALESCE(start_date, due_date) AS start_date'),
                 DB::raw('COALESCE(due_date, start_date) AS due_date'),
             )
+            ->with('status')
+            ->with('priority')
             ->withSum(['workers as total_spent_time'], 'duration')
             ->where(static fn(Builder $query) => $query
                 ->whereNotNull('start_date')
