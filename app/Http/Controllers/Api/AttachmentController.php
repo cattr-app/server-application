@@ -48,11 +48,17 @@ class AttachmentController extends ItemController
 
     public function createTemporaryUrl(DownloadAttachmentRequest $request, Attachment $attachment): string
     {
-        return URL::temporarySignedRoute(
+        // we do this because signature breaks if we use built in method for creating relative path
+        // also cannot determine request scheme when ran inside docker
+        $url = URL::temporarySignedRoute(
             'attachment.temporary-download',
             now()->addSeconds($request->validated('seconds') ?? 3600),
             $attachment
         );
+        $parsedUrl = parse_url($url);
+
+        // Combine the path and query string
+        return $parsedUrl['path'] . (isset($parsedUrl['query']) ? '?' . $parsedUrl['query'] : '');
     }
 
     /**
