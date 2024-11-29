@@ -162,6 +162,7 @@ class User extends Authenticatable
         'nonce',
         'client_installed',
         'last_activity',
+        'efficiency',
     ];
 
     /**
@@ -189,6 +190,7 @@ class User extends Authenticatable
         'invitation_sent' => 'boolean',
         'nonce' => 'integer',
         'client_installed' => 'integer',
+        'efficiency' => 'float',
     ];
 
     /**

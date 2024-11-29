@@ -38,12 +38,17 @@
 
                 <p class="popup__row">
                     <span class="popup__key">{{ $t('calendar.task.start_date') }}</span>
-                    <span class="popup__value">{{ hoverPopup.task.start_date }}</span>
+                    <span class="popup__value">{{ formatDate(hoverPopup.task.start_date) }}</span>
                 </p>
 
                 <p class="popup__row">
                     <span class="popup__key">{{ $t('calendar.task.due_date') }}</span>
-                    <span class="popup__value">{{ hoverPopup.task.due_date }}</span>
+                    <span class="popup__value">{{ formatDate(hoverPopup.task.due_date) }}</span>
+                </p>
+
+                <p class="popup__row">
+                    <span class="popup__key">{{ $t('calendar.task.forecast_completion_date') }}</span>
+                    <span class="popup__value">{{ formatDate(hoverPopup.task.forecast_completion_date) }}</span>
                 </p>
             </template>
         </div>
@@ -124,6 +129,9 @@
         methods: {
             formatDuration(value) {
                 return value !== null ? formatDurationString(value) : '—';
+            },
+            formatDate(value) {
+                return value !== null ? value : '—';
             },
             resize: throttle(function () {
                 const { container } = this.$refs;
@@ -226,7 +234,7 @@
                     const onMouseOver = event => {
                         const rectBBox = rect.bbox();
                         const popupX = event.clientX;
-                        const popupY = rectBBox.y - 10;
+                        const popupY = rectBBox.y;
                         this.hoverPopup = {
                             show: true,
                             x: popupX,
@@ -339,7 +347,7 @@
             display: block;
             padding: 10px;
             width: 100%;
-            max-width: 320px;
+            max-width: 420px;
 
             pointer-events: none;
 

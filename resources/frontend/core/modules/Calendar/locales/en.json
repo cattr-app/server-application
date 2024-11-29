@@ -33,7 +33,8 @@
       "estimate": "Estimate",
       "total_spent_time": "Total spent time",
       "start_date": "Start date",
-      "due_date": "Due date"
+      "due_date": "Due date",
+      "forecast_completion_date": "Forecast completion date"
     },
     "tasks": "Tasks {date}",
     "show_all": "Show all",

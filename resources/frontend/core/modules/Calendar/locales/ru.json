@@ -33,7 +33,8 @@
       "estimate": "Оценка времени",
       "total_spent_time": "Всего потрачено времени",
       "start_date": "Дата начала",
-      "due_date": "Дата завершения"
+      "due_date": "Дата завершения",
+      "forecast_completion_date": "Прогнозируемая дата завершения"
     },
     "tasks": "Задачи {date}",
     "show_all": "Показать всё",
