@@ -53,6 +53,7 @@ export function init(context, router) {
 
     const crud = tasksContext.createCrud('tasks.crud-title', 'tasks', TasksService, {
         with: [
+            'can',
             'priority',
             'project',
             'phase:id,name',
@@ -980,6 +981,34 @@ export function init(context, router) {
                 $router.go(-1);
             },
             renderCondition: () => true,
+        },
+    ]);
+
+    crud.view.addPageControls([
+        {
+            label: 'tasks.relations.title',
+            icon: 'icon-corner-down-right',
+            onClick: ({ $router }) => {
+                $router.push({ name: relationsRouteName });
+            },
+            renderCondition: ({ $can, values }) => {
+                if (!('can' in values)) return false;
+
+                return $can('update', 'task', values);
+            },
+        },
+        {
+            label: 'control.edit',
+            renderType: 'primary',
+            icon: 'icon-edit',
+            onClick: ({ $router }) => {
+                $router.push({ name: crudEditRoute });
+            },
+            renderCondition: ({ $can, values }) => {
+                if (!('can' in values)) return false;
+
+                return $can('update', 'task', values);
+            },
         },
     ]);
 
