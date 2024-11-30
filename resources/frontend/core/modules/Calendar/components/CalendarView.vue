@@ -231,10 +231,22 @@
                     const taskHorizontalPadding = 0.2;
                     const taskVerticalPadding = 3;
 
+                    const popupWidth = 420;
+                    const popupHeight = 220;
+
                     const onMouseOver = event => {
                         const rectBBox = rect.bbox();
-                        const popupX = event.clientX;
-                        const popupY = rectBBox.y;
+                        const popupX =
+                            event.clientX < this.$refs.container.clientWidth - popupWidth
+                                ? event.clientX
+                                : event.clientX - popupWidth - 40;
+
+                        const popupY =
+                            rectBBox.y + this.$refs.container.getBoundingClientRect().y <
+                            window.innerHeight - popupHeight
+                                ? rectBBox.y
+                                : rectBBox.y - popupHeight;
+
                         this.hoverPopup = {
                             show: true,
                             x: popupX,
