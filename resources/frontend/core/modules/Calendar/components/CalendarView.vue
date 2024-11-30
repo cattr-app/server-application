@@ -212,6 +212,11 @@
                         horizontalOffset += cellWidth;
                     }
 
+                    group.line(0, verticalOffset, '100%', verticalOffset).stroke({ width: 1, color: '#C5D9E8' });
+                    group
+                        .line(0, verticalOffset + cellHeight - 1, '100%', verticalOffset + cellHeight - 1)
+                        .stroke({ width: 1, color: '#C5D9E8' });
+
                     verticalOffset += cellHeight;
                 };
 
