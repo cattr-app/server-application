@@ -522,6 +522,20 @@ class TaskController extends ItemController
      */
     public function show(ShowTaskRequest $request): JsonResponse
     {
+        Filter::listen(Filter::getQueryFilterName(), static function ($query) {
+            return $query->withAvg('users as efficiency', 'efficiency');
+        });
+
+        CatEvent::listen(Filter::getAfterActionEventName(), static function (Task $task) {
+            $task->mergeCasts(['forecast_completion_date' => 'date']);
+
+            if ($task->start_date !== null && $task->estimate !== null && $task->efficiency !== null) {
+                $task->forecast_completion_date = $task->start_date->addSeconds($task->estimate * $task->efficiency);
+            } else {
+                $task->forecast_completion_date = null;
+            }
+        });
+
         return $this->_show($request);
     }
 
@@ -834,7 +848,7 @@ class TaskController extends ItemController
                 ];
             }
 
-            if ($task->estimate !== null && $task->efficiency !== null) {
+            if ($task->start_date !== null && $task->estimate !== null && $task->efficiency !== null) {
                 $task->forecast_completion_date = $task->start_date->addSeconds($task->estimate * $task->efficiency);
             } else {
                 $task->forecast_completion_date = null;

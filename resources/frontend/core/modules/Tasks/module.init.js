@@ -371,6 +371,25 @@ export function init(context, router) {
             },
         },
         {
+            key: 'forecast_completion_date',
+            label: 'calendar.task.forecast_completion_date',
+            render: (h, props) => {
+                let date = '—';
+                const userTimezone = moment.tz.guess();
+                const companyTimezone = rootStore.getters['user/companyData'].timezone;
+                if (
+                    props.currentValue != null &&
+                    typeof props.currentValue === 'string' &&
+                    typeof companyTimezone === 'string'
+                ) {
+                    date =
+                        formatDate(moment.utc(props.currentValue).tz(companyTimezone, true).tz(userTimezone)) +
+                        ` (GMT${moment.tz(userTimezone).format('Z')})`;
+                }
+                return h('span', date);
+            },
+        },
+        {
             key: 'workers',
             label: 'tasks.spent_by_user',
             render: (h, props) => {
