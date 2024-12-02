@@ -1,32 +1,16 @@
 <template>
-    <div ref="canvasWrapper" class="canvas">
-        <canvas ref="canvas" />
-
+    <div ref="canvas" class="canvas" @pointerdown="onDown">
         <div ref="scrollbarTop" class="scrollbar-top" @scroll="onScroll">
-            <div :style="{ width: `${contentWidth}px` }" />
-        </div>
-
-        <div class="scroll-area-wrapper">
-            <div
-                ref="scrollArea"
-                class="scroll-area"
-                @scroll="onScroll"
-                @pointerdown="onDown"
-                @pointermove="onMove"
-                @pointerup="onUp"
-            >
-                <div class="scroll-area-inner" :style="{ width: `${contentWidth}px` }" />
-            </div>
+            <div :style="{ width: `${totalWidth}px` }" />
         </div>
     </div>
 </template>
 
 <script>
-    import { fabric } from 'fabric';
-    import throttle from 'lodash/throttle';
     import moment from 'moment';
     import { formatDurationString } from '@/utils/time';
     import { mapGetters } from 'vuex';
+    import { SVG } from '@svgdotjs/svg.js';
 
     const defaultColorConfig = [
         {
@@ -47,22 +31,10 @@
         },
     ];
 
-    const fabricObjectOptions = {
-        editable: false,
-        selectable: false,
-        objectCaching: false,
-        hasBorders: false,
-        hasControls: false,
-        hasRotatingPoint: false,
-        cursor: 'default',
-        hoverCursor: 'default',
-    };
-
     const titleHeight = 20;
     const subtitleHeight = 20;
     const rowHeight = 65;
     const minColumnWidth = 85;
-
     export default {
         name: 'TeamTableGraph',
         props: {
@@ -85,9 +57,10 @@
         },
         data() {
             return {
-                canvas: null,
-                isDragging: false,
                 lastPosX: 0,
+                offsetX: 0,
+                totalWidth: 0,
+                scrollPos: 0,
             };
         },
         computed: {
@@ -98,37 +71,15 @@
             colorRules() {
                 return this.companyData.color ? this.companyData.color : defaultColorConfig;
             },
-            canvasWidth() {
-                if (!this.canvas) {
-                    return 500;
-                }
-
-                return this.canvas.getWidth();
-            },
             columns() {
                 const start = moment(this.start, 'YYYY-MM-DD');
                 const end = moment(this.end, 'YYYY-MM-DD');
 
                 return end.diff(start, 'days') + 1;
             },
-            columnWidth() {
-                return Math.max(minColumnWidth, this.canvasWidth / this.columns);
-            },
-            contentWidth() {
-                return this.columns * this.columnWidth;
-            },
-            maxScrollX() {
-                return this.contentWidth - this.canvasWidth;
-            },
         },
         mounted() {
-            this.canvas = new fabric.Canvas(this.$refs.canvas, {
-                backgroundColor: '#ffffff',
-                renderOnAddRemove: false,
-                selection: false,
-                skipOffscreen: true,
-            });
-
+            this.draw = SVG();
             this.onResize();
             window.addEventListener('resize', this.onResize);
         },
@@ -136,6 +87,24 @@
             window.removeEventListener('resize', this.onResize);
         },
         methods: {
+            height() {
+                return this.users.length * rowHeight;
+            },
+            canvasWidth() {
+                return this.$refs.canvas.clientWidth;
+            },
+            columnWidth() {
+                return Math.max(minColumnWidth, this.canvasWidth() / this.columns);
+            },
+            async contentWidth() {
+                await this.$nextTick();
+                this.totalWidth = this.columns * this.columnWidth();
+                return this.totalWidth;
+            },
+            isDateWithinRange(dateString, startDate, endDate) {
+                const date = new Date(dateString);
+                return date >= new Date(startDate) && date <= new Date(endDate);
+            },
             getColor(progress) {
                 let color = '#3cd7b6';
 
@@ -150,348 +119,236 @@
                 return color;
             },
             onDown(e) {
-                this.canvas.selection = false;
-                this.isDragging = true;
-                this.lastPosX = e.clientX;
+                this.$refs.canvas.addEventListener('pointermove', this.onMove);
+                this.$refs.canvas.addEventListener('pointerup', this.onUp, { once: true });
+                this.$refs.canvas.addEventListener('pointercancel', this.onCancel, { once: true });
             },
-            onMove(e) {
-                if (this.isDragging) {
-                    const deltaX = e.clientX - this.lastPosX;
-                    const x = Math.min(0, Math.max(this.canvas.viewportTransform[4] + deltaX, -this.maxScrollX));
-
-                    this.setScroll(x);
-                    this.lastPosX = e.clientX;
+            async maxScrollX() {
+                return (await this.contentWidth()) - this.canvasWidth();
+            },
+            async scrollCanvas(movementX, setScroll = true) {
+                const canvas = this.$refs.canvas;
+                const clientWidth = canvas.clientWidth;
+                const entireWidth = await this.contentWidth();
+                const height = this.height();
+                const newScrollPos = this.scrollPos - movementX;
+                if (newScrollPos <= 0) {
+                    this.scrollPos = 0;
+                } else if (newScrollPos >= entireWidth - clientWidth) {
+                    this.scrollPos = entireWidth - clientWidth;
+                } else {
+                    this.scrollPos = newScrollPos;
                 }
+                setScroll ? await this.setScroll() : null;
+                this.draw.viewbox(this.scrollPos, 20, clientWidth, height);
+            },
+            async onMove(e) {
+                this.$refs.canvas.setPointerCapture(e.pointerId);
+                await this.scrollCanvas(e.movementX);
             },
             onUp(e) {
-                this.isDragging = false;
+                this.$refs.canvas.removeEventListener('pointermove', this.onMove);
+            },
+            onCancel(e) {
+                this.$refs.canvas.removeEventListener('pointermove', this.onMove);
             },
             onScroll(e) {
-                this.setScroll(-e.target.scrollLeft);
+                this.scrollCanvas(this.scrollPos - this.$refs.scrollbarTop.scrollLeft, false);
             },
-            setScroll(x) {
-                if (x === this.canvas.viewportTransform[4]) {
-                    return;
-                }
-
-                this.$refs.scrollbarTop.scrollLeft = -x;
-                this.$refs.scrollArea.scrollLeft = -x;
-
-                const transform = [...this.canvas.viewportTransform];
-                transform[4] = x;
-
-                this.canvas.setViewportTransform(transform);
-                this.canvas.requestRenderAll();
-            },
-            resetScroll() {
-                this.setScroll(0);
+            async setScroll(x = null) {
+                await this.$nextTick();
+                this.$refs.scrollbarTop.scrollLeft = x ?? this.scrollPos;
             },
             formatDuration: formatDurationString,
-            draw: throttle(function () {
-                this.canvas.clear();
-
-                const width = this.contentWidth;
-                const height = this.users.length * rowHeight;
-
+            drawGrid: async function () {
+                if (typeof this.draw === 'undefined') return;
+                this.draw.clear();
+                const draw = this.draw;
+                const canvasContainer = this.$refs.canvas;
+                const width = canvasContainer.clientWidth;
+                const columnWidth = this.columnWidth();
+                const height = this.height();
+                if (height <= 0) {
+                    return;
+                }
                 const start = moment(this.start, 'YYYY-MM-DD');
 
-                const cursor = this.contentWidth > this.canvasWidth ? 'move' : 'default';
-
+                const cursor = (await this.contentWidth()) > this.canvasWidth() ? 'move' : 'default';
+                draw.addTo(canvasContainer).size(width, height + titleHeight + subtitleHeight);
+                draw.viewbox(0, 20, width, height);
                 // Background
-                this.canvas.add(
-                    new fabric.Rect({
-                        left: 0,
-                        top: titleHeight + subtitleHeight,
-                        width: width - 1,
-                        height: height - 1,
-                        rx: 20,
-                        ry: 20,
-                        fill: '#fafafa',
-                        stroke: '#dfe5ed',
-                        strokeWidth: 1,
-                        ...fabricObjectOptions,
-                        cursor,
+                draw.rect((await this.contentWidth()) - 1, height - 1)
+                    .move(0, titleHeight + subtitleHeight)
+                    .radius(20)
+                    .fill('#fafafa')
+                    .stroke({ color: '#dfe5ed', width: 1 })
+                    .attr({
+                        cursor: cursor,
                         hoverCursor: cursor,
-                    }),
-                );
-
+                    })
+                    .on('mousedown', () => this.$emit('outsideClick'));
                 for (let column = 0; column < this.columns; ++column) {
                     const date = start.clone().locale(this.$i18n.locale).add(column, 'days');
-                    const left = this.columnWidth * column;
-
+                    let left = this.columnWidth() * column;
+                    let halfColumnWidth = this.columnWidth() / 2;
                     // Column headers - day
-                    this.canvas.add(
-                        new fabric.Textbox(date.locale(this.$i18n.locale).format('D'), {
-                            left,
-                            top: 0,
-                            width: this.columnWidth,
-                            height: titleHeight,
-                            textAlign: 'center',
-                            fontFamily: 'Nunito, sans-serif',
-                            fontSize: 15,
+                    draw.text(date.locale(this.$i18n.locale).format('D'))
+                        .move(left + halfColumnWidth, 0)
+                        .size(columnWidth, titleHeight)
+                        .font({
+                            family: 'Nunito, sans-serif',
+                            size: 15,
                             fill: '#151941',
-                            ...fabricObjectOptions,
-                            cursor,
+                        })
+                        .attr({
+                            'text-anchor': 'middle',
+                            cursor: cursor,
                             hoverCursor: cursor,
-                        }),
-                    );
+                        });
 
                     // Column headers - am/pm
-                    this.canvas.add(
-                        new fabric.Textbox(date.format('dddd').toUpperCase(), {
-                            left,
-                            top: titleHeight,
-                            width: this.columnWidth,
-                            height: subtitleHeight,
-                            textAlign: 'center',
-                            fontFamily: 'Nunito, sans-serif',
-                            fontSize: 10,
-                            fontWeight: '600',
+                    draw.text(date.format('dddd').toUpperCase())
+                        .move(left + halfColumnWidth, titleHeight - 5)
+                        .size(columnWidth, subtitleHeight)
+                        .font({
+                            family: 'Nunito, sans-serif',
+                            size: 10,
+                            weight: '600',
                             fill: '#b1b1be',
-                            ...fabricObjectOptions,
-                            cursor,
+                        })
+                        .attr({
+                            'text-anchor': 'middle',
+                            cursor: cursor,
                             hoverCursor: cursor,
-                        }),
-                    );
+                        });
 
                     // Vertical grid lines
                     if (column > 0) {
-                        this.canvas.add(
-                            new fabric.Line([0, 0, 0, height], {
-                                left,
-                                top: titleHeight + subtitleHeight,
-                                stroke: '#dfe5ed',
-                                strokeWidth: 1,
-                                ...fabricObjectOptions,
-                                cursor,
+                        draw.line(0, titleHeight + subtitleHeight, 0, height + titleHeight + subtitleHeight)
+                            .move(left, titleHeight + subtitleHeight)
+                            .stroke({ color: '#DFE5ED', width: 1 })
+                            .attr({
+                                cursor: cursor,
                                 hoverCursor: cursor,
-                            }),
-                        );
+                            });
                     }
                 }
 
-                const countAllRows = this.users.length - 1;
-                const countAllColumns = this.columns - 1;
-
-                this.users.forEach((user, row) => {
+                const filteredData = {};
+                for (let key in this.timePerDay) {
+                    const innerObject = this.timePerDay[key];
+                    const filteredInnerObject = {};
+                    for (let dateKey in innerObject) {
+                        if (this.isDateWithinRange(dateKey, this.start, this.end)) {
+                            filteredInnerObject[dateKey] = innerObject[dateKey];
+                        }
+                    }
+                    filteredData[key] = filteredInnerObject;
+                }
+                const clipPath = draw
+                    .rect((await this.contentWidth()) - 1, height - 1)
+                    .move(0, titleHeight + subtitleHeight)
+                    .radius(20)
+                    .attr({
+                        absolutePositioned: true,
+                    });
+                const squaresGroup = draw.group().clipWith(clipPath);
+                for (const [row, user] of this.users.entries()) {
                     const top = row * rowHeight + titleHeight + subtitleHeight;
-                    const userTime = this.timePerDay[user.id];
+                    const userTime = filteredData[user.id];
 
                     if (userTime) {
-                        Object.keys(userTime).forEach((day, i) => {
+                        for (const day of Object.keys(userTime)) {
                             const column = -start.diff(day, 'days');
                             const duration = userTime[day];
-                            const left = column * this.columnWidth;
+                            const left = (column * (await this.contentWidth())) / this.columns;
                             const total = 60 * 60 * this.workingHours;
                             const progress = duration / total;
                             const height = Math.ceil(Math.min(progress, 1) * (rowHeight - 1));
                             const color = this.getColor(progress);
-
-                            if (column === 0 && row === 0) {
-                                // Cell background
-                                this.canvas.add(
-                                    new fabric.Rect({
-                                        left: left + 1,
-                                        top: Math.floor(top + (rowHeight - height)),
-                                        width: this.columnWidth,
-                                        height,
-                                        fill: color,
-                                        strokeWidth: 0,
-                                        ...fabricObjectOptions,
-                                        cursor,
-                                        hoverCursor: cursor,
-                                        clipPath: new fabric.Rect({
-                                            left: 0,
-                                            top: titleHeight + subtitleHeight,
-                                            width: this.contentWidth,
-                                            height: this.users.length * rowHeight,
-                                            rx: 20,
-                                            ry: 20,
-                                            absolutePositioned: true,
-                                        }),
-                                    }),
-                                );
-                            } else if (column === 0 && row === countAllRows) {
-                                this.canvas.add(
-                                    new fabric.Rect({
-                                        left: left + 1,
-                                        top: Math.floor(top + (rowHeight - height)),
-                                        width: this.columnWidth,
-                                        height,
-                                        fill: color,
-                                        strokeWidth: 0,
-                                        ...fabricObjectOptions,
-                                        cursor,
-                                        hoverCursor: cursor,
-                                        clipPath: new fabric.Rect({
-                                            left: 0,
-                                            top: titleHeight + subtitleHeight,
-                                            width: this.contentWidth,
-                                            height: this.users.length * rowHeight,
-                                            rx: 20,
-                                            ry: 20,
-                                            absolutePositioned: true,
-                                        }),
-                                    }),
-                                );
-                            } else if (countAllColumns === column && row === 0) {
-                                this.canvas.add(
-                                    new fabric.Rect({
-                                        left: left + 1,
-                                        top: Math.floor(top + (rowHeight - height)),
-                                        width: this.columnWidth,
-                                        height,
-                                        fill: color,
-                                        strokeWidth: 0,
-                                        ...fabricObjectOptions,
-                                        cursor,
-                                        hoverCursor: cursor,
-                                        clipPath: new fabric.Rect({
-                                            left: 0,
-                                            top: titleHeight + subtitleHeight,
-                                            width: this.contentWidth,
-                                            height: this.users.length * rowHeight,
-                                            rx: 20,
-                                            ry: 20,
-                                            absolutePositioned: true,
-                                        }),
-                                    }),
-                                );
-                            } else if (countAllColumns === column && row === countAllRows) {
-                                this.canvas.add(
-                                    new fabric.Rect({
-                                        left: left + 1,
-                                        top: Math.floor(top + (rowHeight - height)),
-                                        width: this.columnWidth,
-                                        height,
-                                        fill: color,
-                                        strokeWidth: 0,
-                                        ...fabricObjectOptions,
-                                        cursor,
-                                        hoverCursor: cursor,
-                                        clipPath: new fabric.Rect({
-                                            left: 0,
-                                            top: titleHeight + subtitleHeight,
-                                            width: this.contentWidth,
-                                            height: this.users.length * rowHeight,
-                                            rx: 20,
-                                            ry: 20,
-                                            absolutePositioned: true,
-                                        }),
-                                    }),
-                                );
-                            } else {
-                                this.canvas.add(
-                                    new fabric.Rect({
-                                        left: left + 1,
-                                        top: Math.floor(top + (rowHeight - height)),
-                                        width: this.columnWidth,
-                                        height,
-                                        fill: color,
-                                        strokeWidth: 0,
-                                        ...fabricObjectOptions,
-                                        cursor,
-                                        hoverCursor: cursor,
-                                    }),
-                                );
-                            }
+                            const rect = draw
+                                .rect(this.columnWidth(), height + 1)
+                                .move(left, Math.floor(top + (rowHeight - height)) - 1)
+                                .fill(color)
+                                .stroke({ width: 0 })
+                                .attr({
+                                    cursor: cursor,
+                                    hoverCursor: cursor,
+                                });
+                            squaresGroup.add(rect);
 
                             // Time label
-                            this.canvas.add(
-                                new fabric.Textbox(this.formatDuration(duration), {
-                                    left,
-                                    top: top + 22,
-                                    width: this.columnWidth,
-                                    height: rowHeight,
-                                    textAlign: 'center',
-                                    fontFamily: 'Nunito, sans-serif',
-                                    fontSize: 15,
-                                    fontWeight: '600',
+                            draw.text(this.formatDuration(duration))
+                                .move(this.columnWidth() / 2 + left, top + 22)
+                                .size(this.columnWidth(), rowHeight)
+                                .font({
+                                    family: 'Nunito, sans-serif',
+                                    size: 15,
+                                    weight: '600',
                                     fill: '#151941',
-                                    ...fabricObjectOptions,
-                                    cursor,
+                                })
+                                .attr({
+                                    'text-anchor': 'middle',
+                                    cursor: cursor,
                                     hoverCursor: cursor,
-                                }),
-                            );
-                        });
+                                });
+                        }
                     }
-
                     // Horizontal grid lines
                     if (row > 0) {
-                        this.canvas.add(
-                            new fabric.Line([0, 0, width, 0], {
-                                left: 0,
-                                top,
-                                stroke: '#dfe5ed',
-                                strokeWidth: 1,
-                                ...fabricObjectOptions,
-                                cursor,
+                        draw.line(0, 0, await this.contentWidth(), 0)
+                            .move(0, top)
+                            .stroke({ color: '#dfe5ed', width: 1 })
+                            .attr({
+                                cursor: cursor,
                                 hoverCursor: cursor,
-                            }),
-                        );
+                            });
                     }
-                });
-
-                this.canvas.requestRenderAll();
-            }, 100),
-            onResize: throttle(function () {
-                if (!this.$refs.canvasWrapper) {
-                    return;
                 }
-                const { width } = this.$refs.canvasWrapper.getBoundingClientRect();
-                const height = this.users.length * rowHeight + titleHeight + subtitleHeight;
-                this.canvas.setWidth(width);
-                this.canvas.setHeight(height);
-                this.draw();
-            }, 100),
+            },
+            onResize: function () {
+                const canvasContainer = this.$refs.canvas;
+                const width = canvasContainer.clientWidth;
+                const height = this.height();
+                this.draw.size(width, height);
+                this.setScroll(0);
+                this.drawGrid();
+            },
         },
         watch: {
             start() {
-                this.resetScroll();
+                this.setScroll(0);
             },
             end() {
-                this.resetScroll();
+                this.setScroll(0);
             },
             users() {
                 this.onResize();
             },
             timePerDay() {
-                this.draw();
+                this.drawGrid();
             },
         },
     };
 </script>
-
 <style lang="scss" scoped>
-    .canvas::v-deep canvas {
-        box-sizing: content-box;
-    }
-
     .canvas {
+        user-select: none;
+        touch-action: pan-y;
+        height: 100%;
         position: relative;
+        width: 100%;
     }
-
     .scrollbar-top {
         position: absolute;
         left: 0;
-        top: -25px;
+        top: -1.5rem;
         width: 100%;
+        height: 10px;
         overflow-x: auto;
     }
 
-    .scrollbar-bottom {
-        position: absolute;
-        left: 0;
-        bottom: -5px;
-        width: 100%;
-        overflow-x: auto;
-    }
-
-    .scrollbar-bottom,
     .scrollbar-top {
-        scrollbar-color: #2e2ef9 transparent;
-        scrollbar-width: thin;
-
         & > div {
             height: 1px;
         }
@@ -513,36 +370,11 @@
             border-radius: 3px;
         }
     }
-
-    .scroll-area-wrapper {
-        position: absolute;
-        top: 0;
-        left: 0;
-        display: block;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        cursor: move;
-    }
-
-    .scroll-area {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: -6px;
-        bottom: -6px;
-        display: block;
-        overflow: scroll;
-        scrollbar-width: thin;
-
-        &::-webkit-scrollbar {
-            display: none;
+    @media (max-width: 720px) {
+        .canvas {
+            .scrollbar-top {
+                top: -1rem;
+            }
         }
-    }
-
-    .scroll-area-inner {
-        display: block;
-        width: 100%;
-        height: 100%;
     }
 </style>

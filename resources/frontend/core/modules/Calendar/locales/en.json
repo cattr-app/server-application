@@ -1,0 +1,43 @@
+{
+  "navigation": {
+    "calendar": "Calendar"
+  },
+  "calendar": {
+    "days": {
+      "monday": "Mon",
+      "tuesday": "Tue",
+      "wednesday": "Wed",
+      "thursday": "Thu",
+      "friday": "Fri",
+      "saturday": "Sat",
+      "sunday": "Sun"
+    },
+    "months": {
+      "january": "Jan.",
+      "february": "Feb.",
+      "april": "Apr.",
+      "march": "Mar.",
+      "may": "May.",
+      "june": "Jun.",
+      "july": "Jul.",
+      "august": "Aug.",
+      "september": "Sep.",
+      "october": "Oct.",
+      "november": "Nov.",
+      "december": "Dec."
+    },
+    "task": {
+      "name": "Name",
+      "status": "Status",
+      "priority": "Priority",
+      "estimate": "Estimate",
+      "total_spent_time": "Total spent time",
+      "start_date": "Start date",
+      "due_date": "Due date",
+      "forecast_completion_date": "Forecast completion date"
+    },
+    "tasks": "Tasks {date}",
+    "show_all": "Show all",
+    "show_first": "Show first 5 tasks"
+  }
+}

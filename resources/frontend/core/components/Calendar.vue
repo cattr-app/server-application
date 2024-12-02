@@ -45,7 +45,7 @@
                     @change="onDateChange"
                 >
                     <template #footer>
-                        <div class="datepicker__footer">
+                        <div v-if="day" class="datepicker__footer">
                             <button class="mx-btn mx-btn-text" size="small" @click="setToday">
                                 {{ $t('control.today') }}
                             </button>
@@ -498,6 +498,14 @@
 
         &--range {
             width: 640px;
+        }
+    }
+
+    @media (max-width: 750px) {
+        .datepicker-wrapper {
+            &--range {
+                width: 320px;
+            }
         }
     }
 

@@ -26,12 +26,10 @@
                 </span>
             </div>
         </div>
-        <div v-for="(user, key) in users" :key="key" class="row">
-            <div class="col-16 row team_sidebar__user_row">
-                <div class="col-4">
-                    <UserAvatar :user="user" />
-                </div>
-                <div class="team_sidebar__user_info col-offset-1">
+        <div v-for="(user, key) in users" :key="key" class="row team_sidebar__user_wrapper">
+            <div class="col-12 row team_sidebar__user_row">
+                <UserAvatar :user="user" />
+                <div class="team_sidebar__user_info col-24">
                     <div class="team_sidebar__user_name">{{ user.full_name }}</div>
                     <div class="team_sidebar__user_task">
                         <router-link
@@ -40,13 +38,12 @@
                             :title="user.last_interval.task_name"
                             target="_blank"
                         >
-                            {{ user.last_interval.project_name | truncate }}
+                            {{ user.last_interval.project_name }}
                         </router-link>
-                        <a v-else>&nbsp;</a>
                     </div>
                 </div>
             </div>
-            <div class="col-8 flex-end team_sidebar__user_worked">
+            <div class="col-12 flex-end team_sidebar__user_worked">
                 {{ formatDurationString(user.worked) }}
             </div>
         </div>
@@ -78,11 +75,6 @@
         computed: {
             ...mapGetters('dashboard', ['intervals']),
         },
-        filters: {
-            truncate(value) {
-                return value.length >= 25 ? value.substring(0, 25) + '...' : value;
-            },
-        },
         methods: {
             formatDurationString,
             selectColumn(column) {
@@ -106,7 +98,7 @@
             &-toggle {
                 cursor: pointer;
                 display: inline-block;
-                margin-bottom: 20px;
+                margin-bottom: 15px;
                 position: relative;
                 .icon {
                     position: absolute;
@@ -122,25 +114,72 @@
                 font-size: 10pt;
                 font-weight: 500;
                 color: #151941;
+                display: block;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             &_row {
-                margin: 16px 0;
+                height: 65px;
+                flex-wrap: nowrap;
+                align-items: center;
             }
 
             &_worked {
                 color: #59566e;
                 font-weight: 600;
-                margin-top: 15px;
-                padding-right: 15px;
+                display: flex;
+                align-items: center;
+                white-space: nowrap;
             }
 
             &_task {
                 font-size: 9pt;
+                display: block;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             &_info {
-                margin-top: -5px;
+                margin-top: 0;
+            }
+        }
+        @media (max-width: 780px) {
+            .team_sidebar {
+                &__heading {
+                    display: grid;
+                    grid-template-columns: 100%;
+                    grid-template-rows: repeat(2, calc(39px / 2));
+                    font-size: 0.8rem;
+                    & > div {
+                        max-width: 100%;
+                        justify-self: start;
+                    }
+                }
+                &__user_wrapper {
+                    height: 65px;
+                    display: grid;
+                    grid-template-rows: 3fr 1fr;
+                    grid-template-columns: 100%;
+                }
+                &__user_task {
+                    display: none;
+                }
+                &__user_worked {
+                    max-width: 100%;
+                    align-self: flex-end;
+                    font-size: 0.6rem;
+                }
+                &__user_row {
+                    max-width: 80%;
+                    height: auto;
+                    align-self: end;
+                }
+            }
+            .hidden {
+                display: none;
             }
         }
     }

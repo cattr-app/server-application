@@ -18,7 +18,6 @@ class FilterServiceProvider extends ServiceProvider implements DeferrableProvide
      */
     public function boot(): void
     {
-        Filter::subscribe(AttachmentFilter::class);
     }
 
     public function register(): void

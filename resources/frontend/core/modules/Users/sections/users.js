@@ -330,6 +330,13 @@ export default (context, router) => {
                 return h('span', i18n.t(`field.types.${currentValue}`));
             },
         },
+        {
+            label: 'field.efficiency',
+            key: 'efficiency',
+            render: (h, { currentValue }) => {
+                return h('span', currentValue !== null ? currentValue : '—');
+            },
+        },
     ];
 
     const fieldsToFill = config.fieldsToFillProvider();

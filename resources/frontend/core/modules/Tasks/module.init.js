@@ -53,6 +53,7 @@ export function init(context, router) {
 
     const crud = tasksContext.createCrud('tasks.crud-title', 'tasks', TasksService, {
         with: [
+            'can',
             'priority',
             'project',
             'phase:id,name',
@@ -367,6 +368,25 @@ export function init(context, router) {
                 const tagsWrapper = tags.length > 0 ? h('div', tags) : '';
 
                 return h('span', [date, tagsWrapper]);
+            },
+        },
+        {
+            key: 'forecast_completion_date',
+            label: 'calendar.task.forecast_completion_date',
+            render: (h, props) => {
+                let date = '—';
+                const userTimezone = moment.tz.guess();
+                const companyTimezone = rootStore.getters['user/companyData'].timezone;
+                if (
+                    props.currentValue != null &&
+                    typeof props.currentValue === 'string' &&
+                    typeof companyTimezone === 'string'
+                ) {
+                    date =
+                        formatDate(moment.utc(props.currentValue).tz(companyTimezone, true).tz(userTimezone)) +
+                        ` (GMT${moment.tz(userTimezone).format('Z')})`;
+                }
+                return h('span', date);
             },
         },
         {
@@ -980,6 +1000,34 @@ export function init(context, router) {
                 $router.go(-1);
             },
             renderCondition: () => true,
+        },
+    ]);
+
+    crud.view.addPageControls([
+        {
+            label: 'tasks.relations.title',
+            icon: 'icon-corner-down-right',
+            onClick: ({ $router }) => {
+                $router.push({ name: relationsRouteName });
+            },
+            renderCondition: ({ $can, values }) => {
+                if (!('can' in values)) return false;
+
+                return $can('update', 'task', values);
+            },
+        },
+        {
+            label: 'control.edit',
+            renderType: 'primary',
+            icon: 'icon-edit',
+            onClick: ({ $router }) => {
+                $router.push({ name: crudEditRoute });
+            },
+            renderCondition: ({ $can, values }) => {
+                if (!('can' in values)) return false;
+
+                return $can('update', 'task', values);
+            },
         },
     ]);
 

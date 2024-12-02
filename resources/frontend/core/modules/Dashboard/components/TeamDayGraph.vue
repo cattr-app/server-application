@@ -1,12 +1,10 @@
 <template>
-    <div ref="canvasWrapper" class="canvas">
-        <canvas ref="canvas" />
-
+    <div class="canvas-wrapper">
         <div
             v-show="hoverPopup.show && !clickPopup.show"
             :style="{
                 left: `${hoverPopup.x - 30}px`,
-                bottom: `${height - hoverPopup.y + 10}px`,
+                bottom: `${height() - hoverPopup.y + 50}px`,
             }"
             class="popup"
         >
@@ -26,7 +24,7 @@
             v-show="clickPopup.show"
             :style="{
                 left: `${clickPopup.x - 30}px`,
-                bottom: `${height - clickPopup.y + 10}px`,
+                bottom: `${height() - clickPopup.y + 50}px`,
             }"
             class="popup"
         >
@@ -70,6 +68,11 @@
             @showNext="showNext"
             @showPrevious="showPrevious"
         />
+        <div ref="canvas" class="canvas" @pointerdown="onDown">
+            <div ref="scrollbarTop" class="scrollbar-top" @scroll="onScroll">
+                <div :style="{ width: `${totalWidth}px` }" />
+            </div>
+        </div>
     </div>
 </template>
 
@@ -78,31 +81,19 @@
     import ScreenshotModal from '@/components/ScreenshotModal';
     import IntervalService from '@/services/resource/time-interval.service';
     import { formatDurationString } from '@/utils/time';
-    import { fabric } from 'fabric';
-    import throttle from 'lodash/throttle';
     import moment from 'moment-timezone';
     import { mapGetters } from 'vuex';
+    import { SVG } from '@svgdotjs/svg.js';
 
     let intervalService = new IntervalService();
-
-    const fabricObjectOptions = {
-        editable: false,
-        selectable: false,
-        objectCaching: false,
-        hasBorders: false,
-        hasControls: false,
-        hasRotatingPoint: false,
-        cursor: 'default',
-        hoverCursor: 'default',
-    };
 
     const titleHeight = 20;
     const subtitleHeight = 20;
     const rowHeight = 65;
     const columns = 24;
-
+    const minColumnWidth = 42;
     const popupWidth = 270;
-    const canvasPadding = 24;
+    const canvasPadding = 20;
     const defaultCornerOffset = 15;
 
     export default {
@@ -145,22 +136,16 @@
                     user: null,
                     interval: null,
                 },
+                totalWidth: 0,
+                scrollPos: 0,
             };
         },
         computed: {
             ...mapGetters('dashboard', ['intervals', 'timezone']),
             ...mapGetters('user', ['companyData']),
-            height() {
-                return this.users.length * rowHeight + titleHeight + subtitleHeight;
-            },
         },
         mounted() {
-            this.canvas = new fabric.Canvas(this.$refs.canvas, {
-                backgroundColor: '#fff',
-                renderOnAddRemove: false,
-                selection: false,
-                skipOffscreen: true,
-            });
+            this.draw = SVG();
 
             this.onResize();
             window.addEventListener('resize', this.onResize);
@@ -234,100 +219,135 @@
                     }
                 }
             },
-            draw: throttle(function () {
-                this.canvas.clear();
+            height() {
+                return this.users.length * rowHeight;
+            },
+            canvasWidth() {
+                return this.$refs.canvas.clientWidth;
+            },
+            columnWidth() {
+                return Math.max(minColumnWidth, this.canvasWidth() / columns);
+            },
+            async contentWidth() {
+                await this.$nextTick();
+                this.totalWidth = columns * this.columnWidth();
+                return this.totalWidth;
+            },
+            onDown(e) {
+                this.$refs.canvas.addEventListener('pointermove', this.onMove);
+                this.$refs.canvas.addEventListener('pointerup', this.onUp, { once: true });
+                this.$refs.canvas.addEventListener('pointercancel', this.onCancel, { once: true });
+            },
 
-                const width = this.canvas.getWidth();
-                const height = this.users.length * rowHeight;
-                const columnWidth = width / columns;
-
+            async maxScrollX() {
+                return (await this.contentWidth()) - this.canvasWidth();
+            },
+            async scrollCanvas(movementX, setScroll = true) {
+                const canvas = this.$refs.canvas;
+                const clientWidth = canvas.clientWidth;
+                const entireWidth = await this.contentWidth();
+                const height = this.height();
+                const newScrollPos = this.scrollPos - movementX;
+                if (newScrollPos <= 0) {
+                    this.scrollPos = 0;
+                } else if (newScrollPos >= entireWidth - clientWidth) {
+                    this.scrollPos = entireWidth - clientWidth;
+                } else {
+                    this.scrollPos = newScrollPos;
+                }
+                setScroll ? await this.setScroll() : null;
+                this.draw.viewbox(this.scrollPos, 20, clientWidth, height);
+            },
+            async onMove(e) {
+                this.$refs.canvas.setPointerCapture(e.pointerId);
+                await this.scrollCanvas(e.movementX);
+            },
+            onUp(e) {
+                this.$refs.canvas.removeEventListener('pointermove', this.onMove);
+            },
+            onCancel(e) {
+                this.$refs.canvas.removeEventListener('pointermove', this.onMove);
+            },
+            onScroll(e) {
+                this.scrollCanvas(this.scrollPos - this.$refs.scrollbarTop.scrollLeft, false);
+            },
+            async setScroll(x = null) {
+                await this.$nextTick();
+                this.$refs.scrollbarTop.scrollLeft = x ?? this.scrollPos;
+            },
+            async drawGrid() {
+                if (typeof this.draw === 'undefined') return;
+                this.draw.clear();
+                const canvasContainer = this.$refs.canvas;
+                const width = canvasContainer.clientWidth;
+                const height = this.height();
+                const columnWidth = this.columnWidth();
+                const draw = this.draw;
+                draw.addTo(canvasContainer).size(width, height + titleHeight + subtitleHeight);
+                if (height <= 0) {
+                    return;
+                }
+                this.draw.viewbox(0, 20, width, height);
                 // Background
-                this.canvas.add(
-                    new fabric.Rect({
-                        left: 0,
-                        top: titleHeight + subtitleHeight,
-                        width: width - 1,
-                        height: height - 1,
-                        rx: 20,
-                        ry: 20,
-                        fill: '#FAFAFA',
-                        stroke: '#DFE5ED',
-                        strokeWidth: 1,
-                        ...fabricObjectOptions,
-                    }).on('mousedown', () => this.$emit('outsideClick')),
-                );
-
+                const rectBackground = draw
+                    .rect(await this.contentWidth(), height - 1)
+                    .move(0, titleHeight + subtitleHeight)
+                    .radius(20)
+                    .fill('#FAFAFA')
+                    .stroke({ color: '#DFE5ED', width: 1 })
+                    .on('mousedown', () => this.$emit('outsideClick'));
+                draw.add(rectBackground);
                 for (let column = 0; column < columns; ++column) {
                     const date = moment().startOf('day').add(column, 'hours');
-                    const left = columnWidth * column;
-
+                    let left = this.columnWidth() * column;
                     // Column headers - hours
-                    this.canvas.add(
-                        new fabric.Textbox(date.format('h'), {
-                            left,
-                            top: 0,
-                            width: columnWidth,
-                            height: titleHeight,
-                            textAlign: 'center',
-                            fontFamily: 'Nunito, sans-serif',
-                            fontSize: 15,
+                    draw.text(date.format('h'))
+                        .move(left + columnWidth / 2, 0)
+                        .size(columnWidth, titleHeight)
+                        .attr({
+                            'text-anchor': 'middle',
+                            'font-family': 'Nunito, sans-serif',
+                            'font-size': 15,
                             fill: '#151941',
-                            ...fabricObjectOptions,
-                        }),
-                    );
-
+                        });
                     // Column headers - am/pm
-                    this.canvas.add(
-                        new fabric.Textbox(date.format('A'), {
-                            left,
-                            top: titleHeight,
-                            width: columnWidth,
-                            height: subtitleHeight,
-                            textAlign: 'center',
-                            fontFamily: 'Nunito, sans-serif',
-                            fontSize: 10,
-                            fontWeight: '600',
+                    draw.text(date.format('A'))
+                        .move(left + columnWidth / 2, titleHeight - 5)
+                        .size(columnWidth, subtitleHeight)
+                        .attr({
+                            'text-anchor': 'middle',
+                            'font-family': 'Nunito, sans-serif',
+                            'font-size': 10,
+                            'font-weight': '600',
                             fill: '#B1B1BE',
-                            ...fabricObjectOptions,
-                        }),
-                    );
+                        });
 
-                    // Vertical grid lines
+                    // // Vertical grid lines
                     if (column > 0) {
-                        this.canvas.add(
-                            new fabric.Line([0, 0, 0, height], {
-                                left,
-                                top: titleHeight + subtitleHeight,
-                                stroke: '#DFE5ED',
-                                strokeWidth: 1,
-                                ...fabricObjectOptions,
-                            }),
-                        );
+                        draw.line(0, titleHeight + subtitleHeight, 0, height + titleHeight + subtitleHeight)
+                            .move(left, titleHeight + subtitleHeight)
+                            .stroke({ color: '#DFE5ED', width: 1 });
                     }
                 }
 
-                if (!this.$refs.canvasWrapper) {
-                    return;
-                }
-
-                const { width: canvasWidth } = this.$refs.canvasWrapper.getBoundingClientRect();
-                const maxLeftOffset = canvasWidth - popupWidth + 2 * canvasPadding;
-                const minLeftOffset = canvasPadding / 2;
-
-                this.users.forEach((user, row) => {
+                const maxLeftOffset = width - popupWidth + 2 * canvasPadding;
+                const clipPath = draw
+                    .rect(await this.contentWidth(), height - 1)
+                    .move(0, titleHeight + subtitleHeight)
+                    .radius(20)
+                    .attr({
+                        absolutePositioned: true,
+                    });
+                const squaresGroup = draw.group().clipWith(clipPath);
+                for (const user of this.users) {
+                    const row = this.users.indexOf(user);
                     const top = row * rowHeight + titleHeight + subtitleHeight;
 
                     // Horizontal grid lines
                     if (row > 0) {
-                        this.canvas.add(
-                            new fabric.Line([0, 0, width, 0], {
-                                left: 0,
-                                top,
-                                stroke: '#DFE5ED',
-                                strokeWidth: 1,
-                                ...fabricObjectOptions,
-                            }),
-                        );
+                        draw.line(0, 0, await this.contentWidth(), 0)
+                            .move(0, top)
+                            .stroke({ color: '#DFE5ED', width: 1 });
                     }
 
                     // Intervals
@@ -338,91 +358,84 @@
                                     .tz(event.start_at, this.companyData.timezone)
                                     .tz(this.timezone)
                                     .diff(moment.tz(this.start, this.timezone).startOf('day'), 'hours', true) % 24;
+                            const widthIntrevals =
+                                ((Math.max(event.duration, 60) + 120) * this.columnWidth()) / 60 / 60;
+                            const rectInterval = draw
+                                .rect(widthIntrevals, rowHeight / 2)
+                                .move(Math.floor(leftOffset * this.columnWidth()), top + rowHeight / 4)
+                                .radius(2)
+                                .stroke({ color: 'transparent', width: 0 })
+                                .attr({
+                                    cursor: 'pointer',
+                                    hoverCursor: 'pointer',
+                                    fill: event.is_manual == '1' ? '#c4b52d' : '#2DC48D',
+                                });
 
-                            const width = ((Math.max(event.duration, 60) + 120) * columnWidth) / 60 / 60;
-
-                            const rect = new fabric.Rect({
-                                left: Math.floor(leftOffset * columnWidth),
-                                top: top + rowHeight / 4,
-                                width,
-                                height: rowHeight / 2,
-                                rx: 2,
-                                ry: 2,
-                                fill: event.is_manual == '1' ? '#c4b52d' : '#2DC48D',
-                                stroke: 'transparent',
-                                strokeWidth: 0,
-                                ...fabricObjectOptions,
-                                cursor: 'pointer',
-                                hoverCursor: 'pointer',
+                            rectInterval.on('mouseover', e => {
+                                const popupY = rectInterval.bbox().y - rectInterval.bbox().height;
+                                const canvasRight = this.$refs.canvas.getBoundingClientRect().right;
+                                const rectMiddleX = rectInterval.rbox().cx - defaultCornerOffset / 2;
+                                const minLeft = this.$refs.canvas.getBoundingClientRect().left;
+                                const left =
+                                    rectMiddleX > canvasRight
+                                        ? canvasRight - defaultCornerOffset / 2
+                                        : rectMiddleX < minLeft
+                                          ? minLeft - defaultCornerOffset / 2
+                                          : rectMiddleX;
+                                const maxRight = canvasRight - popupWidth + 2 * canvasPadding;
+                                const popupX = left > maxRight ? maxRight : left < minLeft ? minLeft : left;
+                                const arrowX = defaultCornerOffset + left - popupX;
+                                this.hoverPopup = {
+                                    show: true,
+                                    x: popupX,
+                                    y: popupY,
+                                    event,
+                                    borderX: arrowX,
+                                };
                             });
-
-                            rect.on('mouseover', e => {
-                                if (e.target.left > maxLeftOffset) {
-                                    this.hoverPopup = {
-                                        show: true,
-                                        x: maxLeftOffset,
-                                        y: e.target.top,
-                                        event,
-                                        borderX: defaultCornerOffset + e.target.left - maxLeftOffset,
-                                    };
-                                } else {
-                                    this.hoverPopup = {
-                                        show: true,
-                                        x: e.target.left < minLeftOffset ? minLeftOffset : e.target.left,
-                                        y: e.target.top,
-                                        borderX: defaultCornerOffset,
-                                        event,
-                                    };
-                                }
-                            });
-
-                            rect.on('mouseout', e => {
+                            rectInterval.on('mouseout', e => {
                                 this.hoverPopup = {
                                     ...this.hoverPopup,
                                     show: false,
                                 };
                             });
-
-                            rect.on('mousedown', e => {
+                            rectInterval.on('mousedown', e => {
                                 this.$emit('selectedIntervals', event);
-
-                                if (e.target.left > maxLeftOffset) {
-                                    this.clickPopup = {
-                                        show: true,
-                                        x: maxLeftOffset,
-                                        y: e.target.top,
-                                        event,
-                                        borderX: defaultCornerOffset + e.target.left - maxLeftOffset,
-                                    };
-                                } else {
-                                    this.clickPopup = {
-                                        show: true,
-                                        x: e.target.left,
-                                        y: e.target.top,
-                                        event,
-                                        borderX: defaultCornerOffset,
-                                    };
-                                }
-
-                                e.e.stopPropagation();
+                                const popupY = rectInterval.bbox().y - rectInterval.bbox().height;
+                                const canvasRight = this.$refs.canvas.getBoundingClientRect().right;
+                                const rectMiddleX = rectInterval.rbox().cx - defaultCornerOffset / 2;
+                                const minLeft = this.$refs.canvas.getBoundingClientRect().left;
+                                const left =
+                                    rectMiddleX > canvasRight
+                                        ? canvasRight - defaultCornerOffset / 2
+                                        : rectMiddleX < minLeft
+                                          ? minLeft - defaultCornerOffset / 2
+                                          : rectMiddleX;
+                                const maxRight = canvasRight - popupWidth + 2 * canvasPadding;
+                                const popupX = left > maxRight ? maxRight : left < minLeft ? minLeft : left;
+                                const arrowX = defaultCornerOffset + left - popupX;
+                                this.clickPopup = {
+                                    show: true,
+                                    x: popupX,
+                                    y: popupY,
+                                    event,
+                                    borderX: arrowX,
+                                };
+                                e.stopPropagation();
                             });
-
-                            this.canvas.add(rect);
+                            squaresGroup.add(rectInterval);
                         });
                     }
-                });
-
-                this.canvas.requestRenderAll();
-            }, 100),
-            onResize: throttle(function () {
-                if (!this.$refs.canvasWrapper) {
-                    return;
                 }
-                const { width } = this.$refs.canvasWrapper.getBoundingClientRect();
-                this.canvas.setWidth(width);
-                this.canvas.setHeight(this.height);
-                this.draw();
-            }, 200),
+            },
+            onResize: function () {
+                const canvasContainer = this.$refs.canvas;
+                const width = canvasContainer.clientWidth;
+                const height = this.height();
+                this.draw.size(width, height);
+                this.setScroll(0);
+                this.drawGrid();
+            },
             onClick(e) {
                 if (e.button !== 0 || (e.target && e.target.closest('.popup'))) {
                     return;
@@ -453,63 +466,91 @@
             },
         },
         watch: {
+            start() {
+                this.setScroll(0);
+            },
             users() {
                 this.onResize();
             },
             intervals() {
-                this.draw();
+                this.drawGrid();
             },
             timezone() {
-                this.draw();
+                this.drawGrid();
             },
         },
     };
 </script>
 
 <style lang="scss" scoped>
+    .popup {
+        background: #ffffff;
+        border: 0;
+        border-radius: 20px;
+        box-shadow: 0px 7px 64px rgba(0, 0, 0, 0.07);
+        display: block;
+        padding: 10px;
+        position: absolute;
+        text-align: center;
+        width: 270px;
+        z-index: 3;
+        & .corner {
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 10px solid #ffffff;
+            bottom: -10px;
+            content: ' ';
+            display: block;
+            height: 0;
+            left: 15px;
+            position: absolute;
+            width: 0;
+            z-index: 1;
+        }
+    }
     .canvas {
         position: relative;
-
+        user-select: none;
+        touch-action: pan-y;
+        cursor: move;
         &::v-deep canvas {
             box-sizing: content-box;
         }
-
-        .popup {
-            background: #ffffff;
-            border: 0;
-
-            border-radius: 20px;
-
-            box-shadow: 0px 7px 64px rgba(0, 0, 0, 0.07);
-            display: block;
-
-            padding: 10px;
-
+        .scrollbar-top {
             position: absolute;
+            left: 0;
+            top: -1.5rem;
+            width: 100%;
+            height: 10px;
+            overflow-x: auto;
+        }
+        .scrollbar-top {
+            & > div {
+                height: 1px;
+            }
 
-            text-align: center;
+            &::-webkit-scrollbar {
+                height: 7px;
+            }
 
-            width: 270px;
+            &::-webkit-scrollbar-track {
+                background: transparent;
+            }
 
-            z-index: 3;
+            &::-webkit-scrollbar-button {
+                display: none;
+            }
 
-            & .corner {
-                border-left: 15px solid transparent;
-
-                border-right: 15px solid transparent;
-                border-top: 10px solid #ffffff;
-
-                bottom: -10px;
-                content: ' ';
-                display: block;
-
-                height: 0;
-                left: 15px;
-
-                position: absolute;
-                width: 0;
-
-                z-index: 1;
+            &::-webkit-scrollbar-thumb {
+                background: #2e2ef9;
+                border-radius: 3px;
+            }
+        }
+    }
+    @media (max-width: 720px) {
+        .canvas {
+            .scrollbar-top {
+                top: -1rem;
             }
         }
     }

@@ -283,7 +283,7 @@
         methods: {
             async handleTmpUrlCreation(attachmentUUID, seconds = null) {
                 const url = await this.taskService.generateAttachmentTmpUrl(attachmentUUID, seconds);
-                await this.setClipboard(url);
+                await this.setClipboard(window.location.origin + url);
                 Vue.prototype.$Notify.success({
                     title: this.$i18n.t('attachments.tmp_url_created'),
                     message: this.$i18n.t('attachments.copied_to_clipboard'),

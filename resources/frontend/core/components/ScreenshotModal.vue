@@ -197,6 +197,7 @@
 
             .at-modal__body {
                 padding: 0;
+                position: relative;
 
                 .icon-camera-off {
                     display: flex;
@@ -297,6 +298,11 @@
 
         &-duration {
             padding-right: 3em;
+        }
+    }
+    @media (max-width: 500px) {
+        .modal ::v-deep .at-modal__wrapper {
+            align-items: start;
         }
     }
 </style>

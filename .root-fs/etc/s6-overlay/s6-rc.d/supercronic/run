@@ -1,3 +1,6 @@
 #!/usr/bin/execlineb -P
 
+with-contenv
+s6-setuidgid www
+
 /usr/bin/supercronic /crontab

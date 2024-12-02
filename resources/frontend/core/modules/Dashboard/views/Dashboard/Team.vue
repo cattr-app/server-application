@@ -401,6 +401,40 @@
         }
     }
 
+    @media (max-width: 1320px) {
+        .controls-row {
+            flex-direction: column;
+            align-items: start;
+            padding-right: 1px; // fix horizontal scroll caused by download btn padding
+            &__item {
+                margin: 0;
+                margin-bottom: $spacing-03;
+            }
+            .calendar {
+                &::v-deep .input {
+                    width: unset;
+                }
+            }
+            & > div:first-child {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, 250px);
+                width: 100%;
+                column-gap: $spacing-03;
+            }
+            & > div:last-child {
+                align-self: flex-end;
+                column-gap: $spacing-03;
+            }
+        }
+    }
+    @media (max-width: 720px) {
+        .at-container {
+            &__inner {
+                padding: 1rem;
+            }
+        }
+    }
+
     .export {
         display: flex;
         align-items: center;

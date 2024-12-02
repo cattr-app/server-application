@@ -191,6 +191,10 @@
                 justify-content: space-between;
                 align-items: flex-start;
 
+                .control-items {
+                    gap: 1em;
+                }
+
                 .control-item {
                     &:last-child {
                         margin-right: 0;

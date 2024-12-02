@@ -1,0 +1,43 @@
+{
+  "navigation": {
+    "calendar": "Календарь"
+  },
+  "calendar": {
+    "days": {
+      "monday": "Пн.",
+      "tuesday": "Вт.",
+      "wednesday": "Ср.",
+      "thursday": "Чт.",
+      "friday": "Пт.",
+      "saturday": "Сб.",
+      "sunday": "Вс."
+    },
+    "months": {
+      "january": "Янв.",
+      "february": "Февр.",
+      "april": "Апр.",
+      "march": "Март",
+      "may": "Май",
+      "june": "Июнь",
+      "july": "Июль",
+      "august": "Авг.",
+      "september": "Сент.",
+      "october": "Окт.",
+      "november": "Нояб.",
+      "december": "Дек."
+    },
+    "task": {
+      "name": "Название",
+      "status": "Статус",
+      "priority": "Приоритет",
+      "estimate": "Оценка времени",
+      "total_spent_time": "Всего потрачено времени",
+      "start_date": "Дата начала",
+      "due_date": "Дата завершения",
+      "forecast_completion_date": "Прогнозируемая дата завершения"
+    },
+    "tasks": "Задачи {date}",
+    "show_all": "Показать всё",
+    "show_first": "Показать первые 5 задач"
+  }
+}

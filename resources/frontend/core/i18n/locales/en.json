@@ -265,6 +265,7 @@
     "screenshots_state": "Enable screenshots",
     "members": "Members",
     "url": "URL",
+    "efficiency": "Employee efficiency ratio",
     "statuses": {
       "any": "Any",
       "active": "Active",
