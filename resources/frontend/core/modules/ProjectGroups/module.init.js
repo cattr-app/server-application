@@ -61,7 +61,7 @@ export function init(context) {
             title: 'control.delete',
             type: 'error',
             icon: 'icon-trash-2',
-            onClick: async (context, item) => {
+            onClick: async ({ service, $router }, item) => {
                 const isConfirm = await Vue.prototype.$CustomModal({
                     title: i18n.t('notification.record.delete.confirmation.title'),
                     content: i18n.t('notification.record.delete.confirmation.message'),
@@ -91,15 +91,16 @@ export function init(context) {
                     return;
                 }
 
-                await context.service.deleteItem(item);
+                await service.deleteItem(item);
                 Vue.prototype.$Notify({
                     type: 'success',
                     title: i18n.t('notification.record.delete.success.title'),
                     message: i18n.t('notification.record.delete.success.message'),
                 });
-                context.$router.push('/groups');
+
+                $router.push({ name: context.getModuleRouteName() });
             },
-            renderCondition: ({ $can }, item) => {
+            renderCondition: ({ $can }) => {
                 return $can('delete', 'projectGroup');
             },
         },
