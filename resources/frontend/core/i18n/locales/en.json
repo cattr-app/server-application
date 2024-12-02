@@ -241,6 +241,7 @@
     "timezone": "Timezone",
     "default_role": "Default Role",
     "project_roles": "Project Roles",
+    "task": "Task",
     "tasks": "Tasks",
     "project": "Project",
     "projects": "Projects",
