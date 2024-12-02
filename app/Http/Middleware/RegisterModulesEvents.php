@@ -44,7 +44,7 @@ class RegisterModulesEvents
         CatEvent::listen('event.after.action.*', static function (string $eventName, array $data) {
             $eventNameParts = explode('.', $eventName);
             [$entityType, $action] = array_slice($eventNameParts, 3, 2); // Strip "event.after.action" and get the next two parts
-            if (!in_array($entityType, ['tasks', 'projects', 'projects_members', 'intervals','task_comments', 'project_groups'])) {
+            if (!in_array($entityType, ['tasks', 'projects', 'projects_members', 'intervals', 'task_comments', 'project_groups'])) {
                 return;
             }
 
@@ -59,7 +59,7 @@ class RegisterModulesEvents
             } elseif ($entityType === 'task_comments') {
                 $entityType = 'tasks_activities';
                 $model = $data[0];
-            } elseif ($entityType ==='project_groups') {
+            } elseif ($entityType === 'project_groups') {
                 $entityType = 'projects';
                 /** @var ProjectGroup $group */
                 $group = $data[0];
@@ -72,15 +72,15 @@ class RegisterModulesEvents
                 $items = is_array($model) || $model instanceof Collection ? $model : [$model];
                 foreach ($items as $item) {
                     static::broadcastEvent($entityType, $action, $item);
-                }
 
-                if (in_array($entityType, ['tasks', 'projects'])) {
-                    $project = match (true) {
-                        $model instanceof Task => $model->project,
-                        $model instanceof Project => $model
-                    };
+                    if (in_array($entityType, ['tasks', 'projects'])) {
+                        $project = match (true) {
+                            $item instanceof Task => $item->project,
+                            $item instanceof Project => $item,
+                        };
 
-                    static::broadcastEvent('gantt', 'updateAll', $project);
+                        static::broadcastEvent('gantt', 'updateAll', $project);
+                    }
                 }
             });
         });
