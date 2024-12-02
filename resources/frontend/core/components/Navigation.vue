@@ -3,19 +3,22 @@
         <router-link to="/" class="navbar__logo"></router-link>
         <div v-if="loggedIn">
             <template v-for="(item, key) in navItems">
-                <navigation-menu-item :key="key" :to="item.to || undefined" @click="item.click || undefined">
-                    {{ $t(item.label) }}
-                </navigation-menu-item>
-            </template>
-            <template v-for="(item, key) in navDropdowns">
-                <at-submenu :key="key" :title="$t(key)">
-                    <template slot="title">{{ $t(key) }}</template>
-                    <template v-for="(val, itemKey) in item">
-                        <navigation-menu-item :key="itemKey" :to="val.to || undefined" @click="val.click || undefined">
-                            {{ $t(val.label) }}
+                <at-submenu v-if="item.type === 'dropdown'" :key="item.label" :title="$t(item.label)">
+                    <template slot="title">{{ $t(item.label) }}</template>
+                    <template v-for="(child, childKey) in item.children">
+                        <navigation-menu-item
+                            :key="childKey"
+                            :to="child.to || undefined"
+                            @click="child.click || undefined"
+                        >
+                            {{ $t(child.label) }}
                         </navigation-menu-item>
                     </template>
                 </at-submenu>
+
+                <navigation-menu-item v-else :key="key" :to="item.to || undefined" @click="item.click || undefined">
+                    {{ $t(item.label) }}
+                </navigation-menu-item>
             </template>
         </div>
         <at-dropdown v-if="loggedIn" placement="bottom-right" @on-dropdown-command="userDropdownHandle">
@@ -62,6 +65,7 @@
         computed: {
             navItems() {
                 const navItems = [];
+                const dropdowns = {};
                 this.modules.forEach(m => {
                     const entries = m.getNavbarEntries();
                     entries.forEach(e => {
@@ -69,29 +73,29 @@
                             navItems.push(e.getData());
                         }
                     });
-                });
 
-                return navItems;
-            },
-            navDropdowns() {
-                const entriesDr = {};
-                this.modules.forEach(m => {
                     const entriesDropdown = m.getNavbarEntriesDropdown();
-                    Object.keys(entriesDropdown).forEach(key => {
-                        const isAllowItem = entriesDropdown[key][0].displayCondition(this.$store);
-                        if (
-                            !Object.prototype.hasOwnProperty.call(entriesDr, entriesDropdown[key][0].section) &&
-                            isAllowItem
-                        ) {
-                            entriesDr[entriesDropdown[key][0].section] = [];
+                    Object.keys(entriesDropdown).forEach(section => {
+                        let entry = dropdowns[section];
+                        if (typeof entry === 'undefined') {
+                            entry = dropdowns[section] = {
+                                type: 'dropdown',
+                                label: section,
+                                children: [],
+                            };
+
+                            navItems.push(entry);
                         }
-                        if (isAllowItem) {
-                            entriesDr[entriesDropdown[key][0].section].push(entriesDropdown[key][0]);
-                        }
+
+                        entriesDropdown[section].forEach(e => {
+                            if (e.displayCondition(this.$store)) {
+                                entry.children.push(e.getData());
+                            }
+                        });
                     });
                 });
 
-                return entriesDr;
+                return navItems;
             },
             ...mapGetters('user', ['user']),
             userDropdownItems() {
