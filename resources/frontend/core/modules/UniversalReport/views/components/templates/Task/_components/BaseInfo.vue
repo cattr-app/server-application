@@ -43,20 +43,7 @@
         </div>
         <div v-if="report.users" class="data-entry">
             <h3>{{ $t('field.members') }}</h3>
-            <at-table
-                :columns="[
-                    { title: $t('field.full_name'), key: 'full_name' },
-                    { title: $t('field.email'), key: 'email' },
-                    {
-                        title: $t('field.total_spent'),
-                        key: 'total_spent_time_by_user',
-                        render: function (h, { column, item }) {
-                            return h('span', formatDurationString(item[column.key]));
-                        },
-                    },
-                ]"
-                :data="Object.values(report.users)"
-            />
+            <at-table :columns="columns" :data="Object.values(report.users)" />
         </div>
         <div v-if="report.worked_time_day" class="data-entry">
             <h4>{{ $t('universal-report.worked_by_day') }}</h4>
@@ -75,6 +62,7 @@
 </template>
 
 <script>
+    import { mapGetters } from 'vuex';
     import { formatDurationString } from '@/utils/time';
     import { Skeleton } from 'vue-loading-skeleton';
     import ProjectInfo from './ProjectInfo';
@@ -101,6 +89,29 @@
             ProjectInfo,
             Skeleton,
             Charts,
+        },
+        computed: {
+            ...mapGetters('universalreport', ['selectedFields']),
+            columns() {
+                const columns = [];
+                if (this.selectedFields.users?.includes('full_name')) {
+                    columns.push({ title: this.$t('field.full_name'), key: 'full_name' });
+                }
+
+                if (this.selectedFields.users?.includes('email')) {
+                    columns.push({ title: this.$t('field.email'), key: 'email' });
+                }
+
+                columns.push({
+                    title: this.$t('field.total_spent'),
+                    key: 'total_spent_time_by_user',
+                    render: function (h, { column, item }) {
+                        return h('span', formatDurationString(item[column.key]));
+                    },
+                });
+
+                return columns;
+            },
         },
         methods: {
             formatDurationString,

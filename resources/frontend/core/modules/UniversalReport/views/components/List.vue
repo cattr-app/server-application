@@ -65,6 +65,7 @@
 
             this.setName(data.data.name);
             this.setBase(data.data.base);
+            this.setSelectedFields(data.data.fields);
             this.setCalendarData({
                 type: sessionStorage?.getItem('amazingcat.session.storage.universalreport' + '.type') ?? 'day',
                 end:
@@ -80,6 +81,7 @@
                 setName: 'universalreport/setName',
                 setBase: 'universalreport/setBase',
                 setCalendarData: 'universalreport/setCalendarData',
+                setSelectedFields: 'universalreport/setSelectedFields',
             }),
 
             getUserPercentage(minutes, totalTime) {
