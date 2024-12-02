@@ -441,6 +441,10 @@ export function init(context) {
         for (const action in handlers) {
             channel.listen(`.projects.${action}`, handlers[action]);
         }
+
+        channel.listen('.projects.edit', function () {
+            store.dispatch('projectGroups/resetGroups');
+        });
     };
 
     grid.addToMetaProperties('gridData.websocketEnterChannel', websocketEnterChannel, grid.getRouterConfig());

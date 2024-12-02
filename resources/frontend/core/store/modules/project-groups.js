@@ -32,6 +32,9 @@ const mutations = {
     setGroupIdsPerQuery(s, { query, groupIds }) {
         s.groupIdsPerQuery = { ...s.groupIdsPerQuery, [query]: groupIds };
     },
+    resetGroupIdsPerQuery(s) {
+        s.groupIdsPerQuery = {};
+    },
 };
 
 const actions = {
@@ -62,6 +65,11 @@ const actions = {
         commit('setPerPage', pagination.perPage);
         commit('setGroups', groups);
         commit('setGroupIdsPerQuery', { query, groupIds });
+    },
+
+    resetGroups({ commit }) {
+        commit('setGroups', {});
+        commit('resetGroupIdsPerQuery');
     },
 
     init() {
