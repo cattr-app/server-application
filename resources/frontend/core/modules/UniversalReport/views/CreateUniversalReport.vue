@@ -132,6 +132,11 @@
                 },
             },
         },
+        async mounted() {
+            await service.getBases().then(({ data }) => {
+                this.setBases(data.data);
+            });
+        },
         methods: {
             ...mapMutations({
                 setName: 'universalreport/setName',
