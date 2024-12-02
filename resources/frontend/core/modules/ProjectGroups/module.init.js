@@ -1,6 +1,5 @@
 import ProjectGroupsService from '@/services/resource/project-groups.service';
 import GroupSelect from '@/components/GroupSelect';
-import ProjectService from '@/services/resource/project.service';
 import i18n from '@/i18n';
 import Vue from 'vue';
 

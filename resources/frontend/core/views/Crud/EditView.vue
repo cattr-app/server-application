@@ -373,8 +373,8 @@
                     if (this.afterSubmitCallback) {
                         this.afterSubmitCallback();
                     } else if (this.pageData.type === 'new') {
-                        this.$router.push({
-                            name: this.$route.meta.navigation.view,
+                        const result = this.$router.push({
+                            name: this.$route.meta.navigation.view ?? this.$route.meta.navigation.edit,
                             params: { id: data[this.service.getIdParam()] },
                         });
                     }
