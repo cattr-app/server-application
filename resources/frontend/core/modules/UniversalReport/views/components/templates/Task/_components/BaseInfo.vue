@@ -47,7 +47,13 @@
                 :columns="[
                     { title: $t('field.full_name'), key: 'full_name' },
                     { title: $t('field.email'), key: 'email' },
-                    { title: $t('field.total_spent'), key: 'total_spent_time_by_user' },
+                    {
+                        title: $t('field.total_spent'),
+                        key: 'total_spent_time_by_user',
+                        render: function (h, { column, item }) {
+                            return h('span', formatDurationString(item[column.key]));
+                        },
+                    },
                 ]"
                 :data="Object.values(report.users)"
             />
