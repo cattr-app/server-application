@@ -3,14 +3,18 @@
 namespace App\Exceptions;
 
 use App\Exceptions\Entities\MethodNotAllowedException;
+use Crypt;
+use Filter;
 use Flugg\Responder\Exceptions\ConvertsExceptions;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Validation\ValidationException;
 use PDOException;
+use Str;
 use Symfony\Component\HttpFoundation\Response;
 use Flugg\Responder\Exceptions\Http\HttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
@@ -59,6 +63,7 @@ class Handler extends ExceptionHandler
         'password',
         'password_confirmation',
     ];
+
     public function register(): void
     {
         $this->reportable(function (Throwable $e) {
@@ -66,6 +71,46 @@ class Handler extends ExceptionHandler
                 app('sentry')->captureException($e);
             }
         });
+    }
+
+    /**
+     * Get the default context variables for logging.
+     *
+     * @return array<string, mixed>
+     */
+    protected function context(): array
+    {
+        $traceId = Str::uuid()->toString();
+        try {
+            // Only add trace_id to error response if Filter::getErrorResponseFilterName() method exists
+            Filter::listen(Filter::getErrorResponseFilterName(), static function (array|null $data = []) use ($traceId) {
+                $data['trace_id'] = $traceId;
+                return $data;
+            });
+        } catch (Throwable $exception) {
+        }
+
+        $requestContent = collect(rescue(fn() => request()->all(), [], false))
+            ->map(function ($item, string $key) {
+                if (Str::contains($key, ['screenshot', 'password', 'secret', 'token', 'api_key'], true)) {
+                    return '***';
+                }
+                return $item;
+            })->toArray();
+
+        if (config('app.debug') === false){
+            try {
+                $requestContent = Crypt::encryptString(json_encode($requestContent, JSON_THROW_ON_ERROR));
+            } catch (Throwable $exception) {
+            }
+        }
+
+
+        return array_merge(parent::context(), [
+            'trace_id' => $traceId,
+            'request_uri' => request()->getRequestUri(),
+            'request_content' => $requestContent
+        ]);
     }
 
     public function render($request, $e): Response
@@ -82,6 +127,6 @@ class Handler extends ExceptionHandler
             return $this->renderResponse($e);
         }
 
-        return parent::render($request, $e);
+        return responder()->error($e->getCode(), $e->getMessage())->respond();
     }
 }

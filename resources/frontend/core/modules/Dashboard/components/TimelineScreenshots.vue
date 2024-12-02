@@ -6,7 +6,7 @@
                 <div
                     v-for="(interval, index) in intervals[this.user.id]"
                     :key="interval.id"
-                    class="col-4 col-xl-3 screenshots__item"
+                    class="col-xs-8 col-4 col-xl-3 screenshots__item"
                 >
                     <div class="screenshot" :index="index" @click.shift.prevent.stop="onShiftClick(index)">
                         <Screenshot

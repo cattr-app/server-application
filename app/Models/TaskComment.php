@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Contracts\AttachmentAble;
+use App\Traits\HasAttachments;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -42,10 +43,12 @@ use Illuminate\Support\Carbon;
  * @method static QueryBuilder|TaskComment withoutTrashed()
  * @mixin EloquentIdeHelper
  */
-class TaskComment extends Model
+class TaskComment extends Model implements AttachmentAble
 {
     use SoftDeletes;
+    use HasAttachments;
 
+    public const TYPE = 'task_comments';
     /**
      * table name from database
      * @var string
@@ -92,5 +95,11 @@ class TaskComment extends Model
     public function properties(): MorphMany
     {
         return $this->morphMany(Property::class, 'entity');
+    }
+
+    // related to attachments
+    public function getProjectId(): int
+    {
+        return $this->task->project_id;
     }
 }

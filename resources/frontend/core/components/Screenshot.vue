@@ -1,13 +1,14 @@
 <template>
     <div class="screenshot" @click="$emit('click', $event)">
         <AppImage
+            v-if="screenshotsEnabled"
             :is-blob="true"
             :src="getThumbnailPath(interval)"
             class="screenshot__image"
             :lazy="lazyImage"
             @click="onShow"
         />
-
+        <i v-else class="icon icon-camera-off screenshot__image" />
         <at-tooltip>
             <template slot="content">
                 <div v-if="interval.activity_fill === null" class="screenshot__activity">
@@ -123,12 +124,11 @@
             },
         },
         data() {
-            return {
-                showModal: false,
-            };
+            return { showModal: false };
         },
         computed: {
             ...mapGetters('user', ['companyData']),
+            ...mapGetters('screenshots', { screenshotsEnabled: 'enabled' }),
             screenshotTime() {
                 const timezone = this.timezone || this.companyData['timezone'];
 
@@ -185,6 +185,12 @@
                     height: 150px;
                 }
             }
+        }
+
+        .icon {
+            font-size: 70px;
+            display: flex;
+            justify-content: center;
         }
 
         &__text {

@@ -2,16 +2,16 @@
 
 namespace App\Http\Requests\Interval;
 
+use AllowDynamicProperties;
 use App\Http\Requests\AuthorizesAfterValidation;
 use App\Http\Requests\CattrFormRequest;
 use App\Models\TimeInterval;
 use App\Models\User;
 use App\Rules\TimeIntervalDoesNotExist;
 use Carbon\Carbon;
-use Exception;
 use Settings;
 
-class CreateTimeIntervalRequest extends CattrFormRequest
+#[AllowDynamicProperties] class CreateTimeIntervalRequest extends CattrFormRequest
 {
     use AuthorizesAfterValidation;
 
@@ -47,12 +47,21 @@ class CreateTimeIntervalRequest extends CattrFormRequest
                     Carbon::parse($this->end_at)->setTimezone($timezone),
                 ),
             ],
-            'activity_fill' => 'int|between:0,100',
-            'mouse_fill' => 'int|between:0,100',
-            'keyboard_fill' => 'int|between:0,100',
+            'activity_fill' => 'nullable|int|between:0,100',
+            'mouse_fill' => 'nullable|int|between:0,100',
+            'keyboard_fill' => 'nullable|int|between:0,100',
             'is_manual' => 'sometimes|bool',
             'location' => 'sometimes|array',
             'screenshot' => 'sometimes|required|image',
         ];
+    }
+
+    public function getRules($user_id, $start_at, $end_at): array
+    {
+        $this->user_id = $user_id;
+        $this->start_at = $start_at;
+        $this->end_at = $end_at;
+
+        return $this->_rules();
     }
 }

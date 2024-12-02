@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Status;
 
+use App\Helpers\QueryHelper;
 use App\Http\Requests\CattrFormRequest;
 use App\Models\Status;
 
@@ -14,6 +15,6 @@ class ListStatusRequest extends CattrFormRequest
 
     public function _rules(): array
     {
-        return [];
+        return QueryHelper::getValidationRules();
     }
 }

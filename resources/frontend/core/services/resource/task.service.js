@@ -64,4 +64,33 @@ export default class TasksService extends ResourceService {
     getOptionLabelKey() {
         return 'task_name';
     }
+
+    /**
+     * Upload attachment
+     * @returns {Promise<void>}
+     * @param payload
+     * @param progressCallback
+     */
+    async uploadAttachment(payload, progressCallback) {
+        const formData = new FormData();
+        formData.append('attachment', payload);
+
+        const { data } = await axios.post('/attachment', formData, {
+            onUploadProgress: progressCallback,
+        });
+        return data;
+    }
+
+    /**
+     * Generate tmp url for attachment
+     * @returns {Promise<void>}
+     * @param uuid
+     * @param seconds
+     */
+    async generateAttachmentTmpUrl(uuid, seconds = null) {
+        const { data } = await axios.get(
+            `/attachment/${uuid}/temporary-url?${typeof seconds === 'number' ? serialize({ seconds }) : ''}`,
+        );
+        return data;
+    }
 }

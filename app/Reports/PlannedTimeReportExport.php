@@ -26,8 +26,7 @@ class PlannedTimeReportExport extends AppReport implements FromCollection, WithM
 
     public function __construct(
         private readonly ?array $projects,
-    )
-    {
+    ) {
     }
 
     public function collection(): Collection
@@ -66,9 +65,18 @@ class PlannedTimeReportExport extends AppReport implements FromCollection, WithM
                         round(CarbonInterval::seconds($worker['duration'])->totalHours, 3)
                     ];
                 }
+                if ($task['estimate'] > 0) {
+                    $reportArr[] = [
+                        [],
+                        "Estimate for {$task['task_name']}",
+                        '',
+                        CarbonInterval::seconds($task['estimate'])->cascade()->forHumans(),
+                        round(CarbonInterval::seconds($task['estimate'])->totalHours, 3),
+                    ];
+                }
                 if (count($task['workers']) > 1) {
                     $reportArr[] = [
-                        $project['name'],
+                        [],
                         "Subtotal for {$task['task_name']}",
                         '',
                         CarbonInterval::seconds($task['total_spent_time'])->cascade()->forHumans(),
@@ -77,15 +85,17 @@ class PlannedTimeReportExport extends AppReport implements FromCollection, WithM
                     $reportArr[] = [];
                 }
             }
-            $reportArr[] = [
-                "Subtotal for {$project['name']}",
-                '',
-                '',
-                CarbonInterval::seconds($project['total_spent_time'])->cascade()->forHumans(),
-                round(CarbonInterval::seconds($project['total_spent_time'])->totalHours, 3),
-            ];
-            $reportArr[] = [];
-            $reportArr[] = [];
+            if ($project['total_spent_time'] > 0) {
+                $reportArr[] = [
+                    "Subtotal for {$project['name']}",
+                    '',
+                    '',
+                    CarbonInterval::seconds($project['total_spent_time'])->cascade()->forHumans(),
+                    round(CarbonInterval::seconds($project['total_spent_time'])->totalHours, 3),
+                ];
+                $reportArr[] = [];
+                $reportArr[] = [];
+            }
         }
 
         return $reportArr;

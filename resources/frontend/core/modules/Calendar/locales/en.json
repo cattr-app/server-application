@@ -1,0 +1,19 @@
+{
+  "navigation": {
+    "calendar": "Calendar"
+  },
+  "calendar": {
+    "days": {
+      "monday": "Mon",
+      "tuesday": "Tue",
+      "wednesday": "Wed",
+      "thursday": "Thu",
+      "friday": "Fri",
+      "saturday": "Sat",
+      "sunday": "Sun"
+    },
+    "tasks": "Tasks {date}",
+    "show_all": "Show all",
+    "show_first": "Show first 5 tasks"
+  }
+}

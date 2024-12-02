@@ -137,7 +137,14 @@
             localStorage['dashboard.tab'] = 'team';
 
             await this.load();
-            this.updateHandle = setInterval(() => this.load(false), updateInterval);
+            this.updateHandle = setInterval(() => {
+                if (!this.updatedWithWebsockets) {
+                    this.load(false);
+                }
+
+                this.updatedWithWebsockets = false;
+            }, updateInterval);
+            this.updatedWithWebsockets = false;
         },
         beforeDestroy() {
             clearInterval(this.updateHandle);
@@ -145,6 +152,7 @@
         },
         computed: {
             ...mapGetters('dashboard', ['intervals', 'timePerDay', 'users', 'timezone', 'service']),
+            ...mapGetters('user', ['user']),
             graphUsers() {
                 return this.users
                     .filter(user => this.userIDs.includes(user.id))
@@ -171,6 +179,10 @@
             getEndOfDayInTimezone,
             ...mapMutations({
                 setTimezone: 'dashboard/setTimezone',
+                removeInterval: 'dashboard/removeInterval',
+                addInterval: 'dashboard/addInterval',
+                updateInterval: 'dashboard/updateInterval',
+                removeIntervalById: 'dashboard/removeIntervalById',
             }),
             load: throttle(async function (withLoadingIndicator = true) {
                 this.isDataLoading = withLoadingIndicator;
@@ -305,6 +317,34 @@
                     : 0;
             },
         },
+        mounted() {
+            const channel = this.$echo.private(`intervals.${this.user.id}`);
+            channel.listen(`.intervals.create`, data => {
+                const startAt = moment.tz(data.model.start_at, 'UTC').tz(this.timezone).format('YYYY-MM-DD');
+                const endAt = moment.tz(data.model.end_at, 'UTC').tz(this.timezone).format('YYYY-MM-DD');
+                if (startAt > this.end || endAt < this.start) {
+                    return;
+                }
+
+                this.addInterval(data.model);
+                this.updatedWithWebsockets = true;
+            });
+
+            channel.listen(`.intervals.edit`, data => {
+                this.updateInterval(data.model);
+                this.updatedWithWebsockets = true;
+            });
+
+            channel.listen(`.intervals.destroy`, data => {
+                if (typeof data.model === 'number') {
+                    this.removeIntervalById(data.model);
+                } else {
+                    this.removeInterval(data.model);
+                }
+
+                this.updatedWithWebsockets = true;
+            });
+        },
         watch: {
             timezone() {
                 this.service.unloadIntervals();
@@ -357,6 +397,40 @@
             &.active {
                 color: #ffffff;
                 background: #2e2ef9;
+            }
+        }
+    }
+
+    @media (max-width: 1320px) {
+        .controls-row {
+            flex-direction: column;
+            align-items: start;
+            padding-right: 1px; // fix horizontal scroll caused by download btn padding
+            &__item {
+                margin: 0;
+                margin-bottom: $spacing-03;
+            }
+            .calendar {
+                &::v-deep .input {
+                    width: unset;
+                }
+            }
+            & > div:first-child {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, 250px);
+                width: 100%;
+                column-gap: $spacing-03;
+            }
+            & > div:last-child {
+                align-self: flex-end;
+                column-gap: $spacing-03;
+            }
+        }
+    }
+    @media (max-width: 720px) {
+        .at-container {
+            &__inner {
+                padding: 1rem;
             }
         }
     }

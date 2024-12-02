@@ -1,87 +1,71 @@
 <template>
     <div class="timeline">
-        <div class="row">
-            <div class="col-5 col-xl-4 pr-1">
-                <div class="at-container sidebar">
-                    <TimelineSidebar
-                        :active-task="activeTask"
-                        :isDataLoading="isDataLoading"
-                        :startDate="start"
-                        :endDate="end"
-                    />
-                </div>
+        <div class="at-container sidebar">
+            <TimelineSidebar
+                :active-task="activeTask"
+                :isDataLoading="isDataLoading"
+                :startDate="start"
+                :endDate="end"
+            />
+        </div>
+        <div class="controls-row flex-between">
+            <div class="flex">
+                <Calendar
+                    class="controls-row__item"
+                    :range="false"
+                    :sessionStorageKey="sessionStorageKey"
+                    @change="onCalendarChange"
+                />
+                <TimezonePicker class="controls-row__item" :value="timezone" @onTimezoneChange="onTimezoneChange" />
             </div>
-            <div class="col-19 col-xl-20">
-                <div class="controls-row flex-between">
-                    <div class="flex">
-                        <Calendar
-                            class="controls-row__item"
-                            :range="false"
-                            :sessionStorageKey="sessionStorageKey"
-                            @change="onCalendarChange"
-                        />
-                        <TimezonePicker
-                            class="controls-row__item"
-                            :value="timezone"
-                            @onTimezoneChange="onTimezoneChange"
-                        />
-                    </div>
 
-                    <div class="flex">
-                        <router-link
-                            v-if="$can('viewManualTime', 'dashboard')"
-                            to="/time-intervals/new"
-                            class="controls-row__item"
-                        >
-                            <at-button class="controls-row__btn" icon="icon-edit">
-                                {{ $t('control.add_time') }}
-                            </at-button>
-                        </router-link>
+            <div class="flex">
+                <router-link
+                    v-if="$can('viewManualTime', 'dashboard')"
+                    to="/time-intervals/new"
+                    class="controls-row__item"
+                >
+                    <at-button class="controls-row__btn" icon="icon-edit">
+                        {{ $t('control.add_time') }}
+                    </at-button>
+                </router-link>
 
-                        <ExportDropdown
-                            class="export-btn dropdown controls-row__btn controls-row__item"
-                            position="left-top"
-                            trigger="hover"
-                            @export="onExport"
-                        />
-                    </div>
-                </div>
-
-                <div class="at-container">
-                    <TimelineDayGraph
-                        v-if="type === 'day'"
-                        class="graph"
-                        :start="start"
-                        :end="end"
-                        :events="userEvents"
-                        :timezone="timezone"
-                        @selectedIntervals="onIntervalsSelect"
-                        @remove="onBulkRemove"
-                    />
-                    <TimelineCalendarGraph
-                        v-else
-                        class="graph"
-                        :start="start"
-                        :end="end"
-                        :timePerDay="userTimePerDay"
-                    />
-
-                    <TimelineScreenshots
-                        v-if="type === 'day' && intervals && Object.keys(intervals).length"
-                        ref="timelineScreenshots"
-                        @on-remove="recalculateStatistic"
-                        @onSelectedIntervals="setSelectedIntervals"
-                    />
-                    <preloader v-if="isDataLoading" class="timeline__loader" :is-transparent="true" />
-
-                    <TimeIntervalEdit
-                        :intervals="selectedIntervals"
-                        @remove="onBulkRemove"
-                        @edit="loadData"
-                        @close="clearIntervals"
-                    />
-                </div>
+                <ExportDropdown
+                    class="export-btn dropdown controls-row__btn controls-row__item"
+                    position="left-top"
+                    trigger="hover"
+                    @export="onExport"
+                />
             </div>
+        </div>
+
+        <div class="at-container intervals">
+            <TimelineDayGraph
+                v-if="type === 'day'"
+                class="graph"
+                :start="start"
+                :end="end"
+                :events="userEvents"
+                :timezone="timezone"
+                @selectedIntervals="onIntervalsSelect"
+                @remove="onBulkRemove"
+            />
+            <TimelineCalendarGraph v-else class="graph" :start="start" :end="end" :timePerDay="userTimePerDay" />
+
+            <TimelineScreenshots
+                v-if="type === 'day' && intervals && Object.keys(intervals).length"
+                ref="timelineScreenshots"
+                @on-remove="recalculateStatistic"
+                @onSelectedIntervals="setSelectedIntervals"
+            />
+            <preloader v-if="isDataLoading" class="timeline__loader" :is-transparent="true" />
+
+            <TimeIntervalEdit
+                :intervals="selectedIntervals"
+                @remove="onBulkRemove"
+                @edit="loadData"
+                @close="clearIntervals"
+            />
         </div>
     </div>
 </template>
@@ -141,11 +125,48 @@
         created() {
             localStorage['dashboard.tab'] = 'timeline';
             this.loadData();
-            this.updateHandle = setInterval(() => this.loadData(false), updateInterval);
+            this.updateHandle = setInterval(() => {
+                if (!this.updatedWithWebsockets) {
+                    this.loadData(false);
+                }
+
+                this.updatedWithWebsockets = false;
+            }, updateInterval);
+            this.updatedWithWebsockets = false;
+        },
+        mounted() {
+            const channel = this.$echo.private(`intervals.${this.user.id}`);
+            channel.listen(`.intervals.create`, data => {
+                const startAt = moment.tz(data.model.start_at, 'UTC').tz(this.timezone).format('YYYY-MM-DD');
+                const endAt = moment.tz(data.model.end_at, 'UTC').tz(this.timezone).format('YYYY-MM-DD');
+                if (startAt > this.end || endAt < this.start) {
+                    return;
+                }
+
+                this.addInterval(data.model);
+                this.updatedWithWebsockets = true;
+            });
+
+            channel.listen(`.intervals.edit`, data => {
+                this.updateInterval(data.model);
+                this.updatedWithWebsockets = true;
+            });
+
+            channel.listen(`.intervals.destroy`, data => {
+                if (typeof data.model === 'number') {
+                    this.removeIntervalById(data.model);
+                } else {
+                    this.removeInterval(data.model);
+                }
+
+                this.updatedWithWebsockets = true;
+            });
         },
         beforeDestroy() {
             clearInterval(this.updateHandle);
             this.service.unloadIntervals();
+
+            this.$echo.leave(`intervals.${this.user.id}`);
         },
         computed: {
             ...mapGetters('dashboard', ['service', 'intervals', 'timePerDay', 'timePerProject', 'timezone']),
@@ -171,6 +192,10 @@
             getEndOfDayInTimezone,
             ...mapMutations({
                 setTimezone: 'dashboard/setTimezone',
+                removeInterval: 'dashboard/removeInterval',
+                addInterval: 'dashboard/addInterval',
+                updateInterval: 'dashboard/updateInterval',
+                removeIntervalById: 'dashboard/removeIntervalById',
             }),
             loadData: debounce(async function (withLoadingIndicator = true) {
                 this.isDataLoading = withLoadingIndicator;
@@ -271,19 +296,13 @@
         }
     }
     .at-container {
-        position: relative;
         padding: 1em;
-
-        &:not(:last-child) {
-            padding-right: 1.5em;
-        }
-    }
-
-    .sidebar {
-        padding: 30px 0;
     }
 
     .timeline {
+        display: grid;
+        grid-template-columns: 300px 1fr 1fr;
+        column-gap: 0.5rem;
         &__loader {
             z-index: 0;
             border-radius: 20px;
@@ -316,16 +335,88 @@
         }
     }
 
+    .sidebar {
+        padding: 30px 0;
+        grid-column: 1 / 2;
+        grid-row: 1 / 3;
+        max-height: fit-content;
+        margin-bottom: 0.5rem;
+    }
+
     .controls-row {
         z-index: 1;
         position: relative;
+        grid-column: 2 / 4;
+        padding-right: 1px; // fix horizontal scroll caused by download btn padding
+    }
+
+    .intervals {
+        grid-column: 2 / 4;
+    }
+    @media (max-width: 1300px) {
+        .timeline {
+            grid-template-columns: 250px 1fr 1fr;
+        }
+    }
+    @media (max-width: 1110px) {
+        .canvas {
+            padding-top: 0.3rem;
+        }
+        .at-container {
+            padding: 0.5rem;
+        }
+        .sidebar {
+            padding: 15px 0;
+        }
+        .controls-row {
+            flex-direction: column;
+            align-items: start;
+            //padding-right: 1px; // fix horizontal scroll caused by download btn padding
+            &__item {
+                margin: 0;
+                margin-bottom: $spacing-03;
+            }
+            .calendar {
+                &::v-deep .input {
+                    width: unset;
+                }
+            }
+            & > div:first-child {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, 250px);
+                width: 100%;
+                column-gap: $spacing-03;
+            }
+            & > div:last-child {
+                align-self: flex-end;
+                column-gap: $spacing-03;
+            }
+        }
+    }
+    @media (max-width: 790px) {
+        .intervals {
+            grid-column: 1/4;
+        }
+        .controls-row {
+            & > div:last-child {
+                align-self: start;
+            }
+        }
+    }
+    @media (max-width: 560px) {
+        .controls-row {
+            grid-column: 1/4;
+            grid-row: 1;
+            & > div:last-child {
+                align-self: end;
+            }
+        }
+        .sidebar {
+            grid-row: 2;
+        }
     }
 
     .graph {
         width: 100%;
-    }
-
-    .pr-1 {
-        padding-right: 1em;
     }
 </style>

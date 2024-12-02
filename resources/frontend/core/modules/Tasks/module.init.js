@@ -17,6 +17,11 @@ import DateInput from './components/DateInput';
 import { store as rootStore } from '@/store';
 import moment from 'moment-timezone';
 import { hasRole } from '@/utils/user';
+import Vue from 'vue';
+import ResourceSelect from '@/components/ResourceSelect.vue';
+import PhaseSelect from './components/PhaseSelect';
+import RelationsSelector from './components/RelationsSelector';
+import Attachments from './components/Attachments.vue';
 
 export const ModuleConfig = {
     routerPrefix: 'tasks',
@@ -50,14 +55,15 @@ export function init(context, router) {
         with: [
             'priority',
             'project',
+            'phase:id,name',
+            'parents',
+            'children',
             'users',
             'status',
-            'changes',
-            'changes.user',
-            'comments',
-            'comments.user',
             'workers',
             'workers.user:id,full_name',
+            'attachmentsRelation',
+            'attachmentsRelation.user:id,full_name',
         ],
         withSum: [
             ['workers as total_spent_time', 'duration'],
@@ -124,6 +130,26 @@ export function init(context, router) {
                     },
                     currentValue.name,
                 );
+            },
+        },
+        {
+            key: 'phase',
+            label: 'field.phase',
+            render: (h, { currentValue }) => {
+                return h('span', {}, [currentValue?.name ?? i18n.t('tasks.unset_phase')]);
+            },
+        },
+        {
+            label: 'tasks.relations.title',
+            key: 'relations',
+            render: (h, data) => {
+                return h(RelationsSelector, {
+                    props: {
+                        parents: Array.isArray(data.values.parents) ? data.values.parents : [],
+                        children: Array.isArray(data.values.children) ? data.values.children : [],
+                        showControls: false,
+                    },
+                });
             },
         },
         {
@@ -217,6 +243,18 @@ export function init(context, router) {
             },
         },
         {
+            key: 'attachments_relation',
+            label: 'field.attachments',
+            render: (h, data) => {
+                return h(Attachments, {
+                    props: {
+                        attachments: Array.isArray(data.currentValue) ? data.currentValue : [],
+                        showControls: false,
+                    },
+                });
+            },
+        },
+        {
             key: 'url',
             label: 'field.source',
             render: (h, props) => {
@@ -272,6 +310,25 @@ export function init(context, router) {
                     estimate = formatDurationString(props.currentValue);
                 }
                 return h('span', estimate);
+            },
+        },
+        {
+            key: 'start_date',
+            label: 'field.start_date',
+            render: (h, props) => {
+                let date = i18n.t('tasks.unset_start_date');
+                const userTimezone = moment.tz.guess();
+                const companyTimezone = rootStore.getters['user/companyData'].timezone;
+                if (
+                    props.currentValue != null &&
+                    typeof props.currentValue === 'string' &&
+                    typeof companyTimezone === 'string'
+                ) {
+                    date =
+                        formatDate(moment.utc(props.currentValue).tz(companyTimezone, true).tz(userTimezone)) +
+                        ` (GMT${moment.tz(userTimezone).format('Z')})`;
+                }
+                return h('span', date);
             },
         },
         {
@@ -341,7 +398,7 @@ export function init(context, router) {
                                         {
                                             props: {
                                                 to: {
-                                                    name: routes.usersView,
+                                                    name: 'Users.crud.users.view',
                                                     params: { id: item.user_id },
                                                 },
                                             },
@@ -367,16 +424,16 @@ export function init(context, router) {
                 return h(TaskHistory, { props: { task: props.values } });
             },
         },
-        {
-            key: 'comments',
-            label: 'field.comments',
-            render: (h, props) => {
-                return h(TaskComments, {
-                    props: { task: props.values },
-                });
-            },
-        },
     ];
+    // {
+    //     key: 'comments',
+    //     label: 'field.comments',
+    //     render: (h, props) => {
+    //         return h(TaskComments, {
+    //             props: { task: props.values },
+    //         });
+    //     },
+    // },
 
     const fieldsToFill = [
         {
@@ -386,9 +443,42 @@ export function init(context, router) {
         {
             label: 'field.project',
             key: 'project_id',
-            type: 'resource-select',
-            service: new ProjectsService(),
+            render: (h, props) => {
+                const value = typeof props.currentValue === 'number' ? props.currentValue : null;
+                return h(ResourceSelect, {
+                    props: {
+                        value,
+                        service: new ProjectsService(),
+                    },
+                    on: {
+                        input: function (value) {
+                            props.setValue('project_phase_id', null);
+                            props.inputHandler(value);
+                        },
+                    },
+                });
+            },
             required: true,
+        },
+
+        {
+            key: 'project_phase_id',
+            label: 'field.phase',
+            render: (h, props) => {
+                const value = typeof props.currentValue === 'number' ? props.currentValue : '';
+                const projectId = typeof props.values.project_id === 'number' ? props.values.project_id : 0;
+                return h(PhaseSelect, {
+                    props: {
+                        value,
+                        projectId,
+                    },
+                    on: {
+                        input: function (value) {
+                            props.inputHandler(value);
+                        },
+                    },
+                });
+            },
         },
         {
             label: 'field.task_name',
@@ -454,6 +544,38 @@ export function init(context, router) {
             },
         },
         {
+            key: 'attachments_relation',
+            label: 'field.attachments',
+            render: (h, data) => {
+                return h(Attachments, {
+                    props: {
+                        attachments: Array.isArray(data.currentValue) ? data.currentValue : [],
+                        showControls: true,
+                    },
+                    on: {
+                        change(attachments) {
+                            data.inputHandler(attachments);
+                            data.setValue(
+                                'attachmentsRelation',
+                                attachments.filter(el => !el.toDelete).map(el => el.id),
+                            );
+                            data.setValue(
+                                'attachmentsToRemove',
+                                attachments.filter(el => el.toDelete).map(el => el.id),
+                            );
+                            // mitigate validation issues for empty array
+                            if (data.values.attachmentsRelation.length === 0) {
+                                delete data.values.attachmentsRelation;
+                            }
+                            if (data.values.attachmentsToRemove.length === 0) {
+                                delete data.values.attachmentsToRemove;
+                            }
+                        },
+                    },
+                });
+            },
+        },
+        {
             label: 'field.important',
             tooltipValue: 'tooltip.task_important',
             key: 'important',
@@ -471,6 +593,20 @@ export function init(context, router) {
                         input: function (seconds) {
                             data.inputHandler(seconds);
                         },
+                    },
+                });
+            },
+        },
+        {
+            label: 'field.start_date',
+            key: 'start_date',
+            render: (h, props) => {
+                const value = typeof props.currentValue === 'string' ? props.currentValue : null;
+
+                return h(DateInput, {
+                    props: {
+                        inputHandler: props.inputHandler,
+                        value,
                     },
                 });
             },
@@ -669,6 +805,7 @@ export function init(context, router) {
         {
             title: 'field.users',
             key: 'users',
+            hideForMobile: true,
             render: (h, { item }) => {
                 const users = item.users;
                 if (!users) {
@@ -701,6 +838,20 @@ export function init(context, router) {
             },
         },
     ]);
+
+    const websocketLeaveChannel = id => Vue.prototype.$echo.leave(`tasks.${id}`);
+    const websocketEnterChannel = (id, handlers) => {
+        const channel = Vue.prototype.$echo.private(`tasks.${id}`);
+        for (const action in handlers) {
+            channel.listen(`.tasks.${action}`, handlers[action]);
+        }
+    };
+
+    grid.addToMetaProperties('gridData.websocketEnterChannel', websocketEnterChannel, grid.getRouterConfig());
+    grid.addToMetaProperties('gridData.websocketLeaveChannel', websocketLeaveChannel, grid.getRouterConfig());
+
+    crud.view.addToMetaProperties('pageData.websocketEnterChannel', websocketEnterChannel, crud.view.getRouterConfig());
+    crud.view.addToMetaProperties('pageData.websocketLeaveChannel', websocketLeaveChannel, crud.view.getRouterConfig());
 
     grid.addToMetaProperties(
         'gridData.actionsFilter',
@@ -745,6 +896,18 @@ export function init(context, router) {
         },
     ]);
 
+    const relationsRouteName = context.getModuleRouteName() + '.relations';
+    context.addRoute([
+        {
+            path: `/${context.routerPrefix}/:id/relations`,
+            name: relationsRouteName,
+            component: () => import('./views/TaskRelations.vue'),
+            meta: {
+                auth: true,
+            },
+        },
+    ]);
+
     grid.addAction([
         {
             title: 'control.view',
@@ -755,6 +918,16 @@ export function init(context, router) {
             renderCondition() {
                 // User always can view assigned tasks
                 return true;
+            },
+        },
+        {
+            title: 'tasks.relations.title',
+            icon: 'icon-corner-down-right',
+            onClick: (router, { item }) => {
+                router.push({ name: relationsRouteName, params: { id: item.id } });
+            },
+            renderCondition({ $can }, item) {
+                return $can('update', 'task', item);
             },
         },
         {

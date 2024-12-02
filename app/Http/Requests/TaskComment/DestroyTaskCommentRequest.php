@@ -16,6 +16,8 @@ class DestroyTaskCommentRequest extends CattrFormRequest
 
     public function _rules(): array
     {
-        return [];
+        return [
+            'id' => 'required'
+        ];
     }
 }

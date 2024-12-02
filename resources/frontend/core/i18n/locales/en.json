@@ -201,6 +201,11 @@
     "project_selected_all": "All projects selected",
     "status_selected": "No statuses selected | 1 status selected | {count} statuses selected",
     "status_selected_all": "All statuses selected",
+    "screenshot_state_options": {
+      "required": "Required",
+      "optional": "Optional",
+      "forbidden": "Forbidden"
+    },
     "day": "Day",
     "week": "Week",
     "month": "Month",
@@ -230,7 +235,6 @@
     "change_password": "Change password",
     "screenshot": "Screenshot",
     "screenshots": "Screenshots",
-    "screenshots_active": "Screenshots Active",
     "manual_time": "Manual Time",
     "screenshots_interval": "Screenshots Interval",
     "computer_time_popup": "Inactivity Time Popup",
@@ -260,6 +264,7 @@
     "total_spent": "Total Spent Time",
     "time": "Time",
     "auto_thin": "Automatic storage cleanup",
+    "screenshots_state": "Enable screenshots",
     "members": "Members",
     "url": "URL",
     "statuses": {
@@ -331,6 +336,7 @@
     "report_has_been_queued": "Report has been queued and will be sent on your email"
   },
   "time": {
+    "d": "d",
     "h": "h",
     "m": "m",
     "s": "s"
@@ -392,7 +398,7 @@
       },
       "error": {
         "title": "Error",
-        "message": "Save failed"
+        "message": "Failed to save"
       }
     },
     "record": {

@@ -13,27 +13,80 @@
       "normal": "Normal",
       "high": "High"
     },
+    "activity": {
+      "task_change": "{user} changed {field} {date}",
+      "task_change_to": "{user} changed {field} to {value} {date}",
+      "task_change_users": "{user} assigned the task to {value} {date}",
+      "task_unassigned_users": "{user} removed all assignees {date}",
+      "show_history": "Show",
+      "hide_history": "Hide",
+      "add_comment": "Add comment",
+      "show_changes": "Show changes",
+      "marked_as_important": "{user} Marked the task as important {date}",
+      "marked_as_non_important": "{user} Unchecked the importance of the task {date}"
+    },
     "projects": "Projects",
     "users": "Users",
     "spent_by_user": "Spent time by user",
     "status": "Status",
+    "save_comment": "Save comment",
+    "cancel": "Cancel",
+    "edited": "Edited",
+    "sort_or_filter": "Sort or Filter",
+    "newest_first": "Newest first",
+    "oldest_first": "Oldest first",
+    "show_all_activity": "Show All Activity",
+    "show_comments_only": "Show comments Only",
+    "show_history_only": "Show history Only",
     "statuses": {
       "any": "Any",
       "open": "Open",
       "closed": "Closed"
     },
     "unassigned": "Unassigned",
+    "unset_start_date": "Not set",
     "unset_due_date": "Not set",
     "due_date--overdue": "Overdue",
     "unset_estimate": "Not set",
-    "estimate--overtime": "Overtime"
+    "estimate--overtime": "Overtime",
+    "unset_phase": "Not set",
+    "important": "Important",
+    "not_important": "Not important",
+    "relations": {
+      "title": "Relations",
+      "for": "Relations for",
+      "follows": "Follows",
+      "precedes": "Precedes",
+      "loading": "Loading tasks",
+      "no_task_found": "No tasks found for {query}",
+      "type_to_search": "Start typing to search for a task",
+      "select_task": "Select task",
+      "type": "Relation type"
+    }
   },
   "field": {
     "source": "Source",
     "estimate": "Time estimate",
+    "start_date": "Start date",
     "due_date": "Due date",
     "hour_short": "h",
-    "minute_short": "m"
+    "minute_short": "m",
+    "phase": "Phase",
+    "attachments": "Attachments"
+  },
+  "attachments": {
+    "status": "Status",
+    "name": "Name",
+    "size": "Size",
+    "upload": "Upload",
+    "is_good": "Hash match",
+    "is_bad": "Hash do not match",
+    "is_not_attached": "Not attached",
+    "is_processing": "Calculating hash",
+    "upload_queue": "Upload queue",
+    "create_tmp_url_for": "Create temporary url for:",
+    "tmp_url_created":  "Temporary url created",
+    "copied_to_clipboard": "Copied to clipboard"
   },
   "control": {
     "kanban-board": "Kanban"

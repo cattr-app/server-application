@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Http\Middleware\RegisterModulesEvents;
 use App\Models\Task;
 use App\Models\TaskHistory;
 use App\Models\User;
@@ -34,13 +35,24 @@ class SaveTaskEditHistory implements ShouldQueue
                 continue;
             }
 
-            TaskHistory::create([
+            $new_value = $value;
+            $old_value = $this->original[$key];
+            // because we need to save a string, not id
+            if ($key === 'project_phase_id') {
+                $new_value = $this->task->phase?->name;
+                $old_value = $this->original['_old_phase_name'];
+            }
+
+            $activity = TaskHistory::create([
                 'task_id' => $this->task->id,
                 'user_id' => $this->author->id,
                 'field' => $key,
-                'new_value' => $value,
-                'old_value' => $this->original[$key],
-            ])->updateQuietly(['created_at' => $this->timestamp]);
+                'new_value' => $new_value,
+                'old_value' => $old_value,
+            ]);
+            $activity->updateQuietly(['created_at' => $this->timestamp]);
+            // broadcast activity
+            RegisterModulesEvents::broadcastEvent('tasks_activities', 'create', $activity->load('user'));
         }
     }
 }

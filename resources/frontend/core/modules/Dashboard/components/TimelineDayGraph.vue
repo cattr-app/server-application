@@ -1,27 +1,23 @@
 <template>
-    <div ref="canvasWrapper" class="canvas">
-        <canvas ref="canvas" />
-
+    <div class="canvas-wrapper">
         <div
             v-show="hoverPopup.show && !clickPopup.show"
             :style="{
                 left: `${hoverPopup.x - 30}px`,
-                bottom: `${height - hoverPopup.y + 10}px`,
+                bottom: `${hoverPopup.y}px`,
             }"
             class="popup"
         >
-            <template v-if="hoverPopup.event">
-                <div>
-                    {{ hoverPopup.event.task_name }}
-                    ({{ hoverPopup.event.project_name }})
-                </div>
+            <div v-if="hoverPopup.event">
+                {{ hoverPopup.event.task_name }}
+                ({{ hoverPopup.event.project_name }})
+            </div>
 
-                <div>
-                    {{ formatDuration(hoverPopup.event.duration) }}
-                </div>
-            </template>
+            <div v-if="hoverPopup.event">
+                {{ formatDuration(hoverPopup.event.duration) }}
+            </div>
 
-            <a :style="{ left: `${hoverPopup.borderX}px` }" class="corner" />
+            <a :style="{ left: `${hoverPopup.borderX}px` }" class="corner"></a>
         </div>
 
         <div
@@ -29,12 +25,12 @@
             :data-offset="`${clickPopup.borderX}px`"
             :style="{
                 left: `${clickPopup.x - 30}px`,
-                bottom: `${height - clickPopup.y + 10}px`,
+                bottom: `${clickPopup.y}px`,
             }"
             class="popup"
         >
             <Screenshot
-                v-if="clickPopup.event"
+                v-if="clickPopup.event && screenshotsEnabled"
                 :disableModal="true"
                 :lazyImage="false"
                 :project="{ id: clickPopup.event.project_id, name: clickPopup.event.project_name }"
@@ -70,37 +66,30 @@
             @showNext="showNext"
             @showPrevious="showPrevious"
         />
+        <div ref="canvas" class="canvas" @pointerdown="onDown">
+            <div ref="scrollbarTop" class="scrollbar-top" @scroll="onScroll">
+                <div :style="{ width: `${totalWidth}px` }" />
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
-    import { fabric } from 'fabric';
-    import throttle from 'lodash/throttle';
     import moment from 'moment-timezone';
     import { formatDurationString } from '@/utils/time';
     import Screenshot from '@/components/Screenshot';
     import ScreenshotModal from '@/components/ScreenshotModal';
     import IntervalService from '@/services/resource/time-interval.service';
     import { mapGetters } from 'vuex';
-
-    const fabricObjectOptions = {
-        editable: false,
-        selectable: false,
-        objectCaching: false,
-        hasBorders: false,
-        hasControls: false,
-        hasRotatingPoint: false,
-        cursor: 'default',
-        hoverCursor: 'default',
-    };
+    import { SVG } from '@svgdotjs/svg.js';
 
     const titleHeight = 20;
     const subtitleHeight = 20;
     const timelineHeight = 80;
     const columns = 24;
-
+    const minColumnWidth = 37;
     const popupWidth = 270;
-    const canvasPadding = 24;
+    const canvasPadding = 20;
     const defaultCornerOffset = 15;
 
     export default {
@@ -130,6 +119,7 @@
         computed: {
             ...mapGetters('dashboard', ['tasks', 'intervals']),
             ...mapGetters('user', ['user', 'companyData']),
+            ...mapGetters('screenshots', { screenshotsEnabled: 'enabled' }),
             height() {
                 return timelineHeight + titleHeight + subtitleHeight;
             },
@@ -176,16 +166,12 @@
                     task: null,
                     show: false,
                 },
+                scrollPos: 0,
+                totalWidth: 0,
             };
         },
         mounted() {
-            this.canvas = new fabric.Canvas(this.$refs.canvas, {
-                backgroundColor: '#fff',
-                renderOnAddRemove: false,
-                selection: false,
-                skipOffscreen: true,
-            });
-
+            this.draw = SVG();
             this.onResize();
             window.addEventListener('resize', this.onResize);
             window.addEventListener('mousedown', this.onClick);
@@ -249,81 +235,123 @@
                     }
                 }
             },
-            draw: throttle(function () {
-                this.canvas.clear();
-
-                const width = this.canvas.getWidth();
-                const columnWidth = width / columns;
-
-                // Background
-                this.canvas.add(
-                    new fabric.Rect({
-                        left: 0,
-                        top: titleHeight + subtitleHeight,
-                        width: width - 1,
-                        height: timelineHeight - 1,
-                        rx: 20,
-                        ry: 20,
-                        fill: '#fafafa',
-                        stroke: '#dfe5ed',
-                        strokeWidth: 1,
-                        ...fabricObjectOptions,
-                    }).on('mousedown', () => this.$emit('outsideClick')),
-                );
-
-                if (!this.$refs.canvasWrapper) {
-                    return;
+            canvasWidth() {
+                return this.$refs.canvas.clientWidth;
+            },
+            columnWidth() {
+                return Math.max(minColumnWidth, this.canvasWidth() / columns);
+            },
+            async contentWidth() {
+                await this.$nextTick();
+                this.totalWidth = columns * this.columnWidth();
+                return this.totalWidth;
+            },
+            onDown(e) {
+                this.$refs.canvas.addEventListener('pointermove', this.onMove);
+                this.$refs.canvas.addEventListener('pointerup', this.onUp, { once: true });
+                this.$refs.canvas.addEventListener('pointercancel', this.onCancel, { once: true });
+            },
+            async scrollCanvas(movementX, setScroll = true) {
+                const canvas = this.$refs.canvas;
+                const clientWidth = canvas.clientWidth;
+                const entireWidth = await this.contentWidth();
+                const height = this.height;
+                const newScrollPos = this.scrollPos - movementX;
+                if (newScrollPos <= 0) {
+                    this.scrollPos = 0;
+                } else if (newScrollPos >= entireWidth - clientWidth) {
+                    this.scrollPos = entireWidth - clientWidth;
+                } else {
+                    this.scrollPos = newScrollPos;
                 }
-                const { width: canvasWidth } = this.$refs.canvasWrapper.getBoundingClientRect();
-                const maxLeftOffset = canvasWidth - popupWidth + 2 * canvasPadding;
+                setScroll ? await this.setScroll() : null;
+                this.draw.viewbox(this.scrollPos, 0, clientWidth, height);
+            },
+            async onMove(e) {
+                this.$refs.canvas.setPointerCapture(e.pointerId);
+                await this.scrollCanvas(e.movementX);
+            },
+            onUp(e) {
+                this.$refs.canvas.removeEventListener('pointermove', this.onMove);
+            },
+            onCancel(e) {
+                this.$refs.canvas.removeEventListener('pointermove', this.onMove);
+            },
+            onScroll(e) {
+                this.scrollCanvas(this.scrollPos - this.$refs.scrollbarTop.scrollLeft, false);
+            },
+            async setScroll(x = null) {
+                await this.$nextTick();
+                this.$refs.scrollbarTop.scrollLeft = x ?? this.scrollPos;
+            },
+            drawGrid: async function () {
+                if (typeof this.draw === 'undefined') return;
+                this.draw.clear();
+                const draw = this.draw;
+                // const width = draw.width();
+                const canvasContainer = this.$refs.canvas;
+                const width = canvasContainer.clientWidth;
+                const columnWidth = this.columnWidth();
+                draw.addTo(canvasContainer).size(width, this.height);
+                this.draw.viewbox(0, 0, width, this.height);
+                // Background
+                this.draw
+                    .rect(await this.contentWidth(), timelineHeight - 1)
+                    .move(0, titleHeight + subtitleHeight)
+                    .radius(20)
+                    .fill('#fafafa')
+                    .stroke({ color: '#dfe5ed', width: 1 })
+                    .on('mousedown', () => this.$emit('outsideClick'));
+                const maxLeftOffset = width - popupWidth + 2 * canvasPadding;
                 const minLeftOffset = canvasPadding / 2;
-
+                const clipPath = draw
+                    .rect(await this.contentWidth(), timelineHeight - 1)
+                    .move(0, titleHeight + subtitleHeight)
+                    .radius(20)
+                    .attr({
+                        absolutePositioned: true,
+                    });
+                const squaresGroup = draw.group().clipWith(clipPath);
                 for (let i = 0; i < columns; ++i) {
                     const date = moment().startOf('day').add(i, 'hours');
                     const left = columnWidth * i;
 
                     // Column header - hour
-                    this.canvas.add(
-                        new fabric.Textbox(date.format('h'), {
-                            left,
-                            top: 0,
-                            width: columnWidth,
-                            height: titleHeight,
-                            textAlign: 'center',
-                            fontFamily: 'Nunito, sans-serif',
-                            fontSize: 15,
+                    draw.text(date.format('h'))
+                        .move(left + columnWidth / 2, 0)
+                        .addClass('text-center')
+                        .width(columnWidth)
+                        .height(titleHeight)
+                        .attr({
+                            'text-anchor': 'middle',
+                            'font-family': 'Nunito, sans-serif',
+                            'font-size': 15,
                             fill: '#151941',
-                            ...fabricObjectOptions,
-                        }),
-                    );
+                        });
 
                     // Column header - am/pm
-                    this.canvas.add(
-                        new fabric.Textbox(date.format('A'), {
-                            left,
-                            top: titleHeight,
-                            width: columnWidth,
-                            height: subtitleHeight,
-                            textAlign: 'center',
-                            fontFamily: 'Nunito, sans-serif',
-                            fontSize: 10,
-                            fontWeight: '600',
+                    draw.text(function (add) {
+                        add.tspan(date.format('A')).newLine();
+                    })
+                        .move(left + columnWidth / 2, titleHeight - 5)
+                        .attr({
+                            'text-anchor': 'middle',
+                            'font-family': 'Nunito, sans-serif',
+                            'font-size': 10,
+                            'font-weight': 600,
                             fill: '#b1b1be',
-                            ...fabricObjectOptions,
-                        }),
-                    );
+                        });
 
                     // Vertical grid line
                     if (i > 0) {
-                        this.canvas.add(
-                            new fabric.Line([0, 0, 0, timelineHeight], {
-                                left,
-                                top: titleHeight + subtitleHeight,
-                                stroke: '#dfe5ed',
-                                strokeWidth: 1,
-                                ...fabricObjectOptions,
-                            }),
-                        );
+                        const line = draw
+                            .line(0, 0, 0, timelineHeight)
+                            .move(left, titleHeight + subtitleHeight)
+                            .stroke({
+                                color: '#dfe5ed',
+                                width: 1,
+                            });
+                        squaresGroup.add(line);
                     }
                 }
 
@@ -337,82 +365,99 @@
 
                     const width = ((Math.max(event.duration, 60) + 120) * columnWidth) / 60 / 60;
 
-                    const rect = new fabric.Rect({
-                        left: Math.floor(leftOffset * columnWidth),
-                        top: titleHeight + subtitleHeight + 22,
-                        width,
-                        height: 30,
-                        rx: 3,
-                        ry: 3,
-                        fill: event.is_manual == '1' ? '#c4b52d' : '#2dc48d',
-                        stroke: 'transparent',
-                        strokeWidth: 0,
-                        ...fabricObjectOptions,
-                        cursor: 'pointer',
-                        hoverCursor: 'pointer',
+                    const rectInterval = draw
+                        .rect(width, 30)
+                        .move(Math.floor(leftOffset * columnWidth), titleHeight + subtitleHeight + 22)
+                        .radius(3)
+                        .attr({
+                            'text-anchor': 'inherit',
+                            'font-family': 'Nunito, sans-serif',
+                            'font-size': 15,
+                            'font-weight': 600,
+                            fill: event.is_manual == '1' ? '#c4b52d' : '#2dc48d',
+                        })
+                        .stroke({
+                            color: 'transparent',
+                            width: 0,
+                        })
+                        .css({
+                            cursor: 'pointer',
+                            'pointer-events': 'auto',
+                        })
+                        .width(width)
+                        .height(30);
+
+                    rectInterval.on('mouseover', e => {
+                        const popupY =
+                            document.body.getBoundingClientRect().height - rectInterval.rbox().y + defaultCornerOffset;
+                        const canvasRight = this.$refs.canvas.getBoundingClientRect().right;
+                        const rectMiddleX = rectInterval.rbox().cx;
+                        const minLeft = this.$refs.canvas.getBoundingClientRect().left;
+                        const left =
+                            rectMiddleX > canvasRight
+                                ? canvasRight - defaultCornerOffset / 2
+                                : rectMiddleX < minLeft
+                                  ? minLeft
+                                  : rectMiddleX;
+                        const maxRight = canvasRight - popupWidth + 2 * canvasPadding;
+                        const popupX =
+                            left > maxRight ? maxRight : left <= minLeft ? minLeft + defaultCornerOffset : left;
+                        const arrowX = defaultCornerOffset + left - popupX;
+                        this.hoverPopup = {
+                            show: true,
+                            x: popupX,
+                            y: popupY,
+                            event,
+                            borderX: arrowX,
+                        };
                     });
 
-                    rect.on('mouseover', e => {
-                        if (e.target.left > maxLeftOffset) {
-                            this.hoverPopup = {
-                                show: true,
-                                x: maxLeftOffset,
-                                y: e.target.top,
-                                event,
-                                borderX: defaultCornerOffset + e.target.left - maxLeftOffset,
-                            };
-                        } else {
-                            this.hoverPopup = {
-                                show: true,
-                                x: e.target.left < minLeftOffset ? minLeftOffset : e.target.left,
-                                y: e.target.top,
-                                borderX: defaultCornerOffset,
-                                event,
-                            };
-                        }
-                    });
-
-                    rect.on('mouseout', e => {
+                    rectInterval.on('mouseout', e => {
                         this.hoverPopup = {
                             ...this.hoverPopup,
                             show: false,
                         };
                     });
 
-                    rect.on('mousedown', e => {
+                    rectInterval.on('mousedown', e => {
                         this.$emit('selectedIntervals', event);
+                        const { left: canvasLeft, right: canvasRight } = this.$refs.canvas.getBoundingClientRect();
+                        const rectBox = rectInterval.rbox();
+                        const popupY =
+                            document.body.getBoundingClientRect().height - rectInterval.rbox().y + defaultCornerOffset;
+                        const rectMiddleX = rectBox.cx;
 
-                        if (e.target.left > maxLeftOffset) {
-                            this.clickPopup = {
-                                show: true,
-                                x: maxLeftOffset,
-                                y: e.target.top,
-                                event,
-                                borderX: defaultCornerOffset + e.target.left - maxLeftOffset,
-                            };
-                        } else {
-                            this.clickPopup = {
-                                show: true,
-                                x: e.target.left,
-                                y: e.target.top,
-                                event,
-                                borderX: defaultCornerOffset,
-                            };
-                        }
+                        // Determine initial left position within canvas bounds
+                        const left =
+                            rectMiddleX > canvasRight
+                                ? canvasRight - defaultCornerOffset / 2
+                                : Math.max(rectMiddleX, canvasLeft);
 
-                        e.e.stopPropagation();
+                        // Calculate maximum allowed position for popup's left
+                        const maxRight = canvasRight - popupWidth + 2 * canvasPadding;
+                        const popupX = left > maxRight ? maxRight : Math.max(left, canvasLeft + defaultCornerOffset);
+
+                        // Calculate the position for the arrow in the popup
+                        const arrowX = defaultCornerOffset + left - popupX;
+
+                        this.clickPopup = {
+                            show: true,
+                            x: popupX,
+                            y: popupY,
+                            event,
+                            borderX: arrowX,
+                        };
+                        e.stopPropagation();
                     });
 
-                    this.canvas.add(rect);
+                    draw.add(rectInterval);
                 });
-
-                this.canvas.requestRenderAll();
-            }),
+            },
             onClick(e) {
                 if (
                     (e.target &&
                         e.target.parentElement &&
-                        !e.target.parentElement.classList.contains(this.canvas.wrapperEl.classList) &&
+                        !e.target.parentElement.classList.contains(this.draw.node.classList) &&
                         !e.target.closest('.time-interval-edit-panel') &&
                         !e.target.closest('.screenshot') &&
                         !e.target.closest('.modal') &&
@@ -428,22 +473,12 @@
                     }
                 }
             },
-            onResize: throttle(function () {
-                if (!this.$refs.canvasWrapper) {
-                    return;
-                }
-                const { width } = this.$refs.canvasWrapper.getBoundingClientRect();
-                this.canvas.setWidth(width);
-
-                const height = titleHeight + subtitleHeight + timelineHeight;
-                this.canvas.setHeight(height);
-
-                this.draw();
-            }, 100),
+            onResize: function () {
+                this.drawGrid();
+            },
             async onRemove() {
                 try {
                     await this.intervalService.deleteItem(this.modal.interval.id);
-
                     this.$Notify({
                         type: 'success',
                         title: this.$t('notification.screenshot.delete.success.title'),
@@ -463,56 +498,80 @@
         },
         watch: {
             events() {
-                this.draw();
+                this.drawGrid();
             },
         },
     };
 </script>
 
 <style lang="scss" scoped>
+    .popup {
+        background: #ffffff;
+        border: 0;
+        border-radius: 20px;
+        box-shadow: 0px 7px 64px rgba(0, 0, 0, 0.07);
+        display: block;
+        padding: 10px;
+        position: absolute;
+        text-align: center;
+        width: 270px;
+        z-index: 3;
+        & .corner {
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 10px solid #ffffff;
+            bottom: -10px;
+            content: ' ';
+            display: block;
+            height: 0;
+            left: 15px;
+            position: absolute;
+            width: 0;
+            z-index: 1;
+        }
+    }
     .canvas {
         position: relative;
-
+        user-select: none;
+        touch-action: pan-y;
+        cursor: move;
         &::v-deep canvas {
             box-sizing: content-box;
         }
+    }
+    .scrollbar-top {
+        position: absolute;
+        left: 0;
+        top: -1rem;
+        width: 100%;
+        height: 10px;
+        overflow-x: auto;
+    }
+    .scrollbar-top {
+        & > div {
+            height: 1px;
+        }
 
-        .popup {
-            background: #fff;
-            border: 0;
+        &::-webkit-scrollbar {
+            height: 7px;
+        }
 
-            border-radius: 20px;
+        &::-webkit-scrollbar-track {
+            background: transparent;
+        }
 
-            box-shadow: 0px 7px 64px rgba(0, 0, 0, 0.07);
-            display: block;
+        &::-webkit-scrollbar-button {
+            display: none;
+        }
 
-            padding: 10px;
-
-            position: absolute;
-
-            text-align: center;
-
-            width: 270px;
-
-            z-index: 1;
-
-            & .corner {
-                border-left: 15px solid transparent;
-
-                border-right: 15px solid transparent;
-                border-top: 10px solid #fff;
-
-                bottom: -10px;
-                content: ' ';
-                display: block;
-
-                height: 0;
-
-                position: absolute;
-                width: 0;
-
-                z-index: 1;
-            }
+        &::-webkit-scrollbar-thumb {
+            background: #2e2ef9;
+            border-radius: 3px;
+        }
+    }
+    @media (max-width: 1110px) {
+        .scrollbar-top {
+            top: -0.5rem;
         }
     }
 </style>

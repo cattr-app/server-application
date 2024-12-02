@@ -5,11 +5,12 @@
         </template>
 
         <AppImage
-            v-if="interval && interval.id"
+            v-if="interval && interval.id && screenshotsEnabled"
             class="modal-screenshot"
             :src="getScreenshotPath(interval)"
             :openable="true"
         />
+        <i v-else class="icon icon-camera-off modal-screenshot" />
         <at-progress
             class="screenshot__activity-bar"
             :stroke-width="7"
@@ -140,6 +141,7 @@
         },
         computed: {
             ...mapGetters('user', ['companyData']),
+            ...mapGetters('screenshots', { screenshotsEnabled: 'enabled' }),
         },
         methods: {
             formatDate(value) {
@@ -195,6 +197,14 @@
 
             .at-modal__body {
                 padding: 0;
+                position: relative;
+
+                .icon-camera-off {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    font-size: 200px;
+                }
             }
 
             .at-modal__footer {
@@ -288,6 +298,11 @@
 
         &-duration {
             padding-right: 3em;
+        }
+    }
+    @media (max-width: 500px) {
+        .modal ::v-deep .at-modal__wrapper {
+            align-items: start;
         }
     }
 </style>
