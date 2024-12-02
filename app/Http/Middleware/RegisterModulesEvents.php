@@ -61,6 +61,7 @@ class RegisterModulesEvents
                 $model = $data[0];
             } elseif ($entityType === 'project_groups') {
                 $entityType = 'projects';
+                $action = 'edit';
                 /** @var ProjectGroup $group */
                 $group = $data[0];
                 $model = $group->projects()->get();
