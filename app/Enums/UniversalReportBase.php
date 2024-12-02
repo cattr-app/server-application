@@ -167,9 +167,9 @@ enum UniversalReportBase: string
     {
         $user = request()->user();
         return match($this) {
-            self::PROJECT => $user->projects()->select('id')->whereIn('id', $data_objects)->get()->count() === count($data_objects),
+            self::PROJECT => $user->projects()->select('id')->whereIn('id', $data_objects)->withoutGlobalScopes()->get()->count() === count($data_objects),
             self::USER => '',
-            self::TASK => $user->tasks()->select('id')->whereIn('id', $data_objects)->get()->count() === count($data_objects),
+            self::TASK => $user->tasks()->select('id')->whereIn('id', $data_objects)->withoutGlobalScopes()->get()->count() === count($data_objects),
         };
     }
 
