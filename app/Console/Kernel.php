@@ -6,7 +6,7 @@ use App\Console\Commands\RecreateCronTaskWorkers;
 use App\Console\Commands\FindSusFiles;
 use App\Console\Commands\RotateScreenshots;
 use App\Jobs\ClearExpiredApps;
-use App\Jobs\VerifyAttachmentHash;
+use App\Console\Commands\VerifyAttachments;
 use App\Models\Attachment;
 use Exception;
 use Illuminate\Console\Scheduling\Schedule;
@@ -46,9 +46,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command(RecreateCronTaskWorkers::class)->daily()->runInBackground()->withoutOverlapping();
         
-        $schedule->call(function () {
-            Attachment::lazyById()->each(fn($attachment) => VerifyAttachmentHash::dispatch($attachment));
-        })->daily();
+        $schedule->command(VerifyAttachments::class)->daily()->runInBackground()->withoutOverlapping();
 
         $schedule->command(FindSusFiles::class)->weekly()->runInBackground()->withoutOverlapping();
     }
