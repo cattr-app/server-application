@@ -15,6 +15,35 @@
                     datasets: formatDataset(chart['datasets'][reportId]),
                     labels: period,
                 }"
+                :options="{
+                    scales: {
+                        y: {
+                            ticks: {
+                                callback: function (value, index, ticks) {
+                                    return formatDurationString(value);
+                                },
+                            },
+                        },
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+
+                                    if (context.parsed.y !== null) {
+                                        label += formatDurationString(context.parsed.y);
+                                    }
+
+                                    return label;
+                                },
+                            },
+                        },
+                    },
+                }"
             />
         </div>
     </div>
@@ -24,6 +53,7 @@
     import cloneDeep from 'lodash/cloneDeep';
     import { mapGetters } from 'vuex';
     import { Line as ChartLine } from 'vue-chartjs';
+    import { formatDurationString } from '@/utils/time';
 
     import {
         Chart as ChartJS,
@@ -63,22 +93,22 @@
             ...mapGetters('universalreport', ['selectedBase']),
         },
         methods: {
+            formatDurationString,
             checkDataset(chart) {
                 const dataset = chart['datasets'][this.reportId];
                 if (!dataset) {
                     return true;
                 }
-                chart = this.formatDataset(chart['datasets'][this.reportId]);
-                console.log(chart, 'work');
 
+                chart = this.formatDataset(chart['datasets'][this.reportId]);
                 return typeof chart[0].label !== 'string';
             },
             formatDataset(dataset) {
                 if (typeof dataset === 'undefined') {
                     return [];
                 }
-                let result = cloneDeep(dataset);
 
+                let result = cloneDeep(dataset);
                 if (result?.data ?? false) {
                     result.data = Object.values(dataset.data);
                     return [result];
