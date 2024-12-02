@@ -264,6 +264,7 @@
     "screenshots_state": "Включить скриншоты",
     "members": "Участники",
     "url": "URL",
+    "efficiency": "Коэффициент эффективности сотрудника",
     "statuses": {
       "any": "Все",
       "active": "Активен",

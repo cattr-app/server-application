@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\CalculateEfficiency;
 use App\Console\Commands\RecreateCronTaskWorkers;
 use App\Console\Commands\FindSusFiles;
 use App\Console\Commands\RotateScreenshots;
@@ -47,6 +48,7 @@ class Kernel extends ConsoleKernel
         $schedule->command(RecreateCronTaskWorkers::class)->daily()->runInBackground()->withoutOverlapping();
         
         $schedule->command(VerifyAttachments::class)->daily()->runInBackground()->withoutOverlapping();
+        $schedule->command(CalculateEfficiency::class)->daily()->runInBackground()->withoutOverlapping();
 
         $schedule->command(FindSusFiles::class)->weekly()->runInBackground()->withoutOverlapping();
     }

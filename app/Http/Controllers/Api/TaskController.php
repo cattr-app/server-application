@@ -522,6 +522,20 @@ class TaskController extends ItemController
      */
     public function show(ShowTaskRequest $request): JsonResponse
     {
+        Filter::listen(Filter::getQueryFilterName(), static function ($query) {
+            return $query->withAvg('users as efficiency', 'efficiency');
+        });
+
+        CatEvent::listen(Filter::getAfterActionEventName(), static function (Task $task) {
+            $task->mergeCasts(['forecast_completion_date' => 'date']);
+
+            if ($task->start_date !== null && $task->estimate !== null && $task->efficiency !== null) {
+                $task->forecast_completion_date = $task->start_date->addSeconds($task->estimate * $task->efficiency);
+            } else {
+                $task->forecast_completion_date = null;
+            }
+        });
+
         return $this->_show($request);
     }
 
@@ -693,6 +707,8 @@ class TaskController extends ItemController
      *          "id": 1,
      *          "task_name": "Eveniet non laudantium pariatur quia.",
      *          "project_id": 1,
+     *          "estimate": null,
+     *          "total_spent_time": 0,
      *          "start_date": "2024-10-03",
      *          "due_date": "2024-10-03"
      *        }
@@ -707,7 +723,15 @@ class TaskController extends ItemController
      *      ],
      *      "tasks_by_week": [
      *        {
-     *          "days": [30, 1, 2, 3, 4, 5, 6],
+     *          "days": [
+     *            { "day": 30, "month": 9 },
+     *            { "day": 1, "month": 10 },
+     *            { "day": 2, "month": 10 },
+     *            { "day": 3, "month": 10 },
+     *            { "day": 4, "month": 10 },
+     *            { "day": 5, "month": 10 },
+     *            { "day": 6, "month": 10 }
+     *          ],
      *          "tasks": [
      *            {
      *              "task_id": 1,
@@ -738,9 +762,16 @@ class TaskController extends ItemController
                 'id',
                 'task_name',
                 'project_id',
+                'status_id',
+                'priority_id',
+                'estimate',
                 DB::raw('COALESCE(start_date, due_date) AS start_date'),
                 DB::raw('COALESCE(due_date, start_date) AS due_date'),
             )
+            ->with('status')
+            ->with('priority')
+            ->withAvg('users as efficiency', 'efficiency')
+            ->withSum('workers as total_spent_time', 'duration')
             ->where(static fn(Builder $query) => $query
                 ->whereNotNull('start_date')
                 ->orWhereNotNull('due_date'))
@@ -786,7 +817,10 @@ class TaskController extends ItemController
 
             $weekPeriod = CarbonPeriod::create($date, '1 day', $date->clone()->addDays(7))->excludeEndDate();
             foreach ($weekPeriod as $day) {
-                $tasksByWeek[$week]['days'][] = (int)$day->format('d');
+                $tasksByWeek[$week]['days'][] = [
+                    'day' => (int)$day->format('d'),
+                    'month' => (int)$day->format('m'),
+                ];
             }
         }
 
@@ -794,6 +828,7 @@ class TaskController extends ItemController
             $task->mergeCasts([
                 'start_date' => 'date:' . static::ISO8601_DATE_FORMAT,
                 'due_date' => 'date:' . static::ISO8601_DATE_FORMAT,
+                'forecast_completion_date' => 'date:' . static::ISO8601_DATE_FORMAT,
             ]);
 
             $startDate = $task->start_date->greaterThan($startAt) ? $task->start_date : $startAt;
@@ -811,6 +846,12 @@ class TaskController extends ItemController
                     'start_week_day' => $task->start_date->greaterThan($date) ? $task->start_date->diffInDays($date) : 0,
                     'end_week_day' => $task->due_date->lessThan($date->clone()->addDays(7)) ? $task->due_date->diffInDays($date) : 6,
                 ];
+            }
+
+            if ($task->start_date !== null && $task->estimate !== null && $task->efficiency !== null) {
+                $task->forecast_completion_date = $task->start_date->addSeconds($task->estimate * $task->efficiency);
+            } else {
+                $task->forecast_completion_date = null;
             }
         }
 
