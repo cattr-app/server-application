@@ -41,7 +41,7 @@ export function init(context) {
                     props: { value: data.values.group_parent },
                     on: {
                         input(value) {
-                            data.values.group_parent = value;
+                            Vue.set(data.values, 'group_parent', value);
                             data.values.parent_id = value?.id ?? null;
                         },
                     },
