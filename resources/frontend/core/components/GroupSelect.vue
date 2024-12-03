@@ -18,7 +18,7 @@
                 <span class="option" :class="{ 'option--current': current }">
                     <span class="option__text">
                         <span v-if="depth > 0" class="option__depth">{{ getSpaceByDepth(depth) }}</span>
-                        <span>{{ ucfirst(name) }}</span>
+                        <span class="option__label" :title="ucfirst(name)">{{ ucfirst(name) }}</span>
                         <span @click.stop>
                             <router-link
                                 class="option__link"
@@ -313,6 +313,17 @@
             align-items: center;
             column-gap: 0.3rem;
             z-index: 2;
+        }
+
+        &__text {
+            display: flex;
+        }
+
+        &__label {
+            display: inline-block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding-right: 0.5em;
         }
 
         &__link {
