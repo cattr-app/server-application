@@ -106,10 +106,10 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
                 $resultRow[] = 'Important';
                 $result[] = $resultRow;
                 $resultRow = [];
-                $resultRow[] = $project['name'];
-                $resultRow[] = $project['created_at'];
-                $resultRow[] = $project['description'];
-                $resultRow[] = $project['important'];
+                $resultRow[] = $project['name'] ?? '';
+                $resultRow[] = $project['created_at'] ?? '';
+                $resultRow[] = $project['description'] ?? '';
+                $resultRow[] = $project['important'] ?? '';
                 $result[] = $resultRow;
 
                 $resultRow = [];
