@@ -1,6 +1,6 @@
 export const ModuleConfig = {
     routerPrefix: 'project-report',
-    loadOrder: 20,
+    loadOrder: 40,
     moduleName: 'ProjectReport',
 };
 

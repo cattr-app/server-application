@@ -1,6 +1,6 @@
 export const ModuleConfig = {
     routerPrefix: 'planned-time-report',
-    loadOrder: 21,
+    loadOrder: 40,
     moduleName: 'PlannedTimeReport',
 };
 

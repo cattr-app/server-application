@@ -1,0 +1,21 @@
+{
+  "groups": {
+    "grid-title": "Группы",
+    "crud-title": "Группа"
+  },
+  "navigation": {
+    "project-groups": "По группам"
+  },
+  "message": {
+    "loading_projects": "Загрузка проектов",
+    "project_search_input_placeholder": "введите, чтобы найти проект",
+    "group_search_input_placeholder": "введите, чтобы найти группу"
+  },
+  "field": {
+    "project": "Проект",
+    "members": "Участники",
+    "amount_of_tasks": "Кол-во задач",
+    "parent_group": "Родительская группа",
+    "loading_groups": "Загружаем группы"
+  }
+}

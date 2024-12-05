@@ -6,7 +6,8 @@
     "company_settings": "Настройки компании",
     "logout": "Выход",
     "dropdown": {
-      "reports": "Отчеты"
+      "reports": "Отчеты",
+      "projects": "Проекты"
     }
   },
   "setup": {
@@ -302,7 +303,8 @@
     "minutes": "{value} минут(-ы)",
     "duration": "Продолжительность",
     "duration_value": "{0} по {1}",
-    "web_and_app_monitoring": "Мониторинг приложений"
+    "web_and_app_monitoring": "Мониторинг приложений",
+    "parent_group": "Родительская группа"
   },
   "filter": {
     "enter-single": "Введите {0}",

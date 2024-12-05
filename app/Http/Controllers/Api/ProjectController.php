@@ -323,6 +323,14 @@ class ProjectController extends ItemController
      */
     public function create(CreateProjectRequest $request): JsonResponse
     {
+        Filter::listen(Filter::getRequestFilterName(), static function ($requestData) {
+            if (isset($requestData['group']) && is_array($requestData['group'])) {
+                $requestData['group'] = $requestData['group']['id'];
+            }
+
+            return $requestData;
+        });
+
         CatEvent::listen(Filter::getAfterActionEventName(), static function (Project $project, $requestData) use ($request) {
             if ($request->has('statuses')) {
                 $statuses = [];
@@ -404,6 +412,14 @@ class ProjectController extends ItemController
      */
     public function edit(EditProjectRequest $request): JsonResponse
     {
+        Filter::listen(Filter::getRequestFilterName(), static function ($requestData) {
+            if (isset($requestData['group']) && is_array($requestData['group'])) {
+                $requestData['group'] = $requestData['group']['id'];
+            }
+
+            return $requestData;
+        });
+
         CatEvent::listen(Filter::getAfterActionEventName(), static function (Project $project, $requestData) use ($request) {
             if ($request->has('statuses')) {
                 $statuses = [];

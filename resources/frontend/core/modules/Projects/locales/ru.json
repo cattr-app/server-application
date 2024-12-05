@@ -1,6 +1,6 @@
 {
   "navigation": {
-    "projects": "Проекты"
+    "projects": "Список"
   },
   "projects": {
     "grid-title": "Проекты",
@@ -27,7 +27,14 @@
     "priority_id": "Приоритет",
     "status_id": "Статус",
     "comments": "Комментарии",
-    "project_phase_id": "Стадия"
+    "project_phase_id": "Стадия",
+    "group": "Группа",
+    "no_group_selected": "Группа не выбрана",
+    "loading_groups": "Загружаем группы",
+    "no_groups_found": "Группа {query} не найдена",
+    "fast_create_group": "Создать группу {query}",
+    "to_create_group": "Создать в новом окне",
+    "type_to_search_for_group": "Начните печатать, чтобы найти группу."
   },
   "control": {
     "task-list": "Список задач",

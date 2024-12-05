@@ -27,9 +27,7 @@
                                     </at-button>
                                 </template>
                             </template>
-                            <at-button size="large" class="control-item" @click="$router.go(-1)"
-                                >{{ $t('control.back') }}
-                            </at-button>
+                            <BackButton size="large" class="control-item">{{ $t('control.back') }}</BackButton>
                         </div>
                     </div>
 
@@ -219,13 +217,40 @@
                         </div>
                         <component
                             :is="component"
-                            v-for="(component, index) of pageData.bottomComponents"
+                            v-for="(component, index) of pageData.bottomComponents.components"
                             :key="index"
                             :parent="this"
                         />
-                        <at-button type="primary" :disabled="invalid || isLoading" :loading="isLoading" @click="submit"
-                            >{{ $t('control.save') }}
-                        </at-button>
+                        <div class="bottom-control">
+                            <at-button
+                                type="primary"
+                                :disabled="invalid || isLoading"
+                                :loading="isLoading"
+                                @click="submit"
+                                >{{ $t('control.save') }}</at-button
+                            >
+                            <template
+                                v-if="
+                                    pageData.bottomComponents.pageControls &&
+                                    pageData.bottomComponents.pageControls.length > 0
+                                "
+                            >
+                                <div class="bottom-control__added-items">
+                                    <template v-for="(button, key) of pageData.bottomComponents.pageControls">
+                                        <at-button
+                                            v-if="checkRenderCondition(button)"
+                                            :key="key"
+                                            class="bottom-control__added-items__item"
+                                            :type="button.type || ''"
+                                            :icon="button.icon || ''"
+                                            @click="handleClick(button)"
+                                        >
+                                            {{ $t(button.label) }}
+                                        </at-button>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
                     </validation-observer>
                 </div>
             </div>
@@ -234,6 +259,7 @@
 </template>
 
 <script>
+    import BackButton from '@/components/BackButton';
     import RenderableField from '@/components/RenderableField';
     import ResourceSelect from '@/components/ResourceSelect';
     import { ValidationObserver, ValidationProvider } from 'vee-validate';
@@ -242,6 +268,7 @@
     export default {
         name: 'EditView',
         components: {
+            BackButton,
             RenderableField,
             ResourceSelect,
             ValidationProvider,
@@ -346,8 +373,8 @@
                     if (this.afterSubmitCallback) {
                         this.afterSubmitCallback();
                     } else if (this.pageData.type === 'new') {
-                        this.$router.push({
-                            name: this.$route.meta.navigation.view,
+                        const result = this.$router.push({
+                            name: this.$route.meta.navigation.view ?? this.$route.meta.navigation.edit,
                             params: { id: data[this.service.getIdParam()] },
                         });
                     }
@@ -419,6 +446,14 @@
                             width: 100%;
                         }
                     }
+                }
+            }
+
+            .bottom-control {
+                display: flex;
+
+                &__added-items {
+                    margin-left: auto;
                 }
             }
         }

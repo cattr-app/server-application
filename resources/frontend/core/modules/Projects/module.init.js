@@ -10,6 +10,7 @@ import { store } from '@/store';
 import Statuses from './components/Statuses';
 import Phases from './components/Phases.vue';
 import Vue from 'vue';
+import GroupSelect from '@/components/GroupSelect';
 
 export const ModuleConfig = {
     routerPrefix: 'projects',
@@ -42,7 +43,14 @@ export function init(context) {
     });
 
     const crud = context.createCrud('projects.crud-title', 'projects', ProjectService, {
-        with: ['defaultPriority', 'tasks', 'workers', 'workers.task:id,task_name', 'workers.user:id,full_name'],
+        with: [
+            'defaultPriority',
+            'tasks',
+            'workers',
+            'workers.task:id,task_name',
+            'workers.user:id,full_name',
+            'group:id,name',
+        ],
         withSum: [
             ['workers as total_spent_time', 'duration'],
             ['workers as total_offset', 'offset'],
@@ -64,7 +72,7 @@ export function init(context) {
     crud.edit.addToMetaProperties('permissions', 'projects/edit', crud.edit.getRouterConfig());
 
     const grid = context.createGrid('projects.grid-title', 'projects', ProjectService, {
-        with: ['users', 'defaultPriority', 'statuses', 'can'],
+        with: ['users', 'defaultPriority', 'statuses', 'can', 'group:id,name'],
         withCount: ['tasks'],
     });
     grid.addToMetaProperties('navigation', navigation, grid.getRouterConfig());
@@ -91,6 +99,12 @@ export function init(context) {
         {
             label: 'field.description',
             key: 'description',
+        },
+        {
+            label: 'field.group',
+            key: 'group',
+            render: (h, props) =>
+                h('span', props.currentValue !== null ? props.currentValue.name : i18n.t('field.no_group_selected')),
         },
         {
             key: 'total_spent_time',
@@ -251,6 +265,21 @@ export function init(context) {
             placeholder: 'field.description',
         },
         {
+            label: 'field.group',
+            key: 'group',
+            render(h, data) {
+                return h(GroupSelect, {
+                    props: { value: data.values.group },
+                    on: {
+                        input(value) {
+                            Vue.set(data.values, 'group', value);
+                        },
+                    },
+                });
+            },
+            required: false,
+        },
+        {
             label: 'field.important',
             tooltipValue: 'tooltip.task_important',
             key: 'important',
@@ -356,6 +385,29 @@ export function init(context) {
             },
         },
         {
+            title: 'field.group',
+            key: 'group',
+            render: (h, data) => {
+                if (!data.item.can.update) {
+                    return h('span', data.item.group?.name ?? '');
+                }
+
+                return h(GroupSelect, {
+                    props: { value: data.item.group },
+                    on: {
+                        input(value) {
+                            data.item.group = value;
+
+                            new ProjectService().save({
+                                id: data.item.id,
+                                group: data.item.group?.id ?? null,
+                            });
+                        },
+                    },
+                });
+            },
+        },
+        {
             title: 'field.members',
             key: 'users',
             hideForMobile: true,
@@ -389,6 +441,10 @@ export function init(context) {
         for (const action in handlers) {
             channel.listen(`.projects.${action}`, handlers[action]);
         }
+
+        channel.listen('.projects.edit', function () {
+            store.dispatch('projectGroups/resetGroups');
+        });
     };
 
     grid.addToMetaProperties('gridData.websocketEnterChannel', websocketEnterChannel, grid.getRouterConfig());
@@ -519,8 +575,9 @@ export function init(context) {
     context.addRoute(crud.getRouterConfig());
     context.addRoute(grid.getRouterConfig());
 
-    context.addNavbarEntry({
+    context.addNavbarEntryDropDown({
         label: 'navigation.projects',
+        section: 'navigation.dropdown.projects',
         to: {
             name: 'Projects.crud.projects',
         },
