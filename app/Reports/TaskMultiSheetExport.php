@@ -16,7 +16,7 @@ use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
-class TaskMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHeadings, WithColumnWidths
+class TaskMultiSheetExport extends BaseExport implements FromArray, WithTitle, WithCharts, WithHeadings, WithColumnWidths
 {
     private $data;
     private $task;
@@ -24,6 +24,7 @@ class TaskMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHead
     private $periodDates;
     private $countDate;
     private $reportData;
+
     const COLUMN_FIRST = 'B';
     const OFFSET_CHART = [10, 30];
     const POSITIONS_CHART = [['A8', 'D38'], ['E8', 'H38']];
@@ -44,10 +45,11 @@ class TaskMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHead
     {
         $columnWidths = ['A' => 45];
         $currentColumn = 2;
-        while ($currentColumn <= $this->countDate+1) {
+        while ($currentColumn <= $this->countDate + 1) {
             $columnWidths[Coordinate::stringFromColumnIndex($currentColumn)] = 25;
             $currentColumn++;
         }
+
         return $columnWidths;
     }
     public function array(): array
@@ -56,14 +58,16 @@ class TaskMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHead
             foreach ($this->data['total_spent_time_day']['datasets'] as $taskId => $task) {
                 if ($taskId !== $this->task)
                     continue;
+
                 $resultRow = [];
                 $resultRow[] = $task['label'] ?? '';
                 $this->taskName = $task['label'] ?? '';
                 if (isset($task['data'])) {
                     foreach ($task['data'] as $date => $time) {
-                        $resultRow[] = number_format($time, 2, '.', '');
+                        $resultRow[] = $this->formatDuration($time);
                     }
                 }
+
                 $result[] = $resultRow;
             }
         }
@@ -77,17 +81,20 @@ class TaskMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHead
             $resultRow[] = ' ';
             $resultRow[] = ' ';
             $result[] = $resultRow;
+
             foreach ($this->data['total_spent_time_day_users_separately']['datasets'] as $taskId => $userTask) {
                 if ($taskId !== $this->task)
                     continue;
+
                 foreach ($userTask as $userId => $user) {
                     $resultRow = [];
                     $resultRow[] = $user['label'] ?? '';
                     if (isset($user['data'])) {
                         foreach ($user['data'] as $date => $time) {
-                            $resultRow[] = number_format($time, 2, '.', '');
+                            $resultRow[] = $this->formatDuration($time);
                         }
                     }
+
                     $result[] = $resultRow;
                 }
             }
@@ -110,6 +117,7 @@ class TaskMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHead
                         $resultRow[] = 'Estimate';
                         $resultRow[] = 'Description';
                         $result[] = $resultRow;
+
                         $resultRow = [];
                         $resultRow[] = $taskData['full_name'] ?? '';
                         $resultRow[] = $taskData['email'] ?? '';
@@ -121,18 +129,21 @@ class TaskMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHead
                         $resultRow[] = $userTasks['description'] ?? '';
                         if (isset($taskData['workers_day'])) {
                             foreach ($taskData['workers_day'] as $date => $time) {
-                                $resultRow[] = 'Data ' . $date . ' time: ' . $time;
+                                $resultRow[] = 'Data ' . $date . ' time: ' . $this->formatDuration($time);
                             }
                         }
+
                         $result[] = $resultRow;
                     }
                 }
+
                 $resultRow = [];
                 $resultRow[] = 'Project name';
                 $resultRow[] = 'created at';
                 $resultRow[] = 'description';
                 $resultRow[] = 'important';
                 $result[] = $resultRow;
+
                 $resultRow = [];
                 $resultRow[] = $userTasks['project']['name'] ?? '';
                 $resultRow[] = $userTasks['project']['created_at'] ?? '';
@@ -141,8 +152,10 @@ class TaskMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHead
                 $result[] = $resultRow;
             }
         }
+
         return $result;
     }
+
     public function charts()
     {
         $createDataSeries = function ($label, $categories, $values) {
@@ -171,6 +184,7 @@ class TaskMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHead
                     $series[] = $createDataSeries($label, $categories, $values);
                 }
             }
+
             $plot = new PlotArea(null, $series);
             $legend = new Legend();
             $chart = new Chart($name, new Title($title), $legend, $plot);
@@ -180,6 +194,7 @@ class TaskMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHead
             $chart->setBottomRightOffset($offset[1], $offset[1]);
             return $chart;
         };
+
         $columnNumber = $this->countDate;
         $charts = [];
         $columnLast =  Coordinate::stringFromColumnIndex($columnNumber + 1);
@@ -191,7 +206,7 @@ class TaskMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHead
     {
         return [
             'Task Name',
-            ...collect($this->periodDates)->map(fn ($date) => Carbon::parse($date)->format('y-m-d'))
+            ...collect($this->periodDates)->map(fn($date) => Carbon::parse($date)->format('y-m-d'))
         ];
     }
 
@@ -202,6 +217,7 @@ class TaskMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHead
     {
         return \Str::limit("{$this->task}) $this->taskName", 8);
     }
+
     protected function rowCount()
     {
         $count = 0;
@@ -209,9 +225,11 @@ class TaskMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHead
             foreach ($this->data['total_spent_time_day_users_separately']['datasets'] as $taskId => $userTasks) {
                 if ($taskId !== $this->task)
                     continue;
+
                 $count += count($userTasks);
             }
         }
+
         return $count;
     }
 }
