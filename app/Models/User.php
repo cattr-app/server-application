@@ -248,6 +248,11 @@ class User extends Authenticatable
         return $this->morphMany(Property::class, 'entity');
     }
 
+    public function universalReports(): HasMany
+    {
+        return $this->hasMany(UniversalReport::class, 'user_id');
+    }
+
     /**
      * Send the password reset notification.
      *

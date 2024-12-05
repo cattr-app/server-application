@@ -1,0 +1,149 @@
+{
+    "navigation": {
+        "universal-report": "Универсальный отчет"
+    },
+    "universal-report": {
+        "warning": {
+            "title": "Ошибка",
+            "empty": "Заполните все обязательные поля"
+        },
+        "no-data-available":"Нет данных за указанный период для этого объекта данных.",
+        "object-not-participate":"Возможно этот объект не участвовал в событиях за указанный период.",
+        "generate": "Сформировать",
+        "remove": "Удалить",
+        "save": "Сохранить",
+        "base": "Основные поля",
+        "users": "Поля пользователя",
+        "projects": "Поля проектов",
+        "calculations": "Поля времени в отчете",
+        "report_timezone": "Часовой пояс отчета {0}",
+        "personal-reports": "Личные отчёты",
+        "no-personal-reports": "Нет персональных отчетов.",
+        "no-company-reports": "Нет отчетов компании.",
+        "сreate-select-existing-report": "Создайте новый или выберите существующий отчет.",
+        "company-reports": "Отчёты компании",
+        "tasks": "Задачи",
+        "estimate": "План",
+        "spent": "Факт",
+        "productivity": "Продуктивность",
+        "report_date": "Отчёт создан: {0}",
+        "data_for": "Данные за: {0} - {1}",
+        "create_new_report": "Создать новый отчёт",
+        "user_information": "Информация о пользователе",
+        "project_information": "Информация о проекте",
+        "task_information": "Информация о задаче",
+        "worked_by_day": "Отработано по дням:",
+        "user-label": "Пользователь",
+        "settings-label": "Поля пользователя",
+        "time-label": "Часы пользователя",
+        "create-company": "Создать для компании",
+        "create-personal": "Создать личный"
+    },
+    "field": {
+        "id": "ID",
+        "name": "Название отчёта",
+        "data-objects": {
+            "user": { "1": "Пользователь", "2": "Настройка столбцов отчета", "3": "Настройка столбцов времени" },
+            "project": { "1": "Проект", "2": "Настройка столбцов отчета", "3": "Настройка столбцов времени" },
+            "task": { "1": "Задача", "2": "Настройка столбцов отчета", "3": "Настройка столбцов времени" }
+        },
+        "fields": {
+            "user": {
+                "base": {
+                    "name": "Имя пользователя",
+                    "email": "Эл. почта",
+                    "full_name": "Имя пользователя"
+                },
+                "tasks": {
+                    "task_name": "Название задачи",
+                    "priority": "Приоритет задачи",
+                    "status": "Статус",
+                    "due_date": "Срок выполнения",
+                    "estimate": "Оценка",
+                    "description": "Описание"
+                },
+                "projects": {
+                    "name": "Название проекта",
+                    "created_at": "Дата создания",
+                    "description": "Описание",
+                    "important": "Важность"
+                },
+                "calculations": {
+                    "total_spent_time": "Всего отработано пользователем",
+                    "total_spent_time_by_day": "Общее время, затраченное за день"
+                },
+                "charts": {
+                    "total_spent_time_day": "Всего отработано пользоваетелем",
+                    "total_spent_time_day_and_tasks": "Часов по задачам",
+                    "total_spent_time_day_and_projects": "Часов по проектам"
+                }
+            },
+            "project": {
+                "base": {
+                    "name": "Название проекта",
+                    "created_at": "Дата создания",
+                    "description": "Описание",
+                    "important": "Важность"
+                },
+                "tasks": {
+                    "task_name": "Название задачи",
+                    "priority": "Приоритет задачи",
+                    "status": "Статус",
+                    "due_date": "Срок выполнения",
+                    "estimate": "Оценка",
+                    "description": "Описание"
+                },
+                "users": {
+                    "name": "Имя пользователя",
+                    "email": "Эл. почта",
+                    "full_name": "Имя пользователя"
+                },
+                "calculations": {
+                    "total_spent_time": "Общее затраченное время",
+                    "total_spent_time_by_day": "Общее время, затраченное за день",
+                    "total_spent_time_by_user": "Общее время, затраченное на одного пользователя",
+                    "total_spent_time_by_day_and_user": "Общее время, затраченное пользователем за день"
+                },
+                "charts": {
+                    "total_spent_time": "Работа всех пользователей",
+                    "total_spent_time_users_separately": "Работа всех пользователей по отдельности",
+                    "total_spent_time_day": "Работа всех пользователей",
+                    "total_spent_time_day_and_users_separately": "Работа всех пользователей по отдельности"
+                }
+            },
+            "task": {
+                "base": {
+                    "task_name": "Название задачи",
+                    "priority": "Приоритет задачи",
+                    "status": "Статус",
+                    "due_date": "Срок выполнения",
+                    "estimate": "Оценка",
+                    "description": "Описание"
+                },
+                "users": {
+                    "name": "Имя пользователя",
+                    "email": "Эл. почта",
+                    "full_name": "Имя пользователя"
+                },
+                "projects": {
+                    "name": "Название проекта",
+                    "created_at": "Дата создания",
+                    "description": "Описание",
+                    "important": "Важность"
+                },
+                "calculations": {
+                    "total_spent_time": "Общее затраченное время",
+                    "total_spent_time_by_day": "Общее время, затраченное за день",
+                    "total_spent_time_by_user": "Общее время, затраченное на одного пользователя",
+                    "total_spent_time_by_day_and_user": "Общее время, затраченное пользователем за день"
+                },
+                "charts": {
+                    "worked_all_users": "Работа всех пользователей",
+                    "worked_all_users_separately": "Работа всех пользователей по отдельности",
+                    "total_spent_time_day": "Работа всех пользователей",
+                    "total_spent_time_day_users_separately": "Работа всех пользователей по отдельности"
+                }
+            }
+        }
+    }
+}

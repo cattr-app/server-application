@@ -197,6 +197,7 @@
     "select_all_open": "Select All Open",
     "select_all_closed": "Select All Closed",
     "user_selected": "No users selected | 1 user selected | {count} users selected",
+    "element_selected": "No elements selected | 1 element selected | {count} elements selected",
     "project_selected": "No projects selected | 1 project selected | {count} projects selected",
     "project_selected_all": "All projects selected",
     "status_selected": "No statuses selected | 1 status selected | {count} statuses selected",
@@ -242,7 +243,9 @@
     "default_role": "Default Role",
     "project_roles": "Project Roles",
     "task": "Task",
+    "tasks": "Tasks",
     "project": "Project",
+    "projects": "Projects",
     "priority": "Priority",
     "created_at": "Created",
     "updated_at": "Last edit",
@@ -417,6 +420,10 @@
         "success": {
           "title": "Success",
           "message": "Record was successfully deleted"
+        },
+        "error": {
+          "title": "Error",
+          "message": "Failed to destroy the report"
         }
       }
     },
