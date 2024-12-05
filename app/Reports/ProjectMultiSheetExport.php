@@ -17,7 +17,7 @@ use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
-class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHeadings, WithColumnWidths
+class ProjectMultiSheetExport extends BaseExport implements FromArray, WithTitle, WithCharts, WithHeadings, WithColumnWidths
 {
     private $data;
     private $project;
@@ -27,6 +27,7 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
     private $reportData;
     private $showTasksChart;
     private $showUsersChart;
+
     const COLUMN_FIRST = 'B';
     const OFFSET_CHART = [10, 30];
     const POSITIONS_CHART = [['A8', 'D38'], ['E8', 'H38']];
@@ -51,25 +52,30 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
             $columnWidths[Coordinate::stringFromColumnIndex($currentColumn)] = 25;
             $currentColumn++;
         }
+
         return $columnWidths;
     }
+
     public function array(): array
     {
         if (isset($this->data['total_spent_time_day']['datasets'])) {
             foreach ($this->data['total_spent_time_day']['datasets'] as $projectId => $project) {
                 if ($projectId !== $this->project)
                     continue;
+
                 $resultRow = [];
                 $resultRow[] = $project['label'] ?? '';
                 $this->projectName = $project['label'] ?? '';
                 if (isset($project['data'])) {
                     foreach ($project['data'] as $date => $time) {
-                        $resultRow[] = number_format($time, 2, '.', '');
+                        $resultRow[] = $this->formatDuration($time);
                     }
                 }
+
                 $result[] = $resultRow;
             }
         }
+
         if (isset($this->data['total_spent_time_day_and_users_separately']['datasets'])) {
             $resultRow = [];
             $resultRow[] = 'user name';
@@ -80,6 +86,7 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
             $resultRow[] = ' ';
             $resultRow[] = ' ';
             $result[] = $resultRow;
+
             foreach ($this->data['total_spent_time_day_and_users_separately']['datasets'] as $projectId => $userTask) {
                 if ($projectId !== $this->project)
                     continue;
@@ -88,13 +95,15 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
                     $resultRow[] = $user['label'] ?? '';
                     if (isset($user['data'])) {
                         foreach ($user['data'] as $date => $time) {
-                            $resultRow[] = number_format($time, 2, '.', '');
+                            $resultRow[] = $this->formatDuration($time);
                         }
                     }
+
                     $result[] = $resultRow;
                 }
             }
         }
+
         if (isset($this->reportData)) {
             foreach ($this->reportData as $projectId => $project) {
                 if ($projectId !== $this->project)
@@ -105,6 +114,7 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
                 $resultRow[] = 'Description';
                 $resultRow[] = 'Important';
                 $result[] = $resultRow;
+
                 $resultRow = [];
                 $resultRow[] = $project['name'] ?? '';
                 $resultRow[] = $project['created_at'] ?? '';
@@ -120,6 +130,7 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
                 $resultRow[] = 'Time estimat';
                 $resultRow[] = 'Descriptione';
                 $result[] = $resultRow;
+
                 if (isset($project['tasks'])) {
                     foreach ($project['tasks'] as $taskId => $task) {
                         $resultRow = [];
@@ -139,6 +150,7 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
                     $resultRow[] = 'User Email';
                     $resultRow[] = 'Total time';
                     $result[] = $resultRow;
+
                     foreach ($projectTasks['users'] as $taskId => $user) {
                         $resultRow = [];
                         $resultRow[] = $user['full_name'] ?? '';
@@ -148,13 +160,16 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
                             foreach ($user['workers_day'] as $date => $time)
                                 $resultRow[] = 'Data ' . $date . ' time: ' . $time;
                         }
+
                         $result[] = $resultRow;
                     }
                 }
             }
         }
+
         return $result;
     }
+
     public function charts()
     {
         $createDataSeries = function ($label, $categories, $values) {
@@ -183,6 +198,7 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
                     $series[] = $createDataSeries($label, $categories, $values);
                 }
             }
+
             $plot = new PlotArea(null, $series);
             $legend = new Legend();
             $chart = new Chart($name, new Title($title), $legend, $plot);
@@ -199,18 +215,21 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
         $rowCounts = $this->rowCount();
         if ($this->showTasksChart)
             $charts[] = $createChart(static::TEXT_USER, static::TEXT_USER, static::POSITIONS_CHART[0],  static::OFFSET_CHART, static::COLUMN_FIRST, $columnLast, [], $columnNumber);
+
         if ($this->showUsersChart)
             $charts[] = $createChart(static::TEXT_USER_INDIVIDUALLY, static::TEXT_USER_INDIVIDUALLY, static::POSITIONS_CHART[1],  static::OFFSET_CHART, static::COLUMN_FIRST, $columnLast, [4, $rowCounts + 4], $columnNumber);
 
         return $charts;
     }
+
     public function headings(): array
     {
         return [
             'Project Name',
-            ...collect($this->periodDates)->map(fn ($date) => Carbon::parse($date)->format('y-m-d'))
+            ...collect($this->periodDates)->map(fn($date) => Carbon::parse($date)->format('y-m-d'))
         ];
     }
+
     protected function rowCount()
     {
         $count = 0;
@@ -223,11 +242,13 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
                 if ($projectId !== $this->project) {
                     continue;
                 }
+
                 $count += count($userTasks);
             }
         }
         return $count;
     }
+
     /**
      * @return string
      */
