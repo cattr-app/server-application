@@ -74,10 +74,21 @@ spec:
         - name: nginx-run
           emptyDir: {}
         - name: app-screenshots
-          {{- if eq .Values.app.persistence.enabled "true" }}
+          {{- if eq .Values.app.persistence.screenshots.enabled "true" }}
           persistentVolumeClaim:
-            {{- if not (empty .Values.app.persistence.existingClaim) }}
-            claimName: {{ .Values.app.persistence.existingClaim }}
+            {{- if not (empty .Values.app.persistence.screenshots.existingClaim) }}
+            claimName: {{ .Values.app.persistence.screenshots.existingClaim }}
+            {{- else }}
+            claimName: {{ .Release.Name }}-pvc
+            {{- end }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: app-attachments
+          {{- if eq .Values.app.persistence.attachments.enabled "true" }}
+          persistentVolumeClaim:
+            {{- if not (empty .Values.app.persistence.attachments.existingClaim) }}
+            claimName: {{ .Values.app.persistence.attachments.existingClaim }}
             {{- else }}
             claimName: {{ .Release.Name }}-pvc
             {{- end }}
