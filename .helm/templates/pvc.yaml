@@ -1,0 +1,15 @@
+{{- if empty .Values.app.persistence.existingClaim }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: cattr-app
+  name: {{ .Release.Name }}-pvc
+spec:
+  storageClassName: {{ .Values.app.persistence.storageClass }}
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.app.persistence.size }}
+{{- end }}
