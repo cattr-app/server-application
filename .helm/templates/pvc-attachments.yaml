@@ -1,0 +1,15 @@
+{{- if empty .Values.app.persistence.attachments.existingClaim }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: cattr-app
+  name: {{ .Release.Name }}-pvc-attachments
+spec:
+  storageClassName: {{ .Values.app.persistence.attachments.storageClass }}
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.app.persistence.attachments.size }}
+{{- end }}

@@ -79,7 +79,7 @@ spec:
             {{- if not (empty .Values.app.persistence.screenshots.existingClaim) }}
             claimName: {{ .Values.app.persistence.screenshots.existingClaim }}
             {{- else }}
-            claimName: {{ .Release.Name }}-pvc
+            claimName: {{ .Release.Name }}-pvc-screenshots
             {{- end }}
           {{- else }}
           emptyDir: {}
@@ -90,7 +90,7 @@ spec:
             {{- if not (empty .Values.app.persistence.attachments.existingClaim) }}
             claimName: {{ .Values.app.persistence.attachments.existingClaim }}
             {{- else }}
-            claimName: {{ .Release.Name }}-pvc
+            claimName: {{ .Release.Name }}-pvc-attachments
             {{- end }}
           {{- else }}
           emptyDir: {}
