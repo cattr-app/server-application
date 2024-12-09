@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+data:
+  LOG_CHANNEL: "stderr"
+  LOG_LEVEL: "debug"
+  {{- range $key, $val := .Values.app.env }}
+  "{{ $key }}": "{{ $val }}"
+  {{- end }}

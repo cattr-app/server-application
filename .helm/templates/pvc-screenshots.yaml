@@ -1,0 +1,15 @@
+{{- if empty .Values.app.persistence.screenshots.existingClaim }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: cattr-app
+  name: {{ .Release.Name }}-pvc-screenshots
+spec:
+  storageClassName: {{ .Values.app.persistence.screenshots.storageClass }}
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.app.persistence.screenshots.size }}
+{{- end }}

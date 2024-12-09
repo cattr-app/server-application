@@ -2,6 +2,7 @@
 
 use App\Enums\ScreenshotsState;
 use App\Helpers\Version;
+use Arquivei\LaravelPrometheusExporter\PrometheusServiceProvider;
 use Illuminate\Support\Facades\Facade;
 
 return [
@@ -67,6 +68,7 @@ return [
 
         Intervention\Image\ImageServiceProvider::class,
         Sentry\Laravel\ServiceProvider::class,
+        PrometheusServiceProvider::class,
 
         /*
          * Application Service Providers...

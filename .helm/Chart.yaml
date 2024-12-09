@@ -1,0 +1,19 @@
+name: cattr-server
+description: A Helm Chart for Cattr Server
+version: 0.0.1
+apiVersion: v2
+keywords:
+  - cattr
+  - management
+  - time-tracker
+  - efficiency
+  - laravel
+  - vue
+sources:
+  - https://git.amazingcat.net/cattr/core/app
+home: https://cattr.app/
+dependencies:
+  - name: mysql
+    version: 11.1.9
+    repository: https://charts.bitnami.com/bitnami
+    condition: mysql.asChart,global.mysql.asChart

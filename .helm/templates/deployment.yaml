@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-web
+spec:
+  replicas: {{ .Values.app.replicas | default 2 }}
+  revisionHistoryLimit: {{ .Values.app.revisionHistoryLimit | default 2 }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Release.Name }}-web
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Release.Name }}-web
+    spec:
+      containers:
+        - name: app
+          imagePullPolicy: {{.Values.app.image.pullPolicy}}
+          image: {{- printf " %s/%s:%s" .Values.app.image.registry .Values.app.image.repository .Values.app.image.tag }}
+          ports:
+            - containerPort: 80
+              name: http-web-svc
+              protocol: TCP
+          env:
+            - name: APP_ENV
+              value: {{ .Values.app.environment | default "dev" | quote }}
+            - name: S6_CMD_WAIT_FOR_SERVICES_MAXTIME
+              value: "180000"
+          volumeMounts:
+            - mountPath: /app/storage/app/screenshots
+              name: app-screenshots
+            - mountPath: /app/bootstrap/cache
+              name: bootstrap-cache
+            - mountPath: /tmp
+              name: app-tmp
+            - mountPath: /run
+              name: app-run
+            - mountPath: /var/lib/nginx/tmp
+              name: nginx-tmp
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-configmap
+            - secretRef:
+                name: {{ .Release.Name }}-secret
+          startupProbe:
+            exec:
+              command: ["php82", "artisan", "octane:status"]
+            failureThreshold: 60
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http-web-svc
+            failureThreshold: 3
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http-web-svc
+            failureThreshold: 3
+            successThreshold: 1
+            periodSeconds: 15
+      volumes:
+        - name: bootstrap-cache
+          emptyDir: {}
+        - name: app-tmp
+          emptyDir: {}
+        - name: storage-framework
+          emptyDir: {}
+        - name: app-run
+          emptyDir: {}
+        - name: nginx-tmp
+          emptyDir: {}
+        - name: nginx-run
+          emptyDir: {}
+        - name: app-screenshots
+          {{- if eq .Values.app.persistence.screenshots.enabled "true" }}
+          persistentVolumeClaim:
+            {{- if not (empty .Values.app.persistence.screenshots.existingClaim) }}
+            claimName: {{ .Values.app.persistence.screenshots.existingClaim }}
+            {{- else }}
+            claimName: {{ .Release.Name }}-pvc-screenshots
+            {{- end }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: app-attachments
+          {{- if eq .Values.app.persistence.attachments.enabled "true" }}
+          persistentVolumeClaim:
+            {{- if not (empty .Values.app.persistence.attachments.existingClaim) }}
+            claimName: {{ .Values.app.persistence.attachments.existingClaim }}
+            {{- else }}
+            claimName: {{ .Release.Name }}-pvc-attachments
+            {{- end }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}

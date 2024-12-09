@@ -1,0 +1,53 @@
+mysql:
+  asChart: false
+
+  auth:
+    database: "cattr"
+    username: "cattr"
+    password: "password"
+
+app:
+  key: ""
+  replicas: 1
+  revisionHistoryLimit: 2
+  environment: "dev"
+  persistence:
+    - screenshots
+        enabled: "true"
+        existingClaim: ""
+        storageClass: ""
+        accessModes:
+          - ReadWriteMany
+        size: 10Gi
+    - attachments
+        enabled: "true"
+        existingClaim: ""
+        storageClass: ""
+        accessModes:
+          - ReadWriteMany
+        size: 10Gi
+  env:
+    DB_HOST: "db"
+    DB_DATABASE: "cattr"
+    DB_USERNAME: "cattr"
+    DB_PASSWORD: "password"
+    APP_ADMIN_EMAIL: "admin@cattr.app"
+    APP_ADMIN_PASSWORD: "password"
+    APP_ADMIN_NAME: "Admin"
+  service:
+    type: ClusterIP
+    clusterIP: ""
+    loadBalancerIP: ""
+    externalTrafficPolicy: Cluster
+    nodePort: 80
+    port: 80
+  image:
+    registry: registry.git.amazingcat.net
+    repository: cattr/core/app
+    tag: v4.0.0-RC49
+    pullPolicy: IfNotPresent
+
+ingress:
+  enabled: false
+  host: ""
+  class: ""

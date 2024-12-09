@@ -41,7 +41,8 @@
     "sentry/sentry-laravel": "^4.1",
     "spatie/temporary-directory": "^2.2",
     "staudenmeir/laravel-adjacency-list": "^1.19",
-    "wikimedia/composer-merge-plugin": "^2.0"
+    "wikimedia/composer-merge-plugin": "^2.0",
+    "vermorag/laravel-prometheus-exporter": "^4.1"
   },
   "require-dev": {
     "barryvdh/laravel-ide-helper": "^2.13",
