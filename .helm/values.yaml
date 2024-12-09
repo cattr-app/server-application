@@ -12,14 +12,14 @@ app:
   revisionHistoryLimit: 2
   environment: "dev"
   persistence:
-    - screenshots
+    screenshots:
         enabled: "true"
         existingClaim: ""
         storageClass: ""
         accessModes:
           - ReadWriteMany
         size: 10Gi
-    - attachments
+    attachments:
         enabled: "true"
         existingClaim: ""
         storageClass: ""
