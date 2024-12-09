@@ -12,12 +12,20 @@ app:
   revisionHistoryLimit: 2
   environment: "dev"
   persistence:
-    enabled: "true"
-    existingClaim: ""
-    storageClass: ""
-    accessModes:
-      - ReadWriteMany
-    size: 10Gi
+    - screenshots
+        enabled: "true"
+        existingClaim: ""
+        storageClass: ""
+        accessModes:
+          - ReadWriteMany
+        size: 10Gi
+    - attachments
+        enabled: "true"
+        existingClaim: ""
+        storageClass: ""
+        accessModes:
+          - ReadWriteMany
+        size: 10Gi
   env:
     DB_HOST: "db"
     DB_DATABASE: "cattr"
