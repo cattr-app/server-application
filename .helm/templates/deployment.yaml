@@ -29,6 +29,8 @@ spec:
           volumeMounts:
             - mountPath: /app/storage/app/screenshots
               name: app-screenshots
+            - mountPath: /app/storage/app/attachments
+              name: app-attachments
             - mountPath: /app/bootstrap/cache
               name: bootstrap-cache
             - mountPath: /tmp
