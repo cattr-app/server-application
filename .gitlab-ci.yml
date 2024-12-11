@@ -3,9 +3,9 @@ variables:
 
 stages:
   - build
+  - pages
   - test
   - release
-  - pages
   - deploy
 
 sast:
