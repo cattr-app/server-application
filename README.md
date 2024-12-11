@@ -12,7 +12,7 @@ your team's performance straight to the top.
 The demo app is available here: [demo.cattr.app](https://demo.cattr.app) 
 
 ## Install Cattr
-[Installation manual](https://docs.cattr.app/#/en/advanced/) on the documentation website.
+[Installation manual](https://docs.cattr.app/#/en/getting-started/?id=requirements) on the documentation website.
 
 ```
 composer install
@@ -52,7 +52,7 @@ composer dumperd
 
 ## Links
 
-https://github.com/cattr-app/desktop-application – Cattr Desktop Application. You can also download the built app for
+https://git.amazingcat.net/cattr/desktop/desktop-application – Cattr Desktop Application. You can also download the built app for
 any OS from the [official site](https://cattr.app/desktop/).
 
 ### Documentation
@@ -63,5 +63,5 @@ Checkout the [Getting Started](https://docs.cattr.app/#/en/getting-started/) pag
 
 ### Questions
 
-For questions and support please use the [official forum](https://community.cattr.app). 
+For questions and support please use the [Github Discussions](https://github.com/orgs/cattr-app/discussions). 
 
