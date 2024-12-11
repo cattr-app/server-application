@@ -3,6 +3,9 @@ Cattr is an open-source time tracking solution, designed to be flawlessly integr
 Superpowered with features like built-in screenshot capture and activity detection, it's a great instrument to boost 
 your team's performance straight to the top.
 
+#### We have our own [Container Registry](https://git.amazingcat.net/cattr/core/app/container_registry/9?orderBy=NAME&sort=desc), the images are hosted on GitLab
+
+
 ### Screenshots
 |           Dashboard           |           Project report           |
 |:-----------------------------:|:----------------------------------:|
