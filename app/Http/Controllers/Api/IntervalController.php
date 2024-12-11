@@ -488,6 +488,7 @@ class IntervalController extends ItemController
      * @apiParam {String}   end_at            Interval time end
      * @apiParam {String}   timezone          Interval time end
      * @apiParam {Boolean}  is_manual         Indicates whether the time was logged manually (true) or automatically
+     * @apiParam {File}     screenshot        Image
      *
      * @apiParamExample {json} Request Example
      * {
