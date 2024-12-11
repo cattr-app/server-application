@@ -10,7 +10,7 @@ app:
   key: ""
   replicas: 1
   revisionHistoryLimit: 2
-  environment: "dev"
+  environment: "production"
   persistence:
     screenshots:
         enabled: "true"
