@@ -56,7 +56,7 @@
                         </at-tab-pane>
                     </at-tabs>
                     <div><a class="about__link" href="https://cattr.app">cattr.app</a></div>
-                    <div><a class="about__link" href="https://community.cattr.app">community</a></div>
+                    <div><a class="about__link" href="https://github.com/orgs/cattr-app/discussions">community</a></div>
                 </div>
                 <!-- /.at-container__inner -->
             </div>
