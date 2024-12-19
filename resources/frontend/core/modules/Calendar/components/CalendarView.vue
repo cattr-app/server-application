@@ -231,14 +231,14 @@
 
                     group.rect(`100%`, cellHeight).move(0, verticalOffset).fill(backgroundColor).stroke(borderColor);
 
-                    const link = group.link(`/tasks/view/${task.id}`);
-
                     const taskHorizontalPadding = 0.2;
                     const taskVerticalPadding = 3;
 
                     const popupWidth = 420;
                     const popupHeight = 220;
-
+                    const onClick = () => {
+                        this.$router.push(`/tasks/view/${task.id}`);
+                    };
                     const onMouseOver = event => {
                         const rectBBox = rect.bbox();
                         const popupX =
@@ -267,18 +267,23 @@
                         };
                     };
 
-                    const rect = link
+                    const rect = group
                         .rect(`${width - 2 * taskHorizontalPadding}%`, cellHeight - 2 * taskVerticalPadding)
                         .move(`${horizontalOffset + taskHorizontalPadding}%`, verticalOffset + taskVerticalPadding)
                         .fill(blockColor)
                         .stroke(borderColor)
-                        .on('mouseover', onMouseOver)
-                        .on('mouseout', onMouseOut);
+                        .on('mouseover', event => {
+                            onMouseOver(event);
+                            event.target.style.cursor = 'pointer';
+                        })
+                        .on('mouseout', onMouseOut)
+                        .on('click', onClick);
 
                     let pxOffset = 0;
                     if (new Date(task.due_date).getTime() + msInDay < new Date().getTime()) {
                         pxOffset += 2 * taskVerticalPadding;
-                        link.rect(cellHeight - 4 * taskVerticalPadding, cellHeight - 4 * taskVerticalPadding)
+                        group
+                            .rect(cellHeight - 4 * taskVerticalPadding, cellHeight - 4 * taskVerticalPadding)
                             .move(
                                 `${horizontalOffset + taskHorizontalPadding}%`,
                                 verticalOffset + 2 * taskVerticalPadding,
@@ -288,15 +293,20 @@
                             .stroke(borderColor)
                             .rx(4)
                             .ry(4)
-                            .on('mouseover', onMouseOver)
-                            .on('mouseout', onMouseOut);
+                            .on('mouseover', event => {
+                                onMouseOver(event);
+                                event.target.style.cursor = 'pointer';
+                            })
+                            .on('mouseout', onMouseOut)
+                            .on('click', onClick);
 
                         pxOffset += cellHeight - 4 * taskVerticalPadding;
                     }
 
                     if (task.estimate !== null && Number(task.total_spent_time) > Number(task.estimate)) {
                         pxOffset += 2 * taskVerticalPadding;
-                        link.rect(cellHeight - 4 * taskVerticalPadding, cellHeight - 4 * taskVerticalPadding)
+                        group
+                            .rect(cellHeight - 4 * taskVerticalPadding, cellHeight - 4 * taskVerticalPadding)
                             .move(
                                 `${horizontalOffset + taskHorizontalPadding}%`,
                                 verticalOffset + 2 * taskVerticalPadding,
@@ -306,21 +316,29 @@
                             .stroke(borderColor)
                             .rx(4)
                             .ry(4)
-                            .on('mouseover', onMouseOver)
-                            .on('mouseout', onMouseOut);
+                            .on('mouseover', event => {
+                                onMouseOver(event);
+                                event.target.style.cursor = 'pointer';
+                            })
+                            .on('mouseout', onMouseOut)
+                            .on('click', onClick);
 
                         pxOffset += cellHeight - 4 * taskVerticalPadding;
                     }
 
-                    link.text(add => add.tspan(task.task_name).dmove(8, 0))
+                    group
+                        .text(add => add.tspan(task.task_name).dmove(8, 0))
                         .font({ anchor: 'start', size: 16 })
                         .amove(`${horizontalOffset + taskHorizontalPadding}%`, verticalOffset + cellHeight / 2)
                         .transform({ translateX: pxOffset })
                         .fill(textColor)
                         .clipWith(rect.clone())
-                        .on('mouseover', onMouseOver)
-                        .on('mouseout', onMouseOut);
-
+                        .on('mouseover', event => {
+                            onMouseOver(event);
+                            event.target.style.cursor = 'pointer';
+                        })
+                        .on('mouseout', onMouseOut)
+                        .on('click', onClick);
                     verticalOffset += cellHeight;
                 };
 
