@@ -11,7 +11,7 @@
             @input="onChange"
         >
             <li v-if="showSelectAll" class="at-select__option" @click="selectAll()">
-                {{ $t('control.select_all') }}
+                {{ allOptionsSelected ? $t('control.deselect_all') : $t('control.select_all') }}
             </li>
             <slot name="before-options"></slot>
             <at-option
@@ -139,12 +139,16 @@
         },
         methods: {
             selectAll(predicate = () => true) {
-                console.log(this.$refs.select);
-                const query = this.$refs.select.query.toUpperCase();
-                this.model = this.options
-                    .filter(({ name }) => name.toUpperCase().indexOf(query) !== -1)
-                    .filter(predicate)
-                    .map(({ id }) => id);
+                if (this.allOptionsSelected) {
+                    this.model = [];
+                } else {
+                    // console.log(this.$refs.select);
+                    const query = this.$refs.select.query.toUpperCase();
+                    this.model = this.options
+                        .filter(({ name }) => name.toUpperCase().indexOf(query) !== -1)
+                        .filter(predicate)
+                        .map(({ id }) => id);
+                }
             },
             clearSelect() {
                 this.$emit('input', []);
@@ -179,7 +183,7 @@
                 return this.model.length;
             },
             allOptionsSelected() {
-                return this.options.length === this.selectionAmount;
+                return this.options.length > 0 && this.options.length === this.selectionAmount;
             },
             placeholderText() {
                 const i18nKey = this.placeholder + (this.allOptionsSelected ? '_all' : '');

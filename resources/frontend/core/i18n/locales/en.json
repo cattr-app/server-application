@@ -192,6 +192,7 @@
     "no": "No",
     "back": "Back",
     "submit": "Submit",
+    "deselect_all": "Deselect All",
     "select_all": "Select All",
     "clear_all": "Clear All",
     "select_all_open": "Select All Open",
