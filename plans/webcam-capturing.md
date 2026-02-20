@@ -59,7 +59,7 @@ Migrations should follow the existing screenshots state migrations.
 ## 4) Offline upload flow
 
 ### 4.1 Offline intervals metadata
-- [ ] Include a `webcam_screenshot_id` in offline interval payloads when webcam is present.
+- [x] Include a `webcam_screenshot_id` in offline interval payloads when webcam is present.
 
 ### 4.2 Offline screenshot upload
 - [ ] Add a webcam equivalent to `uploadOfflineScreenshots`:

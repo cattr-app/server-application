@@ -771,7 +771,7 @@ class IntervalController extends ItemController
             __('File contains 0 intervals')
         );
 
-        $user = User::whereId($intervals[0]['user_id'])->first(['id', 'email', 'full_name', 'screenshots_state']);
+        $user = User::whereId($intervals[0]['user_id'])->first(['id', 'email', 'full_name', 'screenshots_state', 'webcam_state']);
 
         abort_if(
             $user === null,
@@ -789,13 +789,18 @@ class IntervalController extends ItemController
             ],
         );
 
-        $tasksScreenshotsState = Task::with('project:id,screenshots_state')
+        $tasksWithProjects = Task::with('project:id,screenshots_state,webcam_state')
             ->whereIn('id', collect($intervals)->pluck('task_id'))
             ->select(['id', 'project_id'])
-            ->get()
+            ->get();
+        $tasksScreenshotsState = $tasksWithProjects
             ->mapWithKeys(fn($item)=>[$item->id => $item->project->screenshots_state])
             ->toArray();
+        $tasksWebcamState = $tasksWithProjects
+            ->mapWithKeys(fn($item) => [$item->id => $item->project->webcam_state])
+            ->toArray();
         $globalScreenshotsState = ScreenshotsState::withGlobalOverrides(null) ?? ScreenshotsState::OPTIONAL;
+        $globalWebcamState = WebcamState::withGlobalOverrides(null) ?? WebcamState::OPTIONAL;
 
         foreach ($intervals as $interval) {
             $interval['user'] = $user;
@@ -827,11 +832,31 @@ class IntervalController extends ItemController
                 }
             }
 
+            $hasWebcam = !empty($interval['has_webcam_screenshot']);
+            $webcamIdValidationRule = $hasWebcam ? ['webcam_screenshot_id' => 'required|uuid'] : [];
+
+            if ($hasWebcam) {
+                $mustNotCaptureWebcam = $globalWebcamState === WebcamState::FORBIDDEN;
+                $optionalWebcamCapture = $globalWebcamState === WebcamState::OPTIONAL
+                    && isset($tasksWebcamState[$interval['task_id']]);
+
+                if ($optionalWebcamCapture && $tasksWebcamState[$interval['task_id']] === WebcamState::FORBIDDEN) {
+                    $mustNotCaptureWebcam = true;
+                } elseif ($optionalWebcamCapture
+                    && $tasksWebcamState[$interval['task_id']] === WebcamState::OPTIONAL) {
+                    $mustNotCaptureWebcam = $user->webcam_state === WebcamState::FORBIDDEN;
+                }
+                if ($mustNotCaptureWebcam) {
+                    $webcamIdValidationRule = [];
+                }
+            }
+
             $intervalValidator = Validator::make(
                 $interval,
                 array_merge(
                     $validatorClass->getRules($interval['user_id'], $interval['start_at'], $interval['end_at']),
-                    $screenshotIdValidationRule
+                    $screenshotIdValidationRule,
+                    $webcamIdValidationRule
                 )
             );
 
