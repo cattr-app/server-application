@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Contracts\ScreenshotService;
+use App\Contracts\WebcamScreenshotService;
 use App\Models\TimeInterval;
 use App\Models\CronTaskWorkers;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -59,6 +60,9 @@ class TimeIntervalObserver
     {
         $screenshotService = app()->make(ScreenshotService::class);
         $screenshotService->destroyScreenshot($timeInterval);
+
+        $webcamScreenshotService = app()->make(WebcamScreenshotService::class);
+        $webcamScreenshotService->destroyWebcamScreenshot($timeInterval);
     }
 
     /**
