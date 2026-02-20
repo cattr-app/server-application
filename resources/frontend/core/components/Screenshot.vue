@@ -154,6 +154,11 @@
         data() {
             return { showModal: false, activeTab: 'screen' };
         },
+        created() {
+            if (!this.screenshotsEnabled && this.webcamEnabled) {
+                this.activeTab = 'webcam';
+            }
+        },
         computed: {
             ...mapGetters('user', ['companyData']),
             ...mapGetters('screenshots', { screenshotsEnabled: 'enabled' }),

@@ -172,6 +172,11 @@
         data() {
             return { activeTab: this.initialTab };
         },
+        created() {
+            if (!this.screenshotsEnabled && this.webcamEnabled) {
+                this.activeTab = 'webcam';
+            }
+        },
         watch: {
             initialTab(val) {
                 this.activeTab = val;
