@@ -356,7 +356,7 @@ export function init(context) {
         {
             label: 'field.webcam_state',
             key: 'webcam_state',
-            default: 1,
+            default: 2,
             render: (h, props) => {
                 return h(WebcamStateSelect, {
                     props: {

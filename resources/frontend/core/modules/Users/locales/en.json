@@ -17,7 +17,7 @@
       "optional_will_be_overridden": "Gives the user a choice. The default is \"Required\""
     },
     "webcam_state": {
-      "optional_will_be_overridden": "Gives the user a choice. The default is \"Required\""
+      "optional_will_be_overridden": "Gives the user a choice. The default is \"Optional\""
     }
   },
   "languages": {

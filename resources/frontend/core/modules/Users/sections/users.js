@@ -97,7 +97,7 @@ export function fieldsToFillProvider() {
         {
             label: 'field.webcam_state',
             key: 'webcam_state',
-            default: 1,
+            default: 2,
             render: (h, props) => {
                 const isAdmin = hasRole(store.getters['user/user'], 'admin');
                 const states = store.getters['webcam/states'];
