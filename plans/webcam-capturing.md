@@ -32,14 +32,14 @@ Migrations should follow the existing screenshots state migrations.
 ## 2) Storage & service layer
 
 ### 2.1 Webcam screenshot service
-- [ ] Create `App\Contracts\WebcamScreenshotService` or extend `ScreenshotService` with webcam paths:
+- [x] Create `App\Contracts\WebcamScreenshotService` or extend `ScreenshotService` with webcam paths:
   - `getWebcamPath(TimeInterval|int $interval)`
   - `getWebcamThumbPath(TimeInterval|int $interval)`
   - `saveWebcamScreenshot($file, TimeInterval $interval)`
-- [ ] Add production implementation similar to `ProductionScreenshotService`.
+- [x] Add production implementation similar to `ProductionScreenshotService`.
 
 ### 2.2 TimeInterval model
-- [ ] Add `has_webcam_screenshot` accessor similar to `has_screenshot`.
+- [x] Add `has_webcam_screenshot` accessor similar to `has_screenshot`.
 
 ## 3) Interval API
 
