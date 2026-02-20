@@ -1,6 +1,7 @@
 import AccountService from '../services/account.service';
 import LanguageSelector from '@/components/LanguageSelector';
 import ScreenshotsStateSelect from '@/components/ScreenshotsStateSelect';
+import WebcamStateSelect from '@/components/WebcamStateSelect';
 import { hasRole } from '@/utils/user';
 import { store } from '@/store';
 
@@ -74,6 +75,28 @@ export function fieldsProvider() {
                         isDisabled:
                             store.getters['screenshots/isUserStateLocked'] ||
                             (props.values.screenshots_state_locked && !isAdmin),
+                        hideIndexes: [0, 3],
+                    },
+                    on: {
+                        input(value) {
+                            props.inputHandler(value);
+                        },
+                    },
+                });
+            },
+        },
+        {
+            label: 'field.webcam_state',
+            key: 'webcam_state',
+            render: (h, props) => {
+                const isAdmin = hasRole(store.getters['user/user'], 'admin');
+
+                return h(WebcamStateSelect, {
+                    props: {
+                        value: props.values.webcam_state,
+                        isDisabled:
+                            store.getters['webcam/isUserStateLocked'] ||
+                            (props.values.webcam_state_locked && !isAdmin),
                         hideIndexes: [0, 3],
                     },
                     on: {

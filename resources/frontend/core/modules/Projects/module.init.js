@@ -5,6 +5,7 @@ import { formatDurationString } from '@/utils/time';
 import { ModuleLoaderInterceptor } from '@/moduleLoader';
 import PrioritySelect from '@/components/PrioritySelect';
 import ScreenshotsStateSelect from '@/components/ScreenshotsStateSelect';
+import WebcamStateSelect from '@/components/WebcamStateSelect';
 import TeamAvatars from '@/components/TeamAvatars';
 import { store } from '@/store';
 import Statuses from './components/Statuses';
@@ -165,6 +166,13 @@ export function init(context) {
         {
             label: 'field.screenshots_state',
             key: 'screenshots_state',
+            render: (h, { currentValue }) => {
+                return h('span', currentValue ? i18n.t('control.yes') : i18n.t('control.no'));
+            },
+        },
+        {
+            label: 'field.webcam_state',
+            key: 'webcam_state',
             render: (h, { currentValue }) => {
                 return h('span', currentValue ? i18n.t('control.yes') : i18n.t('control.no'));
             },
@@ -335,6 +343,25 @@ export function init(context) {
                     props: {
                         value: props.values.screenshots_state,
                         isDisabled: store.getters['screenshots/isProjectStateLocked'],
+                        hideIndexes: [0],
+                    },
+                    on: {
+                        input(value) {
+                            props.inputHandler(value);
+                        },
+                    },
+                });
+            },
+        },
+        {
+            label: 'field.webcam_state',
+            key: 'webcam_state',
+            default: 1,
+            render: (h, props) => {
+                return h(WebcamStateSelect, {
+                    props: {
+                        value: props.values.webcam_state,
+                        isDisabled: store.getters['webcam/isProjectStateLocked'],
                         hideIndexes: [0],
                     },
                     on: {

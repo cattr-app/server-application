@@ -70,11 +70,11 @@ Migrations should follow the existing screenshots state migrations.
 ## 5) Server UI
 
 ### 5.1 Settings toggles
-- [ ] Add "Webcam monitoring" state selectors in:
+- [x] Add "Webcam monitoring" state selectors in:
   - Company Settings
   - User Settings
   - Project Settings
-- [ ] Implement state override/locking behavior identical to screenshot controls.
+- [x] Implement state override/locking behavior identical to screenshot controls.
 
 ### 5.2 Screenshots UI
 - [ ] Update `resources/frontend/core/components/Screenshot.vue` and `ScreenshotModal.vue`:

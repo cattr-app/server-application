@@ -208,6 +208,11 @@
       "optional": "Optional",
       "forbidden": "Forbidden"
     },
+    "webcam_state_options": {
+      "required": "Required",
+      "optional": "Optional",
+      "forbidden": "Forbidden"
+    },
     "day": "Day",
     "week": "Week",
     "month": "Month",
@@ -268,6 +273,7 @@
     "time": "Time",
     "auto_thin": "Automatic storage cleanup",
     "screenshots_state": "Enable screenshots",
+    "webcam_state": "Enable webcam",
     "members": "Members",
     "url": "URL",
     "efficiency": "Employee efficiency ratio",

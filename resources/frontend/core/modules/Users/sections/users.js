@@ -1,6 +1,7 @@
 import cloneDeep from 'lodash/cloneDeep';
 import TimezonePicker from '@/components/TimezonePicker';
 import ScreenshotsStateSelect from '@/components/ScreenshotsStateSelect';
+import WebcamStateSelect from '@/components/WebcamStateSelect';
 import CoreUsersService from '@/services/resource/user.service';
 import RoleSelect from '@/components/RoleSelect';
 import Users from '../views/Users';
@@ -82,6 +83,33 @@ export function fieldsToFillProvider() {
                     props: {
                         value: props.values.screenshots_state,
                         isDisabled: store.getters['screenshots/isUserStateLocked'],
+                        hideIndexes: [0],
+                        hint,
+                    },
+                    on: {
+                        input(value) {
+                            props.inputHandler(value);
+                        },
+                    },
+                });
+            },
+        },
+        {
+            label: 'field.webcam_state',
+            key: 'webcam_state',
+            default: 1,
+            render: (h, props) => {
+                const isAdmin = hasRole(store.getters['user/user'], 'admin');
+                const states = store.getters['webcam/states'];
+                const hint =
+                    isAdmin && props.values.webcam_state === states.optional
+                        ? 'users.webcam_state.optional_will_be_overridden'
+                        : '';
+
+                return h(WebcamStateSelect, {
+                    props: {
+                        value: props.values.webcam_state,
+                        isDisabled: store.getters['webcam/isUserStateLocked'],
                         hideIndexes: [0],
                         hint,
                     },
@@ -275,6 +303,13 @@ export default (context, router) => {
         {
             label: 'field.screenshots_state',
             key: 'screenshots_state',
+            render: (h, { currentValue }) => {
+                return h('span', currentValue ? i18n.t('control.yes') : i18n.t('control.no'));
+            },
+        },
+        {
+            label: 'field.webcam_state',
+            key: 'webcam_state',
             render: (h, { currentValue }) => {
                 return h('span', currentValue ? i18n.t('control.yes') : i18n.t('control.no'));
             },

@@ -4,6 +4,7 @@ import CompanyService from '../services/company.service';
 import ColorSelect from '../components/ColorSelect';
 import PrioritySelect from '@/components/PrioritySelect';
 import ScreenshotsStateSelect from '@/components/ScreenshotsStateSelect';
+import WebcamStateSelect from '@/components/WebcamStateSelect';
 import { store } from '@/store';
 import { hasRole } from '@/utils/user';
 
@@ -148,6 +149,26 @@ export default {
                                     props.values.screenshots_state,
                                 ),
                                 isDisabled: store.getters['screenshots/isCompanyStateLocked'],
+                                hideIndexes: [0],
+                            },
+                            on: {
+                                input(value) {
+                                    props.inputHandler(value);
+                                },
+                            },
+                        });
+                    },
+                },
+                {
+                    label: 'field.webcam_state',
+                    key: 'webcam_state',
+                    render: (h, props) => {
+                        return h(WebcamStateSelect, {
+                            props: {
+                                value: store.getters['webcam/getCompanyStateWithOverrides'](
+                                    props.values.webcam_state,
+                                ),
+                                isDisabled: store.getters['webcam/isCompanyStateLocked'],
                                 hideIndexes: [0],
                             },
                             on: {
