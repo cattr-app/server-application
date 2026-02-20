@@ -95,7 +95,7 @@ Migrations should follow the existing screenshots state migrations.
 ## 7) Tests & validation
 
 ### 7.1 Server tests
-- [ ] Add/extend tests:
+- [x] Add/extend tests:
   - webcam state validation for company/user/project
   - create interval with webcam screenshot
   - webcam endpoints (image + thumb)
