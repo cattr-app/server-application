@@ -65,10 +65,10 @@
 - Windows dev package: `yarn package-dev-windows`
 
 ## Tests
-- No test runner or test files are configured in this repo.
-- There is no `yarn test` script in `package.json`.
-- Single-test command: N/A until a test runner is added.
-- If you add tests, also add and document `yarn test` and the single-test flag.
+- Run all tests: `php artisan test`
+- Run a specific test file: `php artisan test --filter=ClassName`
+- Test files are located in `tests/Feature/`.
+- Webcam feature tests: `tests/Feature/Webcam/`.
 
 ## Formatting (EditorConfig + ESLint)
 - Indent: 2 spaces for `*.js`, `*.json`, `*.yml` (`.editorconfig`).

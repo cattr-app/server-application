@@ -17,6 +17,9 @@ use App\Http\Requests\Interval\ListIntervalRequest;
 use App\Http\Requests\Interval\PutScreenshotRequest;
 use App\Http\Requests\Interval\PutWebcamScreenshotRequest;
 use App\Http\Requests\Interval\ScreenshotRequest;
+use App\Http\Requests\Interval\ShowIntervalRequest;
+use App\Http\Requests\Interval\TrackAppRequest;
+use App\Http\Requests\Interval\UploadOfflineIntervalsRequest;
 use App\Http\Requests\Interval\UploadOfflineScreenshotsRequest;
 use App\Http\Requests\Interval\UploadOfflineWebcamScreenshotsRequest;
 use App\Jobs\AssignAppsToTimeInterval;
@@ -594,6 +597,8 @@ class IntervalController extends ItemController
                             || ($optionalCapture && $interval->user->webcam_state !== WebcamState::FORBIDDEN)
                         ) {
                             $webcamScreenshotService->saveWebcamScreenshot(Storage::path($webcamPath), $interval);
+                            dispatch(static fn() => Storage::delete($webcamPath))->delay(now()->addMinute());
+                        } else {
                             dispatch(static fn() => Storage::delete($webcamPath))->delay(now()->addMinute());
                         }
                     } catch (\Throwable $e) {
