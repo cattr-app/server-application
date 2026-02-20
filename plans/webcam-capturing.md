@@ -44,17 +44,17 @@ Migrations should follow the existing screenshots state migrations.
 ## 3) Interval API
 
 ### 3.1 Create interval with webcam screenshot
-- [ ] Extend `IntervalController@create` to accept `webcam_screenshot` (multipart file).
-- [ ] Store webcam screenshot based on policy:
+- [x] Extend `IntervalController@create` to accept `webcam_screenshot` (multipart file).
+- [x] Store webcam screenshot based on policy:
   - `REQUIRED` => must store (reject if missing or invalid)
   - `OPTIONAL` => store if provided
   - `FORBIDDEN` => ignore or reject
 
 ### 3.2 Endpoints
-- [ ] Add endpoints to fetch webcam images:
+- [x] Add endpoints to fetch webcam images:
   - `GET /time-intervals/{interval}/webcam`
   - `GET /time-intervals/{interval}/webcam-thumb`
-- [ ] Add a PUT endpoint to attach a webcam screenshot after interval creation (mirrors screenshot flow).
+- [x] Add a PUT endpoint to attach a webcam screenshot after interval creation (mirrors screenshot flow).
 
 ## 4) Offline upload flow
 
