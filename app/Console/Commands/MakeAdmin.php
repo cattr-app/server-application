@@ -33,22 +33,22 @@ class MakeAdmin extends Command implements Isolatable
                 $this->error('Email is incorrect or it was already registered');
                 return 1;
             }
-        }
+        } else {
+            $email = env('APP_ADMIN_EMAIL', 'admin@cattr.app');
 
-        $email = env('APP_ADMIN_EMAIL', 'admin@cattr.app');
+            if (Validator::make([
+                    'email' => $email
+                ], [
+                    'email' => ['email', Rule::unique(User::class)]
+                ])->fails()) {
+                if (env('IMAGE_VERSION', false)) {
+                    $this->info('Admin already exists, skipping creation');
+                    return 0;
+                }
 
-        if (Validator::make([
-                'email' => $email
-            ], [
-                'email' => ['email', Rule::unique(User::class)]
-            ])->fails()) {
-            if (env('IMAGE_VERSION', false)) {
-                $this->info('Admin already exists, skipping creation');
-                return 0;
+                $this->error('Email is incorrect or it was already registered');
+                return 1;
             }
-
-            $this->error('Email is incorrect or it was already registered');
-            return 1;
         }
 
         if ($email !== 'admin@cattr.app' && !$this->option('o') && !User::admin()->count()) {
@@ -74,17 +74,17 @@ class MakeAdmin extends Command implements Isolatable
                 $this->warn('Minimum length is 6 characters');
                 return 1;
             }
-        }
+        } else {
+            $password = env('APP_ADMIN_PASSWORD', 'password');
 
-        $password = env('APP_ADMIN_PASSWORD', 'password');
-
-        if (Validator::make([
-                'password' => $password
-            ], [
-                'password' => 'min:6'
-            ])->fails()) {
-            $this->warn('Minimum length is 6 characters');
-            return 1;
+            if (Validator::make([
+                    'password' => $password
+                ], [
+                    'password' => 'min:6'
+                ])->fails()) {
+                $this->warn('Minimum length is 6 characters');
+                return 1;
+            }
         }
 
         User::factory()->admin()->create([

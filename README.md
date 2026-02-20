@@ -1,20 +1,23 @@
 ## About Cattr
-Cattr is an open-source time tracking solution, designed to be flawlessly integrated with your infrastructure. 
-Superpowered with features like built-in screenshot capture and activity detection, it's a great instrument to boost 
+
+Cattr is an open-source time tracking solution, designed to be flawlessly integrated with your infrastructure.
+Superpowered with features like built-in screenshot capture and activity detection, it's a great instrument to boost
 your team's performance straight to the top.
 
 #### We have our own [Container Registry](https://git.amazingcat.net/cattr/core/app/container_registry/9?orderBy=NAME&sort=desc), the images are hosted on GitLab
 
-
 ### Screenshots
+
 |           Dashboard           |           Project report           |
-|:-----------------------------:|:----------------------------------:|
+| :---------------------------: | :--------------------------------: |
 | ![](./examples/dashboard.jpg) | ![](./examples/project_report.jpg) |
 
 ### Demo
-The demo app is available here: [demo.cattr.app](https://demo.cattr.app) 
+
+The demo app is available here: [demo.cattr.app](https://demo.cattr.app)
 
 ## Install Cattr
+
 [Installation manual](https://docs.cattr.app/#/en/getting-started/?id=requirements) on the documentation website.
 
 ```
@@ -32,6 +35,7 @@ php artisan migrate --seed --seeder=InitialSeeder
 App will not start without seeding of InitialSeeder
 
 After seeding it, run `php artisan cattr:make:admin` and you will be able to login with following credentials
+
 ```
 admin@cattr.app
 password
@@ -39,11 +43,24 @@ password
 
 ### Run Local server
 
-local server by default will be run as <http://127.0.0.1:8000>
+Local server by default will be run as <http://127.0.0.1:8000>.
 
-```
-php artisan serve
+First, build the frontend assets:
+
+```bash
 yarn dev
+```
+
+Then, start the backend server:
+
+```bash
+php artisan serve
+```
+
+For development with automatic asset recompilation:
+
+```bash
+yarn watch
 ```
 
 ### Generate IDE helpers
@@ -66,5 +83,4 @@ Checkout the [Getting Started](https://docs.cattr.app/#/en/getting-started/) pag
 
 ### Questions
 
-For questions and support please use the [Github Discussions](https://github.com/orgs/cattr-app/discussions). 
-
+For questions and support please use the [Github Discussions](https://github.com/orgs/cattr-app/discussions).

@@ -367,13 +367,13 @@ class UserController extends ItemController
             if ($user->screenshots_state_locked && !$request->user()->isAdmin()) {
                 $user->screenshots_state = $user->getOriginal('screenshots_state');
             } else {
-                $user->screenshots_state_locked = $request->user()->isAdmin() && ScreenshotsState::tryFrom($user->screenshots_state)->mustBeInherited();
+                $user->screenshots_state_locked = $request->user()->isAdmin() && $user->screenshots_state->mustBeInherited();
             }
 
             if ($user->webcam_state_locked && !$request->user()->isAdmin()) {
                 $user->webcam_state = $user->getOriginal('webcam_state');
             } else {
-                $user->webcam_state_locked = $request->user()->isAdmin() && WebcamState::tryFrom($user->webcam_state)->mustBeInherited();
+                $user->webcam_state_locked = $request->user()->isAdmin() && $user->webcam_state->mustBeInherited();
             }
 
             return $user;

@@ -902,12 +902,13 @@ class IntervalController extends ItemController
         abort_if(
             $zipOpenResult === false || (is_int($zipOpenResult) && $zipOpenResult > 0),
             400,
-            __('Cannot open file.' . is_int($zipOpenResult) ? " ZipArchive error code: $zipOpenResult" : ""),
+            __('Cannot open file.') . (is_int($zipOpenResult) ? " ZipArchive error code: $zipOpenResult" : ''),
         );
 
         $temporaryDirectory = (new TemporaryDirectory())
             ->location(Storage::disk('local')->path('tmp'))->force()->create();
-        $zip->extractTo($temporaryDirectory->path());
+
+        $this->extractZipSafely($zip, $temporaryDirectory->path());
         $zip->close();
 
         $dirPath = Str::of($temporaryDirectory->path())->match('/tmp.+/');
@@ -918,7 +919,6 @@ class IntervalController extends ItemController
 
         $creationResult = [];
 
-        $screenshotService = $this->screenshotService;
         foreach ($allScreenshots as $screenshotPath) {
             $pathArr = Str::of($screenshotPath)->match('/\d_.+/')->split('/_/');
             abort_if(
@@ -941,8 +941,11 @@ class IntervalController extends ItemController
                 continue;
             }
             try {
-                dispatch(static function () use ($screenshotService, $interval, $screenshotPath) {
-                    $screenshotService->saveScreenshot(Storage::path($screenshotPath), $interval);
+                $intervalId = $interval->id;
+                dispatch(static function () use ($intervalId, $screenshotPath) {
+                    $service = app(ScreenshotService::class);
+                    $interval = TimeInterval::findOrFail($intervalId);
+                    $service->saveScreenshot(Storage::disk('local')->path($screenshotPath), $interval);
                     $interval->screenshot_id = null;
                     $interval->save();
                 });
@@ -980,12 +983,13 @@ class IntervalController extends ItemController
         abort_if(
             $zipOpenResult === false || (is_int($zipOpenResult) && $zipOpenResult > 0),
             400,
-            __('Cannot open file.' . is_int($zipOpenResult) ? " ZipArchive error code: $zipOpenResult" : ""),
+            __('Cannot open file.') . (is_int($zipOpenResult) ? " ZipArchive error code: $zipOpenResult" : ''),
         );
 
         $temporaryDirectory = (new TemporaryDirectory())
             ->location(Storage::disk('local')->path('tmp'))->force()->create();
-        $zip->extractTo($temporaryDirectory->path());
+
+        $this->extractZipSafely($zip, $temporaryDirectory->path());
         $zip->close();
 
         $dirPath = Str::of($temporaryDirectory->path())->match('/tmp.+/');
@@ -995,7 +999,6 @@ class IntervalController extends ItemController
 
         $creationResult = [];
 
-        $webcamScreenshotService = $this->webcamScreenshotService;
         foreach ($allScreenshots as $screenshotPath) {
             $pathArr = Str::of($screenshotPath)->match('/\d_.+/')->split('/_/');
             abort_if(
@@ -1018,8 +1021,11 @@ class IntervalController extends ItemController
                 continue;
             }
             try {
-                dispatch(static function () use ($webcamScreenshotService, $interval, $screenshotPath) {
-                    $webcamScreenshotService->saveWebcamScreenshot(Storage::path($screenshotPath), $interval);
+                $intervalId = $interval->id;
+                dispatch(static function () use ($intervalId, $screenshotPath) {
+                    $service = app(WebcamScreenshotService::class);
+                    $interval = TimeInterval::findOrFail($intervalId);
+                    $service->saveWebcamScreenshot(Storage::disk('local')->path($screenshotPath), $interval);
                     $interval->webcam_screenshot_id = null;
                     $interval->save();
                 });
@@ -1043,6 +1049,45 @@ class IntervalController extends ItemController
         }
 
         return responder()->success($creationResult)->respond();
+    }
+
+    private function extractZipSafely(ZipArchive $zip, string $destination): void
+    {
+        $realDestination = realpath($destination);
+
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $entryName = $zip->getNameIndex($i);
+
+            abort_if(
+                str_contains($entryName, '..') || str_starts_with($entryName, '/'),
+                400,
+                __('Invalid zip entry path'),
+            );
+
+            $stat = $zip->statIndex($i);
+            abort_if(
+                $stat === false || ($stat['opsys'] === ZipArchive::OPSYS_UNIX && (($stat['external_attr'] >> 16) & 0120000) === 0120000),
+                400,
+                __('Invalid zip entry: symlinks are not allowed'),
+            );
+
+            $targetPath = realpath(dirname($destination . DIRECTORY_SEPARATOR . $entryName));
+            if ($targetPath !== false) {
+                abort_if(
+                    !str_starts_with($targetPath, $realDestination),
+                    400,
+                    __('Invalid zip entry path'),
+                );
+            }
+
+            $zip->extractTo($destination, $entryName);
+
+            $extractedPath = $destination . DIRECTORY_SEPARATOR . $entryName;
+            if (is_link($extractedPath)) {
+                unlink($extractedPath);
+                abort(400, __('Invalid zip entry: symlinks are not allowed'));
+            }
+        }
     }
 
     /**

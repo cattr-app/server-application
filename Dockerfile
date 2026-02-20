@@ -6,7 +6,7 @@ ARG APP_VERSION
 ARG APP_ENV=production
 ARG REVERB_SCHEME=http
 ARG REVERB_PORT=8080
-ARG BACKEND_MODULES="cattr/gitlab_integration-module cattr/redmine_integration-module"
+ARG BACKEND_MODULES=""
 ENV IMAGE_VERSION=5.0.0
 ENV APP_VERSION $APP_VERSION
 ENV SENTRY_DSN $SENTRY_DSN
@@ -28,8 +28,11 @@ COPY --chown=www:www . /app
 USER www:www
 
 RUN set -x && \
-    php /usr/bin/composer.phar require -n --no-ansi --no-install --no-update --no-audit $BACKEND_MODULES && \
-    php /usr/bin/composer.phar update -n --no-autoloader --no-install --no-ansi $BACKEND_MODULES && \
+    git config --global url."https://github.com/".insteadOf git@github.com: && \
+    if [ -n "$BACKEND_MODULES" ]; then \
+        php /usr/bin/composer.phar require -n --no-ansi --no-install --no-update --no-audit $BACKEND_MODULES && \
+        php /usr/bin/composer.phar update -n --no-autoloader --no-install --no-ansi $BACKEND_MODULES; \
+    fi && \
     php /usr/bin/composer.phar install -n --no-dev --no-cache --no-ansi --no-autoloader --no-dev && \
     php /usr/bin/composer.phar dump-autoload -n --optimize --apcu --classmap-authoritative
 

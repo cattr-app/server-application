@@ -1,38 +1,39 @@
-version: '3.9'
-
 services:
-  app:
-    build: .
-    depends_on:
-      db:
-        condition: service_healthy
-    volumes:
-      - backend_storage:/app/storage
-    labels:
-      traefik.enable: true
-    networks:
-      - default
-      - web
+    app:
+        build: .
+        depends_on:
+            db:
+                condition: service_healthy
+        volumes:
+            - backend_storage:/app/storage
+        labels:
+            traefik.enable: true
+        networks:
+            - default
+            - web
 
-  db:
-    image: percona:8.0
-    environment:
-      - MYSQL_DATABASE=cattr
-      - MYSQL_ROOT_PASSWORD=password
-    cap_add:
-      - SYS_NICE
-    volumes:
-      - database:/var/lib/mysql
-    healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '--password=password', '-u', 'root']
-      timeout: 20s
-      retries: 10
+    db:
+        image: percona:8.0
+        platform: linux/x86_64
+        ports:
+            - '3306:3306'
+        environment:
+            - MYSQL_DATABASE=cattr
+            - MYSQL_ROOT_PASSWORD=password
+        cap_add:
+            - SYS_NICE
+        volumes:
+            - database:/var/lib/mysql
+        healthcheck:
+            test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '--password=password', '-u', 'root']
+            timeout: 20s
+            retries: 10
 
 volumes:
-  backend_storage: {}
-  database: {}
+    backend_storage: {}
+    database: {}
 
 networks:
-  default: {}
-  web:
-    external: true
+    default: {}
+    web:
+        external: true

@@ -19,6 +19,7 @@
     "ext-openssl": "*",
     "ext-pdo": "*",
     "ext-zip": "*",
+    "arquivei/laravel-prometheus-exporter": "^4.1",
     "czproject/git-php": "^4.0",
     "doctrine/dbal": "^3.0",
     "elhebert/laravel-sri": "^3.2",
@@ -41,8 +42,7 @@
     "sentry/sentry-laravel": "^4.1",
     "spatie/temporary-directory": "^2.2",
     "staudenmeir/laravel-adjacency-list": "^1.19",
-    "wikimedia/composer-merge-plugin": "^2.0",
-    "vermorag/laravel-prometheus-exporter": "^4.1"
+    "wikimedia/composer-merge-plugin": "^2.0"
   },
   "require-dev": {
     "barryvdh/laravel-ide-helper": "^2.13",
@@ -101,8 +101,8 @@
   },
   "repositories": [
     {
-      "type": "composer",
-      "url": "https://git.amazingcat.net/api/v4/group/cattr/-/packages/composer/"
+      "type": "vcs",
+      "url": "https://github.com/arquivei/laravel-prometheus-exporter"
     }
   ],
   "minimum-stability": "stable",
