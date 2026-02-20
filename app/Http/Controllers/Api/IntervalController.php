@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Contracts\ScreenshotService;
+use App\Contracts\WebcamScreenshotService;
 use App\Enums\ScreenshotsState;
+use App\Enums\WebcamState;
 use App\Http\Requests\Interval\BulkDestroyTimeIntervalRequest;
 use App\Http\Requests\Interval\BulkEditTimeIntervalRequest;
 use App\Http\Requests\Interval\CreateTimeIntervalRequest;
@@ -13,11 +15,10 @@ use App\Http\Requests\Interval\IntervalTasksRequest;
 use App\Http\Requests\Interval\IntervalTotalRequest;
 use App\Http\Requests\Interval\ListIntervalRequest;
 use App\Http\Requests\Interval\PutScreenshotRequest;
+use App\Http\Requests\Interval\PutWebcamScreenshotRequest;
 use App\Http\Requests\Interval\ScreenshotRequest;
-use App\Http\Requests\Interval\ShowIntervalRequest;
-use App\Http\Requests\Interval\TrackAppRequest;
-use App\Http\Requests\Interval\UploadOfflineIntervalsRequest;
 use App\Http\Requests\Interval\UploadOfflineScreenshotsRequest;
+use App\Http\Requests\Interval\UploadOfflineWebcamScreenshotsRequest;
 use App\Jobs\AssignAppsToTimeInterval;
 use App\Models\Task;
 use App\Models\TrackedApplication;
@@ -46,8 +47,10 @@ class IntervalController extends ItemController
 {
     protected const MODEL = TimeInterval::class;
 
-    public function __construct(protected ScreenshotService $screenshotService)
-    {
+    public function __construct(
+        protected ScreenshotService $screenshotService,
+        protected WebcamScreenshotService $webcamScreenshotService,
+    ) {
     }
 
     /**
@@ -568,6 +571,39 @@ class IntervalController extends ItemController
             );
         }
 
+        $webcamScreenshotService = $this->webcamScreenshotService;
+
+        if ($request->hasFile('webcam_screenshot') && optional($request->file('webcam_screenshot'))->isValid()) {
+            $webcamPath = $request->file('webcam_screenshot')->store('tmp');
+
+            CatEvent::listen(
+                Filter::getAfterActionEventName(),
+                static function (TimeInterval $interval) use ($webcamPath, $webcamScreenshotService) {
+                    try {
+                        $projWebcamState = $interval->task->project->webcam_state;
+                        $mustCapture = $projWebcamState === WebcamState::REQUIRED;
+                        $optionalCapture = $projWebcamState === WebcamState::OPTIONAL;
+                        $forbidden = $projWebcamState === WebcamState::FORBIDDEN;
+
+                        if ($forbidden) {
+                            dispatch(static fn() => Storage::delete($webcamPath))->delay(now()->addMinute());
+                            return;
+                        }
+
+                        if ($mustCapture
+                            || ($optionalCapture && $interval->user->webcam_state !== WebcamState::FORBIDDEN)
+                        ) {
+                            $webcamScreenshotService->saveWebcamScreenshot(Storage::path($webcamPath), $interval);
+                            dispatch(static fn() => Storage::delete($webcamPath))->delay(now()->addMinute());
+                        }
+                    } catch (\Throwable $e) {
+                        \Log::warning('Failed to save webcam screenshot for interval ' . $interval->id . ': ' . $e->getMessage());
+                        dispatch(static fn() => Storage::delete($webcamPath))->delay(now()->addMinute());
+                    }
+                }
+            );
+        }
+
         CatEvent::listen(
             Filter::getAfterActionEventName(),
             static function ($data) {
@@ -626,6 +662,59 @@ class IntervalController extends ItemController
                 409,
                 __('Screenshots disabled for interval\'s project')
             );
+        }
+
+        return responder()->success()->respond(204);
+    }
+
+    public function showWebcam(ScreenshotRequest $request, TimeInterval $interval): BinaryFileResponse
+    {
+        $path = $this->webcamScreenshotService->getWebcamPath($interval);
+        if (!Storage::exists($path)) {
+            abort(404);
+        }
+
+        $fullPath = Storage::path($path);
+
+        return response()->file($fullPath);
+    }
+
+    public function showWebcamThumbnail(ScreenshotRequest $request, TimeInterval $interval): BinaryFileResponse
+    {
+        $path = $this->webcamScreenshotService->getWebcamThumbPath($interval);
+        if (!Storage::exists($path)) {
+            abort(404);
+        }
+
+        $fullPath = Storage::path($path);
+
+        return response()->file($fullPath);
+    }
+
+    public function putWebcamScreenshot(PutWebcamScreenshotRequest $request, TimeInterval $interval): JsonResponse
+    {
+        $data = $request->validated();
+
+        abort_if(
+            Storage::exists($this->webcamScreenshotService->getWebcamPath($interval)),
+            409,
+            __('Webcam screenshot for requested interval already exists')
+        );
+
+        $projWebcamState = $interval->task->project->webcam_state;
+        $mustCapture = $projWebcamState === WebcamState::REQUIRED;
+        $optionalCapture = $projWebcamState === WebcamState::OPTIONAL;
+
+        if ($projWebcamState === WebcamState::FORBIDDEN) {
+            abort(409, __('Webcam screenshots disabled for interval\'s project'));
+        }
+
+        if ($mustCapture
+            || ($optionalCapture && $interval->user->webcam_state !== WebcamState::FORBIDDEN)
+        ) {
+            $this->webcamScreenshotService->saveWebcamScreenshot($data['webcam_screenshot'], $interval);
+        } else {
+            abort(409, __('Webcam screenshots disabled for interval\'s project'));
         }
 
         return responder()->success()->respond(204);
@@ -839,6 +928,83 @@ class IntervalController extends ItemController
                     'interval' => $interval,
                     'user_id' => $userId,
                     'screenshot_id' => $screenshotId,
+                    'message' => __('validation.offline-sync.screenshot_not_attached'),
+                    'success' => false
+                ];
+                \Log::error($e);
+            }
+        }
+
+        return responder()->success($creationResult)->respond();
+    }
+
+    public function uploadOfflineWebcamScreenshots(UploadOfflineWebcamScreenshotsRequest $request): JsonResponse
+    {
+        /**
+         * @var UploadedFile $file
+         */
+        $file = $request->validated()['file'];
+
+        $zip = new ZipArchive;
+        $zipOpenResult = $zip->open($file->path());
+        abort_if(
+            $zipOpenResult === false || (is_int($zipOpenResult) && $zipOpenResult > 0),
+            400,
+            __('Cannot open file.' . is_int($zipOpenResult) ? " ZipArchive error code: $zipOpenResult" : ""),
+        );
+
+        $temporaryDirectory = (new TemporaryDirectory())
+            ->location(Storage::disk('local')->path('tmp'))->force()->create();
+        $zip->extractTo($temporaryDirectory->path());
+        $zip->close();
+
+        $dirPath = Str::of($temporaryDirectory->path())->match('/tmp.+/');
+        dispatch(static fn() => $temporaryDirectory->delete())->delay(now()->addHour());
+
+        $allScreenshots = Storage::disk('local')->files($dirPath);
+
+        $creationResult = [];
+
+        $webcamScreenshotService = $this->webcamScreenshotService;
+        foreach ($allScreenshots as $screenshotPath) {
+            $pathArr = Str::of($screenshotPath)->match('/\d_.+/')->split('/_/');
+            abort_if(
+                count($pathArr) !== 2 || (count($pathArr) === 2 && !Str::isUuid($pathArr[1])),
+                400,
+                __('Wrong webcam screenshot file name')
+            );
+
+            [$userId, $webcamScreenshotId] = $pathArr;
+
+            $interval = TimeInterval::where('user_id', $userId)->where('webcam_screenshot_id', $webcamScreenshotId)->first();
+            if ($interval === null) {
+                $creationResult[] = [
+                    'interval' => $interval,
+                    'user_id' => $userId,
+                    'webcam_screenshot_id' => $webcamScreenshotId,
+                    'message' => __('validation.offline-sync.cannot_find_interval'),
+                    'success' => false
+                ];
+                continue;
+            }
+            try {
+                dispatch(static function () use ($webcamScreenshotService, $interval, $screenshotPath) {
+                    $webcamScreenshotService->saveWebcamScreenshot(Storage::path($screenshotPath), $interval);
+                    $interval->webcam_screenshot_id = null;
+                    $interval->save();
+                });
+                $creationResult[] = [
+                    'interval' => $interval,
+                    'user_id' => $userId,
+                    'webcam_screenshot_id' => $webcamScreenshotId,
+                    'message' => __('validation.offline-sync.screenshot_attached'),
+                    'success' => true
+                ];
+            } catch (\Exception $e) {
+                $creationResult[] = [
+                    'interval' => $interval,
+                    'user_id' => $userId,
+                    'webcam_screenshot_id' => $webcamScreenshotId,
                     'message' => __('validation.offline-sync.screenshot_not_attached'),
                     'success' => false
                 ];

@@ -53,6 +53,7 @@ use Settings;
             'is_manual' => 'sometimes|bool',
             'location' => 'sometimes|array',
             'screenshot' => 'sometimes|required|image',
+            'webcam_screenshot' => 'sometimes|required|image',
         ];
     }
 

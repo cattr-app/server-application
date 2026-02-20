@@ -78,3 +78,5 @@ composer.phar
 erd.svg
 
 apidoc
+# ralphex progress logs
+.ralphex/progress/

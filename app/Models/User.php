@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\Role;
 use App\Enums\ScreenshotsState;
+use App\Enums\WebcamState;
 use App\Mail\ResetPassword;
 use App\Scopes\UserAccessScope;
 use App\Traits\HasRole;
@@ -145,6 +146,8 @@ class User extends Authenticatable
         'avatar',
         'screenshots_state',
         'screenshots_state_locked',
+        'webcam_state',
+        'webcam_state_locked',
         'manual_time',
         'computer_time_popup',
         'blur_screenshots',
@@ -175,6 +178,7 @@ class User extends Authenticatable
         'company_id' => 'integer',
         'avatar' => 'string',
         'screenshots_state_locked' => 'boolean',
+        'webcam_state_locked' => 'boolean',
         'manual_time' => 'integer',
         'computer_time_popup' => 'integer',
         'blur_screenshots' => 'boolean',
@@ -321,6 +325,32 @@ class User extends Authenticatable
                 };
             },
             set: static fn ($value) => (string)ScreenshotsState::getNormalizedValue($value),
+        )->shouldCache();
+    }
+
+    /**
+     * Always returns correct webcam state in case env or app settings should override it.
+     */
+    protected function webcamState(): Attribute
+    {
+        return Attribute::make(
+            get: static function (mixed $value, array $attributes): WebcamState {
+                $userState = WebcamState::withGlobalOverrides($value);
+                $showOriginalValues = Auth::user() !== null && Auth::user()->hasRole(Role::ADMIN) && (int)Auth::id() !== (int)$attributes['id'];
+                if ($showOriginalValues) {
+                    return match ($userState) {
+                        null => WebcamState::OPTIONAL,
+                        WebcamState::ANY => WebcamState::OPTIONAL,
+                        default => $userState,
+                    };
+                }
+
+                return match ($userState) {
+                    null, WebcamState::ANY, WebcamState::OPTIONAL => WebcamState::OPTIONAL,
+                    default => $userState,
+                };
+            },
+            set: static fn ($value) => (string)WebcamState::getNormalizedValue($value),
         )->shouldCache();
     }
 

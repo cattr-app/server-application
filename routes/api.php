@@ -217,6 +217,9 @@ Route::group([
         $router->post('time-intervals/{interval}/screenshot', [IntervalController::class, 'putScreenshot'])
             ->where('interval', '[0-9]+')->name('intervals.screenshot.put');
 
+        $router->post('time-intervals/{interval}/webcam', [IntervalController::class, 'putWebcamScreenshot'])
+            ->where('interval', '[0-9]+')->name('intervals.webcam.put');
+
         //Time Intervals routes
         $router->any('time-intervals/list', [IntervalController::class, 'index'])
             ->name('intervals.list');
@@ -246,6 +249,8 @@ Route::group([
             ->name('offline_sync.upload_intervals');
         $router->post('offline-sync/upload-screenshots', [IntervalController::class, 'uploadOfflineScreenshots'])
             ->name('offline_sync.upload_screenshots');
+        $router->post('offline-sync/upload-webcam-screenshots', [IntervalController::class, 'uploadOfflineWebcamScreenshots'])
+            ->name('offline_sync.upload_webcam_screenshots');
         $router->get('offline-sync/public-key', [CompanySettingsController::class, 'getOfflineSyncPublicKey'])
             ->name('offline_sync.public_key');
 
@@ -318,6 +323,12 @@ Route::group([
         ->where('interval', '[0-9]+')->name('intervals.screenshot.original');
     $router->get('time-intervals/{interval}/thumb', [IntervalController::class, 'showThumbnail'])
         ->where('interval', '[0-9]+')->name('intervals.screenshot.thumb');
+
+    // Webcam routes
+    $router->get('time-intervals/{interval}/webcam', [IntervalController::class, 'showWebcam'])
+        ->where('interval', '[0-9]+')->name('intervals.webcam.original');
+    $router->get('time-intervals/{interval}/webcam-thumb', [IntervalController::class, 'showWebcamThumbnail'])
+        ->where('interval', '[0-9]+')->name('intervals.webcam.thumb');
 });
 
 Route::any('(.*)', [Controller::class, 'universalRoute'])->name('universal_route');

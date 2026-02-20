@@ -2,12 +2,34 @@
     <at-modal v-if="show" class="modal" :width="900" :value="true" @on-cancel="onClose" @on-confirm="onClose">
         <template v-slot:header>
             <span class="modal-title">{{ $t('field.screenshot') }}</span>
+            <div v-if="screenshotsEnabled && webcamEnabled" class="modal-tabs">
+                <span
+                    class="modal-tab"
+                    :class="{ 'modal-tab--active': activeTab === 'screen' }"
+                    @click="activeTab = 'screen'"
+                    >{{ $t('field.screen') }}</span
+                >
+                <span
+                    class="modal-tab"
+                    :class="{ 'modal-tab--active': activeTab === 'webcam' }"
+                    @click="activeTab = 'webcam'"
+                    >{{ $t('field.webcam') }}</span
+                >
+            </div>
         </template>
 
         <AppImage
-            v-if="interval && interval.id && screenshotsEnabled"
+            v-if="activeTab === 'screen' && interval && interval.id && screenshotsEnabled"
             class="modal-screenshot"
             :src="getScreenshotPath(interval)"
+            :openable="true"
+        />
+        <AppImage
+            v-else-if="
+                activeTab === 'webcam' && interval && interval.id && webcamEnabled && interval.has_webcam_screenshot
+            "
+            class="modal-screenshot"
+            :src="getWebcamPath(interval)"
             :openable="true"
         />
         <i v-else class="icon icon-camera-off modal-screenshot" />
@@ -106,7 +128,11 @@
         return `time-intervals/${interval.id}/screenshot`;
     }
 
-    export const config = { screenshotPathProvider };
+    export function webcamPathProvider(interval) {
+        return `time-intervals/${interval.id}/webcam`;
+    }
+
+    export const config = { screenshotPathProvider, webcamPathProvider };
 
     export default {
         name: 'ScreenshotModal',
@@ -138,10 +164,23 @@
                 type: Boolean,
                 default: true,
             },
+            initialTab: {
+                type: String,
+                default: 'screen',
+            },
+        },
+        data() {
+            return { activeTab: this.initialTab };
+        },
+        watch: {
+            initialTab(val) {
+                this.activeTab = val;
+            },
         },
         computed: {
             ...mapGetters('user', ['companyData']),
             ...mapGetters('screenshots', { screenshotsEnabled: 'enabled' }),
+            ...mapGetters('webcam', { webcamEnabled: 'enabled' }),
         },
         methods: {
             formatDate(value) {
@@ -159,6 +198,9 @@
             },
             getScreenshotPath(interval) {
                 return config.screenshotPathProvider(interval);
+            },
+            getWebcamPath(interval) {
+                return config.webcamPathProvider(interval);
             },
         },
     };
@@ -252,6 +294,26 @@
             color: #000000;
             font-size: 15px;
             font-weight: 600;
+        }
+
+        &-tabs {
+            display: inline-flex;
+            margin-left: 16px;
+            gap: 12px;
+        }
+
+        &-tab {
+            font-size: 13px;
+            font-weight: 600;
+            color: #b1b1be;
+            cursor: pointer;
+            padding-bottom: 2px;
+            border-bottom: 2px solid transparent;
+
+            &--active {
+                color: #2e2ef9;
+                border-bottom-color: #2e2ef9;
+            }
         }
 
         &-screenshot {

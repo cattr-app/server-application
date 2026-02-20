@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Contracts\ScreenshotService;
+use App\Contracts\WebcamScreenshotService;
 use App\Scopes\TimeIntervalAccessScope;
 use Database\Factories\TimeIntervalFactory;
 use Eloquent as EloquentIdeHelper;
@@ -105,6 +106,7 @@ class TimeInterval extends Model
     protected $fillable = [
         'task_id',
         'screenshot_id',
+        'webcam_screenshot_id',
         'start_at',
         'user_id',
         'end_at',
@@ -139,7 +141,7 @@ class TimeInterval extends Model
         'deleted_at',
     ];
 
-    protected $appends = ['has_screenshot'];
+    protected $appends = ['has_screenshot', 'has_webcam_screenshot'];
 
     /**
      * Override parent boot and Call deleting event
@@ -173,6 +175,15 @@ class TimeInterval extends Model
         return Attribute::make(
             get: static fn ($value) => !$value || Storage::exists(
                 app(ScreenshotService::class)->getScreenshotPath($value['id'])
+            )
+        )->shouldCache();
+    }
+
+    public function hasWebcamScreenshot(): Attribute
+    {
+        return Attribute::make(
+            get: static fn ($value) => !$value || Storage::exists(
+                app(WebcamScreenshotService::class)->getWebcamPath($value['id'])
             )
         )->shouldCache();
     }

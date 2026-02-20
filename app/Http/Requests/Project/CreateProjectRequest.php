@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Project;
 
 use App\Enums\ScreenshotsState;
+use App\Enums\WebcamState;
 use App\Models\Project;
 use App\Http\Requests\CattrFormRequest;
 use Illuminate\Validation\Rule;
@@ -23,6 +24,7 @@ class CreateProjectRequest extends CattrFormRequest
             'important' => 'sometimes|required|bool',
             'default_priority_id' => 'sometimes|integer|exists:priorities,id',
             'screenshots_state' => ['required', new Enum(ScreenshotsState::class)],
+            'webcam_state' => ['sometimes', 'required', new Enum(WebcamState::class)],
             'statuses' => 'sometimes|array',
             'statuses.*.id' => 'required|exists:statuses,id',
             'statuses.*.color' => 'sometimes|nullable|string|regex:/^#[a-f0-9]{6}$/i',

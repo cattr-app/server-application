@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App;
 use App\Enums\Role;
 use App\Enums\ScreenshotsState;
+use App\Enums\WebcamState;
 use App\Http\Requests\User\ListUsersRequest;
 use App\Scopes\UserAccessScope;
 use Settings;
@@ -267,6 +268,10 @@ class UserController extends ItemController
         Filter::listen(Filter::getRequestFilterName(), static function ($requestData) use ($request) {
             $requestData['screenshots_state_locked'] = $request->user()->isAdmin() && ScreenshotsState::tryFrom($requestData['screenshots_state'])->mustBeInherited();
 
+            if (isset($requestData['webcam_state'])) {
+                $requestData['webcam_state_locked'] = $request->user()->isAdmin() && WebcamState::tryFrom($requestData['webcam_state'])->mustBeInherited();
+            }
+
             return $requestData;
         });
 
@@ -361,10 +366,15 @@ class UserController extends ItemController
         Filter::listen(Filter::getActionFilterName(), static function (User $user) use ($request) {
             if ($user->screenshots_state_locked && !$request->user()->isAdmin()) {
                 $user->screenshots_state = $user->getOriginal('screenshots_state');
-                return $user;
+            } else {
+                $user->screenshots_state_locked = $request->user()->isAdmin() && ScreenshotsState::tryFrom($user->screenshots_state)->mustBeInherited();
             }
 
-            $user->screenshots_state_locked = $request->user()->isAdmin() && ScreenshotsState::tryFrom($user->screenshots_state)->mustBeInherited();
+            if ($user->webcam_state_locked && !$request->user()->isAdmin()) {
+                $user->webcam_state = $user->getOriginal('webcam_state');
+            } else {
+                $user->webcam_state_locked = $request->user()->isAdmin() && WebcamState::tryFrom($user->webcam_state)->mustBeInherited();
+            }
 
             return $user;
         });

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ScreenshotsState;
+use App\Enums\WebcamState;
 use App\Scopes\ProjectAccessScope;
 use App\Traits\ExposePermissions;
 use Database\Factories\ProjectFactory;
@@ -86,6 +87,7 @@ class Project extends Model
         'source',
         'default_priority_id',
         'screenshots_state',
+        'webcam_state',
         'group',
     ];
 
@@ -200,6 +202,21 @@ class Project extends Model
                 };
             },
             set: static fn ($value) => (string)ScreenshotsState::getNormalizedValue($value),
+        )->shouldCache();
+    }
+
+    protected function webcamState(): Attribute
+    {
+        return Attribute::make(
+            get: static function ($value): WebcamState {
+                $projectState = WebcamState::withGlobalOverrides($value);
+                return match ($projectState) {
+                    null => WebcamState::OPTIONAL,
+                    WebcamState::ANY => WebcamState::OPTIONAL,
+                    default => $projectState,
+                };
+            },
+            set: static fn ($value) => (string)WebcamState::getNormalizedValue($value),
         )->shouldCache();
     }
 }

@@ -1,9 +1,32 @@
 <template>
     <div class="screenshot" @click="$emit('click', $event)">
+        <div v-if="screenshotsEnabled && webcamEnabled" class="screenshot__tabs">
+            <span
+                class="screenshot__tab"
+                :class="{ 'screenshot__tab--active': activeTab === 'screen' }"
+                @click.stop="activeTab = 'screen'"
+                >{{ $t('field.screen') }}</span
+            >
+            <span
+                class="screenshot__tab"
+                :class="{ 'screenshot__tab--active': activeTab === 'webcam' }"
+                @click.stop="activeTab = 'webcam'"
+                >{{ $t('field.webcam') }}</span
+            >
+        </div>
+
         <AppImage
-            v-if="screenshotsEnabled"
+            v-if="activeTab === 'screen' && screenshotsEnabled"
             :is-blob="true"
             :src="getThumbnailPath(interval)"
+            class="screenshot__image"
+            :lazy="lazyImage"
+            @click="onShow"
+        />
+        <AppImage
+            v-else-if="activeTab === 'webcam' && webcamEnabled && interval.has_webcam_screenshot"
+            :is-blob="true"
+            :src="getWebcamThumbnailPath(interval)"
             class="screenshot__image"
             :lazy="lazyImage"
             @click="onShow"
@@ -60,6 +83,7 @@
             :showNavigation="showNavigation"
             :task="task"
             :user="user"
+            :initialTab="activeTab"
             @close="onHide"
             @remove="onRemove"
             @showNext="$emit('showNext')"
@@ -78,7 +102,11 @@
         return `time-intervals/${interval.id}/thumb`;
     }
 
-    export const config = { thumbnailPathProvider };
+    export function webcamThumbnailPathProvider(interval) {
+        return `time-intervals/${interval.id}/webcam-thumb`;
+    }
+
+    export const config = { thumbnailPathProvider, webcamThumbnailPathProvider };
 
     export default {
         name: 'Screenshot',
@@ -124,11 +152,12 @@
             },
         },
         data() {
-            return { showModal: false };
+            return { showModal: false, activeTab: 'screen' };
         },
         computed: {
             ...mapGetters('user', ['companyData']),
             ...mapGetters('screenshots', { screenshotsEnabled: 'enabled' }),
+            ...mapGetters('webcam', { webcamEnabled: 'enabled' }),
             screenshotTime() {
                 const timezone = this.timezone || this.companyData['timezone'];
 
@@ -163,12 +192,36 @@
             getThumbnailPath(interval) {
                 return config.thumbnailPathProvider(interval);
             },
+            getWebcamThumbnailPath(interval) {
+                return config.webcamThumbnailPathProvider(interval);
+            },
         },
     };
 </script>
 
 <style lang="scss" scoped>
     .screenshot {
+        &__tabs {
+            display: flex;
+            margin-bottom: 4px;
+        }
+
+        &__tab {
+            flex: 1;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: #59566e;
+            cursor: pointer;
+            padding: 2px 0;
+            border-bottom: 2px solid transparent;
+
+            &--active {
+                color: #2e2ef9;
+                border-bottom-color: #2e2ef9;
+            }
+        }
+
         &__image {
             border-radius: 5px;
             cursor: pointer;

@@ -3,12 +3,14 @@
 namespace App\Http\Transformers;
 
 use App\Enums\ScreenshotsState;
+use App\Enums\WebcamState;
 use Filter;
 use Flugg\Responder\Transformers\Transformer;
 
 class CompanySettingsTransformer extends Transformer
 {
     protected const DEFAULT_SCREENSHOTS_STATE = ScreenshotsState::REQUIRED;
+    protected const DEFAULT_WEBCAM_STATE = WebcamState::OPTIONAL;
 
     public function transform(array $input): array
     {
@@ -26,6 +28,11 @@ class CompanySettingsTransformer extends Transformer
             )->value,
             'env_screenshots_state' => (ScreenshotsState::tryFromString(config('app.screenshots_state')) ?? ScreenshotsState::ANY)->value,
             'default_priority_id' => (int)($input['default_priority_id'] ?? 2),
+            'webcam_state' => (isset($input['webcam_state'])
+                ? WebcamState::tryFrom($input['webcam_state']) ?? static::DEFAULT_WEBCAM_STATE
+                : static::DEFAULT_WEBCAM_STATE
+            )->value,
+            'env_webcam_state' => (WebcamState::tryFromString(config('app.webcam_state')) ?? WebcamState::ANY)->value,
         ]);
     }
 }

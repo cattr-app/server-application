@@ -4,6 +4,7 @@ namespace App\Http\Requests\CompanySettings;
 
 use App\Enums\Role;
 use App\Enums\ScreenshotsState;
+use App\Enums\WebcamState;
 use App\Http\Requests\CattrFormRequest;
 use Illuminate\Validation\Rules\Enum;
 
@@ -21,6 +22,7 @@ class UpdateCompanySettingsRequest extends CattrFormRequest
             'work_time' => 'sometimes|int',
             'auto_thinning' => 'sometimes|boolean',
             'screenshots_state' => ['sometimes', 'required', new Enum(ScreenshotsState::class)],
+            'webcam_state' => ['sometimes', 'required', new Enum(WebcamState::class)],
             'language' => 'sometimes|string',
             'default_priority_id' => 'sometimes|int',
         ];
