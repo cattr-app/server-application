@@ -182,8 +182,8 @@ class TimeInterval extends Model
     public function hasWebcamScreenshot(): Attribute
     {
         return Attribute::make(
-            get: static fn ($value) => !$value || Storage::exists(
-                app(WebcamScreenshotService::class)->getWebcamPath($value['id'])
+            get: static fn ($value, $attributes) => isset($attributes['id']) && Storage::exists(
+                app(WebcamScreenshotService::class)->getWebcamPath($attributes['id'])
             )
         )->shouldCache();
     }
