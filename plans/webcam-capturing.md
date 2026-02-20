@@ -83,7 +83,7 @@ Migrations should follow the existing screenshots state migrations.
 - [x] Use new endpoints for image/thumbnail loading.
 
 ### 5.3 Store module
-- [ ] Add `resources/frontend/core/store/modules/webcam.js` similar to `screenshots.js`:
+- [x] Add `resources/frontend/core/store/modules/webcam.js` similar to `screenshots.js`:
   - `states`, `enabled`, override logic, locking checks.
 
 ## 6) API client contract
