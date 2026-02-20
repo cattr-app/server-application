@@ -89,8 +89,8 @@ Migrations should follow the existing screenshots state migrations.
 ## 6) API client contract
 
 ### 6.1 Field names
-- [ ] Standardize multipart field name `webcam_screenshot`.
-- [ ] Standardize offline metadata `webcam_screenshot_id` and ZIP filename schema.
+- [x] Standardize multipart field name `webcam_screenshot`.
+- [x] Standardize offline metadata `webcam_screenshot_id` and ZIP filename schema.
 
 ## 7) Tests & validation
 

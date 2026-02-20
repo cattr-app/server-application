@@ -165,9 +165,7 @@ export default {
                     render: (h, props) => {
                         return h(WebcamStateSelect, {
                             props: {
-                                value: store.getters['webcam/getCompanyStateWithOverrides'](
-                                    props.values.webcam_state,
-                                ),
+                                value: store.getters['webcam/getCompanyStateWithOverrides'](props.values.webcam_state),
                                 isDisabled: store.getters['webcam/isCompanyStateLocked'],
                                 hideIndexes: [0],
                             },

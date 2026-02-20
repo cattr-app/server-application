@@ -95,8 +95,7 @@ export function fieldsProvider() {
                     props: {
                         value: props.values.webcam_state,
                         isDisabled:
-                            store.getters['webcam/isUserStateLocked'] ||
-                            (props.values.webcam_state_locked && !isAdmin),
+                            store.getters['webcam/isUserStateLocked'] || (props.values.webcam_state_locked && !isAdmin),
                         hideIndexes: [0, 3],
                     },
                     on: {
