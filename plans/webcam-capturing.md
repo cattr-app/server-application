@@ -62,7 +62,7 @@ Migrations should follow the existing screenshots state migrations.
 - [x] Include a `webcam_screenshot_id` in offline interval payloads when webcam is present.
 
 ### 4.2 Offline screenshot upload
-- [ ] Add a webcam equivalent to `uploadOfflineScreenshots`:
+- [x] Add a webcam equivalent to `uploadOfflineScreenshots`:
   - Dedicated ZIP upload endpoint
   - Validate filename schema (user_id + webcam_screenshot_id)
   - Attach webcam screenshots and clear the ID after upload
