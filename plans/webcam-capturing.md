@@ -77,10 +77,10 @@ Migrations should follow the existing screenshots state migrations.
 - [x] Implement state override/locking behavior identical to screenshot controls.
 
 ### 5.2 Screenshots UI
-- [ ] Update `resources/frontend/core/components/Screenshot.vue` and `ScreenshotModal.vue`:
+- [x] Update `resources/frontend/core/components/Screenshot.vue` and `ScreenshotModal.vue`:
   - Add a toggle to switch between "Screen" and "Webcam".
   - Show "camera-off" if webcam image is missing.
-- [ ] Use new endpoints for image/thumbnail loading.
+- [x] Use new endpoints for image/thumbnail loading.
 
 ### 5.3 Store module
 - [ ] Add `resources/frontend/core/store/modules/webcam.js` similar to `screenshots.js`:

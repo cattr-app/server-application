@@ -242,6 +242,8 @@
     "change_password": "Change password",
     "screenshot": "Screenshot",
     "screenshots": "Screenshots",
+    "screen": "Screen",
+    "webcam": "Webcam",
     "manual_time": "Manual Time",
     "screenshots_interval": "Screenshots Interval",
     "computer_time_popup": "Inactivity Time Popup",
