@@ -80,3 +80,4 @@ erd.svg
 apidoc
 # ralphex progress logs
 .ralphex/progress/
+/storage/app/webcam/
