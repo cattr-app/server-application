@@ -2,6 +2,7 @@ import moment from 'moment-timezone';
 import TasksService from '@/services/resource/task.service';
 import UserService from '@/services/resource/user.service';
 import DashboardService from '_internal/Dashboard/services/dashboard.service';
+import { normalizeTimezone } from '@/utils/time';
 import _ from 'lodash';
 import Vue from 'vue';
 
@@ -10,7 +11,7 @@ const state = {
     intervals: {},
     tasks: {},
     users: [],
-    timezone: moment.tz.guess(),
+    timezone: normalizeTimezone(moment.tz.guess()),
 };
 
 const getters = {

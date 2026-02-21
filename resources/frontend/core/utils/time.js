@@ -726,6 +726,52 @@ export function getZones() {
     }));
 }
 
+/**
+ * Resolve a potentially deprecated IANA timezone name to a canonical name
+ * that is accepted by PHP's timezone validation.
+ *
+ * moment-timezone keeps a `_links` map of deprecated → canonical keys and a
+ * `_zones` map of all real (non-aliased) zones.  We follow the link chain
+ * until we reach a zone entry, then return the properly-cased name from
+ * moment's own list so it is guaranteed to be a valid IANA identifier.
+ *
+ * @param {string} timezone
+ * @returns {string}
+ */
+export function normalizeTimezone(timezone) {
+    if (!timezone || typeof timezone !== 'string') {
+        return timezone;
+    }
+
+    const toKey = tz => tz.toLowerCase().replace(/\//g, '_');
+
+    const zones = moment.tz._zones;
+    const links = moment.tz._links;
+
+    let key = toKey(timezone);
+
+    // If already canonical, return as-is
+    if (zones[key]) {
+        return timezone;
+    }
+
+    // Follow the link chain (guard against cycles)
+    const visited = new Set();
+    while (links[key] && !visited.has(key)) {
+        visited.add(key);
+        key = links[key];
+    }
+
+    if (zones[key]) {
+        // Find the properly-cased name from moment's name list
+        const canonical = moment.tz.names().find(n => toKey(n) === key);
+        return canonical || timezone;
+    }
+
+    // Fallback: return original if we couldn't resolve
+    return timezone;
+}
+
 export function getCountryName(iso) {
     return countryList[iso] ? countryList[iso] : iso;
 }

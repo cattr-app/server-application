@@ -22,6 +22,7 @@
 <script>
     import moment from 'moment-timezone';
     import vSelect from 'vue-select';
+    import { normalizeTimezone } from '@/utils/time';
 
     export default {
         props: {
@@ -53,7 +54,7 @@
                 set(option) {
                     if (!option) return;
 
-                    this.$emit('onTimezoneChange', option.value);
+                    this.$emit('onTimezoneChange', normalizeTimezone(option.value));
                 },
             },
             filtered() {
@@ -72,7 +73,7 @@
         },
         methods: {
             inputHandler(value) {
-                this.$emit('onTimezoneChange', value);
+                this.$emit('onTimezoneChange', normalizeTimezone(value));
             },
             async onOpen() {
                 if (this.hasNextPage) {
