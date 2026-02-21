@@ -28,6 +28,6 @@ class GenerateWebcamThumbnail implements ShouldQueue, ShouldBeUnique
 
     public function uniqueId(): string
     {
-        return optional($this->interval)->id ?: $this->interval;
+        return (string)(optional($this->interval)->id ?: $this->interval);
     }
 }

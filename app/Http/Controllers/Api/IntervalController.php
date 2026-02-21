@@ -594,7 +594,7 @@ class IntervalController extends ItemController
                         }
 
                         if ($mustCapture
-                            || ($optionalCapture && $interval->user->webcam_state !== WebcamState::FORBIDDEN)
+                            || ($optionalCapture && $interval->user->webcam_state === WebcamState::REQUIRED)
                         ) {
                             $webcamScreenshotService->saveWebcamScreenshot(Storage::path($webcamPath), $interval);
                             dispatch(static fn() => Storage::delete($webcamPath))->delay(now()->addMinute());
@@ -715,7 +715,7 @@ class IntervalController extends ItemController
         }
 
         if ($mustCapture
-            || ($optionalCapture && $interval->user->webcam_state !== WebcamState::FORBIDDEN)
+            || ($optionalCapture && $interval->user->webcam_state === WebcamState::REQUIRED)
         ) {
             $this->webcamScreenshotService->saveWebcamScreenshot($data['webcam_screenshot'], $interval);
         } else {

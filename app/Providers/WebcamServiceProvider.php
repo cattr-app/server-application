@@ -2,7 +2,8 @@
 
 namespace App\Providers;
 
-use App;
+use App\Contracts\WebcamScreenshotService;
+use App\Services\ProductionWebcamScreenshotService;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
 
@@ -11,13 +12,13 @@ class WebcamServiceProvider extends ServiceProvider implements DeferrableProvide
     public function register(): void
     {
         $this->app->bind(
-            App\Contracts\WebcamScreenshotService::class,
-            App\Services\ProductionWebcamScreenshotService::class
+            WebcamScreenshotService::class,
+            ProductionWebcamScreenshotService::class
         );
     }
 
     public function provides(): array
     {
-        return [App\Contracts\WebcamScreenshotService::class];
+        return [WebcamScreenshotService::class];
     }
 }
