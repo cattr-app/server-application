@@ -41,6 +41,10 @@ admin@cattr.app
 password
 ```
 
+```
+php artisan cattr:make:admin --email=you@example.com --password=yourpass --name="Your Name"
+```
+
 ### Run Local server
 
 Local server by default will be run as <http://127.0.0.1:8000>.
