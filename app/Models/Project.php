@@ -202,7 +202,7 @@ class Project extends Model
                 };
             },
             set: static fn ($value) => (string)ScreenshotsState::getNormalizedValue($value),
-        )->shouldCache();
+        );
     }
 
     protected function webcamState(): Attribute
@@ -217,6 +217,6 @@ class Project extends Model
                 };
             },
             set: static fn ($value) => (string)WebcamState::getNormalizedValue($value),
-        )->shouldCache();
+        );
     }
 }
