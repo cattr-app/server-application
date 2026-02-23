@@ -81,3 +81,4 @@ apidoc
 # ralphex progress logs
 .ralphex/progress/
 /storage/app/webcam/
+/.temp/
