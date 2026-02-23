@@ -173,8 +173,8 @@ class TimeInterval extends Model
     public function hasScreenshot(): Attribute
     {
         return Attribute::make(
-            get: static fn ($value) => !$value || Storage::exists(
-                app(ScreenshotService::class)->getScreenshotPath($value['id'])
+            get: static fn ($value, $attributes) => isset($attributes['id']) && Storage::exists(
+                app(ScreenshotService::class)->getScreenshotPath($attributes['id'])
             )
         )->shouldCache();
     }

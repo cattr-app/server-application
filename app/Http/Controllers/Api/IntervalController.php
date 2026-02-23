@@ -635,14 +635,17 @@ class IntervalController extends ItemController
 
     public function showThumbnail(ScreenshotRequest $request, TimeInterval $interval): BinaryFileResponse
     {
-        $path = $this->screenshotService->getThumbPath($interval);
-        if (!Storage::exists($path)) {
-            abort(404);
+        $thumbPath = $this->screenshotService->getThumbPath($interval);
+
+        if (!Storage::exists($thumbPath)) {
+            $screenshotPath = $this->screenshotService->getScreenshotPath($interval);
+            if (!Storage::exists($screenshotPath)) {
+                abort(404);
+            }
+            $this->screenshotService->createThumbnail($interval);
         }
 
-        $fullPath = Storage::path($path);
-
-        return response()->file($fullPath);
+        return response()->file(Storage::path($thumbPath));
     }
 
     public function putScreenshot(PutScreenshotRequest $request, TimeInterval $interval): JsonResponse
@@ -686,14 +689,17 @@ class IntervalController extends ItemController
 
     public function showWebcamThumbnail(ScreenshotRequest $request, TimeInterval $interval): BinaryFileResponse
     {
-        $path = $this->webcamScreenshotService->getWebcamThumbPath($interval);
-        if (!Storage::exists($path)) {
-            abort(404);
+        $thumbPath = $this->webcamScreenshotService->getWebcamThumbPath($interval);
+
+        if (!Storage::exists($thumbPath)) {
+            $webcamPath = $this->webcamScreenshotService->getWebcamPath($interval);
+            if (!Storage::exists($webcamPath)) {
+                abort(404);
+            }
+            $this->webcamScreenshotService->createWebcamThumbnail($interval);
         }
 
-        $fullPath = Storage::path($path);
-
-        return response()->file($fullPath);
+        return response()->file(Storage::path($thumbPath));
     }
 
     public function putWebcamScreenshot(PutWebcamScreenshotRequest $request, TimeInterval $interval): JsonResponse
