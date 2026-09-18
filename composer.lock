@@ -4,8 +4,62 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d40ad030e7def0c1ae14abe42e5a8859",
+    "content-hash": "edffb9306bb26b651361df0feb8e0759",
     "packages": [
+        {
+            "name": "arquivei/laravel-prometheus-exporter",
+            "version": "4.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/arquivei/laravel-prometheus-exporter.git",
+                "reference": "1fcf3d590a1d29ad2ad222d389274aad942b4888"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/arquivei/laravel-prometheus-exporter/zipball/1fcf3d590a1d29ad2ad222d389274aad942b4888",
+                "reference": "1fcf3d590a1d29ad2ad222d389274aad942b4888",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^7.4.2",
+                "illuminate/routing": "^10.0",
+                "illuminate/support": "^10.0",
+                "php": "^8.0 || ^8.1 || ^8.2",
+                "promphp/prometheus_client_php": "^2.6.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1.5.0",
+                "orchestra/testbench": "^8.5",
+                "phpunit/phpunit": "^9.5.20"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Arquivei\\LaravelPrometheusExporter\\": "src/",
+                    "Arquivei\\LaravelPrometheusExporter\\Tests\\": "tests/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Arquivei"
+                }
+            ],
+            "description": "A Prometheus exporter for Laravel and Lumen",
+            "support": {
+                "issues": "https://github.com/arquivei/laravel-prometheus-exporter/issues",
+                "source": "https://github.com/arquivei/laravel-prometheus-exporter/tree/4.1.0"
+            },
+            "time": "2025-04-10T17:14:53+00:00"
+        },
         {
             "name": "brick/math",
             "version": "0.11.0",
@@ -9388,59 +9442,6 @@
                 "source": "https://github.com/tijsverkoyen/CssToInlineStyles/tree/v2.2.7"
             },
             "time": "2023-12-08T13:03:43+00:00"
-        },
-        {
-            "name": "vermorag/laravel-prometheus-exporter",
-            "version": "4.1.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/vermorag/laravel-prometheus-exporter.git",
-                "reference": "f5c8f32edd08e850d00fcc2f8dcd7fed4cc08b6e"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/vermorag/laravel-prometheus-exporter/zipball/f5c8f32edd08e850d00fcc2f8dcd7fed4cc08b6e",
-                "reference": "f5c8f32edd08e850d00fcc2f8dcd7fed4cc08b6e",
-                "shasum": ""
-            },
-            "require": {
-                "guzzlehttp/guzzle": "^7.4.2",
-                "illuminate/routing": "^10.0 || ^11.0",
-                "illuminate/support": "^10.0 || ^11.0",
-                "php": "^8.0 || ^8.1 || ^8.2",
-                "promphp/prometheus_client_php": "^2.6.0"
-            },
-            "require-dev": {
-                "mockery/mockery": "^1.5.0",
-                "orchestra/testbench": "^8.5",
-                "phpunit/phpunit": "^9.5.20"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.0-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Arquivei\\LaravelPrometheusExporter\\": "src/",
-                    "Arquivei\\LaravelPrometheusExporter\\Tests\\": "tests/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Arquivei"
-                }
-            ],
-            "description": "A Prometheus exporter for Laravel and Lumen",
-            "support": {
-                "source": "https://github.com/vermorag/laravel-prometheus-exporter/tree/4.1.2"
-            },
-            "time": "2024-05-23T15:06:50+00:00"
         },
         {
             "name": "vlucas/phpdotenv",

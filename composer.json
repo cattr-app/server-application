@@ -42,7 +42,7 @@
     "spatie/temporary-directory": "^2.2",
     "staudenmeir/laravel-adjacency-list": "^1.19",
     "wikimedia/composer-merge-plugin": "^2.0",
-    "vermorag/laravel-prometheus-exporter": "^4.1"
+    "arquivei/laravel-prometheus-exporter": "^4.0"
   },
   "require-dev": {
     "barryvdh/laravel-ide-helper": "^2.13",
