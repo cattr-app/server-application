@@ -38,6 +38,7 @@ contents:
     - nodejs
     - yarn
     - openssh
+    - corepack
 
 environment:
   PATH: /usr/sbin:/sbin:/bin:/usr/bin:/app/node_modules/.bin
