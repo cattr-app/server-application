@@ -12,6 +12,7 @@ ARG APP_VERSION
 ARG APP_ENV=production
 ARG REVERB_SCHEME=http
 ARG REVERB_PORT=8080
+ARG COREPACK_VERSION=0.33.0
 ENV IMAGE_VERSION=5.0.0
 ENV APP_VERSION $APP_VERSION
 ENV SENTRY_DSN $SENTRY_DSN
@@ -37,6 +38,7 @@ RUN set -x && \
     php /usr/bin/composer.phar dump-autoload -n --optimize --apcu --classmap-authoritative
 
 RUN set -x && \
+    npm install --global "corepack@${COREPACK_VERSION}" && \
     corepack enable && \
     yarn install --immutable && \
     yarn prod && \
