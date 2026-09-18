@@ -37,7 +37,7 @@ RUN set -x && \
     php /usr/bin/composer.phar dump-autoload -n --optimize --apcu --classmap-authoritative
 
 RUN set -x && \
-    yarn && \
+    yarn install --immutable && \
     yarn prod && \
     rm -rf node_modules
 
