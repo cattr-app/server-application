@@ -2,12 +2,14 @@ contents:
   repositories:
     - https://dl-cdn.alpinelinux.org/alpine/v3.18/main
     - https://dl-cdn.alpinelinux.org/alpine/v3.18/community
+
   packages:
     - alpine-baselayout-data
     - ca-certificates-bundle
     - s6-overlay
     - supercronic
     - nginx
+
     - php82
     - php82-gd
     - php82-openssl
@@ -41,8 +43,10 @@ paths:
     permissions: 0o770
     uid: 10000
     gid: 10000
+
   - path: /run
     type: directory
+
   - path: /var/run
     type: symlink
     source: /run
@@ -53,17 +57,15 @@ accounts:
   groups:
     - groupname: www
       gid: 10000
+
   users:
     - username: www
       uid: 10000
+
   run-as: root
 
 entrypoint:
   command: /init
 
 archs:
-  - 'amd64'
-  - 'arm64'
-  - 'arm/v7'
-  - 's390x'
-
+  - amd64

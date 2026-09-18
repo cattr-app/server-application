@@ -23,16 +23,21 @@ env:
   BUILDER_CONFIG: build/base/builder/apko.yaml
   COREPACK_CONFIG: build/packages/corepack.yaml
 
+  # Increment when the base-image build process itself changes in a way
+  # that should invalidate previously built immutable images.
   IMAGE_BUILD_REVISION: '1'
 
 jobs:
   runtime-images:
     name: Prepare runtime images
+
     runs-on: ubuntu-24.04
     timeout-minutes: 60
 
     container:
       image: ghcr.io/wolfi-dev/sdk:latest
+
+      # Required by the bubblewrap runner used by Melange.
       options: --privileged
 
     defaults:
@@ -86,7 +91,7 @@ jobs:
 
           builder_files_hash="${{ hashFiles(
             'build/base/builder/**',
-            'build/packages/corepack.yml',
+            'build/packages/corepack.yaml',
             'build/base/rebuild'
           ) }}"
 
@@ -100,10 +105,8 @@ jobs:
             exit 1
           fi
 
-          # apko/melange versions are part of the image identity because
-          # changing the build tooling may change the resulting image.
-          apko_version="$(apko version | tr '\n' ' ')"
-          melange_version="$(melange version | tr '\n' ' ')"
+          apko_version="$(apko version 2>&1 | tr '\n' ' ')"
+          melange_version="$(melange version 2>&1 | tr '\n' ' ')"
 
           runtime_hash="$(
             printf '%s\n%s\n%s\n' \
@@ -137,6 +140,7 @@ jobs:
           echo "Builder image:"
           echo "  ${RUNTIME_IMAGE}:${builder_tag}"
 
+      # server-runtime is public, so deliberately check anonymously.
       - name: Check existing runtime images
         id: check
         env:
@@ -181,12 +185,12 @@ jobs:
             "${COREPACK_CONFIG}" \
             --runner bubblewrap \
             --arch x86_64 \
-            --arch aarch64 \
-            --arch armv7 \
-            --arch s390x \
             --out-dir "${PACKAGE_REPOSITORY}" \
             --signing-key "${MELANGE_PRIVATE_KEY}" \
-            --namespace cattr
+            --namespace cattr \
+            --license MIT \
+            --git-repo-url "https://github.com/${GITHUB_REPOSITORY}" \
+            --git-commit "${GITHUB_SHA}"
 
           echo "Generated APK repository:"
 
@@ -195,8 +199,8 @@ jobs:
             -type f \
             -print
 
-      # setup-crane has already authenticated crane to GHCR using github.token.
-      # apko can use the same standard registry credentials.
+      # setup-crane authenticates against GHCR using github.token.
+      # apko reads the same standard registry credentials.
       - name: Build and publish runtime image
         if: steps.check.outputs.runtime_exists != 'true'
         env:
@@ -255,9 +259,9 @@ jobs:
             "${RUNTIME_IMAGE}:${BUILDER_TAG}" \
             builder-latest
 
-
   application:
     name: Build server
+
     runs-on: ubuntu-24.04
     timeout-minutes: 60
 
@@ -266,17 +270,9 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
-
-      - name: Show container tooling versions
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          buildah --version
-          podman --version
 
       - name: Prepare release metadata
         id: release
@@ -310,6 +306,9 @@ jobs:
           tags: |
             ${{ github.ref_name }}
             latest
+
+          # Cattr images are intentionally linux/amd64 only.
+          arch: amd64
 
           build-args: |
             APP_VERSION=${{ steps.release.outputs.version }}

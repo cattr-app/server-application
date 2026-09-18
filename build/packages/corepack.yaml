@@ -2,7 +2,11 @@ package:
   name: corepack
   version: 0.33.0
   epoch: 0
+
   description: Corepack package manager bridge for Node.js
+
+  target-architecture:
+    - x86_64
 
   copyright:
     - license: MIT
@@ -35,7 +39,9 @@ pipeline:
       module_dir="${{targets.destdir}}/usr/lib/node_modules/corepack"
       bin_dir="${{targets.destdir}}/usr/bin"
 
-      mkdir -p "${module_dir}" "${bin_dir}"
+      mkdir -p \
+        "${module_dir}" \
+        "${bin_dir}"
 
       cp -a \
         package.json \
@@ -50,19 +56,24 @@ pipeline:
         "${module_dir}/dist/yarn.js" \
         "${module_dir}/dist/yarnpkg.js"
 
-      ln -s ../lib/node_modules/corepack/dist/corepack.js \
+      ln -s \
+        ../lib/node_modules/corepack/dist/corepack.js \
         "${bin_dir}/corepack"
 
-      ln -s ../lib/node_modules/corepack/dist/pnpm.js \
+      ln -s \
+        ../lib/node_modules/corepack/dist/pnpm.js \
         "${bin_dir}/pnpm"
 
-      ln -s ../lib/node_modules/corepack/dist/pnpx.js \
+      ln -s \
+        ../lib/node_modules/corepack/dist/pnpx.js \
         "${bin_dir}/pnpx"
 
-      ln -s ../lib/node_modules/corepack/dist/yarn.js \
+      ln -s \
+        ../lib/node_modules/corepack/dist/yarn.js \
         "${bin_dir}/yarn"
 
-      ln -s ../lib/node_modules/corepack/dist/yarnpkg.js \
+      ln -s \
+        ../lib/node_modules/corepack/dist/yarnpkg.js \
         "${bin_dir}/yarnpkg"
 
 test:
@@ -78,4 +89,6 @@ test:
   pipeline:
     - name: Check Corepack
       runs: |
-        corepack --version | grep -Fx '0.33.0'
+        set -eu
+
+        test "$(corepack --version)" = "0.33.0"
