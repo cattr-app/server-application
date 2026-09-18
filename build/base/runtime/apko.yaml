@@ -61,12 +61,6 @@ accounts:
 entrypoint:
   command: /init
 
-os-release:
-  id: alpine
-  version-id: '3.18.0'
-  name: 'Alpine Slim'
-  pretty-name: 'Alpine Slim (apko)'
-
 archs:
   - 'amd64'
   - 'arm64'
