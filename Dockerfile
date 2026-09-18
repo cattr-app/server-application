@@ -38,8 +38,6 @@ RUN set -x && \
     php /usr/bin/composer.phar dump-autoload -n --optimize --apcu --classmap-authoritative
 
 RUN set -x && \
-    yarn global add "corepack@${COREPACK_VERSION}" --prefix /usr/local && \
-    corepack enable && \
     yarn install --immutable && \
     yarn prod && \
     rm -rf node_modules

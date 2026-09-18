@@ -1,0 +1,81 @@
+package:
+  name: corepack
+  version: 0.33.0
+  epoch: 0
+  description: Corepack package manager bridge for Node.js
+
+  copyright:
+    - license: MIT
+
+  dependencies:
+    runtime:
+      - nodejs>=18.17.1
+
+environment:
+  contents:
+    repositories:
+      - https://dl-cdn.alpinelinux.org/alpine/v3.18/main
+      - https://dl-cdn.alpinelinux.org/alpine/v3.18/community
+
+    packages:
+      - busybox
+      - ca-certificates-bundle
+
+pipeline:
+  - uses: fetch
+    with:
+      uri: https://registry.npmjs.org/corepack/-/corepack-${{package.version}}.tgz
+      expected-sha512: 5d25f804d8ddc0f5e350493bff6af4bc586cd62af056770944cca3cc37a5dcf54a5a71d05de85c897d1692f0eb775ba32cb14945ef057996fd0120aa06d17f38
+      delete: "true"
+
+  - name: Install Corepack
+    runs: |
+      set -eu
+
+      module_dir="${{targets.destdir}}/usr/lib/node_modules/corepack"
+      bin_dir="${{targets.destdir}}/usr/bin"
+
+      mkdir -p "${module_dir}" "${bin_dir}"
+
+      cp -a \
+        package.json \
+        LICENSE.md \
+        dist \
+        "${module_dir}/"
+
+      chmod 0755 \
+        "${module_dir}/dist/corepack.js" \
+        "${module_dir}/dist/pnpm.js" \
+        "${module_dir}/dist/pnpx.js" \
+        "${module_dir}/dist/yarn.js" \
+        "${module_dir}/dist/yarnpkg.js"
+
+      ln -s ../lib/node_modules/corepack/dist/corepack.js \
+        "${bin_dir}/corepack"
+
+      ln -s ../lib/node_modules/corepack/dist/pnpm.js \
+        "${bin_dir}/pnpm"
+
+      ln -s ../lib/node_modules/corepack/dist/pnpx.js \
+        "${bin_dir}/pnpx"
+
+      ln -s ../lib/node_modules/corepack/dist/yarn.js \
+        "${bin_dir}/yarn"
+
+      ln -s ../lib/node_modules/corepack/dist/yarnpkg.js \
+        "${bin_dir}/yarnpkg"
+
+test:
+  environment:
+    contents:
+      repositories:
+        - https://dl-cdn.alpinelinux.org/alpine/v3.18/main
+        - https://dl-cdn.alpinelinux.org/alpine/v3.18/community
+
+      packages:
+        - nodejs
+
+  pipeline:
+    - name: Check Corepack
+      runs: |
+        corepack --version | grep -Fx '0.33.0'

@@ -21,25 +21,23 @@ env:
 
   RUNTIME_CONFIG: build/base/runtime/apko.yaml
   BUILDER_CONFIG: build/base/builder/apko.yaml
+  COREPACK_CONFIG: build/packages/corepack.yml
 
-  # Increment when the runtime image build process changes in a way
-  # that should invalidate previously built images.
   IMAGE_BUILD_REVISION: '1'
-
-  # Increment when the build-tools installation/cache layout changes.
-  TOOLS_CACHE_REVISION: '1'
-
-  APKO_VERSION: '1.4.3'
-  APKO_SHA256: '4e44cc93b7e09bdb1e52c69c9758c2240459709db01a3148de6674054ca79b78'
-
-  CRANE_VERSION: '0.22.1'
-  CRANE_SHA256: '0ab7a1d6932a213aed964ce97666c3077fe691c8606413674a8b3e0b9ec4cda0'
 
 jobs:
   runtime-images:
     name: Prepare runtime images
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+
+    container:
+      image: ghcr.io/wolfi-dev/sdk:latest
+      options: --privileged
+
+    defaults:
+      run:
+        shell: bash
 
     outputs:
       image: ${{ steps.meta.outputs.image }}
@@ -48,160 +46,99 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
 
-      - name: Cache build tools
-        id: tools_cache
-        uses: actions/cache@v6.1.0
+      - name: Setup crane
+        uses: imjasonh/setup-crane@v0.7
         with:
-          path: |
-            ~/.local/bin/apko
-            ~/.local/bin/crane
-          key: container-tools-${{ env.TOOLS_CACHE_REVISION }}-${{ runner.os }}-${{ runner.arch }}-apko-${{ env.APKO_VERSION }}-${{ env.APKO_SHA256 }}-crane-${{ env.CRANE_VERSION }}-${{ env.CRANE_SHA256 }}
-
-      - name: Install build tools
-        if: steps.tools_cache.outputs.cache-hit != 'true'
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-
-          BIN_DIR="${HOME}/.local/bin"
-          DOWNLOAD_DIR="${RUNNER_TEMP}/container-tools"
-
-          mkdir -p "${BIN_DIR}" "${DOWNLOAD_DIR}"
-
-          APKO_ARCHIVE="${DOWNLOAD_DIR}/apko_${APKO_VERSION}_linux_amd64.tar.gz"
-          CRANE_ARCHIVE="${DOWNLOAD_DIR}/go-containerregistry_Linux_x86_64.tar.gz"
-
-          echo "Downloading apko ${APKO_VERSION}..."
-
-          gh release download \
-            "v${APKO_VERSION}" \
-            --repo chainguard-dev/apko \
-            --pattern "apko_${APKO_VERSION}_linux_amd64.tar.gz" \
-            --dir "${DOWNLOAD_DIR}"
-
-          echo "${APKO_SHA256}  ${APKO_ARCHIVE}" |
-            sha256sum --check -
-
-          tar \
-            --extract \
-            --gzip \
-            --file "${APKO_ARCHIVE}" \
-            --directory "${BIN_DIR}" \
-            --strip-components=1 \
-            "apko_${APKO_VERSION}_linux_amd64/apko"
-
-          echo "Downloading crane ${CRANE_VERSION}..."
-
-          gh release download \
-            "v${CRANE_VERSION}" \
-            --repo google/go-containerregistry \
-            --pattern "go-containerregistry_Linux_x86_64.tar.gz" \
-            --dir "${DOWNLOAD_DIR}"
-
-          echo "${CRANE_SHA256}  ${CRANE_ARCHIVE}" |
-            sha256sum --check -
-
-          tar \
-            --extract \
-            --gzip \
-            --file "${CRANE_ARCHIVE}" \
-            --directory "${BIN_DIR}" \
-            crane
-
-          chmod 0755 \
-            "${BIN_DIR}/apko" \
-            "${BIN_DIR}/crane"
-
-      - name: Add build tools to PATH
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          chmod 0755 \
-            "${HOME}/.local/bin/apko" \
-            "${HOME}/.local/bin/crane"
-
-          echo "${HOME}/.local/bin" >> "${GITHUB_PATH}"
+          version: v0.22.1
 
       - name: Show build tool versions
-        shell: bash
         run: |
           set -euo pipefail
 
           apko version
+          melange version
           crane version
 
       - name: Calculate runtime image tags
         id: meta
-        shell: bash
         run: |
           set -euo pipefail
 
-          if [[ ! -f "${RUNTIME_CONFIG}" ]]; then
-            echo "::error::Runtime apko config not found: ${RUNTIME_CONFIG}"
-            exit 1
-          fi
+          for file in \
+            "${RUNTIME_CONFIG}" \
+            "${BUILDER_CONFIG}" \
+            "${COREPACK_CONFIG}"
+          do
+            if [[ ! -f "${file}" ]]; then
+              echo "::error::Required build configuration not found: ${file}"
+              exit 1
+            fi
+          done
 
-          if [[ ! -f "${BUILDER_CONFIG}" ]]; then
-            echo "::error::Builder apko config not found: ${BUILDER_CONFIG}"
-            exit 1
-          fi
+          runtime_files_hash="${{ hashFiles(
+            'build/base/runtime/**',
+            'build/base/rebuild'
+          ) }}"
 
-          RUNTIME_FILES_HASH="${{ hashFiles('build/base/runtime/**', 'build/base/rebuild') }}"
-          BUILDER_FILES_HASH="${{ hashFiles('build/base/builder/**', 'build/base/rebuild') }}"
+          builder_files_hash="${{ hashFiles(
+            'build/base/builder/**',
+            'build/packages/corepack.yml',
+            'build/base/rebuild'
+          ) }}"
 
-          if [[ -z "${RUNTIME_FILES_HASH}" ]]; then
+          if [[ -z "${runtime_files_hash}" ]]; then
             echo "::error::Unable to calculate runtime configuration hash"
             exit 1
           fi
 
-          if [[ -z "${BUILDER_FILES_HASH}" ]]; then
+          if [[ -z "${builder_files_hash}" ]]; then
             echo "::error::Unable to calculate builder configuration hash"
             exit 1
           fi
 
-          RUNTIME_HASH="$(
+          # apko/melange versions are part of the image identity because
+          # changing the build tooling may change the resulting image.
+          apko_version="$(apko version | tr '\n' ' ')"
+          melange_version="$(melange version | tr '\n' ' ')"
+
+          runtime_hash="$(
             printf '%s\n%s\n%s\n' \
               "${IMAGE_BUILD_REVISION}" \
-              "${APKO_VERSION}" \
-              "${RUNTIME_FILES_HASH}" |
+              "${apko_version}" \
+              "${runtime_files_hash}" |
               sha256sum |
-              cut --delimiter=' ' --fields=1
+              cut -d' ' -f1
           )"
 
-          BUILDER_HASH="$(
-            printf '%s\n%s\n%s\n' \
+          builder_hash="$(
+            printf '%s\n%s\n%s\n%s\n' \
               "${IMAGE_BUILD_REVISION}" \
-              "${APKO_VERSION}" \
-              "${BUILDER_FILES_HASH}" |
+              "${apko_version}" \
+              "${melange_version}" \
+              "${builder_files_hash}" |
               sha256sum |
-              cut --delimiter=' ' --fields=1
+              cut -d' ' -f1
           )"
 
-          RUNTIME_TAG="runtime-${RUNTIME_HASH}"
-          BUILDER_TAG="builder-${BUILDER_HASH}"
+          runtime_tag="runtime-${runtime_hash}"
+          builder_tag="builder-${builder_hash}"
 
           echo "image=${RUNTIME_IMAGE}" >> "${GITHUB_OUTPUT}"
-          echo "runtime_tag=${RUNTIME_TAG}" >> "${GITHUB_OUTPUT}"
-          echo "builder_tag=${BUILDER_TAG}" >> "${GITHUB_OUTPUT}"
+          echo "runtime_tag=${runtime_tag}" >> "${GITHUB_OUTPUT}"
+          echo "builder_tag=${builder_tag}" >> "${GITHUB_OUTPUT}"
 
           echo "Runtime image:"
-          echo "  ${RUNTIME_IMAGE}:${RUNTIME_TAG}"
+          echo "  ${RUNTIME_IMAGE}:${runtime_tag}"
 
           echo "Builder image:"
-          echo "  ${RUNTIME_IMAGE}:${BUILDER_TAG}"
+          echo "  ${RUNTIME_IMAGE}:${builder_tag}"
 
-      # server-runtime is expected to be public, so existence checks
-      # deliberately happen before authentication.
       - name: Check existing runtime images
         id: check
-        shell: bash
         env:
           RUNTIME_TAG: ${{ steps.meta.outputs.runtime_tag }}
           BUILDER_TAG: ${{ steps.meta.outputs.builder_tag }}
@@ -224,42 +161,44 @@ jobs:
             echo "builder_exists=false" >> "${GITHUB_OUTPUT}"
           fi
 
-      - name: Install QEMU
-        if: >-
-          steps.check.outputs.runtime_exists != 'true' ||
-          steps.check.outputs.builder_exists != 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          sudo apt-get update
-
-          sudo apt-get install \
-            --yes \
-            --no-install-recommends \
-            qemu-user-static \
-            binfmt-support
-
-          sudo update-binfmts --enable
-
-      # Authentication is only required for registry writes.
-      # apko uses the standard registry credentials written by crane.
-      - name: Authenticate to GHCR
-        shell: bash
+      - name: Build Corepack APK repository
+        if: steps.check.outputs.builder_exists != 'true'
         env:
-          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MELANGE_PRIVATE_KEY: ${{ runner.temp }}/melange.rsa
+          PACKAGE_REPOSITORY: ${{ github.workspace }}/packages
         run: |
           set -euo pipefail
 
-          echo "${GHCR_TOKEN}" |
-            crane auth login \
-              ghcr.io \
-              --username "${GITHUB_ACTOR}" \
-              --password-stdin
+          rm -rf "${PACKAGE_REPOSITORY}"
 
+          rm -f \
+            "${MELANGE_PRIVATE_KEY}" \
+            "${MELANGE_PRIVATE_KEY}.pub"
+
+          melange keygen "${MELANGE_PRIVATE_KEY}"
+
+          melange build \
+            "${COREPACK_CONFIG}" \
+            --runner bubblewrap \
+            --arch x86_64 \
+            --arch aarch64 \
+            --arch armv7 \
+            --arch s390x \
+            --out-dir "${PACKAGE_REPOSITORY}" \
+            --signing-key "${MELANGE_PRIVATE_KEY}" \
+            --namespace cattr
+
+          echo "Generated APK repository:"
+
+          find "${PACKAGE_REPOSITORY}" \
+            -maxdepth 2 \
+            -type f \
+            -print
+
+      # setup-crane has already authenticated crane to GHCR using github.token.
+      # apko can use the same standard registry credentials.
       - name: Build and publish runtime image
         if: steps.check.outputs.runtime_exists != 'true'
-        shell: bash
         env:
           RUNTIME_TAG: ${{ steps.meta.outputs.runtime_tag }}
         run: |
@@ -277,15 +216,18 @@ jobs:
 
       - name: Build and publish builder image
         if: steps.check.outputs.builder_exists != 'true'
-        shell: bash
         env:
           BUILDER_TAG: ${{ steps.meta.outputs.builder_tag }}
+          MELANGE_PUBLIC_KEY: ${{ runner.temp }}/melange.rsa.pub
+          PACKAGE_REPOSITORY: ${{ github.workspace }}/packages
         run: |
           set -euo pipefail
 
           echo "Publishing ${RUNTIME_IMAGE}:${BUILDER_TAG}"
 
           apko publish \
+            --repository-append "${PACKAGE_REPOSITORY}" \
+            --keyring-append "${MELANGE_PUBLIC_KEY}" \
             "${BUILDER_CONFIG}" \
             "${RUNTIME_IMAGE}:${BUILDER_TAG}"
 
@@ -294,7 +236,6 @@ jobs:
             >/dev/null
 
       - name: Update runtime-latest
-        shell: bash
         env:
           RUNTIME_TAG: ${{ steps.meta.outputs.runtime_tag }}
         run: |
@@ -305,7 +246,6 @@ jobs:
             runtime-latest
 
       - name: Update builder-latest
-        shell: bash
         env:
           BUILDER_TAG: ${{ steps.meta.outputs.builder_tag }}
         run: |
@@ -314,6 +254,7 @@ jobs:
           crane tag \
             "${RUNTIME_IMAGE}:${BUILDER_TAG}" \
             builder-latest
+
 
   application:
     name: Build server
@@ -343,20 +284,18 @@ jobs:
         run: |
           set -euo pipefail
 
-          VERSION="${GITHUB_REF_NAME#v}"
+          version="${GITHUB_REF_NAME#v}"
 
-          if [[ -z "${VERSION}" ]]; then
+          if [[ -z "${version}" ]]; then
             echo "::error::Unable to determine application version"
             exit 1
           fi
 
-          echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
 
           echo "Release tag: ${GITHUB_REF_NAME}"
-          echo "Application version: ${VERSION}"
+          echo "Application version: ${version}"
 
-      # server-runtime is public, so Buildah can pull both images
-      # without GHCR credentials.
       - name: Build Cattr server
         id: build
         uses: redhat-actions/buildah-build@v3.1.0

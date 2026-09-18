@@ -36,7 +36,7 @@ contents:
     - git
     - composer
     - nodejs
-    - yarn
+    - npm
     - openssh
 
 environment:
