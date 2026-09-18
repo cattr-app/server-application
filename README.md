@@ -1,70 +1,82 @@
-## About Cattr
-Cattr is an open-source time tracking solution, designed to be flawlessly integrated with your infrastructure. 
-Superpowered with features like built-in screenshot capture and activity detection, it's a great instrument to boost 
-your team's performance straight to the top.
+# Cattr
 
-#### We have our own [Container Registry](https://git.amazingcat.net/cattr/core/app/container_registry/9?orderBy=NAME&sort=desc), the images are hosted on GitLab
+Self-hosted time tracking and project management platform with activity tracking,
+screenshots, reports, and a public API.
 
+[Website](https://cattr.app) ·
+[Demo](https://demo.cattr.app) ·
+[Documentation](https://docs.cattr.app) ·
+[Discussions](https://github.com/orgs/cattr-app/discussions)
 
-### Screenshots
-|           Dashboard           |           Project report           |
-|:-----------------------------:|:----------------------------------:|
-| ![](./examples/dashboard.jpg) | ![](./examples/project_report.jpg) |
+## Screenshots
 
-### Demo
-The demo app is available here: [demo.cattr.app](https://demo.cattr.app) 
+|                  Dashboard                   |                     Project report                     |
+|:--------------------------------------------:|:------------------------------------------------------:|
+| ![Cattr dashboard](./examples/dashboard.jpg) | ![Cattr project report](./examples/project_report.jpg) |
 
-## Install Cattr
-[Installation manual](https://docs.cattr.app/#/en/getting-started/?id=requirements) on the documentation website.
+## Features
 
-```
-composer install
-php artisan key:generate
-yarn
-```
+- Time tracking across projects and tasks
+- Project and task management
+- Screenshot and activity tracking
+- Dashboard and configurable reports
+- Offline synchronization
+- Team, user, and role management
+- Task comments and attachments
+- Public API
+- Extensible module system
 
-After should be edited `.env` file (e.g. for DB connection), look at `.env.example` for examples
+## Try Cattr
 
-```
-php artisan migrate --seed --seeder=InitialSeeder
-```
+A public demo is available at [demo.cattr.app](https://demo.cattr.app).
 
-App will not start without seeding of InitialSeeder
+## Installation
 
-After seeding it, run `php artisan cattr:make:admin` and you will be able to login with following credentials
-```
-admin@cattr.app
-password
-```
+Cattr is designed to run on your own infrastructure.
 
-### Run Local server
+See the [installation guide](https://docs.cattr.app/#/en/getting-started/)
+for requirements, deployment, and configuration.
 
-local server by default will be run as <http://127.0.0.1:8000>
+Container images are published to:
 
-```
-php artisan serve
-yarn dev
-```
+`ghcr.io/cattr-app/server`
 
-### Generate IDE helpers
+## API
 
-```
-composer dumphelpers
-composer dumperd
-```
+Cattr provides an HTTP API for projects, tasks, users, time intervals,
+screenshots, reports, company settings, attachments, and offline synchronization.
 
-## Links
+See the [API documentation](https://api.docs.cattr.app).
 
-https://git.amazingcat.net/cattr/desktop/desktop-application – Cattr Desktop Application. You can also download the built app for
-any OS from the [official site](https://cattr.app/desktop/).
+## Desktop application
 
-### Documentation
+The Cattr desktop client provides native time tracking and activity collection.
 
-You can find the Cattr documentation [on the website](https://docs.cattr.app).
+- [Source code](https://github.com/cattr-app/desktop-application)
+- [Downloads](https://cattr.app/desktop/)
 
-Checkout the [Getting Started](https://docs.cattr.app/#/en/getting-started/) page for a quick overview.
+## Development
 
-### Questions
+Interested in contributing or building Cattr locally?
 
-For questions and support please use the [Github Discussions](https://github.com/orgs/cattr-app/discussions). 
+See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
+## Documentation
+
+- [User Guide](https://docs.cattr.app)
+- [API Reference](https://api.docs.cattr.app)
+- [Backend Documentation](https://backend.docs.cattr.app)
+- [Frontend Documentation](https://frontend.docs.cattr.app)
+
+## Community
+
+For questions and general discussion, use
+[GitHub Discussions](https://github.com/orgs/cattr-app/discussions).
+
+For bugs and feature requests, use
+[GitHub Issues](https://github.com/cattr-app/server-application/issues).
+
+## License
+
+Cattr Server is distributed under the
+[Server Side Public License 1.0](./LICENSE).

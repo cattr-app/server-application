@@ -8,6 +8,9 @@ on:
 permissions:
   contents: read
   packages: write
+  id-token: write
+  attestations: write
+  artifact-metadata: write
 
 concurrency:
   group: release-${{ github.repository }}
@@ -25,7 +28,24 @@ env:
 
   # Increment when the base-image build process itself changes in a way
   # that should invalidate previously built immutable images.
-  IMAGE_BUILD_REVISION: '1'
+  IMAGE_BUILD_REVISION: '2'
+
+  # OCI image metadata.
+  #
+  # org.opencontainers.image.* keys are OCI annotations. apko also mirrors
+  # them into image config labels for compatibility with label-based tooling.
+  OCI_SOURCE: https://github.com/cattr-app/server-application
+  OCI_VENDOR: Cattr
+
+  SERVER_DESCRIPTION: >-
+    Cattr server application - self-hosted time tracking with project management,
+    reports, screenshots, activity tracking and public API
+
+  RUNTIME_DESCRIPTION: >-
+    Cattr server runtime image with PHP 8.2, Nginx and required runtime dependencies
+
+  BUILDER_DESCRIPTION: >-
+    Cattr server build image with PHP 8.2, Composer, Node.js and Corepack
 
 jobs:
   runtime-images:
@@ -51,9 +71,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0
 
       - name: Setup crane
         uses: imjasonh/setup-crane@v0.7
@@ -68,7 +89,7 @@ jobs:
           melange version
           crane version
 
-      - name: Calculate runtime image tags
+      - name: Calculate runtime image metadata
         id: meta
         run: |
           set -euo pipefail
@@ -108,21 +129,61 @@ jobs:
           apko_version="$(apko version 2>&1 | tr '\n' ' ')"
           melange_version="$(melange version 2>&1 | tr '\n' ' ')"
 
+          # Keep the OCI revision of immutable base images tied to the last
+          # commit that actually changed their build inputs, rather than to
+          # every unrelated Cattr application release.
+          runtime_revision="$(
+            git log \
+              -1 \
+              --format='%H' \
+              -- \
+              "${RUNTIME_CONFIG}" \
+              build/base/rebuild
+          )"
+
+          builder_revision="$(
+            git log \
+              -1 \
+              --format='%H' \
+              -- \
+              "${BUILDER_CONFIG}" \
+              "${COREPACK_CONFIG}" \
+              build/base/rebuild
+          )"
+
+          if [[ -z "${runtime_revision}" ]]; then
+            echo "::error::Unable to determine runtime source revision"
+            exit 1
+          fi
+
+          if [[ -z "${builder_revision}" ]]; then
+            echo "::error::Unable to determine builder source revision"
+            exit 1
+          fi
+
+          # Static OCI metadata is part of the image identity as changing it
+          # changes the resulting OCI manifest/config digest.
           runtime_hash="$(
-            printf '%s\n%s\n%s\n' \
+            printf '%s\n%s\n%s\n%s\n%s\n%s\n' \
               "${IMAGE_BUILD_REVISION}" \
               "${apko_version}" \
-              "${runtime_files_hash}" |
+              "${runtime_files_hash}" \
+              "${OCI_SOURCE}" \
+              "${OCI_VENDOR}" \
+              "${RUNTIME_DESCRIPTION}" |
               sha256sum |
               cut -d' ' -f1
           )"
 
           builder_hash="$(
-            printf '%s\n%s\n%s\n%s\n' \
+            printf '%s\n%s\n%s\n%s\n%s\n%s\n%s\n' \
               "${IMAGE_BUILD_REVISION}" \
               "${apko_version}" \
               "${melange_version}" \
-              "${builder_files_hash}" |
+              "${builder_files_hash}" \
+              "${OCI_SOURCE}" \
+              "${OCI_VENDOR}" \
+              "${BUILDER_DESCRIPTION}" |
               sha256sum |
               cut -d' ' -f1
           )"
@@ -131,8 +192,12 @@ jobs:
           builder_tag="builder-${builder_hash}"
 
           echo "image=${RUNTIME_IMAGE}" >> "${GITHUB_OUTPUT}"
+
           echo "runtime_tag=${runtime_tag}" >> "${GITHUB_OUTPUT}"
+          echo "runtime_revision=${runtime_revision}" >> "${GITHUB_OUTPUT}"
+
           echo "builder_tag=${builder_tag}" >> "${GITHUB_OUTPUT}"
+          echo "builder_revision=${builder_revision}" >> "${GITHUB_OUTPUT}"
 
           echo "Runtime image:"
           echo "  ${RUNTIME_IMAGE}:${runtime_tag}"
@@ -140,7 +205,6 @@ jobs:
           echo "Builder image:"
           echo "  ${RUNTIME_IMAGE}:${builder_tag}"
 
-      # server-runtime is public, so deliberately check anonymously.
       - name: Check existing runtime images
         id: check
         env:
@@ -189,7 +253,7 @@ jobs:
             --signing-key "${MELANGE_PRIVATE_KEY}" \
             --namespace cattr \
             --license MIT \
-            --git-repo-url "https://github.com/${GITHUB_REPOSITORY}" \
+            --git-repo-url "${OCI_SOURCE}" \
             --git-commit "${GITHUB_SHA}"
 
           echo "Generated APK repository:"
@@ -199,29 +263,51 @@ jobs:
             -type f \
             -print
 
-      # setup-crane authenticates against GHCR using github.token.
-      # apko reads the same standard registry credentials.
       - name: Build and publish runtime image
+        id: publish_runtime
         if: steps.check.outputs.runtime_exists != 'true'
         env:
           RUNTIME_TAG: ${{ steps.meta.outputs.runtime_tag }}
+          RUNTIME_REVISION: ${{ steps.meta.outputs.runtime_revision }}
         run: |
           set -euo pipefail
 
           echo "Publishing ${RUNTIME_IMAGE}:${RUNTIME_TAG}"
 
           apko publish \
+            --vcs=false \
+            --annotations "org.opencontainers.image.source:${OCI_SOURCE}" \
+            --annotations "org.opencontainers.image.revision:${RUNTIME_REVISION}" \
+            --annotations "org.opencontainers.image.version:${RUNTIME_TAG}" \
+            --annotations "org.opencontainers.image.vendor:${OCI_VENDOR}" \
+            --annotations "org.opencontainers.image.description:${RUNTIME_DESCRIPTION}" \
             "${RUNTIME_CONFIG}" \
             "${RUNTIME_IMAGE}:${RUNTIME_TAG}"
 
-          crane manifest \
-            "${RUNTIME_IMAGE}:${RUNTIME_TAG}" \
-            >/dev/null
+          digest="$(
+            crane digest "${RUNTIME_IMAGE}:${RUNTIME_TAG}"
+          )"
+
+          echo "Published:"
+          echo "  ${RUNTIME_IMAGE}:${RUNTIME_TAG}@${digest}"
+
+          echo "digest=${digest}" >> "${GITHUB_OUTPUT}"
+
+      - name: Attest runtime image
+        if: steps.check.outputs.runtime_exists != 'true'
+        uses: actions/attest@v4
+        with:
+          subject-name: ${{ env.RUNTIME_IMAGE }}
+          subject-digest: ${{ steps.publish_runtime.outputs.digest }}
+          subject-version: ${{ steps.meta.outputs.runtime_tag }}
+          push-to-registry: true
 
       - name: Build and publish builder image
+        id: publish_builder
         if: steps.check.outputs.builder_exists != 'true'
         env:
           BUILDER_TAG: ${{ steps.meta.outputs.builder_tag }}
+          BUILDER_REVISION: ${{ steps.meta.outputs.builder_revision }}
           MELANGE_PUBLIC_KEY: ${{ runner.temp }}/melange.rsa.pub
           PACKAGE_REPOSITORY: ${{ github.workspace }}/packages
         run: |
@@ -230,14 +316,34 @@ jobs:
           echo "Publishing ${RUNTIME_IMAGE}:${BUILDER_TAG}"
 
           apko publish \
+            --vcs=false \
             --repository-append "${PACKAGE_REPOSITORY}" \
             --keyring-append "${MELANGE_PUBLIC_KEY}" \
+            --annotations "org.opencontainers.image.source:${OCI_SOURCE}" \
+            --annotations "org.opencontainers.image.revision:${BUILDER_REVISION}" \
+            --annotations "org.opencontainers.image.version:${BUILDER_TAG}" \
+            --annotations "org.opencontainers.image.vendor:${OCI_VENDOR}" \
+            --annotations "org.opencontainers.image.description:${BUILDER_DESCRIPTION}" \
             "${BUILDER_CONFIG}" \
             "${RUNTIME_IMAGE}:${BUILDER_TAG}"
 
-          crane manifest \
-            "${RUNTIME_IMAGE}:${BUILDER_TAG}" \
-            >/dev/null
+          digest="$(
+            crane digest "${RUNTIME_IMAGE}:${BUILDER_TAG}"
+          )"
+
+          echo "Published:"
+          echo "  ${RUNTIME_IMAGE}:${BUILDER_TAG}@${digest}"
+
+          echo "digest=${digest}" >> "${GITHUB_OUTPUT}"
+
+      - name: Attest builder image
+        if: steps.check.outputs.builder_exists != 'true'
+        uses: actions/attest@v4
+        with:
+          subject-name: ${{ env.RUNTIME_IMAGE }}
+          subject-digest: ${{ steps.publish_builder.outputs.digest }}
+          subject-version: ${{ steps.meta.outputs.builder_tag }}
+          push-to-registry: true
 
       - name: Update runtime-latest
         env:
@@ -270,7 +376,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
 
@@ -310,6 +416,9 @@ jobs:
           # Cattr images are intentionally linux/amd64 only.
           arch: amd64
 
+          # org.opencontainers.image.* metadata is emitted as OCI annotations.
+          oci: true
+
           build-args: |
             APP_VERSION=${{ steps.release.outputs.version }}
             SENTRY_DSN=${{ secrets.SENTRY_DSN }}
@@ -320,10 +429,12 @@ jobs:
             RUNTIME_BASE_IMAGE=${{ needs.runtime-images.outputs.image }}
             RUNTIME_BASE_IMAGE_TAG=${{ needs.runtime-images.outputs.runtime_tag }}
 
-          labels: |
-            org.opencontainers.image.source=https://github.com/${{ github.repository }}
-            org.opencontainers.image.version=${{ steps.release.outputs.version }}
+          annotations: |
+            org.opencontainers.image.source=${{ env.OCI_SOURCE }}
             org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ steps.release.outputs.version }}
+            org.opencontainers.image.vendor=${{ env.OCI_VENDOR }}
+            org.opencontainers.image.description=${{ env.SERVER_DESCRIPTION }}
 
           layers: true
 
@@ -339,12 +450,33 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # actions/attest needs standard OCI registry credentials when
+      # push-to-registry is enabled.
+      - name: Login to GHCR for attestation
+        uses: docker/login-action@v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Attest Cattr server
+        uses: actions/attest@v4
+        with:
+          subject-name: ${{ env.REGISTRY_NAMESPACE }}/${{ env.APP_IMAGE }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          subject-version: ${{ steps.release.outputs.version }}
+          push-to-registry: true
+
       - name: Print published images
         shell: bash
         env:
           REGISTRY_PATHS: ${{ steps.push.outputs.registry-paths }}
+          DIGEST: ${{ steps.push.outputs.digest }}
         run: |
           set -euo pipefail
 
           echo "Published:"
           echo "${REGISTRY_PATHS}"
+
+          echo "Digest:"
+          echo "${DIGEST}"
