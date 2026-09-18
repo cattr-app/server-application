@@ -21,7 +21,7 @@ env:
 
   RUNTIME_CONFIG: build/base/runtime/apko.yaml
   BUILDER_CONFIG: build/base/builder/apko.yaml
-  COREPACK_CONFIG: build/packages/corepack.yml
+  COREPACK_CONFIG: build/packages/corepack.yaml
 
   IMAGE_BUILD_REVISION: '1'
 
