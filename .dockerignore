@@ -61,16 +61,12 @@ bootstrap/cache/*
 composer.phar
 
 /public/dist
-/resources/frontend/app/etc/modules.local.json
 /resources/frontend/app/generated
 /resources/template-apidoc
 
 /public/mix-manifest.json
 /public/mix-sri.json
 /public/fonts
-/public/images
-/public/vendor
-
 /public/sw.*
 /public/workbox*
 

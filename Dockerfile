@@ -1,5 +1,11 @@
 # syntax=docker/dockerfile:1-labs
-FROM registry.git.amazingcat.net/cattr/core/wolfi-os-image/cattr-dev:latest AS builder
+ARG BUILDER_BASE_IMAGE=ghcr.io/cattr-app/server-runtime
+ARG BUILDER_BASE_IMAGE_TAG=builder-latest
+
+ARG RUNTIME_BASE_IMAGE=ghcr.io/cattr-app/server-runtime
+ARG RUNTIME_BASE_IMAGE_TAG=runtime-latest
+
+FROM ${BUILDER_BASE_IMAGE}:${BUILDER_BASE_IMAGE_TAG} AS builder
 
 ARG SENTRY_DSN
 ARG APP_VERSION
@@ -41,7 +47,7 @@ RUN set -x && \
 RUN set -x && \
     php artisan storage:link
 
-FROM registry.git.amazingcat.net/cattr/core/wolfi-os-image/cattr:latest AS runtime
+FROM ${RUNTIME_BASE_IMAGE}:${RUNTIME_BASE_IMAGE_TAG} AS runtime
 
 ARG SENTRY_DSN
 ARG APP_VERSION

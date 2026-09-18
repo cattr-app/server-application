@@ -7,3 +7,5 @@
 *.woff2 filter=lfs diff=lfs merge=lfs -text
 *.ico filter=lfs diff=lfs merge=lfs -text
 *.min.js filter=lfs diff=lfs merge=lfs -text
+.husky/* text eol=lf
+*.sh text eol=lf

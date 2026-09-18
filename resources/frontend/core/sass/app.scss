@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css?family=Nunito&display=swap&subset=cyrillic');
 
 /** first import the vendor css to be able to overwrite them **/
-@import '@cattr/ui-kit/src/stylesheet/src/index';
+@import '@amazingcat/cattr-ui/src/stylesheet/src/index';
 
 @import '~vue2-datepicker/index.css';
 @import '~vue-multiselect/dist/vue-multiselect.min.css';

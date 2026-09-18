@@ -1,0 +1,411 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: release-${{ github.repository }}
+  cancel-in-progress: false
+
+env:
+  REGISTRY_NAMESPACE: ghcr.io/cattr-app
+
+  APP_IMAGE: server
+  RUNTIME_IMAGE: ghcr.io/cattr-app/server-runtime
+
+  RUNTIME_CONFIG: build/base/runtime/apko.yaml
+  BUILDER_CONFIG: build/base/builder/apko.yaml
+
+  # Increment when the image build procedure changes in a way that
+  # should invalidate previously built runtime/builder images.
+  IMAGE_BUILD_REVISION: '1'
+
+  APKO_VERSION: '1.4.3'
+  APKO_SHA256: '4e44cc93b7e09bdb1e52c69c9758c2240459709db01a3148de6674054ca79b78'
+
+  CRANE_VERSION: '0.22.1'
+  CRANE_SHA256: '0ab7a1d6932a213aed964ce97666c3077fe691c8606413674a8b3e0b9ec4cda0'
+
+jobs:
+  runtime-images:
+    name: Prepare runtime images
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
+      runtime_tag: ${{ steps.meta.outputs.runtime_tag }}
+      builder_tag: ${{ steps.meta.outputs.builder_tag }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Cache build tools
+        id: tools_cache
+        uses: actions/cache@v6.1.0
+        with:
+          path: |
+            ~/.local/bin/apko
+            ~/.local/bin/crane
+          key: >-
+            container-tools-${{ runner.os }}-${{ runner.arch }}-
+            apko-${{ env.APKO_VERSION }}-${{ env.APKO_SHA256 }}-
+            crane-${{ env.CRANE_VERSION }}-${{ env.CRANE_SHA256 }}
+
+      - name: Install build tools
+        if: steps.tools_cache.outputs.cache-hit != 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          BIN_DIR="${HOME}/.local/bin"
+          DOWNLOAD_DIR="${RUNNER_TEMP}/container-tools"
+
+          mkdir -p "${BIN_DIR}" "${DOWNLOAD_DIR}"
+
+          APKO_ARCHIVE="${DOWNLOAD_DIR}/apko_${APKO_VERSION}_linux_amd64.tar.gz"
+          CRANE_ARCHIVE="${DOWNLOAD_DIR}/go-containerregistry_Linux_x86_64.tar.gz"
+
+          echo "Downloading apko ${APKO_VERSION}..."
+
+          gh release download \
+            "v${APKO_VERSION}" \
+            --repo chainguard-dev/apko \
+            --pattern "apko_${APKO_VERSION}_linux_amd64.tar.gz" \
+            --dir "${DOWNLOAD_DIR}"
+
+          echo "${APKO_SHA256}  ${APKO_ARCHIVE}" |
+            sha256sum --check -
+
+          tar \
+            --extract \
+            --gzip \
+            --file "${APKO_ARCHIVE}" \
+            --directory "${BIN_DIR}" \
+            apko
+
+          echo "Downloading crane ${CRANE_VERSION}..."
+
+          gh release download \
+            "v${CRANE_VERSION}" \
+            --repo google/go-containerregistry \
+            --pattern "go-containerregistry_Linux_x86_64.tar.gz" \
+            --dir "${DOWNLOAD_DIR}"
+
+          echo "${CRANE_SHA256}  ${CRANE_ARCHIVE}" |
+            sha256sum --check -
+
+          tar \
+            --extract \
+            --gzip \
+            --file "${CRANE_ARCHIVE}" \
+            --directory "${BIN_DIR}" \
+            crane
+
+          chmod 0755 \
+            "${BIN_DIR}/apko" \
+            "${BIN_DIR}/crane"
+
+      - name: Add build tools to PATH
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          chmod 0755 \
+            "${HOME}/.local/bin/apko" \
+            "${HOME}/.local/bin/crane"
+
+          echo "${HOME}/.local/bin" >> "${GITHUB_PATH}"
+
+      - name: Show build tool versions
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          apko version
+          crane version
+
+      - name: Calculate runtime image tags
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ ! -f "${RUNTIME_CONFIG}" ]]; then
+            echo "::error::Runtime apko config not found: ${RUNTIME_CONFIG}"
+            exit 1
+          fi
+
+          if [[ ! -f "${BUILDER_CONFIG}" ]]; then
+            echo "::error::Builder apko config not found: ${BUILDER_CONFIG}"
+            exit 1
+          fi
+
+          RUNTIME_FILES_HASH="${{ hashFiles('build/base/runtime/**', 'build/base/rebuild') }}"
+          BUILDER_FILES_HASH="${{ hashFiles('build/base/builder/**', 'build/base/rebuild') }}"
+
+          if [[ -z "${RUNTIME_FILES_HASH}" ]]; then
+            echo "::error::Unable to calculate runtime configuration hash"
+            exit 1
+          fi
+
+          if [[ -z "${BUILDER_FILES_HASH}" ]]; then
+            echo "::error::Unable to calculate builder configuration hash"
+            exit 1
+          fi
+
+          RUNTIME_HASH="$(
+            printf '%s\n%s\n%s\n' \
+              "${IMAGE_BUILD_REVISION}" \
+              "${APKO_VERSION}" \
+              "${RUNTIME_FILES_HASH}" |
+              sha256sum |
+              cut --delimiter=' ' --fields=1
+          )"
+
+          BUILDER_HASH="$(
+            printf '%s\n%s\n%s\n' \
+              "${IMAGE_BUILD_REVISION}" \
+              "${APKO_VERSION}" \
+              "${BUILDER_FILES_HASH}" |
+              sha256sum |
+              cut --delimiter=' ' --fields=1
+          )"
+
+          RUNTIME_TAG="runtime-${RUNTIME_HASH}"
+          BUILDER_TAG="builder-${BUILDER_HASH}"
+
+          echo "image=${RUNTIME_IMAGE}" >> "${GITHUB_OUTPUT}"
+          echo "runtime_tag=${RUNTIME_TAG}" >> "${GITHUB_OUTPUT}"
+          echo "builder_tag=${BUILDER_TAG}" >> "${GITHUB_OUTPUT}"
+
+          echo "Runtime image:"
+          echo "  ${RUNTIME_IMAGE}:${RUNTIME_TAG}"
+
+          echo "Builder image:"
+          echo "  ${RUNTIME_IMAGE}:${BUILDER_TAG}"
+
+      # The package is expected to be public, so existence checks
+      # intentionally happen before GHCR authentication.
+      - name: Check existing runtime images
+        id: check
+        shell: bash
+        env:
+          RUNTIME_TAG: ${{ steps.meta.outputs.runtime_tag }}
+          BUILDER_TAG: ${{ steps.meta.outputs.builder_tag }}
+        run: |
+          set -euo pipefail
+
+          if crane manifest "${RUNTIME_IMAGE}:${RUNTIME_TAG}" >/dev/null 2>&1; then
+            echo "Runtime image already exists."
+            echo "runtime_exists=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "Runtime image does not exist."
+            echo "runtime_exists=false" >> "${GITHUB_OUTPUT}"
+          fi
+
+          if crane manifest "${RUNTIME_IMAGE}:${BUILDER_TAG}" >/dev/null 2>&1; then
+            echo "Builder image already exists."
+            echo "builder_exists=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "Builder image does not exist."
+            echo "builder_exists=false" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Install QEMU
+        if: >-
+          steps.check.outputs.runtime_exists != 'true' ||
+          steps.check.outputs.builder_exists != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          sudo apt-get update
+
+          sudo apt-get install \
+            --yes \
+            --no-install-recommends \
+            qemu-user-static \
+            binfmt-support
+
+          sudo update-binfmts --enable
+
+      # Authentication is needed only for publish/tag operations.
+      # apko uses the standard registry credential store written by crane.
+      - name: Authenticate to GHCR
+        shell: bash
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          echo "${GHCR_TOKEN}" |
+            crane auth login \
+              ghcr.io \
+              --username "${GITHUB_ACTOR}" \
+              --password-stdin
+
+      - name: Build and publish runtime image
+        if: steps.check.outputs.runtime_exists != 'true'
+        shell: bash
+        env:
+          RUNTIME_TAG: ${{ steps.meta.outputs.runtime_tag }}
+        run: |
+          set -euo pipefail
+
+          echo "Publishing ${RUNTIME_IMAGE}:${RUNTIME_TAG}"
+
+          apko publish \
+            "${RUNTIME_CONFIG}" \
+            "${RUNTIME_IMAGE}:${RUNTIME_TAG}"
+
+          crane manifest \
+            "${RUNTIME_IMAGE}:${RUNTIME_TAG}" \
+            >/dev/null
+
+      - name: Build and publish builder image
+        if: steps.check.outputs.builder_exists != 'true'
+        shell: bash
+        env:
+          BUILDER_TAG: ${{ steps.meta.outputs.builder_tag }}
+        run: |
+          set -euo pipefail
+
+          echo "Publishing ${RUNTIME_IMAGE}:${BUILDER_TAG}"
+
+          apko publish \
+            "${BUILDER_CONFIG}" \
+            "${RUNTIME_IMAGE}:${BUILDER_TAG}"
+
+          crane manifest \
+            "${RUNTIME_IMAGE}:${BUILDER_TAG}" \
+            >/dev/null
+
+      - name: Update runtime-latest
+        shell: bash
+        env:
+          RUNTIME_TAG: ${{ steps.meta.outputs.runtime_tag }}
+        run: |
+          set -euo pipefail
+
+          crane tag \
+            "${RUNTIME_IMAGE}:${RUNTIME_TAG}" \
+            runtime-latest
+
+      - name: Update builder-latest
+        shell: bash
+        env:
+          BUILDER_TAG: ${{ steps.meta.outputs.builder_tag }}
+        run: |
+          set -euo pipefail
+
+          crane tag \
+            "${RUNTIME_IMAGE}:${BUILDER_TAG}" \
+            builder-latest
+
+  application:
+    name: Build server
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    needs:
+      - runtime-images
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Show container tooling versions
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          buildah --version
+          podman --version
+
+      - name: Prepare release metadata
+        id: release
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          VERSION="${GITHUB_REF_NAME#v}"
+
+          if [[ -z "${VERSION}" ]]; then
+            echo "::error::Unable to determine application version"
+            exit 1
+          fi
+
+          echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
+
+          echo "Release tag: ${GITHUB_REF_NAME}"
+          echo "Application version: ${VERSION}"
+
+      # server-runtime is public, so no GHCR login is required
+      # to pull the builder/runtime images.
+      - name: Build Cattr server
+        id: build
+        uses: redhat-actions/buildah-build@v3.1.0
+        with:
+          context: .
+
+          containerfiles: |
+            ./Dockerfile
+
+          image: ${{ env.APP_IMAGE }}
+
+          tags: |
+            ${{ github.ref_name }}
+            latest
+
+          build-args: |
+            APP_VERSION=${{ steps.release.outputs.version }}
+            SENTRY_DSN=${{ secrets.SENTRY_DSN }}
+
+            BUILDER_BASE_IMAGE=${{ needs.runtime-images.outputs.image }}
+            BUILDER_BASE_IMAGE_TAG=${{ needs.runtime-images.outputs.builder_tag }}
+
+            RUNTIME_BASE_IMAGE=${{ needs.runtime-images.outputs.image }}
+            RUNTIME_BASE_IMAGE_TAG=${{ needs.runtime-images.outputs.runtime_tag }}
+
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.version=${{ steps.release.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+
+          layers: true
+
+      - name: Push Cattr server
+        id: push
+        uses: redhat-actions/push-to-registry@v3.0.0
+        with:
+          image: ${{ steps.build.outputs.image }}
+          tags: ${{ steps.build.outputs.tags }}
+
+          registry: ${{ env.REGISTRY_NAMESPACE }}
+
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Print published images
+        shell: bash
+        env:
+          REGISTRY_PATHS: ${{ steps.push.outputs.registry-paths }}
+        run: |
+          set -euo pipefail
+
+          echo "Published:"
+          echo "${REGISTRY_PATHS}"

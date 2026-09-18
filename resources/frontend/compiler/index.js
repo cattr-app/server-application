@@ -25,6 +25,10 @@ module.exports = () => {
         );
     }
 
+    if (fs.existsSync(path.join(__dirname, '..', 'etc', 'modules.ci.json'))) {
+        moduleList = merge(moduleList, require(path.join(__dirname, '..', 'etc', 'modules.ci.json')));
+    }
+
     if (fs.existsSync(path.join(__dirname, '..', 'etc', 'modules.local.json'))) {
         moduleList = merge(moduleList, require(path.join(__dirname, '..', 'etc', 'modules.local.json')));
     }

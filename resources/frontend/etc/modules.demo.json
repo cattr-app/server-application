@@ -1,7 +1,0 @@
-{
-  "AmazingCat_Demo": {
-    "enabled": true,
-    "type": "package",
-    "ref": "@cattr/demo-module"
-  }
-}

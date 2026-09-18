@@ -1,12 +1,3 @@
 {
-  "AmazingCat_GitlabIntegration": {
-    "enabled": true,
-    "type": "package",
-    "ref": "@cattr/gitlab-integration"
-  },
-  "AmazingCat_RedmineIntegration": {
-    "enabled": true,
-    "type": "package",
-    "ref": "@cattr/redmine-integration"
-  }
+
 }

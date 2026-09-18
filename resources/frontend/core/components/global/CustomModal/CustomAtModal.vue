@@ -58,7 +58,7 @@
 </template>
 
 <script>
-    import { t } from '@cattr/ui-kit/src/locale';
+    import { t } from '@amazingcat/cattr-ui/src/locale';
 
     export default {
         name: 'custom-at-modal',

@@ -1,0 +1,75 @@
+contents:
+  repositories:
+    - https://dl-cdn.alpinelinux.org/alpine/v3.18/main
+    - https://dl-cdn.alpinelinux.org/alpine/v3.18/community
+  packages:
+    - alpine-baselayout-data
+    - ca-certificates-bundle
+    - s6-overlay
+    - supercronic
+    - nginx
+    - php82
+    - php82-gd
+    - php82-openssl
+    - php82-pdo_mysql
+    - php82-zip
+    - php82-mysqli
+    - php82-intl
+    - php82-session
+    - php82-exif
+    - php82-curl
+    - php82-xml
+    - php82-fileinfo
+    - php82-tokenizer
+    - php82-simplexml
+    - php82-dom
+    - php82-xmlwriter
+    - php82-xmlreader
+    - php82-iconv
+    - php82-posix
+    - php82-pecl-redis
+    - php82-pecl-apcu
+    - php82-pecl-swoole
+    - php82-pcntl
+
+environment:
+  PATH: /usr/sbin:/sbin:/usr/bin:/bin
+
+paths:
+  - path: /app
+    type: directory
+    permissions: 0o770
+    uid: 10000
+    gid: 10000
+  - path: /run
+    type: directory
+  - path: /var/run
+    type: symlink
+    source: /run
+
+work-dir: /app
+
+accounts:
+  groups:
+    - groupname: www
+      gid: 10000
+  users:
+    - username: www
+      uid: 10000
+  run-as: root
+
+entrypoint:
+  command: /init
+
+os-release:
+  id: alpine
+  version-id: '3.18.0'
+  name: 'Alpine Slim'
+  pretty-name: 'Alpine Slim (apko)'
+
+archs:
+  - 'amd64'
+  - 'arm64'
+  - 'arm/v7'
+  - 's390x'
+

@@ -7,10 +7,10 @@
   "support": {
     "email": "hi@cattr.app",
     "docs": "https://docs.cattr.app/backend#/",
-    "forum": "https://community.cattr.app/public/",
-    "issues": "https://git.amazingcat.net/cattr/core/app/-/issues",
+    "forum": "https://github.com/orgs/cattr-app/discussions",
+    "issues": "https://github.com/cattr-app/server-application/issues",
     "chat": "https://cattr.app",
-    "source": "https://git.amazingcat.net/cattr/core/app"
+    "source": "https://github.com/cattr-app/server-application"
   },
   "require": {
     "php": "~8.2",
