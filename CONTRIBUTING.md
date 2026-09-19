@@ -283,16 +283,16 @@ The production application is distributed as a single container containing the b
 
 Use the versions declared by the repository whenever possible.
 
-| Dependency | Version                                             |
-|------------|-----------------------------------------------------|
-| PHP        | 8.2                                                 |
-| Laravel    | 10.x                                                |
-| Node.js    | `.nvmrc`, currently 18.20                           |
-| Yarn       | `packageManager` in `package.json`, currently 3.8.7 |
-| Composer   | Composer 2                                          |
-| Database   | MySQL-compatible database                           |
+| Dependency | Version                                                    |
+|------------|------------------------------------------------------------|
+| PHP        | 8.2                                                        |
+| Laravel    | 10.x                                                       |
+| Node.js    | `.nvmrc`, currently 18.20                                  |
+| pnpm       | `packageManager` in `package.json`, currently 10.x         |
+| Composer   | Composer 2                                                 |
+| Database   | MySQL-compatible database                                  |
 
-Corepack is required to use the pinned Yarn version.
+Corepack is required to use the pnpm version pinned by the repository.
 
 The PHP installation must provide the extensions required by `composer.json`, including GD, JSON, OpenSSL, PDO, and ZIP. When using MySQL locally, the corresponding PDO MySQL driver is also required.
 
@@ -333,7 +333,7 @@ Enable Corepack and install frontend dependencies:
 
 ```bash
 corepack enable
-yarn install --immutable
+pnpm install --frozen-lockfile
 ```
 
 ## Database setup
@@ -396,7 +396,7 @@ php artisan serve
 Start the frontend watcher in another terminal:
 
 ```bash
-yarn watch
+pnpm watch
 ```
 
 The application is available by default at:
@@ -440,25 +440,25 @@ resources/frontend/
 Build once in development mode:
 
 ```bash
-yarn dev
+pnpm dev
 ```
 
 Watch source files:
 
 ```bash
-yarn watch
+pnpm watch
 ```
 
 Create a production frontend build:
 
 ```bash
-yarn prod
+pnpm prod
 ```
 
 Run frontend validation:
 
 ```bash
-yarn lint
+pnpm lint
 ```
 
 Frontend formatting is defined by `prettier.config.js`.
@@ -549,7 +549,7 @@ Coverage requires Xdebug with coverage mode enabled.
 Run frontend validation with:
 
 ```bash
-yarn lint
+pnpm lint
 ```
 
 Before submitting a contribution, run the tests and validation relevant to the changed code.
@@ -589,14 +589,20 @@ For example:
 composer require vendor/package
 ```
 
-Frontend dependencies are managed with Yarn.
+Frontend dependencies are managed with pnpm.
 
-Commit changes to `yarn.lock`.
+Commit changes to `pnpm-lock.yaml` together with dependency changes.
 
 For example:
 
 ```bash
-yarn add package
+pnpm add package
+```
+
+For development-only dependencies:
+
+```bash
+pnpm add -D package
 ```
 
 Do not manually edit lockfiles.
@@ -604,8 +610,12 @@ Do not manually edit lockfiles.
 Frontend dependency installation must remain reproducible with:
 
 ```bash
-yarn install --immutable
+pnpm install --frozen-lockfile
 ```
+
+The frontend workspace layout is defined in `pnpm-workspace.yaml`. Update it when adding or moving workspace packages.
+
+Do not rely on transitive dependencies being available at the project root. If Cattr imports a package directly, declare that package as a direct dependency or development dependency as appropriate.
 
 New production dependencies should be justified in the pull request description.
 
@@ -754,7 +764,7 @@ Corepack is packaged with Melange:
 build/packages/corepack.yaml
 ```
 
-The generated APK is added to the builder image.
+The generated APK is added to the builder image and is used to activate the pnpm version pinned by `package.json`.
 
 When changing base-image dependencies, modify the relevant apko or Melange configuration instead of installing additional system packages in the application Dockerfile unless there is a specific reason to do otherwise.
 

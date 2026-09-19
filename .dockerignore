@@ -21,7 +21,6 @@
 *.lock
 !composer.lock
 *-lock.json
-!yarn.lock
 *.phar
 _ide_helper.php
 .phpstorm.meta.php
@@ -49,14 +48,6 @@ Modules/*
 bootstrap/cache/*
 !bootstrap/cache/.gitkeep
 /public/vendor/
-
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
-.pnp.*
 
 composer.phar
 
