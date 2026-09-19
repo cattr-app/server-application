@@ -76,6 +76,10 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
+      - name: Configure Git safe directory
+        run: |
+          git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+
       - name: Setup crane
         uses: imjasonh/setup-crane@v0.7
         with:
@@ -343,7 +347,6 @@ jobs:
           subject-name: ${{ env.RUNTIME_IMAGE }}
           subject-digest: ${{ steps.publish_builder.outputs.digest }}
           subject-version: ${{ steps.meta.outputs.builder_tag }}
-          push-to-registry: true
 
       - name: Update runtime-latest
         env:
@@ -465,7 +468,6 @@ jobs:
           subject-name: ${{ env.REGISTRY_NAMESPACE }}/${{ env.APP_IMAGE }}
           subject-digest: ${{ steps.push.outputs.digest }}
           subject-version: ${{ steps.release.outputs.version }}
-          push-to-registry: true
 
       - name: Print published images
         shell: bash
