@@ -11,8 +11,8 @@ pages :
   only:
     - tags
   before_script:
-    - apk add yarn
-    - yarn
+    - corepack enable
+    - pnpm install
     - rm -rf public
     - mkdir public
   script:

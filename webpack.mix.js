@@ -61,6 +61,7 @@ mix.before(() => {
         resolve: {
             fallback: {
                 path: require.resolve('path-browserify'),
+                events: require.resolve('events/'),
             },
         },
     });
