@@ -296,8 +296,6 @@ Corepack is required to use the pinned Yarn version.
 
 The PHP installation must provide the extensions required by `composer.json`, including GD, JSON, OpenSSL, PDO, and ZIP. When using MySQL locally, the corresponding PDO MySQL driver is also required.
 
-Git LFS is recommended when working with repository assets. Images, fonts, icons, and several other binary formats are stored through Git LFS according to `.gitattributes`.
-
 ## Getting started
 
 Clone the repository:
@@ -305,13 +303,6 @@ Clone the repository:
 ```bash
 git clone https://github.com/cattr-app/server-application.git
 cd server-application
-```
-
-Initialize Git LFS:
-
-```bash
-git lfs install
-git lfs pull
 ```
 
 Create your local environment file:
@@ -805,18 +796,6 @@ web
 It should not be assumed to be a standalone development or production deployment configuration.
 
 For normal application development, use the local development setup described above unless working specifically on deployment or container infrastructure.
-
-## Assets and Git LFS
-
-The repository uses Git LFS for binary assets including images, fonts, icons, and other configured file types.
-
-Verify tracked files with:
-
-```bash
-git lfs ls-files
-```
-
-Avoid adding large binary files unless they are required by the application.
 
 ## Documentation
 
