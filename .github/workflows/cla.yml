@@ -28,6 +28,15 @@ jobs:
     secrets:
       CATTR_CLA_BOT_PRIVATE_KEY: ${{ secrets.CATTR_CLA_BOT_PRIVATE_KEY }}
 
+  check-comment:
+    if: >
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request != null &&
+      github.event.comment.body == '/cla-check'
+    uses: cattr-app/cla-actions/.github/workflows/check.yml@v1
+    secrets:
+      CATTR_CLA_BOT_PRIVATE_KEY: ${{ secrets.CATTR_CLA_BOT_PRIVATE_KEY }}
+
   sign:
     if: >
       github.event_name == 'issue_comment' &&
