@@ -1,53 +1,214 @@
-mysql:
-  asChart: true
+## @section Global parameters
+global:
+  ## @param global.storageClass Global StorageClass for Persistent Volume(s)
+  storageClass: ""
+  ## @param global.imagePullSecrets Global Docker registry secret names as an array
+  imagePullSecrets: []
 
-  auth:
-    database: "cattr"
-    username: "cattr"
-    password: "password"
+## @section Cattr parameters
+image:
+  ## @param image.registry Cattr image registry
+  registry: registry.git.amazingcat.net
+  ## @param image.repository Cattr image repository
+  repository: cattr/core/app
+  ## @param image.tag Cattr image tag (immutable tags are recommended)
+  tag: ""
+  ## @param image.pullPolicy Cattr image pull policy
+  pullPolicy: IfNotPresent
 
-app:
-  key: ""
-  replicas: 1
-  revisionHistoryLimit: 2
-  environment: "production"
-  persistence:
-    screenshots:
-        enabled: "true"
-        existingClaim: ""
-        storageClass: ""
-        accessModes:
-          - ReadWriteMany
-        size: 10Gi
-    attachments:
-        enabled: "true"
-        existingClaim: ""
-        storageClass: ""
-        accessModes:
-          - ReadWriteMany
-        size: 10Gi
-  env:
-    DB_HOST: "db"
-    DB_DATABASE: "cattr"
-    DB_USERNAME: "cattr"
-    DB_PASSWORD: "password"
-    APP_ADMIN_EMAIL: "admin@cattr.app"
-    APP_ADMIN_PASSWORD: "password"
-    APP_ADMIN_NAME: "Admin"
-  service:
-    type: ClusterIP
-    clusterIP: ""
-    loadBalancerIP: ""
-    externalTrafficPolicy: Cluster
-    nodePort: 80
-    port: 80
-  image:
-    registry: registry.git.amazingcat.net
-    repository: cattr/core/app
-    tag: v4.0.0-RC49
-    pullPolicy: IfNotPresent
+## @param replicaCount Number of Cattr replicas to deploy
+replicaCount: 1
 
-ingress:
-  enabled: false
+## @section Cattr application configuration
+cattr:
+  ## @param cattr.appKey Laravel application key (auto-generated if empty)
+  appKey: ""
+  ## @param cattr.appUrl Application URL
+  appUrl: "http://cattr.local"
+  ## @param cattr.appEnv Application environment
+  appEnv: production
+  ## @param cattr.appDebug Enable application debug mode
+  appDebug: "false"
+  ## @param cattr.logChannel Log channel (stderr recommended for Kubernetes)
+  logChannel: stderr
+  ## @param cattr.extraEnvVars Array of extra environment variables
+  extraEnvVars: []
+  #  - name: FOO
+  #    value: bar
+
+## @section Database parameters
+database:
+  ## @param database.host Database host (auto-resolved to built-in MySQL if empty)
   host: ""
-  class: ""
+  ## @param database.port Database port
+  port: 3306
+  ## @param database.name Database name
+  name: cattr
+  ## @param database.username Database username
+  username: cattr
+  ## @param database.password Database user password
+  password: cattr
+  ## @param database.rootPassword Database root password
+  rootPassword: cattrroot
+
+## @section Built-in MySQL parameters
+mysql:
+  ## @param mysql.enabled Deploy a MySQL server as part of this chart
+  enabled: true
+  image:
+    ## @param mysql.image.registry MySQL image registry
+    registry: docker.io
+    ## @param mysql.image.repository MySQL image repository
+    repository: mysql
+    ## @param mysql.image.tag MySQL image tag
+    tag: "8.0"
+    ## @param mysql.image.pullPolicy MySQL image pull policy
+    pullPolicy: IfNotPresent
+  ## MySQL primary persistence parameters
+  persistence:
+    ## @param mysql.persistence.enabled Enable MySQL persistence using PVC
+    enabled: true
+    ## @param mysql.persistence.storageClass PVC Storage Class for MySQL volume
+    storageClass: ""
+    ## @param mysql.persistence.accessModes PVC Access Mode for MySQL volume
+    accessModes:
+      - ReadWriteOnce
+    ## @param mysql.persistence.size PVC Storage Request for MySQL volume
+    size: 10Gi
+    ## @param mysql.persistence.existingClaim Name of an existing PVC to use
+    existingClaim: ""
+  ## MySQL resource requests and limits
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+  ## MySQL container security context
+  containerSecurityContext: {}
+  ## MySQL startup probe (generous for first-time init on slow storage)
+  startupProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    failureThreshold: 30
+  ## MySQL liveness probe
+  livenessProbe:
+    enabled: true
+    periodSeconds: 15
+    failureThreshold: 3
+  ## MySQL readiness probe
+  readinessProbe:
+    enabled: true
+    periodSeconds: 10
+    failureThreshold: 3
+
+## @section Cattr deployment parameters
+podSecurityContext: {}
+containerSecurityContext: {}
+
+## Cattr resource requests and limits
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+## Cattr startup probe (generous for s6-overlay + migrations)
+startupProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  failureThreshold: 30
+
+## Cattr liveness probe
+livenessProbe:
+  enabled: true
+  periodSeconds: 15
+  failureThreshold: 3
+
+## Cattr readiness probe
+readinessProbe:
+  enabled: true
+  periodSeconds: 10
+  failureThreshold: 3
+
+## @param extraVolumes Optionally specify extra list of additional volumes
+extraVolumes: []
+## @param extraVolumeMounts Optionally specify extra list of additional volumeMounts
+extraVolumeMounts: []
+## @param initContainers Add additional init containers
+initContainers: []
+## @param sidecars Add additional sidecar containers
+sidecars: []
+
+## @section Persistence parameters
+persistence:
+  screenshots:
+    ## @param persistence.screenshots.enabled Enable persistence for screenshots
+    enabled: true
+    ## @param persistence.screenshots.storageClass PVC Storage Class
+    storageClass: ""
+    ## @param persistence.screenshots.accessModes PVC Access Modes
+    accessModes:
+      - ReadWriteOnce
+    ## @param persistence.screenshots.size PVC Storage Request
+    size: 5Gi
+    ## @param persistence.screenshots.existingClaim Use an existing PVC
+    existingClaim: ""
+  attachments:
+    ## @param persistence.attachments.enabled Enable persistence for attachments
+    enabled: true
+    ## @param persistence.attachments.storageClass PVC Storage Class
+    storageClass: ""
+    ## @param persistence.attachments.accessModes PVC Access Modes
+    accessModes:
+      - ReadWriteOnce
+    ## @param persistence.attachments.size PVC Storage Request
+    size: 5Gi
+    ## @param persistence.attachments.existingClaim Use an existing PVC
+    existingClaim: ""
+
+## @section Traffic Exposure parameters
+service:
+  ## @param service.type Kubernetes Service type
+  type: ClusterIP
+  ## @param service.port Cattr service HTTP port
+  port: 80
+
+## Ingress parameters
+ingress:
+  ## @param ingress.enabled Enable ingress record generation
+  enabled: true
+  ## @param ingress.className IngressClass that will be used
+  className: nginx
+  ## @param ingress.hostname Default host for the ingress record
+  hostname: cattr.local
+  ## @param ingress.path Default path for the ingress record
+  path: /
+  ## @param ingress.pathType Ingress path type
+  pathType: Prefix
+  ## @param ingress.annotations Additional annotations for the Ingress resource
+  annotations: {}
+  ## @param ingress.tls Enable TLS configuration
+  tls: []
+  #  - secretName: cattr-tls
+  #    hosts:
+  #      - cattr.local
+
+## @section Service Account parameters
+serviceAccount:
+  ## @param serviceAccount.create Enable creation of ServiceAccount
+  create: false
+  ## @param serviceAccount.name Name of the ServiceAccount to use
+  name: ""
+  ## @param serviceAccount.annotations Annotations for the ServiceAccount
+  annotations: {}
+
+## @param commonLabels Labels to add to all deployed objects
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+commonAnnotations: {}
