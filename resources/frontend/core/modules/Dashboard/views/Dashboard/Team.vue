@@ -91,6 +91,7 @@
     import cloneDeep from 'lodash/cloneDeep';
     import throttle from 'lodash/throttle';
     import moment from 'moment';
+    import isEmail from 'validator/lib/isEmail';
     import { mapGetters, mapMutations } from 'vuex';
     import TeamDayGraph from '../../components/TeamDayGraph';
     import TeamSidebar from '../../components/TeamSidebar';
@@ -286,29 +287,16 @@
                     return;
                 }
 
-                const emails = modal.value.split(',');
+                const emails = modal.value.split(',').map(email => email.trim());
 
-                // eslint-disable-next-line no-useless-escape
-                const regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-                const validation = {
-                    isError: false,
-                    emails: [],
-                };
+                const invalidEmails = emails.filter(email => !isEmail(email));
 
-                for (let i = 0; i < emails.length; i++) {
-                    let email = emails[i].replace(' ', '');
-                    if (regex.exec(email) == null) {
-                        validation.isError = true;
-                        validation.emails.push(email);
-                    }
-                }
-
-                if (!validation.isError) {
-                    this.reportService.sendInvites({ emails }).then(({ data }) => {
+                if (invalidEmails.length === 0) {
+                    this.reportService.sendInvites({ emails }).then(() => {
                         this.$Message.success('Success');
                     });
                 } else {
-                    this.$Message.error(this.$t('invite.message.valid') + validation.emails);
+                    this.$Message.error(this.$t('invite.message.valid') + invalidEmails);
                 }
             },
             getWorked(userId) {
