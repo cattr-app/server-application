@@ -284,7 +284,7 @@ jobs:
             --annotations "org.opencontainers.image.revision:${RUNTIME_REVISION}" \
             --annotations "org.opencontainers.image.version:${RUNTIME_TAG}" \
             --annotations "org.opencontainers.image.vendor:${OCI_VENDOR}" \
-            --annotations "org.opencontainers.image.description:${RUNTIME_DESCRIPTION}" \
+            --annotations "\"org.opencontainers.image.description:${RUNTIME_DESCRIPTION}\"" \
             "${RUNTIME_CONFIG}" \
             "${RUNTIME_IMAGE}:${RUNTIME_TAG}"
 
@@ -327,7 +327,7 @@ jobs:
             --annotations "org.opencontainers.image.revision:${BUILDER_REVISION}" \
             --annotations "org.opencontainers.image.version:${BUILDER_TAG}" \
             --annotations "org.opencontainers.image.vendor:${OCI_VENDOR}" \
-            --annotations "org.opencontainers.image.description:${BUILDER_DESCRIPTION}" \
+            --annotations "\"org.opencontainers.image.description:${BUILDER_DESCRIPTION}\"" \
             "${BUILDER_CONFIG}" \
             "${RUNTIME_IMAGE}:${BUILDER_TAG}"
 
