@@ -48,7 +48,7 @@ Reports based only on automated scanner output, without enough information to re
 
 ## Response and Handling
 
-Cattr is a community-maintained open-source project and does not provide a guaranteed security response or remediation SLA.
+Cattr is a community-maintained project and does not provide a guaranteed security response or remediation SLA.
 
 Maintainer availability may vary significantly.
 
