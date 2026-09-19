@@ -288,8 +288,7 @@
 
                 const emails = modal.value.split(',');
 
-                // eslint-disable-next-line no-useless-escape
-                const regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+                const regex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/;
                 const validation = {
                     isError: false,
                     emails: [],
@@ -297,7 +296,7 @@
 
                 for (let i = 0; i < emails.length; i++) {
                     let email = emails[i].replace(' ', '');
-                    if (regex.exec(email) == null) {
+                    if (!regex.test(email)) {
                         validation.isError = true;
                         validation.emails.push(email);
                     }
