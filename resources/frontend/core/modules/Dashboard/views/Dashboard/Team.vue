@@ -288,8 +288,8 @@
 
                 const emails = modal.value.split(',');
 
-                // eslint-disable-next-line no-useless-escape
-                const regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+                // Basic email validation pattern designed to avoid catastrophic backtracking
+                const regex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/;
                 const validation = {
                     isError: false,
                     emails: [],
