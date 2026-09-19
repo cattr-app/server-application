@@ -1,5 +1,6 @@
 packages:
   - "resources/frontend/vendor_modules/*/*"
+
 allowBuilds:
   '@parcel/watcher': false
   canvas: false
@@ -8,3 +9,9 @@ allowBuilds:
   v-code-diff: true
   vue-demi: true
   vue-echarts: true
+
+engineStrict: true
+
+# Node 18 compatibility layer
+overrides:
+  '@types/minimatch': 5.1.2
