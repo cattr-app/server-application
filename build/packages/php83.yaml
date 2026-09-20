@@ -15,6 +15,7 @@ package:
     runtime:
       # Keep the complete PHP core extension set on one exact Wolfi build.
       - php-8.3=${{vars.php-version}}
+      - php-8.3-mbstring=${{vars.php-version}}
       - php-8.3-ctype=${{vars.php-version}}
       - php-8.3-gd=${{vars.php-version}}
       - php-8.3-openssl=${{vars.php-version}}

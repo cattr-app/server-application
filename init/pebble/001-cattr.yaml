@@ -19,7 +19,7 @@ services:
   nginx:
     override: replace
     summary: Cattr HTTP reverse proxy and static file server
-    command: nginx -g "daemon off;"
+    command: nginx -e stderr -g "daemon off;"
     startup: disabled
     requires:
       - app
@@ -56,7 +56,7 @@ services:
   scheduler:
     override: replace
     summary: Laravel scheduler trigger
-    command: /usr/bin/supercronic /opt/cattr/etc/supercronic/crontab
+    command: /usr/bin/supercronic /opt/cattr/crontab
     startup: disabled
     working-dir: /opt/cattr/app
     on-success: restart
