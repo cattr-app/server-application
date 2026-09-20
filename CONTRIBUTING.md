@@ -262,35 +262,39 @@ Breaking changes may be accepted, but they should first be discussed through an 
 
 The repository contains both the server-side application and the web frontend.
 
-| Path                  | Purpose                                            |
-|-----------------------|----------------------------------------------------|
-| `app/`                | Laravel application code                           |
-| `config/`             | Application configuration                          |
-| `database/`           | Migrations, seeders, and factories                 |
-| `routes/`             | API, web, and operational routes                   |
-| `resources/frontend/` | Vue frontend application                           |
-| `modules/`            | Backend modules                                    |
-| `tests/`              | Backend unit and feature tests                     |
-| `.root-fs/`           | Files added to the production container filesystem |
-| `build/base/`         | apko definitions for runtime and builder images    |
-| `build/packages/`     | Melange package definitions                        |
-| `.github/workflows/`  | GitHub Actions workflows                           |
-| `.helm/`              | Helm deployment files                              |
+| Path                  | Purpose                                               |
+|-----------------------|-------------------------------------------------------|
+| `app/`                | Laravel application code                              |
+| `config/`             | Application configuration                             |
+| `database/`           | Migrations, seeders, and factories                    |
+| `routes/`             | API, web, and operational routes                      |
+| `resources/frontend/` | Vue frontend application                              |
+| `modules/`            | Backend modules                                       |
+| `tests/`              | Backend unit and feature tests                        |
+| `runtime/`            | Runtime configuration for nginx, PHP, and cron        |
+| `init/`               | Container entrypoint and Pebble service configuration |
+| `build/base/`         | apko definitions for runtime and builder images       |
+| `build/packages/`     | Melange package definitions                           |
+| `.github/workflows/`  | GitHub Actions workflows                              |
+| `.helm/`              | Helm deployment files                                 |
 
 The production application is distributed as a single container containing the backend, compiled frontend, nginx, Laravel Octane, queue worker, Laravel Reverb, and scheduled jobs.
+
+The production build is Wolfi-based: the builder uses Node.js 24 with pnpm 12.5.1,
+and the runtime uses PHP 8.3, nginx, Pebble, Laravel Octane, and Laravel Reverb.
 
 ## Development requirements
 
 Use the versions declared by the repository whenever possible.
 
-| Dependency | Version                                            |
-|------------|----------------------------------------------------|
-| PHP        | 8.3                                                |
-| Laravel    | 10.x                                               |
-| Node.js    | `.nvmrc`, currently 24.21                          |
-| pnpm       | `packageManager` in `package.json`, currently 12.x |
-| Composer   | Composer 2                                         |
-| Database   | MySQL-compatible database                          |
+| Dependency | Version                            |
+|------------|------------------------------------|
+| PHP        | 8.3                                |
+| Laravel    | 10.x                               |
+| Node.js    | `.nvmrc`, currently 24.21          |
+| pnpm       | `packageManager`, currently 12.5.1 |
+| Composer   | Composer 2.10.3                    |
+| Database   | MySQL-compatible database          |
 
 Corepack is required to use the pnpm version pinned by the repository.
 
@@ -427,7 +431,8 @@ php artisan schedule:work
 
 The local development server does not reproduce the complete production runtime.
 
-Production uses nginx and Laravel Octane with Swoole, with services supervised by s6-overlay.
+Production uses nginx on port 8080 and Laravel Octane with Swoole. Pebble supervises
+nginx, Octane, Reverb, the queue worker, and scheduled jobs in the rootless runtime.
 
 ## Frontend development
 
@@ -704,11 +709,15 @@ ghcr.io/cattr-app/server-runtime:builder-latest
 ghcr.io/cattr-app/server-runtime:runtime-latest
 ```
 
-A local application image can be built with:
+A local application image can be built with Podman:
 
 ```bash
-docker build -t cattr-server .
+podman build -t cattr-server .
 ```
+
+The final image runs as UID/GID `10000`, uses `/opt/cattr/app` as its working
+directory, and stores mutable Laravel data under `/opt/cattr/app/storage`.
+The image exposes nginx on `8080`, Reverb on `8081`, and Octane on `8090`.
 
 The base images can be overridden with:
 
@@ -723,7 +732,7 @@ Production images currently target Linux `amd64`.
 
 ## Runtime services
 
-The production container uses s6-overlay to manage its services and initialization steps.
+The production container uses Pebble to manage its services and initialization steps.
 
 The runtime includes:
 
@@ -737,7 +746,9 @@ supercronic
 
 Startup also prepares application state, applies migrations and the initial seeder, and creates the administrator account when required.
 
-Changes to `.root-fs/` should therefore be tested using a production-style container build rather than only `php artisan serve`.
+Changes to `runtime/`, `init/`, `Dockerfile`, or the base-image definitions should
+therefore be tested using a production-style container build rather than only
+`php artisan serve`.
 
 Operational endpoints include:
 
@@ -756,7 +767,9 @@ build/base/runtime/apko.yaml
 build/base/builder/apko.yaml
 ```
 
-The builder contains additional development and compilation dependencies such as Composer, Node.js, npm, Git, and Corepack.
+The Wolfi builder image contains Composer, PHP 8.3 builder extensions, Node.js 24,
+Git, OpenSSH, and Corepack. The runtime image contains PHP 8.3, nginx, Pebble,
+supercronic, and the packages needed to run Cattr.
 
 Corepack is packaged with Melange:
 
@@ -764,7 +777,8 @@ Corepack is packaged with Melange:
 build/packages/corepack.yaml
 ```
 
-The generated APK is added to the builder image and is used to activate the pnpm version pinned by `package.json`.
+The generated APK is added to the builder image and Corepack activates the pnpm
+version pinned by `package.json` (`pnpm@12.5.1`).
 
 When changing base-image dependencies, modify the relevant apko or Melange configuration instead of installing additional system packages in the application Dockerfile unless there is a specific reason to do otherwise.
 
@@ -797,15 +811,36 @@ Changes to the release pipeline should preserve reproducible application builds 
 
 ## Docker Compose
 
-The repository contains `docker-compose.yml`, but it reflects an existing deployment environment and expects an external Docker network named:
+`docker-compose.yml` is a standalone local container setup. It builds the
+application image from the current `Dockerfile`, starts a Percona-compatible
+MySQL database, and waits for the database health check before starting Cattr.
+It does not require a pre-created external network.
 
-```text
-web
+Build and start the stack with Docker Compose or the equivalent Podman command:
+
+```bash
+podman-compose up -d --build
 ```
 
-It should not be assumed to be a standalone development or production deployment configuration.
+The application is available on `http://127.0.0.1:8080`. The database is
+published on port `3306` for local tooling. The Compose service mounts the
+named volume `backend_storage` at `/opt/cattr/app/storage`; the database uses
+the separate `database` volume.
 
-For normal application development, use the local development setup described above unless working specifically on deployment or container infrastructure.
+Useful commands:
+
+```bash
+podman-compose logs -f app
+podman-compose ps
+podman-compose down
+```
+
+`down` preserves named volumes. Use `podman-compose down -v` only when a clean
+database and empty Laravel storage volume are intentionally required.
+
+The container runs as UID/GID `10000`. Its entrypoint creates the writable
+Laravel directories under `/opt/cattr/app/storage`, including logs, framework
+cache/sessions/views, screenshots, and module/public data.
 
 ## Documentation
 
