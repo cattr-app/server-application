@@ -25,7 +25,7 @@ env:
   BUILDER_CONFIG: build/base/builder/apko.yaml
   PHP_CONFIG: build/packages/php83.yaml
   NODEJS_CONFIG: build/packages/nodejs-24.yaml
-  S6_OVERLAY_CONFIG: build/packages/s6-overlay.yaml
+  PEBBLE_CONFIG: build/packages/pebble.yaml
   COMPOSER_CONFIG: build/packages/composer.yaml
   COREPACK_CONFIG: build/packages/corepack.yaml
 
@@ -45,7 +45,7 @@ env:
     reports, screenshots, activity tracking and public API
 
   RUNTIME_DESCRIPTION: >-
-    Cattr server runtime image with PHP 8.3, Nginx and s6-overlay on Wolfi
+    Cattr server runtime image with PHP 8.3, Nginx and Pebble on Wolfi
 
   BUILDER_DESCRIPTION: >-
     Cattr server build image with PHP 8.3, Composer, Node.js and Corepack on Wolfi
@@ -106,7 +106,7 @@ jobs:
             "${BUILDER_CONFIG}" \
             "${PHP_CONFIG}" \
             "${NODEJS_CONFIG}" \
-            "${S6_OVERLAY_CONFIG}" \
+            "${PEBBLE_CONFIG}" \
             "${COMPOSER_CONFIG}" \
             "${COREPACK_CONFIG}"
           do
@@ -119,7 +119,7 @@ jobs:
           runtime_files_hash="${{ hashFiles(
             'build/base/runtime/**',
             'build/packages/php83.yaml',
-            'build/packages/s6-overlay.yaml',
+            'build/packages/pebble.yaml',
             'build/base/rebuild'
           ) }}"
 
@@ -127,7 +127,7 @@ jobs:
             'build/base/builder/**',
             'build/packages/php83.yaml',
             'build/packages/nodejs-24.yaml',
-            'build/packages/s6-overlay.yaml',
+            'build/packages/pebble.yaml',
             'build/packages/composer.yaml',
             'build/packages/corepack.yaml',
             'build/base/rebuild'
@@ -156,7 +156,7 @@ jobs:
               -- \
               "${RUNTIME_CONFIG}" \
               "${PHP_CONFIG}" \
-              "${S6_OVERLAY_CONFIG}" \
+              "${PEBBLE_CONFIG}" \
               build/base/rebuild
           )"
 
@@ -168,7 +168,7 @@ jobs:
               "${BUILDER_CONFIG}" \
               "${PHP_CONFIG}" \
               "${NODEJS_CONFIG}" \
-              "${S6_OVERLAY_CONFIG}" \
+              "${PEBBLE_CONFIG}" \
               "${COMPOSER_CONFIG}" \
               "${COREPACK_CONFIG}" \
               build/base/rebuild
@@ -277,7 +277,7 @@ jobs:
           for config in \
             "${PHP_CONFIG}" \
             "${NODEJS_CONFIG}" \
-            "${S6_OVERLAY_CONFIG}"
+            "${PEBBLE_CONFIG}"
           do
             melange build \
               "${config}" \
