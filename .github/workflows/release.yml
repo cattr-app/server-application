@@ -26,11 +26,12 @@ env:
   PHP_CONFIG: build/packages/php83.yaml
   NODEJS_CONFIG: build/packages/nodejs-24.yaml
   S6_OVERLAY_CONFIG: build/packages/s6-overlay.yaml
+  COMPOSER_CONFIG: build/packages/composer.yaml
   COREPACK_CONFIG: build/packages/corepack.yaml
 
   # Increment when the base-image build process itself changes in a way
   # that should invalidate previously built immutable images.
-  IMAGE_BUILD_REVISION: '5'
+  IMAGE_BUILD_REVISION: '6'
 
   # OCI image metadata.
   #
@@ -106,6 +107,7 @@ jobs:
             "${PHP_CONFIG}" \
             "${NODEJS_CONFIG}" \
             "${S6_OVERLAY_CONFIG}" \
+            "${COMPOSER_CONFIG}" \
             "${COREPACK_CONFIG}"
           do
             if [[ ! -f "${file}" ]]; then
@@ -126,6 +128,7 @@ jobs:
             'build/packages/php83.yaml',
             'build/packages/nodejs-24.yaml',
             'build/packages/s6-overlay.yaml',
+            'build/packages/composer.yaml',
             'build/packages/corepack.yaml',
             'build/base/rebuild'
           ) }}"
@@ -166,6 +169,7 @@ jobs:
               "${PHP_CONFIG}" \
               "${NODEJS_CONFIG}" \
               "${S6_OVERLAY_CONFIG}" \
+              "${COMPOSER_CONFIG}" \
               "${COREPACK_CONFIG}" \
               build/base/rebuild
           )"
@@ -266,8 +270,10 @@ jobs:
 
           melange keygen "${MELANGE_PRIVATE_KEY}"
 
-          # These packages depend only on Wolfi or upstream release artifacts,
-          # so they can be built before the local repository index exists.
+          # Build the packages that depend only on Wolfi or upstream release
+          # artifacts first. Composer and Corepack are intentionally built in
+          # the next phase because their metapackage dependencies must be
+          # available in the local repository.
           for config in \
             "${PHP_CONFIG}" \
             "${NODEJS_CONFIG}" \
@@ -286,26 +292,31 @@ jobs:
               --git-commit "${GITHUB_SHA}"
           done
 
-          # Corepack depends on the local cattr-nodejs metapackage.
+          # Make the first-phase packages available to dependent builds.
           melange index \
             --arch x86_64 \
             --output "${PACKAGE_REPOSITORY}/x86_64/APKINDEX.tar.gz" \
             --signing-key "${MELANGE_PRIVATE_KEY}" \
             "${PACKAGE_REPOSITORY}/x86_64/"*.apk
 
-          melange build \
-            "${COREPACK_CONFIG}" \
-            --runner bubblewrap \
-            --arch x86_64 \
-            --out-dir "${PACKAGE_REPOSITORY}" \
-            --repository-append "${PACKAGE_REPOSITORY}" \
-            --keyring-append "${MELANGE_PUBLIC_KEY}" \
-            --signing-key "${MELANGE_PRIVATE_KEY}" \
-            --generate-index=false \
-            --namespace cattr \
-            --license MIT \
-            --git-repo-url "${OCI_SOURCE}" \
-            --git-commit "${GITHUB_SHA}"
+          for config in \
+            "${COMPOSER_CONFIG}" \
+            "${COREPACK_CONFIG}"
+          do
+            melange build \
+              "${config}" \
+              --runner bubblewrap \
+              --arch x86_64 \
+              --out-dir "${PACKAGE_REPOSITORY}" \
+              --repository-append "${PACKAGE_REPOSITORY}" \
+              --keyring-append "${MELANGE_PUBLIC_KEY}" \
+              --signing-key "${MELANGE_PRIVATE_KEY}" \
+              --generate-index=false \
+              --namespace cattr \
+              --license MIT \
+              --git-repo-url "${OCI_SOURCE}" \
+              --git-commit "${GITHUB_SHA}"
+          done
 
           # Rebuild one signed index containing all local packages.
           melange index \
