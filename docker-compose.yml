@@ -7,7 +7,7 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - backend_storage:/app/storage
+      - backend_storage:/opt/cattr/app/storage
     labels:
       traefik.enable: true
     ports:
