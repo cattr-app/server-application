@@ -10,7 +10,6 @@ permissions:
   packages: write
   id-token: write
   attestations: write
-  artifact-metadata: write
 
 concurrency:
   group: release-${{ github.repository }}
@@ -280,10 +279,10 @@ jobs:
 
           apko publish \
             --vcs=false \
-            --annotations "org.opencontainers.image.source:${OCI_SOURCE}" \
-            --annotations "org.opencontainers.image.revision:${RUNTIME_REVISION}" \
-            --annotations "org.opencontainers.image.version:${RUNTIME_TAG}" \
-            --annotations "org.opencontainers.image.vendor:${OCI_VENDOR}" \
+            --annotations "\"org.opencontainers.image.source:${OCI_SOURCE}\"" \
+            --annotations "\"org.opencontainers.image.revision:${RUNTIME_REVISION}\"" \
+            --annotations "\"org.opencontainers.image.version:${RUNTIME_TAG}\"" \
+            --annotations "\"org.opencontainers.image.vendor:${OCI_VENDOR}\"" \
             --annotations "\"org.opencontainers.image.description:${RUNTIME_DESCRIPTION}\"" \
             "${RUNTIME_CONFIG}" \
             "${RUNTIME_IMAGE}:${RUNTIME_TAG}"
@@ -303,8 +302,6 @@ jobs:
         with:
           subject-name: ${{ env.RUNTIME_IMAGE }}
           subject-digest: ${{ steps.publish_runtime.outputs.digest }}
-          subject-version: ${{ steps.meta.outputs.runtime_tag }}
-          push-to-registry: true
 
       - name: Build and publish builder image
         id: publish_builder
@@ -323,10 +320,10 @@ jobs:
             --vcs=false \
             --repository-append "${PACKAGE_REPOSITORY}" \
             --keyring-append "${MELANGE_PUBLIC_KEY}" \
-            --annotations "org.opencontainers.image.source:${OCI_SOURCE}" \
-            --annotations "org.opencontainers.image.revision:${BUILDER_REVISION}" \
-            --annotations "org.opencontainers.image.version:${BUILDER_TAG}" \
-            --annotations "org.opencontainers.image.vendor:${OCI_VENDOR}" \
+            --annotations "\"org.opencontainers.image.source:${OCI_SOURCE}\"" \
+            --annotations "\"org.opencontainers.image.revision:${BUILDER_REVISION}\"" \
+            --annotations "\"org.opencontainers.image.version:${BUILDER_TAG}\"" \
+            --annotations "\"org.opencontainers.image.vendor:${OCI_VENDOR}\"" \
             --annotations "\"org.opencontainers.image.description:${BUILDER_DESCRIPTION}\"" \
             "${BUILDER_CONFIG}" \
             "${RUNTIME_IMAGE}:${BUILDER_TAG}"
@@ -346,7 +343,6 @@ jobs:
         with:
           subject-name: ${{ env.RUNTIME_IMAGE }}
           subject-digest: ${{ steps.publish_builder.outputs.digest }}
-          subject-version: ${{ steps.meta.outputs.builder_tag }}
 
       - name: Update runtime-latest
         env:
@@ -453,21 +449,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # actions/attest needs standard OCI registry credentials when
-      # push-to-registry is enabled.
-      - name: Login to GHCR for attestation
-        uses: docker/login-action@v4.6.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Attest Cattr server
         uses: actions/attest@v4
         with:
           subject-name: ${{ env.REGISTRY_NAMESPACE }}/${{ env.APP_IMAGE }}
           subject-digest: ${{ steps.push.outputs.digest }}
-          subject-version: ${{ steps.release.outputs.version }}
 
       - name: Print published images
         shell: bash
