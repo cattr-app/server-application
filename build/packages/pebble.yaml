@@ -1,0 +1,47 @@
+package:
+  name: pebble
+  version: "1.32.2"
+  epoch: 0
+
+  description: Canonical Pebble service manager for the Cattr runtime
+
+  target-architecture:
+    - x86_64
+
+  copyright:
+    - license: GPL-3.0-only
+
+# Canonical release binaries are built with CGO_ENABLED=0, so the installed
+# executable has no libc ABI coupling to the base image.
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+
+    packages:
+      - busybox
+      - ca-certificates-bundle
+
+pipeline:
+  - uses: fetch
+    with:
+      uri: https://github.com/canonical/pebble/releases/download/v${{package.version}}/pebble_v${{package.version}}_linux_amd64.tar.gz
+      expected-sha256: 4a8f71025e7c004a8aa6530ae6f4f4236b4ec3dae59caf942a930131d1e090d7
+      strip-components: "0"
+      delete: "true"
+
+  - name: Install Pebble
+    runs: |
+      set -eu
+      install -Dm755 pebble "${{targets.destdir}}/usr/bin/pebble"
+      install -Dm644 COPYING "${{targets.destdir}}/usr/share/licenses/cattr-pebble/COPYING"
+
+test:
+  pipeline:
+    - name: Check Pebble
+      runs: |
+        set -eu
+        pebble version --client | grep -F "${{package.version}}"

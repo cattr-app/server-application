@@ -7,15 +7,14 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - backend_storage:/app/storage
+      - backend_storage:/opt/cattr/app/storage
     labels:
       traefik.enable: true
-    networks:
-      - default
-      - web
+    ports:
+      - "8080:8080"
 
   db:
-    image: percona:8.0
+    image: docker.io/library/percona:8.0
     environment:
       - MYSQL_DATABASE=cattr
       - MYSQL_ROOT_PASSWORD=password
@@ -27,12 +26,9 @@ services:
       test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '--password=password', '-u', 'root']
       timeout: 20s
       retries: 10
+    ports:
+      - "127.0.0.1:3306:3306"
 
 volumes:
   backend_storage: {}
   database: {}
-
-networks:
-  default: {}
-  web:
-    external: true

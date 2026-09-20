@@ -105,8 +105,21 @@ mysql:
     failureThreshold: 3
 
 ## @section Cattr deployment parameters
-podSecurityContext: {}
-containerSecurityContext: {}
+podSecurityContext:
+  ## Run the pod as the non-root UID/GID used by the runtime image.
+  runAsUser: 10000
+  runAsGroup: 10000
+  fsGroup: 10000
+  fsGroupChangePolicy: OnRootMismatch
+containerSecurityContext:
+  ## The runtime image is rootless and does not require privilege escalation.
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  seccompProfile:
+    type: RuntimeDefault
 
 ## Cattr resource requests and limits
 resources:
@@ -117,7 +130,7 @@ resources:
     cpu: "1"
     memory: 1Gi
 
-## Cattr startup probe (generous for s6-overlay + migrations)
+## Cattr startup probe (generous for Pebble + migrations)
 startupProbe:
   enabled: true
   initialDelaySeconds: 30

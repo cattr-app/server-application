@@ -1,71 +1,76 @@
 contents:
+  keyring:
+    - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+
   repositories:
-    - https://dl-cdn.alpinelinux.org/alpine/v3.18/main
-    - https://dl-cdn.alpinelinux.org/alpine/v3.18/community
+    - https://packages.wolfi.dev/os
 
   packages:
-    - alpine-baselayout-data
+    - wolfi-baselayout
+    - busybox
     - ca-certificates-bundle
-    - s6-overlay
-    - supercronic
-    - nginx
 
-    - php82
-    - php82-gd
-    - php82-openssl
-    - php82-pdo_mysql
-    - php82-zip
-    - php82-mysqli
-    - php82-intl
-    - php82-session
-    - php82-exif
-    - php82-curl
-    - php82-xml
-    - php82-fileinfo
-    - php82-tokenizer
-    - php82-simplexml
-    - php82-dom
-    - php82-xmlwriter
-    - php82-xmlreader
-    - php82-iconv
-    - php82-posix
-    - php82-pecl-redis
-    - php82-pecl-apcu
-    - php82-pecl-swoole
-    - php82-pcntl
+    - pebble
+    - supercronic=0.2.49-r3
+    - nginx-mainline=1.31.6-r0
+
+    # Local metapackage pins PHP and all required extensions.
+    - php83-local
 
 environment:
-  PATH: /usr/sbin:/sbin:/usr/bin:/bin
+  HOME: /opt/cattr
+  PATH: /usr/sbin:/sbin:/bin:/usr/bin
 
 paths:
-  - path: /app
+  - path: /opt/cattr
     type: directory
-    permissions: 0o770
+    permissions: 0o750
     uid: 10000
     gid: 10000
 
-  - path: /run
+  - path: /opt/cattr/.pebble
     type: directory
+    permissions: 0o750
+    uid: 10000
+    gid: 10000
 
-  - path: /var/run
-    type: symlink
-    source: /run
+  - path: /opt/cattr/.pebble/layers
+    type: directory
+    permissions: 0o750
+    uid: 10000
+    gid: 10000
 
-work-dir: /app
+  - path: /opt/cattr
+    type: directory
+    permissions: 0o755
+    uid: 0
+    gid: 0
+
+  - path: /opt/cattr/app
+    type: directory
+    permissions: 0o755
+    uid: 0
+    gid: 0
+
+work-dir: /opt/cattr/app
 
 accounts:
   groups:
-    - groupname: www
+    - groupname: cattr
       gid: 10000
 
   users:
-    - username: www
+    - username: cattr
       uid: 10000
+      gid: 10000
 
-  run-as: root
+  # The base image itself is already non-root. The final Dockerfile keeps the
+  # same UID/GID and never switches to root at container startup.
+  run-as: 10000
 
+# This is a base image. The Cattr application image defines its real entrypoint.
 entrypoint:
-  command: /init
+  command: /bin/sh
 
 archs:
   - amd64

@@ -13,6 +13,10 @@ const components = {
 };
 
 function installGlobalComponents(Vue) {
+    const reverbScheme = process.env.MIX_REVERB_SCHEME ?? window.location.protocol.replace(':', '');
+    const reverbFrontendPort =
+        process.env.MIX_REVERB_FRONTEND_PORT || window.location.port || (reverbScheme === 'https' ? 443 : 80);
+
     for (const component in components) {
         if (components[component].name) {
             Vue.component(components[component].name, components[component]);
@@ -26,9 +30,9 @@ function installGlobalComponents(Vue) {
         key: process.env.MIX_REVERB_APP_KEY,
         wsHost: process.env.MIX_REVERB_HOST ?? window.location.hostname,
         wsPath: process.env.MIX_REVERB_PATH ?? '',
-        wsPort: process.env.MIX_REVERB_FRONTEND_PORT ?? 80,
-        wssPort: process.env.MIX_REVERB_FRONTEND_PORT ?? 443,
-        forceTLS: (process.env.MIX_REVERB_SCHEME ?? 'https') === 'https',
+        wsPort: reverbFrontendPort,
+        wssPort: reverbFrontendPort,
+        forceTLS: reverbScheme === 'https',
         disableStats: true,
         enabledTransports: ['ws', 'wss'],
         Pusher,

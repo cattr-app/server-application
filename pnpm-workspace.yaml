@@ -12,6 +12,4 @@ allowBuilds:
 
 engineStrict: true
 
-# Node 18 compatibility layer
-overrides:
-  '@types/minimatch': 5.1.2
+minimumReleaseAge: 0

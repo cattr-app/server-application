@@ -23,11 +23,15 @@ env:
 
   RUNTIME_CONFIG: build/base/runtime/apko.yaml
   BUILDER_CONFIG: build/base/builder/apko.yaml
+  PHP_CONFIG: build/packages/php83.yaml
+  NODEJS_CONFIG: build/packages/nodejs-24.yaml
+  PEBBLE_CONFIG: build/packages/pebble.yaml
+  COMPOSER_CONFIG: build/packages/composer.yaml
   COREPACK_CONFIG: build/packages/corepack.yaml
 
   # Increment when the base-image build process itself changes in a way
   # that should invalidate previously built immutable images.
-  IMAGE_BUILD_REVISION: '2'
+  IMAGE_BUILD_REVISION: '6'
 
   # OCI image metadata.
   #
@@ -41,10 +45,10 @@ env:
     reports, screenshots, activity tracking and public API
 
   RUNTIME_DESCRIPTION: >-
-    Cattr server runtime image with PHP 8.2, Nginx and required runtime dependencies
+    Cattr server runtime image with PHP 8.3, Nginx and Pebble on Wolfi
 
   BUILDER_DESCRIPTION: >-
-    Cattr server build image with PHP 8.2, Composer, Node.js and Corepack
+    Cattr server build image with PHP 8.3, Composer, Node.js and Corepack on Wolfi
 
 jobs:
   runtime-images:
@@ -100,6 +104,10 @@ jobs:
           for file in \
             "${RUNTIME_CONFIG}" \
             "${BUILDER_CONFIG}" \
+            "${PHP_CONFIG}" \
+            "${NODEJS_CONFIG}" \
+            "${PEBBLE_CONFIG}" \
+            "${COMPOSER_CONFIG}" \
             "${COREPACK_CONFIG}"
           do
             if [[ ! -f "${file}" ]]; then
@@ -110,11 +118,17 @@ jobs:
 
           runtime_files_hash="${{ hashFiles(
             'build/base/runtime/**',
+            'build/packages/php83.yaml',
+            'build/packages/pebble.yaml',
             'build/base/rebuild'
           ) }}"
 
           builder_files_hash="${{ hashFiles(
             'build/base/builder/**',
+            'build/packages/php83.yaml',
+            'build/packages/nodejs-24.yaml',
+            'build/packages/pebble.yaml',
+            'build/packages/composer.yaml',
             'build/packages/corepack.yaml',
             'build/base/rebuild'
           ) }}"
@@ -141,6 +155,8 @@ jobs:
               --format='%H' \
               -- \
               "${RUNTIME_CONFIG}" \
+              "${PHP_CONFIG}" \
+              "${PEBBLE_CONFIG}" \
               build/base/rebuild
           )"
 
@@ -150,6 +166,10 @@ jobs:
               --format='%H' \
               -- \
               "${BUILDER_CONFIG}" \
+              "${PHP_CONFIG}" \
+              "${NODEJS_CONFIG}" \
+              "${PEBBLE_CONFIG}" \
+              "${COMPOSER_CONFIG}" \
               "${COREPACK_CONFIG}" \
               build/base/rebuild
           )"
@@ -167,9 +187,10 @@ jobs:
           # Static OCI metadata is part of the image identity as changing it
           # changes the resulting OCI manifest/config digest.
           runtime_hash="$(
-            printf '%s\n%s\n%s\n%s\n%s\n%s\n' \
+            printf '%s\n%s\n%s\n%s\n%s\n%s\n%s\n' \
               "${IMAGE_BUILD_REVISION}" \
               "${apko_version}" \
+              "${melange_version}" \
               "${runtime_files_hash}" \
               "${OCI_SOURCE}" \
               "${OCI_VENDOR}" \
@@ -232,32 +253,78 @@ jobs:
             echo "builder_exists=false" >> "${GITHUB_OUTPUT}"
           fi
 
-      - name: Build Corepack APK repository
-        if: steps.check.outputs.builder_exists != 'true'
+      - name: Build local APK repository
+        if: steps.check.outputs.runtime_exists != 'true' || steps.check.outputs.builder_exists != 'true'
         env:
-          MELANGE_PRIVATE_KEY: ${{ runner.temp }}/melange.rsa
           PACKAGE_REPOSITORY: ${{ github.workspace }}/packages
         run: |
           set -euo pipefail
+
+          MELANGE_PRIVATE_KEY="${RUNNER_TEMP}/melange.rsa"
+          MELANGE_PUBLIC_KEY="${RUNNER_TEMP}/melange.rsa.pub"
 
           rm -rf "${PACKAGE_REPOSITORY}"
 
           rm -f \
             "${MELANGE_PRIVATE_KEY}" \
-            "${MELANGE_PRIVATE_KEY}.pub"
+            "${MELANGE_PUBLIC_KEY}"
 
           melange keygen "${MELANGE_PRIVATE_KEY}"
 
-          melange build \
-            "${COREPACK_CONFIG}" \
-            --runner bubblewrap \
+          # Build the packages that depend only on Wolfi or upstream release
+          # artifacts first. Composer and Corepack are intentionally built in
+          # the next phase because their metapackage dependencies must be
+          # available in the local repository.
+          for config in \
+            "${PHP_CONFIG}" \
+            "${NODEJS_CONFIG}" \
+            "${PEBBLE_CONFIG}"
+          do
+            melange build \
+              "${config}" \
+              --runner bubblewrap \
+              --arch x86_64 \
+              --out-dir "${PACKAGE_REPOSITORY}" \
+              --signing-key "${MELANGE_PRIVATE_KEY}" \
+              --generate-index=false \
+              --namespace cattr \
+              --license MIT \
+              --git-repo-url "${OCI_SOURCE}" \
+              --git-commit "${GITHUB_SHA}"
+          done
+
+          # Make the first-phase packages available to dependent builds.
+          melange index \
             --arch x86_64 \
-            --out-dir "${PACKAGE_REPOSITORY}" \
+            --output "${PACKAGE_REPOSITORY}/x86_64/APKINDEX.tar.gz" \
             --signing-key "${MELANGE_PRIVATE_KEY}" \
-            --namespace cattr \
-            --license MIT \
-            --git-repo-url "${OCI_SOURCE}" \
-            --git-commit "${GITHUB_SHA}"
+            "${PACKAGE_REPOSITORY}/x86_64/"*.apk
+
+          for config in \
+            "${COMPOSER_CONFIG}" \
+            "${COREPACK_CONFIG}"
+          do
+            melange build \
+              "${config}" \
+              --runner bubblewrap \
+              --arch x86_64 \
+              --out-dir "${PACKAGE_REPOSITORY}" \
+              --repository-append "${PACKAGE_REPOSITORY}" \
+              --keyring-append "${MELANGE_PUBLIC_KEY}" \
+              --signing-key "${MELANGE_PRIVATE_KEY}" \
+              --generate-index=false \
+              --namespace cattr \
+              --license MIT \
+              --git-repo-url "${OCI_SOURCE}" \
+              --git-commit "${GITHUB_SHA}"
+          done
+
+          # Rebuild one signed index containing all local packages.
+          melange index \
+            --arch x86_64 \
+            --output "${PACKAGE_REPOSITORY}/x86_64/APKINDEX.tar.gz" \
+            --signing-key "${MELANGE_PRIVATE_KEY}" \
+            "${PACKAGE_REPOSITORY}/x86_64/"*.apk
 
           echo "Generated APK repository:"
 
@@ -272,13 +339,18 @@ jobs:
         env:
           RUNTIME_TAG: ${{ steps.meta.outputs.runtime_tag }}
           RUNTIME_REVISION: ${{ steps.meta.outputs.runtime_revision }}
+          PACKAGE_REPOSITORY: ${{ github.workspace }}/packages
         run: |
           set -euo pipefail
+
+          MELANGE_PUBLIC_KEY="${RUNNER_TEMP}/melange.rsa.pub"
 
           echo "Publishing ${RUNTIME_IMAGE}:${RUNTIME_TAG}"
 
           apko publish \
             --vcs=false \
+            --repository-append "${PACKAGE_REPOSITORY}" \
+            --keyring-append "${MELANGE_PUBLIC_KEY}" \
             --annotations "\"org.opencontainers.image.source:${OCI_SOURCE}\"" \
             --annotations "\"org.opencontainers.image.revision:${RUNTIME_REVISION}\"" \
             --annotations "\"org.opencontainers.image.version:${RUNTIME_TAG}\"" \
@@ -309,10 +381,11 @@ jobs:
         env:
           BUILDER_TAG: ${{ steps.meta.outputs.builder_tag }}
           BUILDER_REVISION: ${{ steps.meta.outputs.builder_revision }}
-          MELANGE_PUBLIC_KEY: ${{ runner.temp }}/melange.rsa.pub
           PACKAGE_REPOSITORY: ${{ github.workspace }}/packages
         run: |
           set -euo pipefail
+
+          MELANGE_PUBLIC_KEY="${RUNNER_TEMP}/melange.rsa.pub"
 
           echo "Publishing ${RUNTIME_IMAGE}:${BUILDER_TAG}"
 

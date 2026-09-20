@@ -54,7 +54,7 @@ spec:
           {{- end }}
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 8080
               protocol: TCP
           envFrom:
             - configMapRef:
@@ -111,16 +111,16 @@ spec:
             - name: tmp
               mountPath: /tmp
             - name: cache
-              mountPath: /app/storage/framework/cache
+              mountPath: /opt/cattr/app/storage/framework/cache
             - name: sessions
-              mountPath: /app/storage/framework/sessions
+              mountPath: /opt/cattr/app/storage/framework/sessions
             {{- if .Values.persistence.screenshots.enabled }}
             - name: screenshots
-              mountPath: /app/storage/app/uploads/screenshots
+              mountPath: /opt/cattr/app/storage/app/uploads/screenshots
             {{- end }}
             {{- if .Values.persistence.attachments.enabled }}
             - name: attachments
-              mountPath: /app/storage/app/uploads/attachments
+              mountPath: /opt/cattr/app/storage/app/uploads/attachments
             {{- end }}
             {{- with .Values.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}

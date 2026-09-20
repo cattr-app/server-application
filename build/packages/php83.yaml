@@ -1,0 +1,146 @@
+package:
+  name: php83-local
+  version: "8.3.33"
+  epoch: 4
+
+  description: Pinned PHP 8.3 runtime and extensions for Cattr on Wolfi
+
+  target-architecture:
+    - x86_64
+
+  copyright:
+    - license: MIT
+
+  dependencies:
+    runtime:
+      # Keep the complete PHP core extension set on one exact Wolfi build.
+      - php-8.3=${{vars.php-version}}
+      - php-8.3-mbstring=${{vars.php-version}}
+      - php-8.3-ctype=${{vars.php-version}}
+      - php-8.3-gd=${{vars.php-version}}
+      - php-8.3-openssl=${{vars.php-version}}
+      - php-8.3-pdo=${{vars.php-version}}
+      - php-8.3-pdo_mysql=${{vars.php-version}}
+      - php-8.3-mysqlnd=${{vars.php-version}}
+      - php-8.3-zip=${{vars.php-version}}
+      - php-8.3-mysqli=${{vars.php-version}}
+      - php-8.3-intl=${{vars.php-version}}
+      - php-8.3-exif=${{vars.php-version}}
+      - php-8.3-curl=${{vars.php-version}}
+      - php-8.3-xml=${{vars.php-version}}
+      - php-8.3-fileinfo=${{vars.php-version}}
+      - php-8.3-simplexml=${{vars.php-version}}
+      - php-8.3-dom=${{vars.php-version}}
+      - php-8.3-xmlwriter=${{vars.php-version}}
+      - php-8.3-xmlreader=${{vars.php-version}}
+      - php-8.3-iconv=${{vars.php-version}}
+      - php-8.3-posix=${{vars.php-version}}
+      - php-8.3-sockets=${{vars.php-version}}
+      - php-8.3-pcntl=${{vars.php-version}}
+
+      # PECL extensions use independent versions in Wolfi.
+      - php-8.3-redis=${{vars.redis-version}}
+      - php-8.3-apcu=${{vars.apcu-version}}
+      - php-8.3-swoole=${{vars.swoole-version}}
+      - php-8.3-igbinary=${{vars.igbinary-version}}
+
+vars:
+  php-version: "8.3.33-r4"
+  redis-version: "6.3.0-r6"
+  apcu-version: "5.1.28-r4"
+  swoole-version: "6.2.2-r3"
+  igbinary-version: "3.2.16-r8"
+  xdebug-version: "3.5.3-r1"
+
+environment:
+  contents:
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+
+    repositories:
+      - https://packages.wolfi.dev/os
+
+    packages:
+      - busybox
+
+pipeline:
+  - name: Create runtime metapackage
+    runs: |
+      mkdir -p "${{targets.destdir}}"
+
+subpackages:
+  - name: php83-builder
+    description: Pinned PHP 8.3 builder extensions for Cattr on Wolfi
+
+    dependencies:
+      runtime:
+        - php83-local=${{package.full-version}}
+        - php-8.3-phar=${{vars.php-version}}
+        - php-8.3-mbstring=${{vars.php-version}}
+        - php-8.3-xdebug=${{vars.xdebug-version}}
+
+    pipeline:
+      - name: Create builder metapackage
+        runs: |
+          mkdir -p "${{targets.subpkgdir}}"
+
+    test:
+      pipeline:
+        - name: Check builder extensions
+          runs: |
+            set -eu
+
+            test "$(php -r 'echo PHP_VERSION;')" = "${{package.version}}"
+
+            php -r 'exit(extension_loaded("phar") ? 0 : 1);'
+            php -r 'exit(extension_loaded("mbstring") ? 0 : 1);'
+
+            test -f /usr/lib/php/modules/xdebug.so
+
+test:
+  pipeline:
+    - name: Check PHP version and runtime extensions
+      runs: |
+        set -eu
+
+        test "$(php -r 'echo PHP_VERSION;')" = "${{package.version}}"
+
+        php -r '
+          $extensions = [
+            "ctype",
+            "gd",
+            "openssl",
+            "pdo",
+            "pdo_mysql",
+            "mysqli",
+            "zip",
+            "intl",
+            "session",
+            "exif",
+            "curl",
+            "xml",
+            "fileinfo",
+            "tokenizer",
+            "simplexml",
+            "dom",
+            "xmlwriter",
+            "xmlreader",
+            "iconv",
+            "posix",
+            "sockets",
+            "pcntl",
+            "redis",
+            "apcu",
+            "swoole",
+            "igbinary",
+          ];
+
+          $loaded = array_map("strtolower", get_loaded_extensions());
+
+          foreach ($extensions as $extension) {
+            if (!in_array(strtolower($extension), $loaded, true)) {
+              fwrite(STDERR, "Missing PHP extension: {$extension}\n");
+              exit(1);
+            }
+          }
+        '

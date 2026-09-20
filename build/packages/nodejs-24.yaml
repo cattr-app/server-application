@@ -1,0 +1,42 @@
+package:
+  name: nodejs-local
+  version: "24.21.0"
+  epoch: 1
+
+  description: Pinned Node.js 24 runtime for the Cattr builder on Wolfi
+
+  target-architecture:
+    - x86_64
+
+  copyright:
+    - license: MIT
+
+  dependencies:
+    runtime:
+      - nodejs-24=${{vars.nodejs-version}}
+
+vars:
+  nodejs-version: "24.21.0-r1"
+
+environment:
+  contents:
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+
+    repositories:
+      - https://packages.wolfi.dev/os
+
+    packages:
+      - busybox
+
+pipeline:
+  - name: Create Node.js metapackage
+    runs: |
+      mkdir -p "${{targets.destdir}}"
+
+test:
+  pipeline:
+    - name: Check Node.js
+      runs: |
+        set -eu
+        test "$(node --version)" = "v${{package.version}}"

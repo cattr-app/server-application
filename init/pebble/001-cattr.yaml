@@ -1,0 +1,66 @@
+summary: Cattr runtime services
+
+description: |
+  Process plan for both the all-in-one Docker image and role-based deployments.
+  Services are disabled by default; cattr-entrypoint explicitly starts the
+  requested role set.
+
+services:
+  app:
+    override: replace
+    summary: Laravel Octane application server
+    command: php artisan octane:start --host=0.0.0.0 --port=8090
+    startup: disabled
+    working-dir: /opt/cattr/app
+    on-success: restart
+    on-failure: shutdown
+    kill-delay: 30s
+
+  nginx:
+    override: replace
+    summary: Cattr HTTP reverse proxy and static file server
+    command: nginx -e stderr -g "daemon off;"
+    startup: disabled
+    requires:
+      - app
+    after:
+      - app
+    on-success: restart
+    on-failure: shutdown
+    kill-delay: 10s
+
+  queue:
+    override: replace
+    summary: Laravel queue worker
+    command: php artisan queue:work --sleep=3 --no-interaction
+    startup: disabled
+    working-dir: /opt/cattr/app
+    on-success: restart
+    on-failure: restart
+    backoff-delay: 1s
+    backoff-limit: 30s
+    kill-delay: 30s
+
+  reverb:
+    override: replace
+    summary: Laravel Reverb WebSocket server
+    command: php artisan reverb:start --host=0.0.0.0 --port=8081
+    startup: disabled
+    working-dir: /opt/cattr/app
+    on-success: restart
+    on-failure: restart
+    backoff-delay: 1s
+    backoff-limit: 30s
+    kill-delay: 30s
+
+  scheduler:
+    override: replace
+    summary: Laravel scheduler trigger
+    command: /usr/bin/supercronic /opt/cattr/crontab
+    startup: disabled
+    working-dir: /opt/cattr/app
+    on-success: restart
+    on-failure: restart
+    backoff-delay: 1s
+    backoff-limit: 30s
+    kill-delay: 10s

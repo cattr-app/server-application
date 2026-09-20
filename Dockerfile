@@ -11,71 +11,107 @@ ARG SENTRY_DSN
 ARG APP_VERSION
 ARG APP_ENV=production
 ARG REVERB_SCHEME=http
-ARG REVERB_PORT=8080
-ENV IMAGE_VERSION=5.0.0
-ENV APP_VERSION=$APP_VERSION
-ENV SENTRY_DSN=$SENTRY_DSN
-ENV APP_ENV=$APP_ENV
-ENV REVERB_APP_KEY="cattr"
-ENV REVERB_HOST="127.0.0.1"
-ENV REVERB_SCHEME=$REVERB_SCHEME
-ENV REVERB_PORT=$REVERB_PORT
+ARG REVERB_PORT=8081
 
-ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=300000
+ENV IMAGE_VERSION=6.0.0 \
+    APP_VERSION=${APP_VERSION} \
+    SENTRY_DSN=${SENTRY_DSN} \
+    APP_ENV=${APP_ENV} \
+    REVERB_APP_KEY=cattr \
+    REVERB_HOST=127.0.0.1 \
+    REVERB_SCHEME=${REVERB_SCHEME} \
+    REVERB_PORT=${REVERB_PORT}
 
-COPY --chown=root:root .root-fs/etc/php82 /etc/php82
+# builder-latest is itself configured with run-as: 10000. Keep this explicit
+# so a future base-image change cannot silently make application build steps root.
+USER 10000:10000
+WORKDIR /opt/cattr/app
 
-WORKDIR /app
+COPY --chown=10000:10000 . /opt/cattr/app
 
-COPY --chown=www:www . /app
+RUN set -eux; \
+    composer install \
+        --no-interaction \
+        --no-dev \
+        --no-cache \
+        --no-ansi \
+        --no-autoloader; \
+    composer dump-autoload \
+        --no-interaction \
+        --optimize \
+        --apcu \
+        --classmap-authoritative
 
-USER www:www
-
-RUN set -x && \
-    php /usr/bin/composer.phar install -n --no-dev --no-cache --no-ansi --no-autoloader --no-dev && \
-    php /usr/bin/composer.phar dump-autoload -n --optimize --apcu --classmap-authoritative
-
-RUN set -x && \
-    pnpm install --frozen-lockfile && \
-    pnpm prod && \
+RUN set -eux; \
+    pnpm install --frozen-lockfile; \
+    pnpm prod; \
     rm -rf node_modules
 
-RUN set -x && \
-    php artisan storage:link
+RUN set -eux; \
+    php artisan storage:link; \
+    rm -rf build runtime init
 
 FROM ${RUNTIME_BASE_IMAGE}:${RUNTIME_BASE_IMAGE_TAG} AS runtime
 
 ARG SENTRY_DSN
 ARG APP_VERSION
 ARG APP_ENV=production
-ARG APP_KEY="base64:PU/8YRKoMdsPiuzqTpFDpFX1H8Af74nmCQNFwnHPFwY="
 ARG REVERB_APP_SECRET="secret"
 ARG REVERB_SCHEME=http
-ARG REVERB_PORT=8080
-ENV IMAGE_VERSION=5.0.0
-ENV REVERB_APP_KEY="cattr"
-ENV REVERB_HOST="127.0.0.1"
-ENV REVERB_SCHEME=$REVERB_SCHEME
-ENV REVERB_PORT=$REVERB_PORT
-ENV REVERB_APP_SECRET=$REVERB_APP_SECRET
-ENV DB_CONNECTION=mysql
-ENV DB_HOST=db
-ENV DB_USERNAME=root
-ENV DB_PASSWORD=password
-ENV LOG_CHANNEL=stderr
-ENV APP_VERSION=$APP_VERSION
-ENV SENTRY_DSN=$SENTRY_DSN
-ENV APP_ENV=$APP_ENV
-ENV APP_KEY=$APP_KEY
-ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=300000
+ARG REVERB_PORT=8081
 
-COPY --from=builder /app /app
+ENV IMAGE_VERSION=6.0.0 \
+    APP_VERSION=${APP_VERSION} \
+    SENTRY_DSN=${SENTRY_DSN} \
+    APP_ENV=${APP_ENV} \
+    REVERB_APP_KEY=cattr \
+    REVERB_APP_SECRET=${REVERB_APP_SECRET} \
+    REVERB_HOST=127.0.0.1 \
+    REVERB_SCHEME=${REVERB_SCHEME} \
+    REVERB_PORT=${REVERB_PORT} \
+    DB_CONNECTION=mysql \
+    DB_HOST=db \
+    DB_USERNAME=root \
+    DB_PASSWORD=password \
+    LOG_CHANNEL=stderr \
+    PEBBLE=/opt/cattr/.pebble
 
-COPY --chown=root:root .root-fs /
+WORKDIR /opt/cattr/app
 
-VOLUME /app/storage
+# Keep application code immutable to the runtime UID. Only Laravel's mutable
+# directories are overlaid with UID/GID 10000 ownership below.
+COPY --from=builder --chown=0:0 /opt/cattr/app/ /opt/cattr/app/
+COPY --from=builder --chown=10000:10000 /opt/cattr/app/bootstrap/cache/ /opt/cattr/app/bootstrap/cache/
+COPY --from=builder --chown=10000:10000 /opt/cattr/app/storage/ /opt/cattr/app/storage/
 
-#HEALTHCHECK --interval=5m --timeout=10s \
-#  CMD wget --spider -q "http://127.0.0.1:8090/status"
+# The runtime base image uses UID 10000 by default, so chown must run as root.
+# Recursively fix both directory and file ownership for Laravel's writable paths.
+USER 0:0
+RUN chown -R 10000:10000 /opt/cattr/app/bootstrap/cache /opt/cattr/app/storage
+USER 10000:10000
 
-EXPOSE 80
+# Cattr-specific configuration lives under /opt/cattr/etc. Program-specific
+# system configuration remains in the conventional /etc/php and /etc/nginx.
+COPY --chown=0:0 --chmod=0644 runtime/supercronic/crontab /opt/cattr/crontab
+COPY --chown=0:0 --chmod=0644 runtime/php/conf.d/99-cattr.ini /etc/php/conf.d/99-cattr.ini
+COPY --chown=0:0 --chmod=0644 runtime/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY --chown=0:0 --chmod=0644 runtime/nginx/conf.d/app.conf /etc/nginx/conf.d/app.conf
+
+# Pebble needs a writable per-user state directory; the base image creates it
+# as UID/GID 10000. The layer itself is application data copied at image build.
+COPY --chown=10000:10000 --chmod=0644 init/pebble/001-cattr.yaml /opt/cattr/.pebble/layers/001-cattr.yaml
+COPY --chown=0:0 --chmod=0755 init/container-entrypoint.sh /opt/cattr/entrypoint
+
+# Hard guarantee for the final image: PID 1 and every supervised process start
+# as the unprivileged Cattr user. No runtime privilege drop is required.
+USER 10000:10000
+
+VOLUME ["/opt/cattr/app/storage"]
+
+# 8080 nginx, 8081 Reverb, 8090 Octane. The latter two matter when a role is
+# deployed without nginx in front of it.
+EXPOSE 8080 8081 8090
+
+STOPSIGNAL SIGTERM
+ENTRYPOINT ["/opt/cattr/entrypoint"]
+CMD ["all"]
