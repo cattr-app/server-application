@@ -1,0 +1,104 @@
+{{- if .Values.mysql.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cattr.mysql.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "cattr.mysql.labels" . | nindent 4 }}
+  {{- with (include "cattr.annotations" .) }}
+  annotations:
+    {{- . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "cattr.mysql.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        {{- include "cattr.mysql.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with (concat (.Values.global.imagePullSecrets | default list) (.Values.imagePullSecrets | default list)) }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.mysql.containerSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: mysql
+          image: {{ include "cattr.mysql.image" . }}
+          imagePullPolicy: {{ .Values.mysql.image.pullPolicy }}
+          ports:
+            - name: mysql
+              containerPort: 3306
+              protocol: TCP
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cattr.secretName" . }}
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_DATABASE
+              value: {{ .Values.database.name | quote }}
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cattr.secretName" . }}
+                  key: DB_USERNAME
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cattr.secretName" . }}
+                  key: DB_PASSWORD
+          args:
+            - --log-bin-trust-function-creators=1
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+          {{- if .Values.mysql.startupProbe.enabled }}
+          startupProbe:
+            tcpSocket:
+              port: mysql
+            initialDelaySeconds: {{ .Values.mysql.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.mysql.startupProbe.periodSeconds }}
+            failureThreshold: {{ .Values.mysql.startupProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.mysql.readinessProbe.enabled }}
+          readinessProbe:
+            exec:
+              command:
+                - mysqladmin
+                - ping
+                - -h
+                - localhost
+            periodSeconds: {{ .Values.mysql.readinessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.mysql.readinessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.mysql.livenessProbe.enabled }}
+          livenessProbe:
+            exec:
+              command:
+                - mysqladmin
+                - ping
+                - -h
+                - localhost
+            periodSeconds: {{ .Values.mysql.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.mysql.livenessProbe.failureThreshold }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.mysql.resources | nindent 12 }}
+      volumes:
+        - name: data
+          {{- if .Values.mysql.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.mysql.persistence.existingClaim | default (include "cattr.mysql.fullname" .) }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+{{- end }}

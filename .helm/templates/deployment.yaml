@@ -1,99 +1,152 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-web
+  name: {{ include "cattr.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "cattr.labels" . | nindent 4 }}
+  {{- with (include "cattr.annotations" .) }}
+  annotations:
+    {{- . | nindent 4 }}
+  {{- end }}
 spec:
-  replicas: {{ .Values.app.replicas | default 2 }}
-  revisionHistoryLimit: {{ .Values.app.revisionHistoryLimit | default 2 }}
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ .Release.Name }}-web
+      {{- include "cattr.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ .Release.Name }}-web
+        {{- include "cattr.selectorLabels" . | nindent 8 }}
     spec:
+      {{- with (concat (.Values.global.imagePullSecrets | default list) (.Values.imagePullSecrets | default list)) }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        {{- if .Values.mysql.enabled }}
+        - name: wait-for-mysql
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z {{ include "cattr.mysql.host" . }} {{ .Values.database.port }}; do
+                echo "Waiting for MySQL..."
+                sleep 3
+              done
+              echo "MySQL is ready"
+        {{- end }}
+        {{- with .Values.initContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       containers:
-        - name: app
-          imagePullPolicy: {{.Values.app.image.pullPolicy}}
-          image: {{- printf " %s/%s:%s" .Values.app.image.registry .Values.app.image.repository .Values.app.image.tag }}
+        - name: cattr
+          image: {{ include "cattr.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           ports:
-            - containerPort: 80
-              name: http-web-svc
+            - name: http
+              containerPort: 80
               protocol: TCP
-          env:
-            - name: APP_ENV
-              value: {{ .Values.app.environment | default "dev" | quote }}
-            - name: S6_CMD_WAIT_FOR_SERVICES_MAXTIME
-              value: "180000"
-          volumeMounts:
-            - mountPath: /app/storage/app/screenshots
-              name: app-screenshots
-            - mountPath: /app/storage/app/attachments
-              name: app-attachments
-            - mountPath: /app/bootstrap/cache
-              name: bootstrap-cache
-            - mountPath: /tmp
-              name: app-tmp
-            - mountPath: /run
-              name: app-run
-            - mountPath: /var/lib/nginx/tmp
-              name: nginx-tmp
           envFrom:
             - configMapRef:
-                name: {{ .Release.Name }}-configmap
-            - secretRef:
-                name: {{ .Release.Name }}-secret
+                name: {{ include "cattr.fullname" . }}
+          env:
+            - name: APP_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cattr.secretName" . }}
+                  key: APP_KEY
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cattr.secretName" . }}
+                  key: DB_USERNAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cattr.secretName" . }}
+                  key: DB_PASSWORD
+            {{- with .Values.cattr.extraEnvVars }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- if .Values.startupProbe.enabled }}
           startupProbe:
-            exec:
-              command: ["php", "artisan", "octane:status"]
-            failureThreshold: 60
-            periodSeconds: 5
-          livenessProbe:
             httpGet:
-              path: /actuator/health/liveness
-              port: http-web-svc
-            failureThreshold: 3
-            periodSeconds: 5
+              path: /
+              port: http
+            initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.startupProbe.periodSeconds }}
+            failureThreshold: {{ .Values.startupProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
           readinessProbe:
             httpGet:
-              path: /actuator/health/readiness
-              port: http-web-svc
-            failureThreshold: 3
-            successThreshold: 1
-            periodSeconds: 15
+              path: /
+              port: http
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: var-run
+              mountPath: /var/run
+            - name: tmp
+              mountPath: /tmp
+            - name: cache
+              mountPath: /app/storage/framework/cache
+            - name: sessions
+              mountPath: /app/storage/framework/sessions
+            {{- if .Values.persistence.screenshots.enabled }}
+            - name: screenshots
+              mountPath: /app/storage/app/uploads/screenshots
+            {{- end }}
+            {{- if .Values.persistence.attachments.enabled }}
+            - name: attachments
+              mountPath: /app/storage/app/uploads/attachments
+            {{- end }}
+            {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+        {{- with .Values.sidecars }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       volumes:
-        - name: bootstrap-cache
+        - name: var-run
           emptyDir: {}
-        - name: app-tmp
+        - name: tmp
           emptyDir: {}
-        - name: storage-framework
+        - name: cache
           emptyDir: {}
-        - name: app-run
+        - name: sessions
           emptyDir: {}
-        - name: nginx-tmp
-          emptyDir: {}
-        - name: nginx-run
-          emptyDir: {}
-        - name: app-screenshots
-          {{- if eq .Values.app.persistence.screenshots.enabled "true" }}
+        {{- if .Values.persistence.screenshots.enabled }}
+        - name: screenshots
           persistentVolumeClaim:
-            {{- if not (empty .Values.app.persistence.screenshots.existingClaim) }}
-            claimName: {{ .Values.app.persistence.screenshots.existingClaim }}
-            {{- else }}
-            claimName: {{ .Release.Name }}-pvc-screenshots
-            {{- end }}
-          {{- else }}
-          emptyDir: {}
-          {{- end }}
-        - name: app-attachments
-          {{- if eq .Values.app.persistence.attachments.enabled "true" }}
+            claimName: {{ .Values.persistence.screenshots.existingClaim | default (printf "%s-screenshots" (include "cattr.fullname" .)) }}
+        {{- end }}
+        {{- if .Values.persistence.attachments.enabled }}
+        - name: attachments
           persistentVolumeClaim:
-            {{- if not (empty .Values.app.persistence.attachments.existingClaim) }}
-            claimName: {{ .Values.app.persistence.attachments.existingClaim }}
-            {{- else }}
-            claimName: {{ .Release.Name }}-pvc-attachments
-            {{- end }}
-          {{- else }}
-          emptyDir: {}
-          {{- end }}
+            claimName: {{ .Values.persistence.attachments.existingClaim | default (printf "%s-attachments" (include "cattr.fullname" .)) }}
+        {{- end }}
+        {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}

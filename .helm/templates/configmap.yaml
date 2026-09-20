@@ -1,10 +1,21 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-configmap
-data:
-  LOG_CHANNEL: "stderr"
-  LOG_LEVEL: "debug"
-  {{- range $key, $val := .Values.app.env }}
-  "{{ $key }}": "{{ $val }}"
+  name: {{ include "cattr.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "cattr.labels" . | nindent 4 }}
+  {{- with (include "cattr.annotations" .) }}
+  annotations:
+    {{- . | nindent 4 }}
   {{- end }}
+data:
+  APP_ENV: {{ .Values.cattr.appEnv | quote }}
+  APP_DEBUG: {{ .Values.cattr.appDebug | quote }}
+  APP_URL: {{ .Values.cattr.appUrl | quote }}
+  LOG_CHANNEL: {{ .Values.cattr.logChannel | quote }}
+  DB_CONNECTION: "mysql"
+  DB_HOST: {{ include "cattr.mysql.host" . | quote }}
+  DB_PORT: {{ .Values.database.port | quote }}
+  DB_DATABASE: {{ .Values.database.name | quote }}
+  S6_CMD_WAIT_FOR_SERVICES_MAXTIME: "300000"
