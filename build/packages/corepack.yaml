@@ -1,6 +1,6 @@
 package:
-  name: corepack
-  version: 0.33.0
+  name: corepack-local
+  version: "0.36.0"
   epoch: 0
 
   description: Corepack package manager bridge for Node.js
@@ -13,13 +13,15 @@ package:
 
   dependencies:
     runtime:
-      - nodejs>=18.17.1
+      - nodejs-local
 
 environment:
   contents:
     repositories:
-      - https://dl-cdn.alpinelinux.org/alpine/v3.18/main
-      - https://dl-cdn.alpinelinux.org/alpine/v3.18/community
+      - https://packages.wolfi.dev/os
+
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
 
     packages:
       - busybox
@@ -28,8 +30,8 @@ environment:
 pipeline:
   - uses: fetch
     with:
-      uri: https://registry.npmjs.org/corepack/-/corepack-${{package.version}}.tgz
-      expected-sha512: 5d25f804d8ddc0f5e350493bff6af4bc586cd62af056770944cca3cc37a5dcf54a5a71d05de85c897d1692f0eb775ba32cb14945ef057996fd0120aa06d17f38
+      uri: https://github.com/nodejs/corepack/releases/download/v${{package.version}}/corepack.tgz
+      expected-sha256: 9128cfe26aee0c99f4fc68c15c6b8b12309a68be0de2c012cdfea2a463cb722f
       delete: "true"
 
   - name: Install Corepack
@@ -39,15 +41,9 @@ pipeline:
       module_dir="${{targets.destdir}}/usr/lib/node_modules/corepack"
       bin_dir="${{targets.destdir}}/usr/bin"
 
-      mkdir -p \
-        "${module_dir}" \
-        "${bin_dir}"
+      mkdir -p "${module_dir}" "${bin_dir}"
 
-      cp -a \
-        package.json \
-        LICENSE.md \
-        dist \
-        "${module_dir}/"
+      cp -a package.json LICENSE.md dist "${module_dir}/"
 
       chmod 0755 \
         "${module_dir}/dist/corepack.js" \
@@ -56,39 +52,26 @@ pipeline:
         "${module_dir}/dist/yarn.js" \
         "${module_dir}/dist/yarnpkg.js"
 
-      ln -s \
-        ../lib/node_modules/corepack/dist/corepack.js \
-        "${bin_dir}/corepack"
-
-      ln -s \
-        ../lib/node_modules/corepack/dist/pnpm.js \
-        "${bin_dir}/pnpm"
-
-      ln -s \
-        ../lib/node_modules/corepack/dist/pnpx.js \
-        "${bin_dir}/pnpx"
-
-      ln -s \
-        ../lib/node_modules/corepack/dist/yarn.js \
-        "${bin_dir}/yarn"
-
-      ln -s \
-        ../lib/node_modules/corepack/dist/yarnpkg.js \
-        "${bin_dir}/yarnpkg"
+      ln -s ../lib/node_modules/corepack/dist/corepack.js "${bin_dir}/corepack"
+      ln -s ../lib/node_modules/corepack/dist/pnpm.js "${bin_dir}/pnpm"
+      ln -s ../lib/node_modules/corepack/dist/pnpx.js "${bin_dir}/pnpx"
+      ln -s ../lib/node_modules/corepack/dist/yarn.js "${bin_dir}/yarn"
+      ln -s ../lib/node_modules/corepack/dist/yarnpkg.js "${bin_dir}/yarnpkg"
 
 test:
   environment:
     contents:
       repositories:
-        - https://dl-cdn.alpinelinux.org/alpine/v3.18/main
-        - https://dl-cdn.alpinelinux.org/alpine/v3.18/community
+        - https://packages.wolfi.dev/os
+
+      keyring:
+        - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
 
       packages:
-        - nodejs
+        - nodejs-local
 
   pipeline:
     - name: Check Corepack
       runs: |
         set -eu
-
-        test "$(corepack --version)" = "0.33.0"
+        test "$(corepack --version)" = "${{package.version}}"

@@ -1,0 +1,57 @@
+package:
+  name: composer-local
+  version: "2.10.3"
+  epoch: 0
+
+  description: Composer packaged for the pinned Cattr PHP 8.3 runtime
+
+  target-architecture:
+    - x86_64
+
+  copyright:
+    - license: MIT
+
+  dependencies:
+    runtime:
+      - php83-local=8.3.33-r4
+      - php-8.3-phar=8.3.33-r4
+      - php-8.3-mbstring=8.3.33-r4
+      - git
+
+environment:
+  contents:
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+
+    repositories:
+      - https://packages.wolfi.dev/os
+
+    packages:
+      - busybox
+
+pipeline:
+  - uses: fetch
+    with:
+      uri: https://getcomposer.org/download/${{package.version}}/composer.phar
+      expected-sha256: 7a2d379d5b8ffdaa028580ef26494c36d2feef4b178d3dd1473a4dbc5e17c8d6
+      extract: false
+
+  - name: Install Composer
+    runs: |
+      mkdir -p "${{targets.destdir}}/usr/bin"
+
+      cp composer.phar "${{targets.destdir}}/usr/bin/composer"
+      chmod 0755 "${{targets.destdir}}/usr/bin/composer"
+
+test:
+  pipeline:
+    - name: Check Composer
+      runs: |
+        set -eu
+
+        test "$(php -r 'echo PHP_VERSION;')" = "8.3.33"
+
+        composer --version
+
+        composer --version \
+          | grep -F "Composer version 2.10.3"

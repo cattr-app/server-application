@@ -46,7 +46,7 @@ spec:
                 name: {{ .Release.Name }}-secret
           startupProbe:
             exec:
-              command: ["php82", "artisan", "octane:status"]
+              command: ["php", "artisan", "octane:status"]
             failureThreshold: 60
             periodSeconds: 5
           livenessProbe:

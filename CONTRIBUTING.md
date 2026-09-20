@@ -285,7 +285,7 @@ Use the versions declared by the repository whenever possible.
 
 | Dependency | Version                                                    |
 |------------|------------------------------------------------------------|
-| PHP        | 8.2                                                        |
+| PHP        | 8.3                                                        |
 | Laravel    | 10.x                                                       |
 | Node.js    | `.nvmrc`, currently 18.20                                  |
 | pnpm       | `packageManager` in `package.json`, currently 10.x         |
@@ -471,7 +471,7 @@ Generated frontend output should not be committed.
 
 ## Backend development
 
-The backend is a Laravel 10 application running on PHP 8.2.
+The backend is a Laravel 10 application running on PHP 8.3.
 
 Available Artisan commands can be inspected with:
 
