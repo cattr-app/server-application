@@ -9,6 +9,40 @@ services=""
 run_migrations=0
 run_provision=0
 
+now() {
+    date -u '+%Y-%m-%dT%H:%M:%SZ'
+}
+
+log() {
+    printf '%s [cattr-entrypoint] %s\n' "$(now)" "$*" >&2
+}
+
+fail() {
+    log "ERROR: $*"
+    exit 1
+}
+
+run_step() {
+    step="$1"
+    shift
+
+    started_at="$(date +%s)"
+    log "START: ${step}"
+
+    if "$@"; then
+        finished_at="$(date +%s)"
+        elapsed="$((finished_at - started_at))"
+        log "DONE:  ${step} (${elapsed}s)"
+        return 0
+    fi
+
+    status="$?"
+    finished_at="$(date +%s)"
+    elapsed="$((finished_at - started_at))"
+    log "FAIL:  ${step} (${elapsed}s, exit=${status})"
+    return "$status"
+}
+
 add_service() {
     service="$1"
 
@@ -24,7 +58,7 @@ add_service() {
     esac
 }
 
-prepare_runtime() {
+prepare_directories() {
     mkdir -p \
         /opt/cattr/app/bootstrap/cache \
         /opt/cattr/app/storage/app/modules \
@@ -39,7 +73,9 @@ prepare_runtime() {
         /tmp/nginx/proxy \
         /tmp/nginx/scgi \
         /tmp/nginx/uwsgi
+}
 
+cache_configuration() {
     php /opt/cattr/app/artisan config:cache --no-interaction
 }
 
@@ -55,16 +91,22 @@ provision_application() {
     php /opt/cattr/app/artisan cattr:make:admin --no-interaction
 }
 
+log "Cattr container bootstrap starting"
+log "Identity: uid=$(id -u) gid=$(id -g) user=$(id -un 2>/dev/null || printf unknown)"
+log "Application root: /opt/cattr/app"
+log "Environment: APP_ENV=${APP_ENV:-<unset>} DB_CONNECTION=${DB_CONNECTION:-<unset>} DB_HOST=${DB_HOST:-<unset>} DB_DATABASE=${DB_DATABASE:-<unset>}"
+
 # Allow an explicit escape hatch for maintenance/debug commands without
 # teaching the entrypoint about every possible executable.
 if [ "${1:-}" = "exec" ]; then
     shift
 
     if [ "$#" -eq 0 ]; then
-        echo "cattr-entrypoint: exec requires a command" >&2
+        log "ERROR: exec requires a command"
         exit 64
     fi
 
+    log "Maintenance exec requested: $1"
     exec "$@"
 fi
 
@@ -76,6 +118,8 @@ if [ "$#" -eq 0 ]; then
     # shellcheck disable=SC2086
     set -- ${CATTR_ROLES:-all}
 fi
+
+log "Requested roles: $*"
 
 for role in "$@"; do
     case "$role" in
@@ -121,27 +165,35 @@ for role in "$@"; do
             run_provision=1
             ;;
         *)
-            echo "Unknown Cattr role: ${role}" >&2
-            echo "Supported roles: all web app nginx queue reverb scheduler migrate provision setup exec" >&2
+            log "ERROR: unknown Cattr role: ${role}"
+            log "Supported roles: all web app nginx queue reverb scheduler migrate provision setup exec"
             exit 64
             ;;
     esac
 done
 
-prepare_runtime
+log "Resolved services: ${services:-<none>}"
+log "Bootstrap actions: config-cache=yes migrate=$([ "$run_migrations" -eq 1 ] && printf yes || printf no) provision=$([ "$run_provision" -eq 1 ] && printf yes || printf no)"
+
+run_step "prepare writable runtime directories" prepare_directories
+run_step "cache Laravel configuration" cache_configuration
 
 if [ "$run_migrations" -eq 1 ]; then
-    migrate_database
+    run_step "run database migrations and seed InitialSeeder" migrate_database
 fi
 
 if [ "$run_provision" -eq 1 ]; then
-    provision_application
+    run_step "provision Cattr administrator" provision_application
 fi
 
 if [ -z "$services" ]; then
-    # One-shot invocation such as migrate, provision, or setup.
+    log "One-shot bootstrap completed successfully; no long-running services requested"
     exit 0
 fi
+
+log "Starting Pebble as PID 1"
+log "Pebble services requested: ${services}"
+log "Service output will be mirrored to container stdout/stderr"
 
 # `pebble enter start` is designed for container entrypoints. exec replaces
 # this shell so Pebble becomes PID 1 and remains the signal/reaping boundary.
