@@ -1,15 +1,20 @@
-{{- if empty .Values.app.persistence.screenshots.existingClaim }}
+{{- if and .Values.persistence.screenshots.enabled (not .Values.persistence.screenshots.existingClaim) }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  name: {{ include "cattr.fullname" . }}-screenshots
+  namespace: {{ .Release.Namespace | quote }}
   labels:
-    app: cattr-app
-  name: {{ .Release.Name }}-pvc-screenshots
+    {{- include "cattr.labels" . | nindent 4 }}
+  {{- with (include "cattr.annotations" .) }}
+  annotations:
+    {{- . | nindent 4 }}
+  {{- end }}
 spec:
-  storageClassName: {{ .Values.app.persistence.screenshots.storageClass }}
   accessModes:
-    - ReadWriteOnce
+    {{- toYaml .Values.persistence.screenshots.accessModes | nindent 4 }}
+  {{- include "cattr.storageClass" (dict "persistence" .Values.persistence.screenshots "global" .Values.global) | nindent 2 }}
   resources:
     requests:
-      storage: {{ .Values.app.persistence.screenshots.size }}
+      storage: {{ .Values.persistence.screenshots.size }}
 {{- end }}
