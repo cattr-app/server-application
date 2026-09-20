@@ -22,6 +22,10 @@ fail() {
     exit 1
 }
 
+if [ -z "${APP_KEY:-}" ]; then
+    fail "APP_KEY must be set and non-empty"
+fi
+
 run_step() {
     step="$1"
     shift
