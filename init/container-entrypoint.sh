@@ -34,13 +34,13 @@ run_step() {
         elapsed="$((finished_at - started_at))"
         log "DONE:  ${step} (${elapsed}s)"
         return 0
+    else
+        status="$?"
+        finished_at="$(date +%s)"
+        elapsed="$((finished_at - started_at))"
+        log "FAIL:  ${step} (${elapsed}s, exit=${status})"
+        return "$status"
     fi
-
-    status="$?"
-    finished_at="$(date +%s)"
-    elapsed="$((finished_at - started_at))"
-    log "FAIL:  ${step} (${elapsed}s, exit=${status})"
-    return "$status"
 }
 
 add_service() {
