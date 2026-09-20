@@ -256,11 +256,12 @@ jobs:
       - name: Build local APK repository
         if: steps.check.outputs.runtime_exists != 'true' || steps.check.outputs.builder_exists != 'true'
         env:
-          MELANGE_PRIVATE_KEY: ${{ runner.temp }}/melange.rsa
-          MELANGE_PUBLIC_KEY: ${{ runner.temp }}/melange.rsa.pub
           PACKAGE_REPOSITORY: ${{ github.workspace }}/packages
         run: |
           set -euo pipefail
+
+          MELANGE_PRIVATE_KEY="${RUNNER_TEMP}/melange.rsa"
+          MELANGE_PUBLIC_KEY="${RUNNER_TEMP}/melange.rsa.pub"
 
           rm -rf "${PACKAGE_REPOSITORY}"
 
@@ -338,10 +339,11 @@ jobs:
         env:
           RUNTIME_TAG: ${{ steps.meta.outputs.runtime_tag }}
           RUNTIME_REVISION: ${{ steps.meta.outputs.runtime_revision }}
-          MELANGE_PUBLIC_KEY: ${{ runner.temp }}/melange.rsa.pub
           PACKAGE_REPOSITORY: ${{ github.workspace }}/packages
         run: |
           set -euo pipefail
+
+          MELANGE_PUBLIC_KEY="${RUNNER_TEMP}/melange.rsa.pub"
 
           echo "Publishing ${RUNTIME_IMAGE}:${RUNTIME_TAG}"
 
@@ -379,10 +381,11 @@ jobs:
         env:
           BUILDER_TAG: ${{ steps.meta.outputs.builder_tag }}
           BUILDER_REVISION: ${{ steps.meta.outputs.builder_revision }}
-          MELANGE_PUBLIC_KEY: ${{ runner.temp }}/melange.rsa.pub
           PACKAGE_REPOSITORY: ${{ github.workspace }}/packages
         run: |
           set -euo pipefail
+
+          MELANGE_PUBLIC_KEY="${RUNNER_TEMP}/melange.rsa.pub"
 
           echo "Publishing ${RUNTIME_IMAGE}:${BUILDER_TAG}"
 
