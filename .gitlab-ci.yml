@@ -7,12 +7,12 @@ stages:
 pages :
   stage: pages
   when: manual
-  image: node:18-alpine
+  image: node:24-alpine
   only:
     - tags
   before_script:
     - corepack enable
-    - pnpm install
+    - pnpm install --frozen-lockfile
     - rm -rf public
     - mkdir public
   script:

@@ -283,14 +283,14 @@ The production application is distributed as a single container containing the b
 
 Use the versions declared by the repository whenever possible.
 
-| Dependency | Version                                                    |
-|------------|------------------------------------------------------------|
-| PHP        | 8.3                                                        |
-| Laravel    | 10.x                                                       |
-| Node.js    | `.nvmrc`, currently 18.20                                  |
-| pnpm       | `packageManager` in `package.json`, currently 10.x         |
-| Composer   | Composer 2                                                 |
-| Database   | MySQL-compatible database                                  |
+| Dependency | Version                                            |
+|------------|----------------------------------------------------|
+| PHP        | 8.3                                                |
+| Laravel    | 10.x                                               |
+| Node.js    | `.nvmrc`, currently 24.21                          |
+| pnpm       | `packageManager` in `package.json`, currently 12.x |
+| Composer   | Composer 2                                         |
+| Database   | MySQL-compatible database                          |
 
 Corepack is required to use the pnpm version pinned by the repository.
 
