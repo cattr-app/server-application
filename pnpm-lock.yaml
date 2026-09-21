@@ -345,8 +345,8 @@ importers:
         specifier: ^4.0.0
         version: 4.0.0(webpack@5.91.0)
       compression-webpack-plugin:
-        specifier: ^10.0.0
-        version: 10.0.0(webpack@5.91.0)
+        specifier: ^12.0.0
+        version: 12.0.0(webpack@5.91.0)
       core-js:
         specifier: ^3.35.0
         version: 3.50.0
@@ -2078,6 +2078,12 @@ packages:
   compression-webpack-plugin@10.0.0:
     resolution: {integrity: sha512-wLXLIBwpul/ALcm7Aj+69X0pYT3BYt6DdPn3qrgBIh9YejV9Bju9ShhlAsjujLyWMo6SAweFIWaUoFmXZNuNrg==}
     engines: {node: '>= 14.15.0'}
+    peerDependencies:
+      webpack: ^5.1.0
+
+  compression-webpack-plugin@12.0.0:
+    resolution: {integrity: sha512-LR4mS19Jqq41XfA3xVMLrtzVNzqJbUHdzPeLRfQoLiAS9s87f0021fDuU89xxVQFcB6d20ufBkv4j1rQ4OowHw==}
+    engines: {node: '>= 20.9.0'}
     peerDependencies:
       webpack: ^5.1.0
 
@@ -4891,6 +4897,10 @@ packages:
 
   serialize-javascript@6.0.2:
     resolution: {integrity: sha512-Saa1xPByTTq2gdeFZYLLo+RFE35NHZkAbqZeWNd3BpzppeVisAqpDjcp8dyf6uIvEqJRd46jemmyA4iFIeVk8g==}
+
+  serialize-javascript@7.1.1:
+    resolution: {integrity: sha512-k3CMsaIvvdSwm8oLB4MXSl0wH2/cwlH7xGcnRd2DaeRmBkbzYmyT8j0tsX60DwD1eRwHTpNpH8ljKu9oUT1MeQ==}
+    engines: {node: '>=20.0.0'}
 
   serve-index@1.9.2:
     resolution: {integrity: sha512-KDj11HScOaLmrPxl70KYNW1PksP4Nb/CLL2yvC+Qd2kHMPEEpfc4Re2e4FOay+bC/+XQl/7zAcWON3JVo5v3KQ==}
@@ -8023,6 +8033,12 @@ snapshots:
       serialize-javascript: 6.0.2
       webpack: 5.91.0(clean-css@5.3.3)(cssnano@5.1.15(postcss@8.5.28))(csso@4.2.0)(html-minifier-terser@5.1.1)(postcss@8.5.28)(uglify-js@3.19.3)(webpack-cli@4.10.0)
 
+  compression-webpack-plugin@12.0.0(webpack@5.91.0):
+    dependencies:
+      schema-utils: 4.5.0
+      serialize-javascript: 7.1.1
+      webpack: 5.91.0(clean-css@5.3.3)(cssnano@5.1.15(postcss@8.5.28))(csso@4.2.0)(html-minifier-terser@5.1.1)(postcss@8.5.28)(uglify-js@3.19.3)(webpack-cli@4.10.0)
+
   compression@1.8.2(supports-color@5.5.0):
     dependencies:
       bytes: 3.1.2
@@ -10952,6 +10968,8 @@ snapshots:
   serialize-javascript@6.0.2:
     dependencies:
       randombytes: 2.1.0
+
+  serialize-javascript@7.1.1: {}
 
   serve-index@1.9.2(supports-color@5.5.0):
     dependencies:
