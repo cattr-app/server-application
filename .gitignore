@@ -65,6 +65,7 @@ composer.phar
 
 /public/sw.*
 /public/workbox*
+/pages-dist/
 
 erd.svg
 

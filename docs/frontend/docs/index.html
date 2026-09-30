@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Cattr Frontend Docs</title>
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
+    <meta content="Description" name="Cattr Frontend Docs" />
+    <link
+            crossorigin="anonymous"
+            href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
+            integrity="sha512-znmTf4HNoF9U6mfB6KlhAShbRvbt4CvCaHoNV0gyssfToNQ/9A0eNdUbvsSwOIUoJdMjFG2ndSvr0Lo3ZpsTqQ=="
+            rel="stylesheet"
+    />
+    <link
+            crossorigin="anonymous"
+            href="https://cdn.jsdelivr.net/npm/docsify-themeable@0.9.0/dist/css/theme-simple.css"
+            integrity="sha512-y/drHAJQt5O0qHyZACp7505lR0hnVpbqrS6VAr1HqreVoooM+YA+J9eCkIeVnS44+emJbPLIGiCSbzvwATSyOQ=="
+            rel="stylesheet"
+    />
+    <!-- Google Tag Manager -->
+    <script>
+        window.dataLayer.push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+    </script>
+    <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-THM3M42"></script>
+    <!-- End Google Tag Manager -->
+    <style>
+        :root {
+            --base-font-size: 15px;
+        }
+
+        body {
+            padding-top: 52px;
+        }
+
+        .sidebar {
+            top: calc(38px + (0.5em * var(--base-line-height)));
+        }
+
+        summary {
+            cursor: pointer;
+        }
+
+        body {
+            padding-top: 52px;
+        }
+
+        ul {
+            display: block;
+            list-style-type: disc;
+            margin-block-start: 0;
+            margin-block-end: 0;
+            margin-inline-start: 0;
+            margin-inline-end: 0;
+            padding-inline-start: 0;
+        }
+
+        #header {
+            top: 0;
+            max-width: 100%;
+            padding: 0 3%;
+            position: fixed;
+            z-index: 1000;
+            background: #ffffff;
+            right: 0;
+            left: 0;
+            border-bottom: 1px solid #e4e6f6;
+        }
+
+        #header li {
+            display: inline-block;
+        }
+
+        main > section > article {
+            margin-top: 54px !important;
+        }
+
+        #header-logo {
+            height: 30px;
+            width: 30px;
+            vertical-align: middle;
+            box-shadow: 0 0 0 0 #000000;
+        }
+
+        .sidebar-toggle {
+            top: auto;
+            bottom: 0;
+        }
+
+        #header .multiple-item:hover .submenu {
+            display: block;
+        }
+
+        #header a {
+            white-space: nowrap;
+        }
+
+        .submenu {
+            display: none;
+            position: absolute;
+            top: 120%;
+            right: 50%;
+            padding: var(--navbar-menu-padding);
+            border-width: var(--navbar-menu-border-width, 0);
+            border-style: solid;
+            border-color: var(--navbar-menu-border-color);
+            border-radius: var(--navbar-menu-border-radius);
+            background: var(--navbar-menu-background);
+            box-shadow: var(--navbar-menu-box-shadow);
+            transform: translate(50%, -0.35em);
+        }
+
+        .submenu li {
+            width: 100%;
+            height: 100%;
+            display: inline-block;
+            white-space: nowrap;
+            padding: 4px 20px;
+        }
+
+        .header-container {
+            height: 52px;
+        }
+
+        .close {
+            float: none;
+            font-size: inherit;
+            font-weight: inherit;
+            line-height: inherit;
+            color: #000000;
+            text-shadow: 0 1px 0 #ffffff;
+            opacity: 1;
+        }
+
+        .close:not(:disabled):not(.disabled):focus,
+        .close:not(:disabled):not(.disabled):hover {
+            opacity: 1;
+        }
+
+        .common-items,
+        .main-items {
+            height: 52px;
+        }
+
+        .item-url {
+            color: #666a99;
+        }
+
+        @media (max-width: 767px) {
+
+            #header,
+            .header-container {
+                height: 120px;
+            }
+
+            .sidebar {
+                top: 120px;
+            }
+
+            .item,
+            .multiple-item {
+                text-align: center;
+            }
+
+            .sidebar-toggle {
+                top: auto;
+                bottom: 54px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript>
+    <iframe height="0"
+            src="https://www.googletagmanager.com/ns.html?id=GTM-THM3M42" style="display:none;visibility:hidden"
+            width="0"></iframe>
+</noscript>
+<!-- End Google Tag Manager (noscript) -->
+<header id="header">
+    <ul class="header-container
+				row
+				flex-md-nowrap
+				row-cols-md-9
+				row-cols-sm-5
+				row-cols-3
+				justify-content-md-between
+				justify-content-center
+				align-items-center
+				">
+        <li class="item col-md-auto col">
+            <a class="item" href="https://cattr.app/">
+                <img id="header-logo" alt="" src="./assets/logo.svg" />
+            </a>
+        </li>
+
+        <li class="item col-md-auto col">
+            <a class="item-url" href="https://cattr.app">Cattr</a>
+        </li>
+
+        <li class="item col-md-auto col">
+            <a class="item-url" href="https://demo.cattr.app">Demo</a>
+        </li>
+
+        <li class="item col-md col">
+            <a class="item-url" href="https://github.com/orgs/cattr-app/discussions">Community</a>
+        </li>
+
+        <li class="item col-md-auto col">
+            <a class="item-url" href="https://docs.cattr.app/">User Guide</a>
+        </li>
+
+        <li class="item col-md-auto col">
+            <a class="item-url" href="../api/">API</a>
+        </li>
+
+        <li class="item col-md-auto col">
+            <a class="item-url" href="../frontend/">Frontend</a>
+        </li>
+
+        <li class="item col-md-auto col">
+            <a class="item-url" href="../backend/">Backend</a>
+        </li>
+
+        <li class="multiple-item col-md-auto col">
+            <a class="item-url" href="">Translations</a>
+            <ul class="submenu">
+                <li><a class="item-url" href="#/en/">English</a></li>
+                <li><a class="item-url" href="#/ru/">Russian</a></li>
+            </ul>
+        </li>
+    </ul>
+</header>
+
+<div id="app"></div>
+
+<script>
+    /**
+     * List of supported languages
+     * @type {Array<String>}
+     */
+    const SUPPORTED_LANGUAGES = ["en", "ru"];
+
+    window.$docsify = {
+        name: "Cattr Frontend Documentation",
+        loadSidebar: true,
+        subMaxLevels: 2,
+        maxLevel: 2,
+        auto2top: true,
+        executeScript: true,
+        search: {
+            depth: 3,
+            noData: {
+                "/ru/": "Нет результатов!",
+                "/en/": "No results!",
+                "/": "No results!"
+            },
+            placeholder: {
+                "/ru/": "Искать...",
+                "/en/": "Search...",
+                "/": "Search..."
+            }
+        },
+        alias: {
+            "/(.*)/.*/_sidebar.md": "/$1/_sidebar.md"
+        }
+    };
+
+    function getLangCookie() {
+        var v = document.cookie.match("(^|;) ?lang=([^;]*)(;|$)");
+        return v ? v[2] : null;
+    };
+
+    // Set root domain cookie, ex: *.cattr.app
+    function setLangCookie(lang) {
+        var rootDomain = location.hostname.split(".").reverse().splice(0, 2).reverse().join(".");
+        document.cookie = "lang=" + lang + "; domain=" + rootDomain;
+    };
+
+    // Get the browser language
+    function getUserLang() {
+        return typeof navigator.language !== "undefined" && navigator.language.length
+               ? navigator.language.substring(0, 2).toLowerCase() : "en";
+    };
+
+    document.addEventListener("DOMContentLoaded", function() {
+
+        // Get user language
+        var lang = getLangCookie() || getUserLang();
+
+        // Falling back to English if detected language is not supported
+        lang = SUPPORTED_LANGUAGES.includes(lang) ? lang : "en";
+
+        var hashSegments = document.location.hash.split("/");
+        var hashLang = hashSegments[1];
+        if (hashLang !== lang) {
+            // Redirect to location approriate to the user's language
+            hashSegments[1] = lang;
+
+            var hash = hashSegments.join("/");
+            if (hashSegments.length === 2) {
+                hash += "/";
+            }
+
+            document.location.hash = hash;
+        }
+    });
+
+    document.addEventListener("click", function(event) {
+        if (event.target.tagName !== "A") {
+            return;
+        }
+
+        var hash = event.target.href.split("#")[1];
+        if (!hash) {
+            return;
+        }
+
+        var urlLang = hash.split("/")[1];
+        setLangCookie(urlLang);
+    });
+</script>
+<script
+        crossorigin="anonymous"
+        integrity="sha512-wUQhpztGC8I9SM2KxoRbEWjcduf6QUN6zlW3q3a/Fy1WKWWjCBwV9n3JJiVbzN7VwKNGKUQLIPrewKLh2dokSA=="
+        src="https://cdn.jsdelivr.net/npm/docsify-themeable@0.9.0"
+></script>
+<script
+        crossorigin="anonymous"
+        integrity="sha512-Qf5jm6dXW/In/Xgh12itTxddJYBkRVno1mWciQp3L4cQM9qlXj08kwuiOQsugbpZF32LRPhMueVZDHxNMVuGuw=="
+        src="https://cdn.jsdelivr.net/npm/docsify@4.13.0"
+></script>
+<script
+        crossorigin="anonymous"
+        integrity="sha512-kXTvdzD2CnLIhn2GlnKO5mirXQpzSgxJBVknAIbs/Mjqs76hnm7aUL2woZN13MT5/PmSgbrA+v3YYd0JGEw9sw=="
+        src="https://cdn.jsdelivr.net/npm/docsify@4.13.0/lib/plugins/search.min.js"
+></script>
+<script
+        crossorigin="anonymous"
+        integrity="sha512-9STKud/Vn2oF0u/umUxBDd9jgB6aBnNryLfjGzsFt/vN+GL8Dgr56i8ZHoPoQuo0ZQ2wv3YMx0pZfTlnLdshjw=="
+        src="https://cdn.jsdelivr.net/npm/docsify@4.13.0/lib/plugins/zoom-image.min.js"
+></script>
+<script
+        crossorigin="anonymous"
+        integrity="sha512-FiVqlerxsba+BjEKw8+ZL01f8XUZScGKfJpZYz9ptAdBSc787nTjepF7ie14lyUJ6/OMVp3FDJ5efvtvsqFXCw=="
+        src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-nginx.min.js"
+></script>
+<script
+        crossorigin="anonymous"
+        integrity="sha512-whYhDwtTmlC/NpZlCr6PSsAaLOrfjVg/iXAnC4H/dtiHawpShhT2SlIMbpIhT/IL/NrpdMm+Hq2C13+VKpHTYw=="
+        src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"
+></script>
+<script
+        crossorigin="anonymous"
+        integrity="sha512-IHQR8J+JbQpZ1tjkHkq8Ivsgo6ovfnYbQnYzmoKCjTCQG90YVs9l+2P14DRIZ94VBrB+F86Ju4wSGOMOjfVCQQ=="
+        src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markdown.min.js"
+></script>
+</body>
+
+</html>

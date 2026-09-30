@@ -1,0 +1,19 @@
+pages:
+  stage: deploy
+  image: node:24-alpine
+  environment:
+    name: production
+    url: https://backend.docs.cattr.app
+  only:
+    - tags
+  before_script:
+    - corepack enable
+    - pnpm install --frozen-lockfile
+  script:
+    - pnpm --filter cattr-docs-backend run sitemap
+    - rm -rf public
+    - mkdir -p public
+    - cp -R docs/backend/docs/. public/
+  artifacts:
+    paths:
+      - public

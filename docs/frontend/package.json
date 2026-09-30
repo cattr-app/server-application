@@ -1,0 +1,49 @@
+{
+    "name": "cattr-docs-frontend",
+    "version": "1.0.0",
+    "main": "index.js",
+    "author": "Cattr team & contributors <hi@cattr.app>",
+    "license": "MIT",
+    "files": ["docs"],
+    "scripts": {
+        "start": "docsify start ./docs",
+        "serve": "docsify serve ./docs",
+        "sitemap": "node prerender/sitemap.js",
+        "render": "node prerender/main.js"
+    },
+    "docsify": {
+        "config": {
+            "basePath": "",
+            "loadSidebar": true,
+            "loadNavbar": true,
+            "name": "Cattr Frontend Docs",
+            "auto2top": true,
+            "executeScript": true,
+            "search": {
+                "depth": 3,
+                "noData": {
+                    "/ru/": "Нет результатов!",
+                    "/en/": "No results!",
+                    "/": "No results!"
+                },
+                "placeholder": {
+                    "/ru/": "Искать...",
+                    "/en/": "Search...",
+                    "/": "Search..."
+                }
+            }
+        }
+    },
+    "devDependencies": {
+        "docsify-cli": "^4.4"
+    },
+    "dependencies": {
+        "html-minifier": "^4.0",
+        "html-snapshots": "^0.17"
+    },
+    "config": {
+        "domain": "docs.cattr.app",
+        "https": true,
+        "path": "/frontend"
+    }
+}

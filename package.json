@@ -10,11 +10,12 @@
   "private": true,
   "repository": "github:cattr-app/server-application",
   "scripts": {
-    "dev": "mix",
-    "watch": "mix watch",
-    "hot": "mix watch --hot",
-    "prod": "mix --production",
-    "lint": "eslint --ext .js,.vue -c .eslintrc.js resources/frontend/"
+      "dev": "mix",
+      "watch": "mix watch",
+      "hot": "mix watch --hot",
+      "prod": "mix --production",
+      "lint": "eslint --ext .js,.vue -c .eslintrc.js resources/frontend/",
+      "pages:build": "node scripts/build-pages.cjs"
   },
   "dependencies": {
     "@amazingcat/cattr-ui": "^1.3.9",

@@ -5,14 +5,14 @@ screenshots, reports, and a public API.
 
 [Website](https://cattr.app) ·
 [Demo](https://demo.cattr.app) ·
-[Documentation](https://docs.cattr.app) ·
+[Documentation](https://cattr-app.github.io/server-application/) ·
 [Discussions](https://github.com/orgs/cattr-app/discussions)
 
 ## Screenshots
 
-|                  Dashboard                   |                     Project report                     |
-|:--------------------------------------------:|:------------------------------------------------------:|
-| ![Cattr dashboard](./examples/dashboard.jpg) | ![Cattr project report](./examples/project_report.jpg) |
+|               Dashboard                |                  Project report                  |
+|:--------------------------------------:|:------------------------------------------------:|
+| ![Cattr dashboard](docs/dashboard.jpg) | ![Cattr project report](docs/project_report.jpg) |
 
 ## Features
 
@@ -46,7 +46,7 @@ Container images are published to:
 Cattr provides an HTTP API for projects, tasks, users, time intervals,
 screenshots, reports, company settings, attachments, and offline synchronization.
 
-See the [API documentation](https://api.docs.cattr.app).
+See the [API documentation](https://cattr-app.github.io/server-application/api/).
 
 ## Desktop application
 
@@ -61,12 +61,19 @@ Interested in contributing or building Cattr locally?
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
+Build the API, frontend, and backend documentation site from the repository root:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm pages:build
+```
+
 ## Documentation
 
 - [User Guide](https://docs.cattr.app)
-- [API Reference](https://api.docs.cattr.app)
-- [Backend Documentation](https://backend.docs.cattr.app)
-- [Frontend Documentation](https://frontend.docs.cattr.app)
+- [API Reference](https://cattr-app.github.io/server-application/api/)
+- [Backend Documentation](https://cattr-app.github.io/server-application/backend/)
+- [Frontend Documentation](https://cattr-app.github.io/server-application/frontend/)
 
 ## Community
 

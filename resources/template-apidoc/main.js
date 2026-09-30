@@ -431,11 +431,11 @@ require([
         }
 
         // tabs
-        $('.nav-tabs-examples a').click(function (e) {
+        $('.nav-tabs-docs a').click(function (e) {
             e.preventDefault();
             $(this).tab('show');
         });
-        $('.nav-tabs-examples').find('a:first').tab('show');
+        $('.nav-tabs-docs').find('a:first').tab('show');
 
         // sample request switch
         $('.sample-request-switch').click(function (e) {

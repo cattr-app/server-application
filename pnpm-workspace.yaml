@@ -1,11 +1,14 @@
 packages:
   - "resources/frontend/vendor_modules/*/*"
+  - "docs/*"
 
 allowBuilds:
   '@parcel/watcher': false
   canvas: false
   core-js: false
+  docsify: false # The npm package already contains the built CLI files.
   ejs: false
+  phantomjs-prebuilt: false # The Pages build does not run html-snapshots.
   v-code-diff: true
   vue-demi: true
   vue-echarts: true
