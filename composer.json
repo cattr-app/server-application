@@ -37,7 +37,7 @@
     "mpdf/mpdf": "^8.0",
     "nwidart/laravel-modules": "^10",
     "phpseclib/phpseclib": "^3.0",
-    "rybakit/msgpack": "^0.9.1",
+    "rybakit/msgpack": "^0.10.0",
     "sentry/sentry-laravel": "^4.1",
     "spatie/temporary-directory": "^2.2",
     "staudenmeir/laravel-adjacency-list": "^1.19",
