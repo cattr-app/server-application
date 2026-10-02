@@ -36,7 +36,7 @@
     "matanyadaev/laravel-eloquent-spatial": "^3.1",
     "mpdf/mpdf": "^8.0",
     "nwidart/laravel-modules": "^10",
-    "phpseclib/phpseclib": "^3.0",
+    "phpseclib/phpseclib": "^4.0",
     "rybakit/msgpack": "^0.9.1",
     "sentry/sentry-laravel": "^4.1",
     "spatie/temporary-directory": "^2.2",
