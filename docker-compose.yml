@@ -8,8 +8,6 @@ services:
         condition: service_healthy
     volumes:
       - backend_storage:/opt/cattr/app/storage
-    labels:
-      traefik.enable: true
     ports:
       - "8080:8080"
 
