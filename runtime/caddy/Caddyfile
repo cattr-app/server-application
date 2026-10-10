@@ -9,6 +9,7 @@
         -Server
         -Via
         X-Frame-Options SAMEORIGIN
+        X-Content-Type-Options nosniff
     }
     log {
         output stdout
