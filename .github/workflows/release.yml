@@ -30,8 +30,9 @@ env:
   COREPACK_CONFIG: build/packages/corepack.yaml
 
   # Increment when the base-image build process itself changes in a way
-  # that should invalidate previously built immutable images.
-  IMAGE_BUILD_REVISION: '6'
+  # that should invalidate previously built immutable images, or to force a
+  # clean republish after a registry integrity failure.
+  IMAGE_BUILD_REVISION: '7'
 
   # OCI image metadata.
   #
@@ -87,6 +88,16 @@ jobs:
         uses: imjasonh/setup-crane@v0.7
         with:
           version: v0.22.1
+
+      - name: Authenticate to GHCR
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          printf '%s' "${GHCR_TOKEN}" |
+            crane auth login ghcr.io \
+              --username "${GITHUB_ACTOR}" \
+              --password-stdin
 
       - name: Show build tool versions
         run: |
@@ -237,7 +248,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          if crane manifest "${RUNTIME_IMAGE}:${RUNTIME_TAG}" >/dev/null 2>&1; then
+          if crane manifest --platform linux/amd64 "${RUNTIME_IMAGE}:${RUNTIME_TAG}" >/dev/null 2>&1 &&
+             crane validate --platform linux/amd64 --remote "${RUNTIME_IMAGE}:${RUNTIME_TAG}" >/dev/null 2>&1; then
             echo "Runtime image already exists."
             echo "runtime_exists=true" >> "${GITHUB_OUTPUT}"
           else
@@ -245,7 +257,8 @@ jobs:
             echo "runtime_exists=false" >> "${GITHUB_OUTPUT}"
           fi
 
-          if crane manifest "${RUNTIME_IMAGE}:${BUILDER_TAG}" >/dev/null 2>&1; then
+          if crane manifest --platform linux/amd64 "${RUNTIME_IMAGE}:${BUILDER_TAG}" >/dev/null 2>&1 &&
+             crane validate --platform linux/amd64 --remote "${RUNTIME_IMAGE}:${BUILDER_TAG}" >/dev/null 2>&1; then
             echo "Builder image already exists."
             echo "builder_exists=true" >> "${GITHUB_OUTPUT}"
           else
@@ -368,6 +381,16 @@ jobs:
 
           echo "digest=${digest}" >> "${GITHUB_OUTPUT}"
 
+      - name: Validate published runtime image
+        if: steps.check.outputs.runtime_exists != 'true'
+        env:
+          RUNTIME_TAG: ${{ steps.meta.outputs.runtime_tag }}
+        run: |
+          set -euo pipefail
+          image="${RUNTIME_IMAGE}:${RUNTIME_TAG}"
+          crane manifest --platform linux/amd64 "${image}" >/dev/null
+          crane validate --platform linux/amd64 --remote "${image}"
+
       - name: Attest runtime image
         if: steps.check.outputs.runtime_exists != 'true'
         uses: actions/attest@v4
@@ -410,6 +433,16 @@ jobs:
 
           echo "digest=${digest}" >> "${GITHUB_OUTPUT}"
 
+      - name: Validate published builder image
+        if: steps.check.outputs.builder_exists != 'true'
+        env:
+          BUILDER_TAG: ${{ steps.meta.outputs.builder_tag }}
+        run: |
+          set -euo pipefail
+          image="${RUNTIME_IMAGE}:${BUILDER_TAG}"
+          crane manifest --platform linux/amd64 "${image}" >/dev/null
+          crane validate --platform linux/amd64 --remote "${image}"
+
       - name: Attest builder image
         if: steps.check.outputs.builder_exists != 'true'
         uses: actions/attest@v4
@@ -427,6 +460,10 @@ jobs:
             "${RUNTIME_IMAGE}:${RUNTIME_TAG}" \
             runtime-latest
 
+          crane manifest --platform linux/amd64 "${RUNTIME_IMAGE}:runtime-latest" >/dev/null
+          crane validate --platform linux/amd64 --remote "${RUNTIME_IMAGE}:runtime-latest"
+          test "$(crane digest "${RUNTIME_IMAGE}:${RUNTIME_TAG}")" = "$(crane digest "${RUNTIME_IMAGE}:runtime-latest")"
+
       - name: Update builder-latest
         env:
           BUILDER_TAG: ${{ steps.meta.outputs.builder_tag }}
@@ -436,6 +473,10 @@ jobs:
           crane tag \
             "${RUNTIME_IMAGE}:${BUILDER_TAG}" \
             builder-latest
+
+          crane manifest --platform linux/amd64 "${RUNTIME_IMAGE}:builder-latest" >/dev/null
+          crane validate --platform linux/amd64 --remote "${RUNTIME_IMAGE}:builder-latest"
+          test "$(crane digest "${RUNTIME_IMAGE}:${BUILDER_TAG}")" = "$(crane digest "${RUNTIME_IMAGE}:builder-latest")"
 
   application:
     name: Build server
