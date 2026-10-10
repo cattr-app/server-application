@@ -1,52 +1,54 @@
 {
-	admin off
+    admin off
 }
 
 :8080 {
-	root * /opt/cattr/app/public
-	encode gzip
-	header {
-		-Server
-		-Via
-	}
-	log {
-		output stdout
-	}
-	request_body {
-		max_size 512MiB
-	}
+    root * /opt/cattr/app/public
+    encode gzip
+    header {
+        -Server
+        -Via
+        X-Frame-Options SAMEORIGIN
+    }
+    log {
+        output stdout
+    }
+    request_body {
+        max_size 512MiB
+    }
 
-	@websocket {
-		header Connection *Upgrade*
-		header Upgrade websocket
-	}
-	@php path *.php
-	@static {
-		file {path}
-		not path *.php
-	}
+    @websocket {
+        header_regexp Connection (?i).*Upgrade.*
+        header_regexp Upgrade (?i)^websocket$
+    }
+    @php path *.php
+    @static {
+        file {path}
+        expression {file_match.type} == "file"
+        not path *.php
+    }
 
-	route {
-		reverse_proxy @websocket 127.0.0.1:8081
+    route {
+        reverse_proxy @websocket 127.0.0.1:8081
 
-		reverse_proxy @php 127.0.0.1:8090 {
-			transport http {
-				read_timeout 300s
-				write_timeout 300s
-			}
-			header_up SERVER_PORT {server_port}
-			header_up REMOTE_ADDR {remote_host}
-		}
+        reverse_proxy @php 127.0.0.1:8090 {
+            transport http {
+                read_timeout 300s
+                write_timeout 300s
+            }
+            header_up SERVER_PORT 8080
+            header_up REMOTE_ADDR {remote_host}
+        }
 
-		file_server @static
+        file_server @static
 
-		reverse_proxy 127.0.0.1:8090 {
-			transport http {
-				read_timeout 300s
-				write_timeout 300s
-			}
-			header_up SERVER_PORT {server_port}
-			header_up REMOTE_ADDR {remote_host}
-		}
-	}
+        reverse_proxy 127.0.0.1:8090 {
+            transport http {
+                read_timeout 300s
+                write_timeout 300s
+            }
+            header_up SERVER_PORT 8080
+            header_up REMOTE_ADDR {remote_host}
+        }
+    }
 }

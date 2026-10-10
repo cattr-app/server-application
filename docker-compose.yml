@@ -1,5 +1,7 @@
 version: '3.9'
 
+# Before starting Compose, copy the example environment file:
+# cp .env.example .env
 services:
   app:
     build: .
