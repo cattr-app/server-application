@@ -65,7 +65,7 @@ Build the API, frontend, and backend documentation site from the repository root
 
 ```bash
 pnpm install --frozen-lockfile
-pnpm pages:build
+pnpm build:pages
 ```
 
 ## Documentation
