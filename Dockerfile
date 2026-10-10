@@ -91,11 +91,10 @@ RUN chown -R 10000:10000 /opt/cattr/app/bootstrap/cache /opt/cattr/app/storage
 USER 10000:10000
 
 # Cattr-specific configuration lives under /opt/cattr/etc. Program-specific
-# system configuration remains in the conventional /etc/php and /etc/nginx.
+# system configuration remains in the conventional /etc/php and /etc/caddy.
 COPY --chown=0:0 --chmod=0644 runtime/supercronic/crontab /opt/cattr/crontab
 COPY --chown=0:0 --chmod=0644 runtime/php/conf.d/99-cattr.ini /etc/php/conf.d/99-cattr.ini
-COPY --chown=0:0 --chmod=0644 runtime/nginx/nginx.conf /etc/nginx/nginx.conf
-COPY --chown=0:0 --chmod=0644 runtime/nginx/conf.d/app.conf /etc/nginx/conf.d/app.conf
+COPY --chown=0:0 --chmod=0644 runtime/caddy/Caddyfile /etc/caddy/Caddyfile
 
 # Pebble needs a writable per-user state directory; the base image creates it
 # as UID/GID 10000. The layer itself is application data copied at image build.
@@ -108,8 +107,8 @@ USER 10000:10000
 
 VOLUME ["/opt/cattr/app/storage"]
 
-# 8080 nginx, 8081 Reverb, 8090 Octane. The latter two matter when a role is
-# deployed without nginx in front of it.
+# 8080 Caddy, 8081 Reverb, 8090 Octane. The latter two matter when a role is
+# deployed without Caddy in front of it.
 EXPOSE 8080 8081 8090
 
 STOPSIGNAL SIGTERM

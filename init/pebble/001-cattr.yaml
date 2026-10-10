@@ -16,10 +16,13 @@ services:
     on-failure: shutdown
     kill-delay: 30s
 
-  nginx:
+  caddy:
     override: replace
-    summary: Cattr HTTP reverse proxy and static file server
-    command: nginx -e stderr -g "daemon off;"
+    summary: Cattr Caddy reverse proxy and static file server
+    command: caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
+    environment:
+      XDG_CONFIG_HOME: /tmp/caddy/config
+      XDG_DATA_HOME: /tmp/caddy/data
     startup: disabled
     requires:
       - app

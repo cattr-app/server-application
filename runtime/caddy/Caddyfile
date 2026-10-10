@@ -1,0 +1,58 @@
+{
+    admin off
+    servers {
+        trusted_proxies static private_ranges
+        trusted_proxies_strict
+    }
+}
+
+:8080 {
+    root * /opt/cattr/app/public
+    encode gzip
+    header {
+        -Server
+        -Via
+        X-Frame-Options SAMEORIGIN
+        X-Content-Type-Options nosniff
+    }
+    log {
+        output stdout
+    }
+    request_body {
+        max_size 512MiB
+    }
+
+    @websocket {
+        header_regexp Connection (?i).*Upgrade.*
+        header_regexp Upgrade (?i)^websocket$
+    }
+    @php path *.php
+    @static {
+        expression `file('\{path}') && {file_match.type} == "file"`
+        not path *.php
+    }
+
+    route {
+        reverse_proxy @websocket 127.0.0.1:8081
+
+        reverse_proxy @php 127.0.0.1:8090 {
+            transport http {
+                read_timeout 300s
+                write_timeout 300s
+            }
+            header_up SERVER_PORT 8080
+            header_up REMOTE_ADDR {client_ip}
+        }
+
+        file_server @static
+
+        reverse_proxy 127.0.0.1:8090 {
+            transport http {
+                read_timeout 300s
+                write_timeout 300s
+            }
+            header_up SERVER_PORT 8080
+            header_up REMOTE_ADDR {client_ip}
+        }
+    }
+}

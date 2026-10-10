@@ -271,17 +271,17 @@ The repository contains both the server-side application and the web frontend.
 | `resources/frontend/` | Vue frontend application                              |
 | `modules/`            | Backend modules                                       |
 | `tests/`              | Backend unit and feature tests                        |
-| `runtime/`            | Runtime configuration for nginx, PHP, and cron        |
+| `runtime/`            | Runtime configuration for Caddy, PHP, and cron        |
 | `init/`               | Container entrypoint and Pebble service configuration |
 | `build/base/`         | apko definitions for runtime and builder images       |
 | `build/packages/`     | Melange package definitions                           |
 | `.github/workflows/`  | GitHub Actions workflows                              |
 | `.helm/`              | Helm deployment files                                 |
 
-The production application is distributed as a single container containing the backend, compiled frontend, nginx, Laravel Octane, queue worker, Laravel Reverb, and scheduled jobs.
+The production application is distributed as a single container containing the backend, compiled frontend, Caddy, Laravel Octane, queue worker, Laravel Reverb, and scheduled jobs.
 
 The production build is Wolfi-based: the builder uses Node.js 24 with pnpm 12.5.1,
-and the runtime uses PHP 8.3, nginx, Pebble, Laravel Octane, and Laravel Reverb.
+and the runtime uses PHP 8.3, Caddy, Pebble, Laravel Octane, and Laravel Reverb.
 
 ## Development requirements
 
@@ -431,8 +431,8 @@ php artisan schedule:work
 
 The local development server does not reproduce the complete production runtime.
 
-Production uses nginx on port 8080 and Laravel Octane with Swoole. Pebble supervises
-nginx, Octane, Reverb, the queue worker, and scheduled jobs in the rootless runtime.
+Production uses Caddy on port 8080 and Laravel Octane with Swoole. Pebble supervises
+Caddy, Octane, Reverb, the queue worker, and scheduled jobs in the rootless runtime.
 
 ## Frontend development
 
@@ -717,7 +717,7 @@ podman build -t cattr-server .
 
 The final image runs as UID/GID `10000`, uses `/opt/cattr/app` as its working
 directory, and stores mutable Laravel data under `/opt/cattr/app/storage`.
-The image exposes nginx on `8080`, Reverb on `8081`, and Octane on `8090`.
+The image exposes Caddy on `8080`, Reverb on `8081`, and Octane on `8090`.
 
 The base images can be overridden with:
 
@@ -737,7 +737,7 @@ The production container uses Pebble to manage its services and initialization s
 The runtime includes:
 
 ```text
-nginx
+Caddy
 Laravel Octane
 Laravel Queue
 Laravel Reverb
@@ -768,7 +768,7 @@ build/base/builder/apko.yaml
 ```
 
 The Wolfi builder image contains Composer, PHP 8.3 builder extensions, Node.js 24,
-Git, OpenSSH, and Corepack. The runtime image contains PHP 8.3, nginx, Pebble,
+Git, OpenSSH, and Corepack. The runtime image contains PHP 8.3, Caddy, Pebble,
 supercronic, and the packages needed to run Cattr.
 
 Corepack is packaged with Melange:
