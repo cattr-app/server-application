@@ -30,6 +30,10 @@
 		reverse_proxy @websocket 127.0.0.1:8081
 
 		reverse_proxy @php 127.0.0.1:8090 {
+			transport http {
+				read_timeout 300s
+				write_timeout 300s
+			}
 			header_up SERVER_PORT {server_port}
 			header_up REMOTE_ADDR {remote_host}
 		}
@@ -37,6 +41,10 @@
 		file_server @static
 
 		reverse_proxy 127.0.0.1:8090 {
+			transport http {
+				read_timeout 300s
+				write_timeout 300s
+			}
 			header_up SERVER_PORT {server_port}
 			header_up REMOTE_ADDR {remote_host}
 		}
