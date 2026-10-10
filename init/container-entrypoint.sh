@@ -72,11 +72,8 @@ prepare_directories() {
         /opt/cattr/app/storage/framework/sessions \
         /opt/cattr/app/storage/framework/views \
         /opt/cattr/app/storage/logs \
-        /tmp/nginx/client_body \
-        /tmp/nginx/fastcgi \
-        /tmp/nginx/proxy \
-        /tmp/nginx/scgi \
-        /tmp/nginx/uwsgi
+        /tmp/caddy/data \
+        /tmp/caddy/config
 }
 
 cache_configuration() {
@@ -131,23 +128,27 @@ for role in "$@"; do
             # Preserve the historical single-container behaviour.
             run_migrations=1
             run_provision=1
-            add_service nginx
+            add_service caddy
             add_service reverb
             add_service queue
             add_service scheduler
             ;;
         web)
-            # nginx requires app in the Pebble plan. Reverb stays in the web
-            # pod because the default nginx config proxies WebSockets to
+            # Caddy requires app in the Pebble plan. Reverb stays in the web
+            # pod because the default Caddy config proxies WebSockets to
             # 127.0.0.1:8081.
-            add_service nginx
+            add_service caddy
             add_service reverb
             ;;
         app)
             add_service app
             ;;
         nginx)
-            add_service nginx
+            # Keep the historical role name as an alias for existing deploys.
+            add_service caddy
+            ;;
+        caddy)
+            add_service caddy
             ;;
         queue)
             add_service queue
@@ -170,7 +171,7 @@ for role in "$@"; do
             ;;
         *)
             log "ERROR: unknown Cattr role: ${role}"
-            log "Supported roles: all web app nginx queue reverb scheduler migrate provision setup exec"
+            log "Supported roles: all web app caddy queue reverb scheduler migrate provision setup exec (nginx is a legacy alias for caddy)"
             exit 64
             ;;
     esac

@@ -8,6 +8,8 @@ services:
         condition: service_healthy
     volumes:
       - backend_storage:/opt/cattr/app/storage
+    env_file:
+      - .env
     ports:
       - "8080:8080"
 

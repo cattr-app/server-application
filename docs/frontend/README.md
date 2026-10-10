@@ -20,4 +20,4 @@ Serve for production
 pnpm --filter cattr-docs-frontend start
 ```
 
-> Notice: you should proxy nginx to localhost:4000
+> Notice: you can put a reverse proxy in front of localhost:4000.

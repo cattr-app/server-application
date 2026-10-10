@@ -1,0 +1,40 @@
+{
+	admin off
+}
+
+:8080 {
+	root * /opt/cattr/app/public
+	encode gzip
+	log {
+		output stdout
+	}
+	request_body {
+		max_size 512MiB
+	}
+
+	@websocket {
+		header Connection *Upgrade*
+		header Upgrade websocket
+	}
+	@php path *.php
+	@static {
+		file {path}
+		not path *.php
+	}
+
+	route {
+		reverse_proxy @websocket 127.0.0.1:8081
+
+		reverse_proxy @php 127.0.0.1:8090 {
+			header_up SERVER_PORT {server_port}
+			header_up REMOTE_ADDR {remote_host}
+		}
+
+		file_server @static
+
+		reverse_proxy 127.0.0.1:8090 {
+			header_up SERVER_PORT {server_port}
+			header_up REMOTE_ADDR {remote_host}
+		}
+	}
+}
