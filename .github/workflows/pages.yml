@@ -43,7 +43,7 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: Build API and developer documentation
-        run: pnpm pages:build
+        run: pnpm build:pages
         env:
           PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
 
