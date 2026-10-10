@@ -1,5 +1,9 @@
 {
     admin off
+    servers {
+        trusted_proxies static private_ranges
+        trusted_proxies_strict
+    }
 }
 
 :8080 {
@@ -24,8 +28,7 @@
     }
     @php path *.php
     @static {
-        file {path}
-        expression {file_match.type} == "file"
+        expression `file('\{path}') && {file_match.type} == "file"`
         not path *.php
     }
 
@@ -38,7 +41,7 @@
                 write_timeout 300s
             }
             header_up SERVER_PORT 8080
-            header_up REMOTE_ADDR {remote_host}
+            header_up REMOTE_ADDR {client_ip}
         }
 
         file_server @static
@@ -49,7 +52,7 @@
                 write_timeout 300s
             }
             header_up SERVER_PORT 8080
-            header_up REMOTE_ADDR {remote_host}
+            header_up REMOTE_ADDR {client_ip}
         }
     }
 }
