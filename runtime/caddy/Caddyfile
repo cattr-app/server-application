@@ -5,6 +5,10 @@
 :8080 {
 	root * /opt/cattr/app/public
 	encode gzip
+	header {
+		-Server
+		-Via
+	}
 	log {
 		output stdout
 	}
