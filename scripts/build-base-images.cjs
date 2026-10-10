@@ -234,8 +234,9 @@ async function main() {
         'build/packages/corepack.yaml',
     ];
     for (const file of required) {
-        if (!fs.existsSync(path.join(root, ...file.split('/')))) {
-            throw new Error(`Missing ${file}; place this file in the repository's scripts/ directory`);
+        const requiredPath = path.join(root, ...file.split('/'));
+        if (!fs.existsSync(requiredPath)) {
+            throw new Error(`Missing build input ${requiredPath}; check the repository checkout and script location.`);
         }
     }
 
