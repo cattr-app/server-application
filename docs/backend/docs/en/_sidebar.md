@@ -1,6 +1,0 @@
-- [Quick start](en/)
-- API
-    - [Access policy](en/api/access_policy/)
-- Documentation
-    - [API Documentation](en/docs/apidoc/)
-    - [Module creation](en/docs/jira/)

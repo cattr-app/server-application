@@ -44,8 +44,6 @@ jobs:
 
       - name: Build API and developer documentation
         run: pnpm build:pages
-        env:
-          PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4

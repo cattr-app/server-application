@@ -426,31 +426,6 @@ importers:
         specifier: ^6.6.0
         version: 6.6.1(@types/babel__core@7.20.5)(supports-color@5.5.0)(webpack@5.91.0)
 
-  docs/backend:
-    dependencies:
-      html-minifier:
-        specifier: ^4.0
-        version: 4.0.0
-      html-snapshots:
-        specifier: ^0.17
-        version: 0.17.8(supports-color@5.5.0)
-    devDependencies:
-      docsify-cli:
-        specifier: ^4.4
-        version: 4.4.4(supports-color@5.5.0)
-
-  docs/frontend:
-    dependencies:
-      html-minifier:
-        specifier: ^4.0
-        version: 4.0.0
-      html-snapshots:
-        specifier: ^0.17
-        version: 0.17.8(supports-color@5.5.0)
-    devDependencies:
-      docsify-cli:
-        specifier: ^4.4
-        version: 4.4.4(supports-color@5.5.0)
 
 packages:
 

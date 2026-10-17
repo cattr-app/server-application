@@ -6,6 +6,8 @@ This guide describes both the technical development workflow and the rules used 
 
 The repository contains the Laravel backend, Vue frontend, module system, production container configuration, and release pipeline.
 
+For frontend and backend extension APIs, see the [developer guides](./docs/developer/README.md). The generated [HTTP API reference](https://docs.cattr.app/api/) is published separately.
+
 For general questions and ideas, use [GitHub Discussions](https://github.com/orgs/cattr-app/discussions). For bugs and actionable feature requests, use [GitHub Issues](https://github.com/cattr-app/server-application/issues).
 
 ## Contribution workflow

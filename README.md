@@ -59,9 +59,9 @@ The Cattr desktop client provides native time tracking and activity collection.
 
 Interested in contributing or building Cattr locally?
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md).
+See [CONTRIBUTING.md](./CONTRIBUTING.md) and the [developer guides](docs/developer/README.md).
 
-Build the API, frontend, and backend documentation site from the repository root:
+Build the published API reference from the repository root:
 
 ```bash
 pnpm install --frozen-lockfile
@@ -72,8 +72,7 @@ pnpm build:pages
 
 - [User Guide](https://docs.cattr.app)
 - [API Reference](https://cattr-app.github.io/server-application/api/)
-- [Backend Documentation](https://cattr-app.github.io/server-application/backend/)
-- [Frontend Documentation](https://cattr-app.github.io/server-application/frontend/)
+- [Developer guides (English / Русский)](docs/developer/README.md)
 
 ## Community
 
