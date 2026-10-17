@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="robots" content="noindex,follow">
+<title>Cattr developer guides moved</title>
+<meta http-equiv="refresh" content="5;url=https://github.com/cattr-app/server-application/blob/main/docs/developer/README.md">
+</head>
+<body>
+<p>Developer guides have moved to the <a id="guide" href="https://github.com/cattr-app/server-application/blob/main/docs/developer/README.md">Cattr repository</a>.</p>
+<script>
+(function () {
+    'use strict';
+    const routes = {"api/access_policy":"access-policy.md","docs/filter":"events-and-filters.md","docs/jira":"jira-integration.md"};
+    const base = 'https://github.com/cattr-app/server-application/blob/main/docs/developer/';
+    const hash = decodeURIComponent(window.location.hash.replace(/^#\/?/, ''));
+    const path = hash.split('?')[0].replace(/^\/+|\/+$/g, '');
+    const match = /^(en|ru)(?:\/(.*))?$/.exec(path);
+    const lang = match && match[1] === 'ru' ? 'ru' : 'en';
+    const route = match && match[2] ? match[2].replace(/\/+$/, '') : '';
+    const file = Object.prototype.hasOwnProperty.call(routes, route) ? routes[route] : 'README.md';
+    const sectionRoot = 'backend';
+    const target = base + lang + '/' + sectionRoot + '/' + file;
+    document.getElementById('guide').href = target;
+    window.location.replace(target);
+}());
+</script>
+</body></html>
