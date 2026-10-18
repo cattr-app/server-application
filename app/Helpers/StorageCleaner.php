@@ -74,6 +74,7 @@ class StorageCleaner
         foreach ($collection->cursor() as $interval) {
             if (Storage::exists($service->getScreenshotPath($interval))) {
                 $result[] = $interval->id;
+                $i++;
             }
 
             if ($i >= config('cleaner.page_size')) {
