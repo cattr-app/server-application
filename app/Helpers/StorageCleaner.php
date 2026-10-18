@@ -76,6 +76,8 @@ class StorageCleaner
                 $result[] = $interval->id;
             }
 
+            $i++;
+
             if ($i >= config('cleaner.page_size')) {
                 break;
             }
