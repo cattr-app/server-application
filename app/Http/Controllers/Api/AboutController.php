@@ -291,6 +291,7 @@ class AboutController extends Controller
     *
     * @apiUse          400Error
     * @apiUse          UnauthorizedError
+    * @apiUse          ForbiddenError
     *
     */
     public function startStorageClean(ManageStorageRequest $request): JsonResponse

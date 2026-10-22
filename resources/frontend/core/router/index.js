@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import { store } from '@/store';
+import { hasRole } from '@/utils/user';
 
 // Fixing new issue with VueRouter caused by new Promise API
 const originalPush = VueRouter.prototype.push;
@@ -95,6 +96,12 @@ const routes = [
     {
         path: '/about',
         name: 'about',
+        meta: {
+            checkPermission: () => {
+                const user = store.getters['user/user'];
+                return Boolean(user && hasRole(user, 'admin'));
+            },
+        },
         component: () => import(/* webpackChunkName: "About" */ '@/views/About.vue'),
     },
     {

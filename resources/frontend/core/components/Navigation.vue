@@ -43,6 +43,7 @@
     import UserAvatar from '@/components/UserAvatar';
     import { getModuleList } from '@/moduleLoader';
     import { mapGetters } from 'vuex';
+    import { hasRole } from '@/utils/user';
 
     export default {
         components: {
@@ -116,7 +117,7 @@
                     //     title: this.$t('navigation.client-login'),
                     //     icon: 'icon-log-in',
                     // },
-                ];
+                ].filter(item => item.name !== 'about' || (this.user && hasRole(this.user, 'admin')));
                 this.modules.forEach(m => {
                     const entriesDropdown = m.getNavbarMenuEntriesDropDown();
                     Object.keys(entriesDropdown).forEach(el => {
