@@ -10,6 +10,8 @@ services:
     override: replace
     summary: Laravel Octane application server
     command: php artisan octane:start --host=0.0.0.0 --port=8090
+    environment:
+      CATTR_LOG_SERVICE: app
     startup: disabled
     working-dir: /opt/cattr/app
     on-success: restart
@@ -37,6 +39,8 @@ services:
     summary: Laravel queue worker
     command: php artisan queue:work --sleep=3 --no-interaction
     startup: disabled
+    environment:
+      CATTR_LOG_SERVICE: queue
     working-dir: /opt/cattr/app
     on-success: restart
     on-failure: restart
@@ -49,6 +53,8 @@ services:
     summary: Laravel Reverb WebSocket server
     command: php artisan reverb:start --host=0.0.0.0 --port=8081
     startup: disabled
+    environment:
+      CATTR_LOG_SERVICE: reverb
     working-dir: /opt/cattr/app
     on-success: restart
     on-failure: restart
@@ -59,8 +65,10 @@ services:
   scheduler:
     override: replace
     summary: Laravel scheduler trigger
-    command: /usr/bin/supercronic /opt/cattr/crontab
+    command: /usr/bin/supercronic -json /opt/cattr/crontab
     startup: disabled
+    environment:
+      CATTR_LOG_SERVICE: scheduler
     working-dir: /opt/cattr/app
     on-success: restart
     on-failure: restart

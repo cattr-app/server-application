@@ -99,7 +99,7 @@ return [
             'driver' => 'monolog',
             'level' => env('LOG_LEVEL', 'debug'),
             'handler' => StreamHandler::class,
-            'formatter' => env('LOG_STDERR_FORMATTER'),
+            'formatter' =>  \App\Logging\CattrJsonFormatter::class,
             'with' => [
                 'stream' => 'php://stderr',
             ],

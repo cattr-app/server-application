@@ -4,6 +4,17 @@
         trusted_proxies static private_ranges
         trusted_proxies_strict
     }
+    log default {
+        output stdout
+        format json {
+            time_key time
+            time_format rfc3339_nano
+            level_key level
+            level_format lower
+            message_key msg
+            name_key logger
+        }
+    }
 }
 
 :8080 {
@@ -12,17 +23,35 @@
     header {
         -Server
         -Via
+        -X-Powered-By
         X-Frame-Options SAMEORIGIN
         X-Content-Type-Options nosniff
     }
+    header /sw.js Cache-Control "no-cache"
+
     log {
         output stdout
+        format filter {
+            request>headers>Sec-Websocket-Key delete
+            resp_headers>Sec-Websocket-Accept delete
+
+            wrap json {
+                time_key time
+                time_format rfc3339_nano
+                level_key level
+                level_format lower
+                message_key msg
+                name_key logger
+            }
+        }
     }
     request_body {
         max_size 512MiB
     }
 
     @websocket {
+        path /app/*
+
         header_regexp Connection (?i).*Upgrade.*
         header_regexp Upgrade (?i)^websocket$
     }
