@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Console\Commands\RotateScreenshots;
+use App\Http\Requests\About\ManageStorageRequest;
 use App\Helpers\ModuleHelper;
 use App\Helpers\ReportHelper;
 use App\Helpers\StorageCleaner;
@@ -132,7 +133,7 @@ class AboutController extends Controller
      * @apiUse         ForbiddenError
      */
 
-    public function __invoke(): JsonResponse
+    public function __invoke(ManageStorageRequest $request): JsonResponse
     {
         $imageVersion = getenv('IMAGE_VERSION', true) ?: null;
 
@@ -258,7 +259,7 @@ class AboutController extends Controller
      * @apiUse         ForbiddenError
      */
 
-    public function storage(): JsonResponse
+    public function storage(ManageStorageRequest $request): JsonResponse
     {
         return responder()->success([
             'space' => [
@@ -292,7 +293,7 @@ class AboutController extends Controller
     * @apiUse          UnauthorizedError
     *
     */
-    public function startStorageClean(): JsonResponse
+    public function startStorageClean(ManageStorageRequest $request): JsonResponse
     {
         Artisan::queue(RotateScreenshots::class);
 
