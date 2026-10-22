@@ -13,9 +13,9 @@ package:
 
   dependencies:
     runtime:
-      - php83-local=8.3.33-r4
-      - php-8.3-phar=8.3.33-r4
-      - php-8.3-mbstring=8.3.33-r4
+      - php83-local=8.3.36-r4
+      - php-8.3-phar=8.3.36-r0
+      - php-8.3-mbstring=8.3.36-r0
       - git
 
 environment:
@@ -49,7 +49,7 @@ test:
       runs: |
         set -eu
 
-        test "$(php -r 'echo PHP_VERSION;')" = "8.3.33"
+        test "$(php -r 'echo PHP_VERSION;')" = "8.3.36"
 
         composer --version
 

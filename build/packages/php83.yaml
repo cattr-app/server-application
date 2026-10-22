@@ -1,6 +1,6 @@
 package:
   name: php83-local
-  version: "8.3.33"
+  version: "8.3.36"
   epoch: 4
 
   description: Pinned PHP 8.3 runtime and extensions for Cattr on Wolfi
@@ -45,7 +45,7 @@ package:
       - php-8.3-igbinary=${{vars.igbinary-version}}
 
 vars:
-  php-version: "8.3.33-r4"
+  php-version: "8.3.36-r0"
   redis-version: "6.3.0-r6"
   apcu-version: "5.1.28-r4"
   swoole-version: "6.2.2-r3"
