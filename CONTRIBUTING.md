@@ -647,62 +647,57 @@ Routine dependency upgrades should normally be submitted separately from unrelat
 
 ## Module system
 
-Cattr supports backend and frontend modules.
+Cattr always initializes built-in frontend modules. External frontend and backend modules
+are bundled or installed with the application, but **disabled by default**.
 
-### Backend modules
-
-Backend modules are stored under:
-
-```text
-modules/
-```
-
-Composer merges module-level Composer definitions from:
+Enable each external module independently with an explicit environment variable:
 
 ```text
-modules/*/composer.json
+MODULE_FRONTEND_AMAZING_CAT_REDMINE_INTEGRATION_ENABLED=true
+MODULE_BACKEND_CATTR_REDMINE_INTEGRATION_ENABLED=true
+MODULE_FRONTEND_AMAZING_CAT_GITLAB_INTEGRATION_ENABLED=true
+MODULE_BACKEND_CATTR_GITLAB_INTEGRATION_ENABLED=true
 ```
 
-using `wikimedia/composer-merge-plugin`.
+Only the exact lowercase string `true` enables an external module. Missing variables,
+`false`, `1`, and other values disable it. A changed container environment takes
+effect after the container is recreated; no image rebuild is needed. Set backend flags
+consistently for the application, queue, scheduler, and migration roles.
 
-The root `modules.json` contains backend module configuration.
+The flag name comes from the module's identifier converted to uppercase snake case:
+`AmazingCat_RedmineIntegration` (frontend) or `CattrRedmineIntegration`
+(backend). Frontend and backend modules do not depend on one another's flags.
 
-The base repository currently does not enable additional modules by default.
+Backend module discovery still reads `module.json` for names and providers. Its
+`active` field does **not** control activation. The `modules` database table and
+`modules*.json` files are not consulted; attempts to change activation with Artisan
+module-management commands will fail. The legacy table is left intact for upgrade
+compatibility but is no longer used.
 
-Core code should not assume that an optional module is installed.
-
-### Frontend modules
-
-The base frontend module configuration is:
-
-```text
-resources/frontend/etc/modules.config.json
-```
-
-Additional configuration is merged in this order:
-
-```text
-modules.config.json
-modules.<NODE_ENV>.json
-modules.ci.json
-modules.local.json
-```
-
-Later configuration overrides earlier values.
-
-`modules.local.json` is intended for developer-specific configuration and is ignored by Git.
-
-Package-based frontend modules are statically included during compilation when configured as:
+External frontend package registration is build-time configuration in
+`resources/frontend/etc/modules.config.json` (with the existing optional overlays).
+For example:
 
 ```json
 {
-    "type": "package",
-    "ref": "package-name",
-    "enabled": true
+    "AmazingCat_RedmineIntegration": {
+        "type": "package",
+        "ref": "@amazingcat/cattr-redmine-integration"
+    }
 }
 ```
 
-`enabled` defaults to `true`.
+These files **only determine what gets bundled**, not what gets enabled. An optional
+external module must already be installed when building the image; adding an env flag
+cannot install missing code. For local frontend modules, the module entrypoint is
+discovered in `resources/frontend/vendor_modules/<vendor>/<module>/module.init.js`.
+`ModuleConfig.enabled` has no effect on activation. Package modules are included in
+the compiled assets, but are loaded/initialized only if their runtime flag is true.
+Frontend loading remains synchronous; internal frontend modules always initialize.
+
+Backend modules are installed in `modules/` or discovered from `vendor/` by
+`nwidart/laravel-modules`. The existing Composer merge plugin includes
+`modules/*/composer.json` when installing module-level dependencies.
 
 ## Container architecture
 

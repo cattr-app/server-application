@@ -2,31 +2,17 @@ import path from 'path';
 import Module from '@/arch/module';
 import EventEmitter from 'events';
 import kebabCase from 'lodash/kebabCase';
-import isObject from 'lodash/isObject';
+import snakeCase from 'lodash/snakeCase';
 import sortBy from 'lodash/sortBy';
 import moduleRequire from '_app/generated/module.require';
-import merge from 'lodash/merge';
 
 export const moduleFilter = moduleName => true;
 export const config = { moduleFilter };
 
-let moduleCfg = require('_app/etc/modules.config.json');
-
-try {
-    moduleCfg = merge(moduleCfg, require(`_app/etc/modules.${process.env.NODE_ENV}.json`));
-} catch (e) {
-    if (process.env.NODE_ENV === 'development') {
-        console.log(`Skip load of modules.${process.env.NODE_ENV}.json`);
-    }
-}
-
-try {
-    moduleCfg = merge(moduleCfg, require('_app/etc/modules.local.json'));
-} catch (e) {
-    if (process.env.NODE_ENV === 'development') {
-        console.log('Skip load of modules.local.json');
-    }
-}
+// Only explicit environment flags may enable external frontend modules.
+// PHP injects these flags into the page before app.js executes.
+const enabledModules = window.__CATTR_FRONTEND_MODULES__ || {};
+const isExternalModuleEnabled = name => enabledModules[snakeCase(name).toUpperCase()] === true;
 
 export const ModuleLoaderInterceptor = new EventEmitter();
 
@@ -45,26 +31,10 @@ export function localModuleLoader(router) {
                 ? `${moduleVendor}_${moduleName}Module`
                 : `${moduleVendor}_${moduleName}`;
 
-        const md = requireModule(fn);
-        const moduleInitData = md.ModuleConfig || { enabled: false };
+        if (isExternalModuleEnabled(fullModuleName)) {
+            const md = requireModule(fn);
+            const moduleInitData = md.ModuleConfig || {};
 
-        const moduleEnabled =
-            (typeof moduleInitData.enabled !== 'undefined' ? moduleInitData.enabled : false) &&
-            (Object.prototype.hasOwnProperty.call(moduleCfg, fullModuleName)
-                ? isObject(moduleCfg[fullModuleName])
-                    ? (Object.prototype.hasOwnProperty.call(moduleCfg[fullModuleName], 'type')
-                          ? moduleCfg[fullModuleName].type === 'local'
-                          : false) &&
-                      (Object.prototype.hasOwnProperty.call(moduleCfg[fullModuleName], 'enabled')
-                          ? moduleCfg[fullModuleName].enabled
-                          : false) &&
-                      (Object.prototype.hasOwnProperty.call(moduleCfg[fullModuleName], 'ref')
-                          ? moduleCfg[fullModuleName].ref === fullModuleName
-                          : false)
-                    : false
-                : false);
-
-        if (moduleEnabled) {
             moduleInitQueue.push({
                 module: md,
                 order: Object.prototype.hasOwnProperty.call(moduleInitData, 'loadOrder')
@@ -80,8 +50,12 @@ export function localModuleLoader(router) {
 
     // Require package modules
     if (moduleRequire.length > 0) {
-        moduleRequire.forEach(requireFn => {
-            const md = requireFn();
+        moduleRequire.forEach(entry => {
+            if (!isExternalModuleEnabled(entry.name)) {
+                return;
+            }
+
+            const md = entry.load();
 
             if (!Object.prototype.hasOwnProperty.call(md, 'ModuleConfig')) {
                 throw new Error(
@@ -148,7 +122,7 @@ export function localModuleLoader(router) {
 
     // Initializing modules sync
     moduleInitQueue.forEach(({ module, moduleInitData, fullModuleName, fn = undefined, type = 'unknown' }) => {
-        if (!config.moduleFilter(fullModuleName)) {
+        if (type !== 'internal' && !config.moduleFilter(fullModuleName)) {
             return;
         }
 
