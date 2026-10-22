@@ -95,6 +95,7 @@ USER 10000:10000
 COPY --chown=0:0 --chmod=0644 runtime/supercronic/crontab /opt/cattr/crontab
 COPY --chown=0:0 --chmod=0644 runtime/php/conf.d/99-cattr.ini /etc/php/conf.d/99-cattr.ini
 COPY --chown=0:0 --chmod=0644 runtime/caddy/Caddyfile /etc/caddy/Caddyfile
+RUN caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
 
 # Pebble needs a writable per-user state directory; the base image creates it
 # as UID/GID 10000. The layer itself is application data copied at image build.

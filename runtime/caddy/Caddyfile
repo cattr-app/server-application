@@ -8,7 +8,7 @@
 
 :8080 {
     root * /opt/cattr/app/public
-    encode gzip
+    encode zstd gzip
     header {
         -Server
         -Via
@@ -44,7 +44,9 @@
             header_up REMOTE_ADDR {client_ip}
         }
 
-        file_server @static
+        file_server @static {
+            precompressed br gzip
+        }
 
         reverse_proxy 127.0.0.1:8090 {
             transport http {

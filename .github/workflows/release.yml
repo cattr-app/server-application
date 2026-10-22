@@ -24,6 +24,7 @@ env:
   RUNTIME_CONFIG: build/base/runtime/apko.yaml
   BUILDER_CONFIG: build/base/builder/apko.yaml
   PHP_CONFIG: build/packages/php83.yaml
+  CADDY_CONFIG: build/packages/caddy.yaml
   NODEJS_CONFIG: build/packages/nodejs-24.yaml
   PEBBLE_CONFIG: build/packages/pebble.yaml
   COMPOSER_CONFIG: build/packages/composer.yaml
@@ -116,6 +117,7 @@ jobs:
             "${RUNTIME_CONFIG}" \
             "${BUILDER_CONFIG}" \
             "${PHP_CONFIG}" \
+            "${CADDY_CONFIG}" \
             "${NODEJS_CONFIG}" \
             "${PEBBLE_CONFIG}" \
             "${COMPOSER_CONFIG}" \
@@ -130,6 +132,7 @@ jobs:
           runtime_files_hash="${{ hashFiles(
             'build/base/runtime/**',
             'build/packages/php83.yaml',
+            'build/packages/caddy.yaml',
             'build/packages/pebble.yaml',
             'build/base/rebuild'
           ) }}"
@@ -167,6 +170,7 @@ jobs:
               -- \
               "${RUNTIME_CONFIG}" \
               "${PHP_CONFIG}" \
+              "${CADDY_CONFIG}" \
               "${PEBBLE_CONFIG}" \
               build/base/rebuild
           )"
@@ -290,6 +294,7 @@ jobs:
           # available in the local repository.
           for config in \
             "${PHP_CONFIG}" \
+            "${CADDY_CONFIG}" \
             "${NODEJS_CONFIG}" \
             "${PEBBLE_CONFIG}"
           do
@@ -523,7 +528,7 @@ jobs:
           image: ${{ env.APP_IMAGE }}
 
           tags: |
-            ${{ github.ref_name }}
+            ${{ steps.release.outputs.version }}
             latest
 
           # Cattr images are intentionally linux/amd64 only.

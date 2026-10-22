@@ -119,8 +119,9 @@ package_configs=(
     build/packages/pebble.yaml
     build/packages/composer.yaml
     build/packages/corepack.yaml
+    build/packages/caddy.yaml
 )
-package_hash="$(sha256sum "\${package_configs[@]}" | sha256sum | cut -d ' ' -f1)"
+package_hash="$(sha256sum "\${package_configs[@]}" scripts/build-base-images.cjs | sha256sum | cut -d ' ' -f1)"
 
 if [[ "$mode" == full ]]; then
     # Mark the cache invalid before changing it so failed runs cannot be reused.
@@ -147,6 +148,7 @@ if [[ "$mode" == full ]]; then
 
     for config in \\
         build/packages/php83.yaml \\
+        build/packages/caddy.yaml \\
         build/packages/nodejs-24.yaml \\
         build/packages/pebble.yaml
     do
@@ -228,6 +230,7 @@ async function main() {
         'build/base/builder/apko.yaml',
         'build/base/runtime/apko.yaml',
         'build/packages/php83.yaml',
+        'build/packages/caddy.yaml',
         'build/packages/nodejs-24.yaml',
         'build/packages/pebble.yaml',
         'build/packages/composer.yaml',
