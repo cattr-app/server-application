@@ -2,13 +2,23 @@
     <div class="at-select">
         <v-select
             :options="options"
+            :filterable="false"
+            :loading="isLoading"
             label="label"
             :placeholder="$t('time_intervals.task_select.placeholder')"
             :clearable="false"
             @input="inputHandler($event.id)"
+            @open="onOpen"
+            @close="onClose"
             @search="onSearch"
         >
             <div slot="no-options">{{ $t('time_intervals.task_select.no_options') }}</div>
+            <template #list-footer>
+                <li v-if="hasNextPage" ref="load" class="task-select__loader">
+                    {{ $t('time_intervals.task_select.loading') }}
+                    <i class="icon icon-loader" />
+                </li>
+            </template>
         </v-select>
         <i class="icon icon-chevron-down at-select__arrow" />
     </div>
@@ -16,6 +26,7 @@
 
 <script>
     import vSelect from 'vue-select';
+    import debounce from 'lodash/debounce';
 
     export default {
         name: 'LazySelect',
@@ -41,37 +52,135 @@
         data() {
             return {
                 options: [],
+                query: '',
+                currentPage: 0,
+                totalPages: 0,
+                isLoading: false,
+                loadFailed: false,
+                isOpen: false,
+                observer: null,
+                requestId: 0,
             };
         },
+        computed: {
+            hasNextPage() {
+                return !this.loadFailed && this.currentPage < this.totalPages;
+            },
+        },
+        watch: {
+            userID() {
+                this.restartSearch();
+            },
+        },
+        created() {
+            this.debouncedSearch = debounce(this.loadNextPage, 350);
+        },
+        mounted() {
+            this.observer = new IntersectionObserver(this.infiniteScroll);
+        },
+        beforeDestroy() {
+            this.debouncedSearch.cancel();
+            this.requestId += 1;
+            this.observer?.disconnect();
+        },
         methods: {
-            onSearch(query, loading) {
-                if (query.length >= 3) {
-                    this.fetchTasks(query, loading);
-                } else {
-                    this.options = [];
+            onOpen() {
+                this.isOpen = true;
+                this.$nextTick(this.observeNextPage);
+            },
+            onClose() {
+                this.isOpen = false;
+                this.observer?.disconnect();
+            },
+            onSearch(query) {
+                this.query = query.trim();
+                this.restartSearch();
+            },
+            restartSearch() {
+                this.debouncedSearch.cancel();
+                this.observer?.disconnect();
+                this.requestId += 1;
+                this.options = [];
+                this.currentPage = 0;
+                this.totalPages = 0;
+                this.isLoading = false;
+                this.loadFailed = false;
+
+                if (this.query.length >= 3) {
+                    this.debouncedSearch(this.requestId);
                 }
             },
-            async fetchTasks(query, loading) {
-                loading(true);
-
-                const filters = { search: { query, fields: ['task_name'] }, with: ['project'] };
-                if (this.userID) {
-                    filters['where'] = { 'users.id': this.userID };
+            infiniteScroll([{ isIntersecting }]) {
+                if (isIntersecting) {
+                    this.observer.disconnect();
+                    this.loadNextPage(this.requestId);
+                }
+            },
+            observeNextPage() {
+                if (!this.observer) {
+                    return;
                 }
 
-                this.options = await this.service.getWithFilters(filters).then(({ data }) => {
-                    loading(false);
+                this.observer.disconnect();
+                if (this.isOpen && this.hasNextPage && this.$refs.load) {
+                    this.observer.observe(this.$refs.load);
+                }
+            },
+            async loadNextPage(requestId) {
+                if (
+                    requestId !== this.requestId ||
+                    this.query.length < 3 ||
+                    this.isLoading ||
+                    this.loadFailed ||
+                    (this.currentPage > 0 && !this.hasNextPage)
+                ) {
+                    return;
+                }
 
-                    return data.data.map(task => {
-                        const label =
-                            typeof task.project !== 'undefined'
-                                ? `${task.task_name} (${task.project.name})`
-                                : task.task_name;
+                const filters = {
+                    search: { query: this.query, fields: ['task_name'] },
+                    with: ['project'],
+                    page: this.currentPage + 1,
+                };
+                if (this.userID) {
+                    filters.where = { 'users.id': this.userID };
+                }
 
-                        return { ...task, label };
-                    });
-                });
+                this.isLoading = true;
+                try {
+                    const { data } = await this.service.getWithFilters(filters);
+                    if (requestId !== this.requestId) {
+                        return;
+                    }
+
+                    this.currentPage = data.pagination.currentPage;
+                    this.totalPages = data.pagination.totalPages;
+                    this.options.push(
+                        ...data.data.map(task => ({
+                            ...task,
+                            label: task.project ? `${task.task_name} (${task.project.name})` : task.task_name,
+                        })),
+                    );
+                } catch (error) {
+                    if (requestId === this.requestId) {
+                        this.loadFailed = true;
+                        console.error('Failed to load tasks for time interval', error);
+                    }
+                } finally {
+                    if (requestId === this.requestId) {
+                        this.isLoading = false;
+                        await this.$nextTick();
+                        this.observeNextPage();
+                    }
+                }
             },
         },
     };
 </script>
+
+<style scoped>
+    .task-select__loader {
+        padding: 8px;
+        text-align: center;
+    }
+</style>
