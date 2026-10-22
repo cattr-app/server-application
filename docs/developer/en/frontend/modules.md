@@ -59,7 +59,7 @@ import i18n from '@/i18n';
  */
 export const ModuleConfig = {
     // Whether this module should be enabled or not (affects only the local instance of the module)
-    enabled: true,
+    // Activation is controlled by MODULE_FRONTEND_<NAME>_ENABLED at container startup.
     // Default router prefix. Note: this parameter will be ignored in context.addRoutes().
     // Grid and Crud entities will automatically have this prefix
     routerPrefix: 'settings',
@@ -161,7 +161,7 @@ export function init(context, router) {
 
 ModuleConfig const is the exported object, containing 4 properties:
 
-1. __enabled__ - property that lets the tracker to be enabled by default. Can be overridden by administrator in app/etc/modules.config.json . Works only when the module is installed locally, instead of node-package.
+1. __enabled__ - legacy property (ignored). Only `MODULE_FRONTEND_<NAME>_ENABLED=true` enables an external module; built-in modules are always enabled.
 2. __routerPrefix__ - property that defines routes' base prefix for GRID and CRUD pages. Keep in mind that this property doesn't have any affect on the context addRoutes method.
 3. __initOrder__ - property that works as a init order number. All the modules are initialized in line, the lesser this number is, the earlier the module is going to be initialized. By default its value is 0. Keep in mind that this property only affects the module order initialization line. The entrypoint files are loaded alphabetically.
 4. __moduleName__ - property that sets the module's name. Only affects modules that are installed via package manager.

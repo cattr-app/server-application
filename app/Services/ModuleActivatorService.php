@@ -1,129 +1,55 @@
 <?php
 
-
 namespace App\Services;
 
-use Cache;
-use Exception;
-use JsonException;
+use Illuminate\Support\Str;
+use LogicException;
 use Nwidart\Modules\Contracts\ActivatorInterface;
 use Nwidart\Modules\Module;
-use App\Models\Module as ModuleModel;
 
 class ModuleActivatorService implements ActivatorInterface
 {
-
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
     public function enable(Module $module): void
     {
-        $this->setActiveByName($module->getName(), true);
+        $this->denyMutation();
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
     public function disable(Module $module): void
     {
-        $this->setActiveByName($module->getName(), false);
+        $this->denyMutation();
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
     public function hasStatus(Module|string $module, bool $status): bool
     {
-        $name = $module instanceof Module ? $module->getName() : $module;
+        // nwidart/laravel-modules >= 12 passes the module name while building the manifest.
+        $name = Str::upper(Str::snake($module instanceof Module ? $module->getName() : $module));
+        $enabled = getenv("MODULE_BACKEND_{$name}_ENABLED") === 'true';
 
-        $moduleStatuses = Cache::store('octane')
-            ->rememberForever(config('modules.activators.amazing.cache_key'), function () {
-                $configFile = config('modules.activators.amazing.file_name');
-
-                $databaseModules = [];
-
-                try {
-                    foreach (ModuleModel::all()->toArray() as $module) {
-                        $databaseModules[$module['name']] = $module['enabled'];
-                    }
-                } catch (Exception) {
-                    // We can't communicate with db - then do nothing
-                    // This can happen on first install when we are trying to migrate over clear database
-                }
-
-                return array_merge(
-                    $this->getFileConfig($configFile),
-                    $this->getFileConfig("$configFile." . config('app.env')),
-                    $this->getFileConfig("$configFile.local"),
-                    $databaseModules,
-                );
-            });
-
-        if (isset($moduleStatuses[$name])) {
-            return (bool) $moduleStatuses[$name] === $status;
-        }
-
-        return ($module instanceof Module ? (bool) $module->json()?->active : false) === $status;
+        return $enabled === $status;
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
     public function setActive(Module $module, bool $active): void
     {
-        $this->setActiveByName($module->getName(), $active);
+        $this->denyMutation();
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
     public function setActiveByName(string $name, bool $active): void
     {
-        ModuleModel::firstOrCreate(['name' => $name])->update(['enabled' => $active]);
-        $this->flushCache();
+        $this->denyMutation();
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
     public function delete(Module $module): void
     {
-        ModuleModel::firstOrFail($module->getName())->delete();
-        $this->flushCache();
+        $this->denyMutation();
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
     public function reset(): void
     {
-        ModuleModel::truncate();
-        $this->flushCache();
+        $this->denyMutation();
     }
 
-    /**
-     * @param $name
-     * @return array
-     * @throws JsonException
-     */
-    private function getFileConfig($name): array
+    private function denyMutation(): void
     {
-        $filePath = base_path("$name.json");
-        return file_exists($filePath) ? json_decode(file_get_contents($filePath), true, 512, JSON_THROW_ON_ERROR) : [];
-    }
-
-    /**
-     * @throws Exception
-     */
-    private function flushCache(): void
-    {
-        Cache::store('octane')->forget(config('modules.activators.amazing.cache_key'));
+        throw new LogicException('Module activation is read-only; configure MODULE_BACKEND_<NAME>_ENABLED and restart the container.');
     }
 }

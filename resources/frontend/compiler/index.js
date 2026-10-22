@@ -37,12 +37,10 @@ module.exports = () => {
         if (isObject(moduleList[moduleName])) {
             const moduleConfig = moduleList[moduleName];
 
-            if (
-                moduleConfig.type === 'package' &&
-                (Object.prototype.hasOwnProperty.call(moduleConfig, 'enabled') ? moduleConfig.enabled : true)
-            ) {
-                fdArray.push(`    () => require('${moduleConfig.ref}'),`);
-                console.log(`${moduleName} => added package as static require dependency`);
+            if (moduleConfig.type === 'package') {
+                // Package registration is build-time; its activation is runtime-only.
+                fdArray.push(`    { name: ${JSON.stringify(moduleName)}, load: () => require(${JSON.stringify(moduleConfig.ref)}) },`);
+                console.log(`${moduleName} => added package to the bundle`);
             }
         }
     });
