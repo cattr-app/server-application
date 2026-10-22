@@ -20,6 +20,10 @@ When only one stable minor release line exists, only that line is supported.
 
 \* Vulnerability reports affecting a current pre-release version may still be accepted if the issue is relevant to an upcoming stable release. Pre-release builds are provided without any guarantee of stability or security support.
 
+After a major version release, security fixes for supported release lines of the previous major version are backported on a best-effort basis, where technically feasible.
+
+Backporting may be limited by the availability of upstream security fixes and continued support for required dependencies. If a backport is not feasible, upgrading to a newer major version may be required.
+
 Security fixes are not guaranteed to be backported to unsupported versions.
 
 Users are strongly encouraged to run the latest stable release.
