@@ -1,0 +1,36 @@
+name: Release checks
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/release.yml'
+      - '.github/workflows/release-check.yml'
+      - 'scripts/release-tags.sh'
+      - 'tests/ci/release-tags.sh'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/release.yml'
+      - '.github/workflows/release-check.yml'
+      - 'scripts/release-tags.sh'
+      - 'tests/ci/release-tags.sh'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Test release tag classification
+        run: bash tests/ci/release-tags.sh
+
+      - name: Lint release workflows
+        uses: docker://rhysd/actionlint:1.7.12
+        with:
+          args: .github/workflows/release.yml .github/workflows/release-check.yml

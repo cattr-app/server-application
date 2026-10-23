@@ -805,9 +805,19 @@ The release process:
 3. Builds the Corepack APK with Melange when required.
 4. Builds missing base images with apko.
 5. Publishes base images to `ghcr.io/cattr-app/server-runtime`.
-6. Updates the `runtime-latest` and `builder-latest` aliases.
+6. Updates `runtime-latest` and `builder-latest` only for stable releases.
 7. Builds the application with Buildah.
-8. Publishes the release version and `latest` to `ghcr.io/cattr-app/server`.
+8. Publishes the exact application version, and also `latest` for stable releases.
+
+Prereleases (for example, `v4.1.0-rc.1`) use exact-version application tags and
+content-hash runtime/builder tags without moving any `*-latest` aliases.
+Stable releases (for example, `v4.1.0`) also move the application `latest` and
+base-image `runtime-latest`/`builder-latest` aliases. Unsupported `v*` tags,
+including SemVer build metadata (`+...`, which is incompatible with OCI tags),
+fail validation before images are built or published.
+
+The `Release checks` workflow tests tag classification and lints the release
+workflow for pull requests changing the release pipeline.
 
 Changes to the release pipeline should preserve reproducible application builds and avoid unnecessary rebuilding of unchanged base images.
 
