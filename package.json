@@ -30,7 +30,7 @@
         "chart.js": "^4.3.3",
         "color-convert": "^2.0.1",
         "cross-env": "^7.0.3",
-        "echarts": "^5.4.3",
+        "echarts": "^6.1.0",
         "events": "3.3.0",
         "highlight.js": "11.10.0",
         "js-md5": "^0.8.3",

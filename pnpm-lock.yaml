@@ -203,8 +203,8 @@ importers:
         specifier: ^7.0.3
         version: 7.0.3
       echarts:
-        specifier: ^5.4.3
-        version: 5.6.0
+        specifier: ^6.1.0
+        version: 6.1.0
       events:
         specifier: 3.3.0
         version: 3.3.0
@@ -279,7 +279,7 @@ importers:
         version: 2.8.2
       vue-echarts:
         specifier: ^6.6.8
-        version: 6.7.3(echarts@5.6.0)(vue@2.7.16)
+        version: 6.7.3(echarts@6.1.0)(vue@2.7.16)
       vue-i18n:
         specifier: ^8.28.2
         version: 8.28.2(vue@2.7.16)
@@ -2745,8 +2745,8 @@ packages:
   duplexer@0.1.2:
     resolution: {integrity: sha512-jtD6YG370ZCIi/9GTaJKQxWTZD045+4R4hTk/x1UyoqadyJ9x9CgSi1RlVDQF8U2sxLLSnFkCaMihqljHIWgMg==}
 
-  echarts@5.6.0:
-    resolution: {integrity: sha512-oTbVTsXfKuEhxftHqL5xprgLoc0k7uScAwtryCgWF6hPYFLRwOUHiFmHGCBKP5NPFNkDVopOieyUqYGH8Fa3kA==}
+  echarts@6.1.0:
+    resolution: {integrity: sha512-q0yaFPggC9FUdsWH4blavRWFmxdrIodbkoKNAjJudAI6CA9gNPxHtV2RcZNEepZVlk4yvBYkOkbk6HIVpIyHZA==}
 
   ee-first@1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
@@ -5872,8 +5872,8 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  zrender@5.6.1:
-    resolution: {integrity: sha512-OFXkDJKcrlx5su2XbzJvj/34Q3m6PvyCZkVPHGYpcCJ52ek4U/ymZyfuV1nKE23AyBJ51E/6Yr0mhZ7xGTO4ag==}
+  zrender@6.1.0:
+    resolution: {integrity: sha512-oEGMDB6pOP2S6OwRR4PdVv610zrjnA3Bh+JnSG12fYJlBKjtNAoEb5fSUoCOOINlH96I2fU38/A2UpRKs67xYQ==}
 
 snapshots:
 
@@ -8403,10 +8403,10 @@ snapshots:
 
   duplexer@0.1.2: {}
 
-  echarts@5.6.0:
+  echarts@6.1.0:
     dependencies:
       tslib: 2.3.0
-      zrender: 5.6.1
+      zrender: 6.1.0
 
   ee-first@1.1.1: {}
 
@@ -11332,9 +11332,9 @@ snapshots:
     dependencies:
       vue: 2.7.16
 
-  vue-echarts@6.7.3(echarts@5.6.0)(vue@2.7.16):
+  vue-echarts@6.7.3(echarts@6.1.0)(vue@2.7.16):
     dependencies:
-      echarts: 5.6.0
+      echarts: 6.1.0
       resize-detector: 0.3.0
       vue: 2.7.16
       vue-demi: 0.13.11(vue@2.7.16)
@@ -11919,6 +11919,6 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zrender@5.6.1:
+  zrender@6.1.0:
     dependencies:
       tslib: 2.3.0
