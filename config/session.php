@@ -19,6 +19,8 @@ return [
     */
 
     'driver' => env('SESSION_DRIVER', 'file'),
+    // OIDC callbacks/token handoffs are serialized per browser session.
+    'block_store' => env('SESSION_BLOCK_STORE', 'file'),
 
     /*
     |--------------------------------------------------------------------------

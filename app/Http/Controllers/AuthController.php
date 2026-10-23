@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Auth\OidcDesktopGrant;
 use App\Exceptions\Entities\AuthorizationException;
 use App\Exceptions\Entities\DeprecatedApiException;
 use App\Helpers\Recaptcha;
@@ -246,16 +247,20 @@ class AuthController extends BaseController
         $token = Str::random(40);
 
         $lifetime = now()->addMinutes(config('auth.lifetime_minutes.desktop_token'));
+        $oidcGrant = app(OidcDesktopGrant::class)->forUser($request->user());
+        if ($oidcGrant) {
+            $lifetime = $lifetime->min(\Illuminate\Support\Carbon::parse($oidcGrant['expires_at']));
+        }
 
         Cache::store('octane')->put(
             sha1($request->ip()) . ":$token",
-            $request->user()->id,
+            $oidcGrant ?? $request->user()->id,
             $lifetime,
         );
         return responder()->success([
             'token' => $token,
             'type' => 'desktop',
-            'expires' => now()->addMinutes(config('auth.lifetime_minutes.desktop_token'))->toIso8601String(),
+            'expires' => $lifetime->toIso8601String(),
         ], new AuthTokenTransformer)->meta(['frontend_uri' => config('app.frontend_url')])->respond();
     }
 
@@ -293,7 +298,12 @@ class AuthController extends BaseController
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
 
-        $user = auth()->loginUsingId(Cache::store('octane')->get(sha1($request->ip()) . ":$token[1]"));
+        $key = sha1($request->ip()) . ":$token[1]";
+        $entry = Cache::store('octane')->get($key);
+        if (is_array($entry) && ($entry['kind'] ?? null) === 'oidc') {
+            return app(OidcDesktopGrant::class)->exchange($key);
+        }
+        $user = auth()->loginUsingId($entry);
 
         if (!optional($user)->active) {
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_USER_DISABLED);

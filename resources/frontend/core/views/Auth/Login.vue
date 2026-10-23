@@ -41,6 +41,9 @@
                         >{{ $t('auth.submit') }}</at-button
                     >
                     <router-link class="link" to="/auth/password/reset">{{ $t('auth.forgot_password') }}</router-link>
+                    <at-button v-if="oidcEnabled" class="login__btn" @click="organizationalLogin">
+                        {{ $t('auth.organizational') }}
+                    </at-button>
                 </validation-observer>
             </div>
             <a class="login__slogan" href="https://cattr.app" v-html="slogan" />
@@ -77,6 +80,7 @@
                 recaptchaKey: null,
                 error: null,
                 isLoading: false,
+                oidcEnabled: false,
             };
         },
 
@@ -89,13 +93,26 @@
             },
         },
 
-        mounted() {
+        async mounted() {
             if (this.$store.getters['user/isLoggedIn']) {
                 this.$router.push({ name: 'dashboard' });
+            }
+            if (this.$route.query.sso_error === '1') {
+                this.error = this.$t('auth.message.auth_error');
+            }
+            try {
+                const response = await fetch('/auth/oidc/config', { credentials: 'same-origin' });
+                this.oidcEnabled = response.ok && (await response.json()).enabled === true;
+            } catch {
+                this.oidcEnabled = false;
             }
         },
 
         methods: {
+            organizationalLogin() {
+                window.location.assign('/auth/oidc/redirect');
+            },
+
             getRandomIntInclusive(min, max) {
                 min = Math.ceil(min);
                 max = Math.floor(max);

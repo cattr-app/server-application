@@ -13,6 +13,12 @@ Vue.use(VueRouter);
 
 const routes = [
     {
+        path: '/auth/oidc/complete',
+        name: 'auth.oidc.complete',
+        meta: { auth: false, layout: 'auth-layout' },
+        component: () => import(/* webpackChunkName: "desktop-login" */ '@/views/Auth/Desktop.vue'),
+    },
+    {
         path: '/auth/login',
         name: 'auth.login',
         meta: {

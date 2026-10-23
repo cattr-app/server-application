@@ -86,15 +86,26 @@ export default class ApiService extends StoreService {
         return instance
             .put('/auth/desktop-key', {}, { ignoreCancel: true })
             .then(({ data }) => {
-                this.setUserToken(data.access_token);
-                this.setUserData(data.user);
+                const payload = data.data || data;
+                this.setUserToken(payload.access_token);
+                this.setUserData(payload.user);
                 this.setLoggedInStatus();
 
-                return Promise.resolve(data);
+                return Promise.resolve(payload);
             })
             .catch(response => {
                 return Promise.reject(response);
             });
+    }
+
+    async attemptOidcLogin() {
+        // Use the browser session and Laravel's XSRF cookie; no token in a redirect URL.
+        const instance = axios.create({ baseURL: window.location.origin, withCredentials: true });
+        const { data } = await instance.post('/auth/oidc/token', {});
+        this.setUserToken(data.data.access_token);
+        this.setUserData(data.data.user);
+        this.setLoggedInStatus();
+        return data;
     }
 
     logout() {
