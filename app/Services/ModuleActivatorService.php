@@ -9,6 +9,19 @@ use Nwidart\Modules\Module;
 
 class ModuleActivatorService implements ActivatorInterface
 {
+    public static function getActivation(): array
+    {
+        $moduleActivation = ['FRONTEND' => [], 'BACKEND' => []];
+
+        foreach (array_merge($_ENV, getenv() ?: []) as $key => $value) {
+            if (preg_match('/^MODULE_(FRONTEND|BACKEND)_([A-Z][A-Z0-9_]*)_ENABLED$/D', $key, $matches)) {
+                $moduleActivation[$matches[1]][$matches[2]] = $value === 'true';
+            }
+        }
+
+        return $moduleActivation;
+    }
+
     public function enable(Module $module): void
     {
         $this->denyMutation();
