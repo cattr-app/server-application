@@ -49,8 +49,11 @@ test('emits valid, faithfully escaped JavaScript package references', () => {
         '</script>\u2028\u2029',
         'pkg"); globalThis.injected = true; //',
     ]) {
-        const name = 'External"Module';
+        const name = 'External"</script>\u2028Module';
         const output = compile({ [name]: { type: 'package', ref } });
+        assert.doesNotMatch(output, /<\/script>/);
+        assert.doesNotMatch(output, /[\u2028\u2029]/);
+        assert.match(output, /\\u003C/);
         const sandbox = { module: { exports: null }, require: requested => requested };
         vm.runInNewContext(output.replace(/^export default \[/, 'module.exports = ['), sandbox);
 
