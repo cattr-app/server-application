@@ -321,6 +321,32 @@ class OidcTest extends OidcWebTestCase
         $this->assertNull(PersonalAccessToken::findToken($data['access_token'])->expires_at);
     }
 
+    public function test_desktop_handoff_fits_the_native_octane_table_key_limit(): void
+    {
+        $this->app['cache']->extend('bounded-test', fn ($app) => $app['cache']->repository(
+            new class extends \Illuminate\Cache\ArrayStore {
+                public function put($key, $value, $seconds)
+                {
+                    if (strlen($key) > 63) {
+                        throw new \LogicException('Native Octane table key exceeds 63 bytes');
+                    }
+                    return parent::put($key, $value, $seconds);
+                }
+            },
+        ));
+        $this->app['config']->set('cache.stores.octane', ['driver' => 'bounded-test']);
+        $this->app['cache']->forgetDriver('octane');
+        $user = $this->user();
+        $this->link($user);
+        $source = $user->createToken('oidc:test', ['*'], now()->addHour())->accessToken;
+        $key = $this->desktopKey($user->withAccessToken($source));
+        $data = $this->desktopExchange($key)->getData(true)['data'];
+        $this->assertSame($user->id, $data['user']['id']);
+        $this->assertTrue($source->expires_at->equalTo(
+            PersonalAccessToken::findToken($data['access_token'])->expires_at,
+        ));
+    }
+
     public function test_first_party_session_desktop_protocol_is_unchanged(): void
     {
         $user = $this->user()->withAccessToken(new \Laravel\Sanctum\TransientToken());

@@ -62,6 +62,9 @@ example `SESSION_DRIVER=redis` and `SESSION_BLOCK_STORE=redis`. Cookie-only sess
 are rejected because callback consumption must be coordinated on the server.
 The existing desktop-key cache uses the `octane` store: retain the existing deployment's
 desktop-key routing/stickiness requirements when using multiple workers or nodes.
+Deploy desktop issuance and exchange changes together. Pending desktop grants
+are held in the existing process-local Octane cache and are invalidated by its
+restart; do not mix worker versions while relying on outstanding grants.
 
 ## Explicitly link an existing account
 

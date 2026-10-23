@@ -253,7 +253,7 @@ class AuthController extends BaseController
         }
 
         Cache::store('octane')->put(
-            sha1($request->ip()) . ":$token",
+            $this->desktopCacheKey($request, $token),
             $oidcGrant ?? $request->user()->id,
             $lifetime,
         );
@@ -294,11 +294,11 @@ class AuthController extends BaseController
 
         $token = explode(' ', $token);
 
-        if (count($token) !== 2 || $token[0] !== 'desktop' || !Cache::store('octane')->has(sha1($request->ip()) . ":$token[1]")) {
+        if (count($token) !== 2 || $token[0] !== 'desktop' || !Cache::store('octane')->has($this->desktopCacheKey($request, $token[1]))) {
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
 
-        $key = sha1($request->ip()) . ":$token[1]";
+        $key = $this->desktopCacheKey($request, $token[1]);
         $entry = Cache::store('octane')->get($key);
         if (is_array($entry) && ($entry['kind'] ?? null) === 'oidc') {
             return app(OidcDesktopGrant::class)->exchange($key);
@@ -340,5 +340,14 @@ class AuthController extends BaseController
     public function refresh(): JsonResponse
     {
         throw new DeprecatedApiException();
+    }
+
+    private function desktopCacheKey(Request $request, string $token): string
+    {
+        // Native Swoole tables limit key length. Keep the full digest and both
+        // IP/token bindings in 51 bytes without changing the desktop wire token.
+        return 'desktop:' . rtrim(strtr(base64_encode(
+            hash('sha256', $request->ip() . "\0" . $token, true),
+        ), '+/', '-_'), '=');
     }
 }
