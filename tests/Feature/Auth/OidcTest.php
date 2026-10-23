@@ -115,6 +115,19 @@ class OidcTest extends OidcWebTestCase
         ])->assertOk();
     }
 
+    public function test_csrf_failure_preserves_419_with_cattrs_production_exception_handler(): void
+    {
+        $this->app->instance(\Illuminate\Contracts\Debug\ExceptionHandler::class,
+            new \App\Exceptions\Handler($this->app));
+        $this->link($this->user());
+        $this->provider();
+        $this->authorize();
+        $this->postJson('https://cattr.example.test/auth/oidc/token')
+            ->assertStatus(419)->assertHeader('Cache-Control', 'no-store, private');
+        $this->assertSame(0, PersonalAccessToken::count());
+        $this->exchange()->assertOk();
+    }
+
     public function test_inactive_account_is_denied_during_callback(): void
     {
         $user = $this->user();

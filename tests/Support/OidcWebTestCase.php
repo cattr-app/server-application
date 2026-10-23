@@ -9,7 +9,7 @@ use Illuminate\Contracts\Http\Kernel as HttpKernel;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Bootstrap\RegisterProviders;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use App\Http\Middleware\VerifyOidcCsrfToken as VerifyCsrfToken;
 use Illuminate\Foundation\PackageManifest;
 use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Support\Facades\Schema;

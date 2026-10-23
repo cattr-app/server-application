@@ -34,6 +34,13 @@ group-to-role synchronization, or provider-initiated/back-channel logout.
    necessary. The SPA, callback, and token exchange must use the **same HTTPS origin**.
    Split-origin frontends are not supported by this browser-session handoff.
 
+   When TLS terminates at a reverse proxy, configure Laravel's
+   `trustedproxy.proxies` for the exact trusted proxy hops and ensure that they
+   forward the original HTTPS scheme. `APP_URL` alone does not make an incoming
+   proxied HTTP request secure. Verify both successful and failed callback
+   redirects remain on the configured HTTPS origin; do not trust arbitrary
+   client-supplied forwarding headers.
+
 4. Apply the `oidc_identities` migration with the normal release migration procedure.
    Clear/rebuild Laravel's configuration cache after changing configuration.
 5. Ensure the issuer's discovery document, token endpoint and JWKS are reachable from
