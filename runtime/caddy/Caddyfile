@@ -27,7 +27,7 @@
         X-Frame-Options SAMEORIGIN
         X-Content-Type-Options nosniff
     }
-    header /sw.js Cache-Control "no-cache"
+    header /service-worker.js Cache-Control "no-cache"
 
     log {
         output stdout
