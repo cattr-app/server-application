@@ -3,17 +3,28 @@
 namespace Tests\Unit;
 
 use App\Services\ModuleActivatorService;
+use Illuminate\Config\Repository;
+use Illuminate\Container\Container;
 use Mockery;
 use Nwidart\Modules\Module;
 use PHPUnit\Framework\TestCase;
 
 class ModuleActivatorServiceTest extends TestCase
 {
+    private Container $previousContainer;
+
     private string|false $previousValue;
 
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->previousContainer = Container::getInstance();
+        Container::setInstance(new Container());
+        app()->instance('config', new Repository([
+            'modules' => ['backend_activation' => []],
+        ]));
+
         $this->previousValue = getenv('MODULE_BACKEND_CATTR_REDMINE_INTEGRATION_ENABLED');
         putenv('MODULE_BACKEND_CATTR_REDMINE_INTEGRATION_ENABLED');
     }
@@ -27,10 +38,11 @@ class ModuleActivatorServiceTest extends TestCase
         }
 
         Mockery::close();
+        Container::setInstance($this->previousContainer);
         parent::tearDown();
     }
 
-    public function test_module_is_disabled_when_flag_is_absent(): void
+    public function test_module_is_disabled_when_cached_flag_is_absent(): void
     {
         $module = $this->redmineModule();
         $activator = new ModuleActivatorService();
@@ -39,22 +51,23 @@ class ModuleActivatorServiceTest extends TestCase
         self::assertTrue($activator->hasStatus($module, false));
     }
 
-    public function test_only_explicit_lowercase_true_enables_module(): void
+    public function test_module_activation_uses_cached_configuration_not_runtime_environment(): void
     {
         $module = $this->redmineModule();
         $activator = new ModuleActivatorService();
 
-        foreach (['false', '1', 'TRUE', 'yes'] as $value) {
-            putenv('MODULE_BACKEND_CATTR_REDMINE_INTEGRATION_ENABLED=' . $value);
-            self::assertFalse($activator->hasStatus($module, true), $value);
-        }
-
         putenv('MODULE_BACKEND_CATTR_REDMINE_INTEGRATION_ENABLED=true');
+        self::assertFalse($activator->hasStatus($module, true));
+
+        config()->set('modules.backend_activation.CATTR_REDMINE_INTEGRATION', true);
         self::assertTrue($activator->hasStatus($module, true));
         self::assertFalse($activator->hasStatus($module, false));
+
+        putenv('MODULE_BACKEND_CATTR_REDMINE_INTEGRATION_ENABLED=false');
+        self::assertTrue($activator->hasStatus($module, true));
     }
 
-    public function test_module_status_cannot_be_changed_in_database(): void
+    public function test_module_status_cannot_be_changed_programmatically(): void
     {
         $this->expectException(\LogicException::class);
 

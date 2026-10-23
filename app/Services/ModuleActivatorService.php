@@ -23,9 +23,7 @@ class ModuleActivatorService implements ActivatorInterface
     {
         // nwidart/laravel-modules >= 12 passes the module name while building the manifest.
         $name = Str::upper(Str::snake($module instanceof Module ? $module->getName() : $module));
-        $enabled = getenv("MODULE_BACKEND_{$name}_ENABLED") === 'true';
-
-        return $enabled === $status;
+        return config("modules.backend_activation.{$name}", false) === $status;
     }
 
     public function setActive(Module $module, bool $active): void
