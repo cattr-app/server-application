@@ -4,7 +4,6 @@
             :key="userID"
             :options="options"
             :filterable="false"
-            :loading="isLoading"
             label="label"
             :placeholder="$t('time_intervals.task_select.placeholder')"
             :clearable="false"
