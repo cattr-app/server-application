@@ -13,3 +13,9 @@ allowBuilds:
 engineStrict: true
 
 minimumReleaseAge: 0
+
+overrides:
+  # laravel-mix-compress@3.0.0 still requires compression-webpack-plugin ^10.0.0
+  # and has no newer release. Override its transitive dependency to avoid
+  # installing two versions and ensure .compress() uses v12.
+  "laravel-mix-compress>compression-webpack-plugin": "12.0.0"
