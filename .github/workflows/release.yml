@@ -248,13 +248,13 @@ jobs:
           runtime_tag="runtime-${runtime_hash}"
           builder_tag="builder-${builder_hash}"
 
-          echo "image=${RUNTIME_IMAGE}" >> "${GITHUB_OUTPUT}"
-
-          echo "runtime_tag=${runtime_tag}" >> "${GITHUB_OUTPUT}"
-          echo "runtime_revision=${runtime_revision}" >> "${GITHUB_OUTPUT}"
-
-          echo "builder_tag=${builder_tag}" >> "${GITHUB_OUTPUT}"
-          echo "builder_revision=${builder_revision}" >> "${GITHUB_OUTPUT}"
+          {
+            echo "image=${RUNTIME_IMAGE}"
+            echo "runtime_tag=${runtime_tag}"
+            echo "runtime_revision=${runtime_revision}"
+            echo "builder_tag=${builder_tag}"
+            echo "builder_revision=${builder_revision}"
+          } >> "${GITHUB_OUTPUT}"
 
           echo "Runtime image:"
           echo "  ${RUNTIME_IMAGE}:${runtime_tag}"
