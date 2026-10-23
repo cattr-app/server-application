@@ -2,14 +2,8 @@
 
 use App\Services\ModuleActivatorService;
 
-// External module activation is determined once, when artisan config:cache runs.
-// Neither the frontend nor backend needs to query environment variables at runtime.
-$moduleActivation = ['FRONTEND' => [], 'BACKEND' => []];
-foreach (array_merge($_ENV, getenv() ?: []) as $key => $value) {
-    if (preg_match('/^MODULE_(FRONTEND|BACKEND)_([A-Z][A-Z0-9_]*)_ENABLED$/D', $key, $matches)) {
-        $moduleActivation[$matches[1]][$matches[2]] = $value === 'true';
-    }
-}
+// Resolved once by artisan config:cache; no runtime environment reads.
+$moduleActivation = ModuleActivatorService::getActivation();
 
 return [
     'frontend_activation' => $moduleActivation['FRONTEND'],
