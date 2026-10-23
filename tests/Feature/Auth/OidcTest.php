@@ -336,9 +336,10 @@ class OidcTest extends OidcWebTestCase
         $key = $this->desktopKey($user->withAccessToken($source));
         $source->forceFill(['expires_at' => now()->addMinutes(5)])->save();
         $data = $this->desktopExchange($key)->getData(true)['data'];
-        $this->assertTrue($source->expires_at->equalTo(
-            PersonalAccessToken::findToken($data['access_token'])->expires_at,
-        ));
+        $desktop = PersonalAccessToken::findToken($data['access_token']);
+        $this->assertNotNull($desktop);
+        $this->assertSame($user->id, $desktop->tokenable_id);
+        $this->assertTrue($source->expires_at->equalTo($desktop->expires_at));
     }
 
     public function test_callback_failure_records_only_a_fixed_label_and_exception_class(): void
