@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a1e407e24f34a7dd18c4957d0dde50d2",
+    "content-hash": "c2b63396c55d210d48b0ddc8a4fabbb5",
     "packages": [
         {
             "name": "arquivei/laravel-prometheus-exporter",
@@ -6466,26 +6466,27 @@
         },
         {
             "name": "rybakit/msgpack",
-            "version": "v0.9.1",
+            "version": "v0.10.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/rybakit/msgpack.php.git",
-                "reference": "fc6bc45e92274e78c32d0a86f2e2cc1f8b5e017b"
+                "reference": "17fdc1e09f986181850dcfef4851a03ea6539e95"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rybakit/msgpack.php/zipball/fc6bc45e92274e78c32d0a86f2e2cc1f8b5e017b",
-                "reference": "fc6bc45e92274e78c32d0a86f2e2cc1f8b5e017b",
+                "url": "https://api.github.com/repos/rybakit/msgpack.php/zipball/17fdc1e09f986181850dcfef4851a03ea6539e95",
+                "reference": "17fdc1e09f986181850dcfef4851a03ea6539e95",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.1.1|^8"
+                "php": "^8.2"
             },
             "require-dev": {
+                "ext-decimal": "*",
                 "ext-gmp": "*",
-                "friendsofphp/php-cs-fixer": "^2.14",
-                "phpunit/phpunit": "^7.1|^8|^9",
-                "vimeo/psalm": "^3.9|^4"
+                "friendsofphp/php-cs-fixer": "^3",
+                "phpunit/phpunit": "^11",
+                "vimeo/psalm": "^5 || ^6"
             },
             "suggest": {
                 "ext-decimal": "For converting overflowed integers to Decimal objects",
@@ -6516,7 +6517,7 @@
             ],
             "support": {
                 "issues": "https://github.com/rybakit/msgpack.php/issues",
-                "source": "https://github.com/rybakit/msgpack.php/tree/v0.9.1"
+                "source": "https://github.com/rybakit/msgpack.php/tree/v0.10.0"
             },
             "funding": [
                 {
@@ -6524,7 +6525,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2022-02-16T00:48:07+00:00"
+            "time": "2026-04-22T23:40:57+00:00"
         },
         {
             "name": "sentry/sentry",
