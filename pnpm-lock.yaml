@@ -223,9 +223,6 @@ importers:
       lodash.debounce:
         specifier: 4.0.8
         version: 4.0.8
-      mapbox-gl:
-        specifier: ^3.1.2
-        version: 3.31.0
       markdown-it:
         specifier: ^14.2.0
         version: 14.3.2
@@ -3899,9 +3896,6 @@ packages:
   map-obj@4.3.0:
     resolution: {integrity: sha512-hdN1wVrZbb29eBGiGjJbeP8JbKjq1urkHJ/LIP/NY48MZ1QVXUsQBV1G1zvYFHn1XE06cwjBsOI2K3Ulnj1YXQ==}
     engines: {node: '>=8'}
-
-  mapbox-gl@3.31.0:
-    resolution: {integrity: sha512-7i25NyCPW5jnqsqJq3irgBBEoVTJgfZqTJJS446Q3ZuxyAb5Om75UIcxYIo38oz9eDswnBXr0riz+M/C8V7g3Q==}
 
   markdown-it-highlightjs@4.3.0:
     resolution: {integrity: sha512-dTEXpTV2J9WJiO8TA/FJ4DxidrYtTNcfBAdl+CLjQ3UFWj8s4dJyCPTcvoXNLmN5U5ZTCGu7TSkSvBvi4fUqkQ==}
@@ -9711,8 +9705,6 @@ snapshots:
   map-obj@1.0.1: {}
 
   map-obj@4.3.0: {}
-
-  mapbox-gl@3.31.0: {}
 
   markdown-it-highlightjs@4.3.0:
     dependencies:

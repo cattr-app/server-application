@@ -37,7 +37,6 @@
         "laravel-echo": "^1.16.1",
         "lodash": "^4.18.0",
         "lodash.debounce": "4.0.8",
-        "mapbox-gl": "^3.1.2",
         "markdown-it": "^14.2.0",
         "markdown-it-highlightjs": "^4.1.0",
         "markdown-it-sub": "^2.0.0",
