@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Auth\OidcDesktopGrant;
 use App\Exceptions\Entities\AuthorizationException;
 use App\Exceptions\Entities\DeprecatedApiException;
 use App\Helpers\Recaptcha;
@@ -246,16 +247,20 @@ class AuthController extends BaseController
         $token = Str::random(40);
 
         $lifetime = now()->addMinutes(config('auth.lifetime_minutes.desktop_token'));
+        $oidcGrant = app(OidcDesktopGrant::class)->forUser($request->user());
+        if ($oidcGrant) {
+            $lifetime = $lifetime->min(\Illuminate\Support\Carbon::parse($oidcGrant['expires_at']));
+        }
 
         Cache::store('octane')->put(
-            sha1($request->ip()) . ":$token",
-            $request->user()->id,
+            $this->desktopCacheKey($request, $token),
+            $oidcGrant ?? $request->user()->id,
             $lifetime,
         );
         return responder()->success([
             'token' => $token,
             'type' => 'desktop',
-            'expires' => now()->addMinutes(config('auth.lifetime_minutes.desktop_token'))->toIso8601String(),
+            'expires' => $lifetime->toIso8601String(),
         ], new AuthTokenTransformer)->meta(['frontend_uri' => config('app.frontend_url')])->respond();
     }
 
@@ -289,11 +294,16 @@ class AuthController extends BaseController
 
         $token = explode(' ', $token);
 
-        if (count($token) !== 2 || $token[0] !== 'desktop' || !Cache::store('octane')->has(sha1($request->ip()) . ":$token[1]")) {
+        if (count($token) !== 2 || $token[0] !== 'desktop' || !Cache::store('octane')->has($this->desktopCacheKey($request, $token[1]))) {
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
 
-        $user = auth()->loginUsingId(Cache::store('octane')->get(sha1($request->ip()) . ":$token[1]"));
+        $key = $this->desktopCacheKey($request, $token[1]);
+        $entry = Cache::store('octane')->get($key);
+        if (is_array($entry) && ($entry['kind'] ?? null) === 'oidc') {
+            return app(OidcDesktopGrant::class)->exchange($key);
+        }
+        $user = auth()->loginUsingId($entry);
 
         if (!optional($user)->active) {
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_USER_DISABLED);
@@ -330,5 +340,14 @@ class AuthController extends BaseController
     public function refresh(): JsonResponse
     {
         throw new DeprecatedApiException();
+    }
+
+    private function desktopCacheKey(Request $request, string $token): string
+    {
+        // Native Swoole tables limit key length. Keep the full digest and both
+        // IP/token bindings in 51 bytes without changing the desktop wire token.
+        return 'desktop:' . rtrim(strtr(base64_encode(
+            hash('sha256', $request->ip() . "\0" . $token, true),
+        ), '+/', '-_'), '=');
     }
 }

@@ -108,6 +108,7 @@
     }
   },
   "auth": {
+    "organizational": "Войти через организацию",
     "submit": "Войти",
     "forgot_password": "Забыли пароль?",
     "message": {

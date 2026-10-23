@@ -1,0 +1,55 @@
+name: OIDC regression tests
+
+on:
+  pull_request:
+    paths:
+      - 'app/**'
+      - 'config/**'
+      - 'routes/**'
+      - 'database/migrations/**'
+      - 'tests/**'
+      - 'resources/frontend/**'
+      - 'composer.*'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/oidc.yml'
+  push:
+    branches: ['main', 'codex/oidc-single-sign-on']
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: shivammathur/setup-php@d52fc211a0436f8839a587b3b5b8efddab4744ea # v2
+        with:
+          php-version: '8.3'
+          extensions: curl, gd, mbstring, pdo_sqlite, zip
+          coverage: none
+          tools: composer:v2
+      - run: composer install --no-interaction --no-progress --prefer-dist --no-scripts
+      - run: vendor/bin/phpunit tests/Unit/OidcClientTest.php tests/Feature/Auth/OidcTest.php
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version-file: .nvmrc
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      # The repository explicitly allows these Vue-version selection hooks.
+      - run: pnpm rebuild v-code-diff vue-demi vue-echarts
+      - run: pnpm test:oidc-frontend
+      - run: >-
+          pnpm exec eslint
+          resources/frontend/core/views/Auth/Login.vue
+          resources/frontend/core/views/Auth/Desktop.vue
+          resources/frontend/core/views/DesktopLogin.vue
+          resources/frontend/core/services/api.js
+          resources/frontend/core/router/index.js
+      - run: pnpm prod

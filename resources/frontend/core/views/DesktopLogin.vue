@@ -72,7 +72,7 @@
                 this.current += 1;
                 this.transferStatus = 'finish';
 
-                this.token = data.access_token;
+                this.token = (data.data || data).access_token;
             } catch ({ response }) {
                 this.transferStatus = 'error';
 

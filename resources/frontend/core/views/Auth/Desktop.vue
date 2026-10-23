@@ -157,6 +157,16 @@
         mounted() {
             this.$Loading.start();
 
+            if (this.$route.name === 'auth.oidc.complete') {
+                const apiService = this.$store.getters['user/apiService'];
+                apiService
+                    .attemptOidcLogin()
+                    .then(() => apiService.getCompanyData())
+                    .then(() => this.$router.replace({ name: 'dashboard' }))
+                    .catch(() => this.finish());
+                return;
+            }
+
             if (location.search.length === 0) {
                 this.finish();
             } else {
