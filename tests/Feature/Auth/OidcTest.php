@@ -311,6 +311,66 @@ class OidcTest extends OidcWebTestCase
         $this->desktopExchange($key);
     }
 
+    #[DataProvider('tokenRevocations')]
+    public function test_revoked_source_cannot_exchange_a_pending_desktop_grant(bool $allTokens): void
+    {
+        $user = $this->user();
+        $this->link($user);
+        $source = $user->createToken('oidc:test', ['*'], now()->addHour())->accessToken;
+        $key = $this->desktopKey($user->withAccessToken($source));
+        $allTokens ? $user->tokens()->delete() : $source->delete();
+        $this->expectException(\App\Exceptions\Entities\AuthorizationException::class);
+        $this->desktopExchange($key);
+    }
+
+    public static function tokenRevocations(): array
+    {
+        return ['source revoked' => [false], 'all sessions revoked' => [true]];
+    }
+
+    public function test_pending_desktop_grant_respects_a_shortened_source_expiry(): void
+    {
+        $user = $this->user();
+        $this->link($user);
+        $source = $user->createToken('oidc:test', ['*'], now()->addHour())->accessToken;
+        $key = $this->desktopKey($user->withAccessToken($source));
+        $source->forceFill(['expires_at' => now()->addMinutes(5)])->save();
+        $data = $this->desktopExchange($key)->getData(true)['data'];
+        $this->assertTrue($source->expires_at->equalTo(
+            PersonalAccessToken::findToken($data['access_token'])->expires_at,
+        ));
+    }
+
+    public function test_callback_failure_records_only_a_fixed_label_and_exception_class(): void
+    {
+        $sink = \Mockery::mock(\Psr\Log\LoggerInterface::class);
+        $sink->shouldReceive('warning')->once()->with('oidc.callback_failed', [
+            'exception_class' => \RuntimeException::class,
+        ]);
+        \Illuminate\Support\Facades\Log::shouldReceive('channel')->once()->with('stderr')->andReturn($sink);
+        $this->get('https://cattr.example.test/auth/oidc/callback?code=sensitive-test-code&state=invalid')
+            ->assertRedirect('/auth/login?sso_error=1');
+    }
+
+    public function test_unavailable_diagnostic_sink_does_not_change_the_callback_failure_response(): void
+    {
+        \Illuminate\Support\Facades\Log::shouldReceive('channel')->once()->with('stderr')
+            ->andThrow(new \RuntimeException('Private logger detail'));
+        $this->get('https://cattr.example.test/auth/oidc/callback?code=sensitive-test-code&state=invalid')
+            ->assertRedirect('/auth/login?sso_error=1');
+    }
+
+    public function test_start_failure_records_only_a_fixed_label_and_exception_class(): void
+    {
+        $this->app['config']->set('oidc.client_secret', null);
+        $sink = \Mockery::mock(\Psr\Log\LoggerInterface::class);
+        $sink->shouldReceive('warning')->once()->with('oidc.authorization_start_failed', [
+            'exception_class' => \RuntimeException::class,
+        ]);
+        \Illuminate\Support\Facades\Log::shouldReceive('channel')->once()->with('stderr')->andReturn($sink);
+        $this->get('https://cattr.example.test/auth/oidc/redirect')->assertStatus(503);
+    }
+
     public function test_existing_password_desktop_protocol_is_unchanged(): void
     {
         $user = $this->user();

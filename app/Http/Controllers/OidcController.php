@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Throwable;
 
@@ -38,8 +39,9 @@ class OidcController extends Controller
             $request->session()->forget(['oidc', 'oidc_grant']);
             $url = (new OidcClient($request->session(), config('oidc'), $http))->authorizationUrl();
             return redirect()->away($url)->withHeaders($this->headers());
-        } catch (Throwable) {
+        } catch (Throwable $exception) {
             // Provider exceptions can contain tokens, codes, or client credentials.
+            $this->recordFailure('oidc.authorization_start_failed', $exception);
             return $this->failure(503);
         }
     }
@@ -66,7 +68,8 @@ class OidcController extends Controller
             $request->session()->regenerate(true);
             $request->session()->put('oidc_grant', ['identity_id' => $identity->id, 'expires' => time() + 60]);
             return redirect('/auth/oidc/complete')->withHeaders($this->headers());
-        } catch (Throwable) {
+        } catch (Throwable $exception) {
+            $this->recordFailure('oidc.callback_failed', $exception);
             $request->session()->forget(['oidc', 'oidc_grant']);
             return redirect('/auth/login?sso_error=1')->withHeaders($this->headers());
         }
@@ -104,6 +107,16 @@ class OidcController extends Controller
     {
         return response()->json(['message' => 'Organizational sign-in could not be completed.'], $status)
             ->withHeaders($this->headers());
+    }
+
+    private function recordFailure(string $label, Throwable $exception): void
+    {
+        try {
+            // Explicit local sink: never send provider errors to the default remote log stack.
+            Log::channel('stderr')->warning($label, ['exception_class' => get_class($exception)]);
+        } catch (Throwable) {
+            // Diagnostic sink failure must not change authentication cleanup or responses.
+        }
     }
 
     private function headers(): array

@@ -6,6 +6,7 @@ on:
       - 'app/**'
       - 'config/**'
       - 'routes/**'
+      - 'database/migrations/**'
       - 'tests/**'
       - 'resources/frontend/**'
       - 'composer.*'
@@ -13,7 +14,7 @@ on:
       - 'pnpm-lock.yaml'
       - '.github/workflows/oidc.yml'
   push:
-    branches: ['codex/oidc-single-sign-on']
+    branches: ['main', 'codex/oidc-single-sign-on']
 
 permissions:
   contents: read

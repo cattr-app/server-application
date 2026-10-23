@@ -65,6 +65,9 @@ desktop-key routing/stickiness requirements when using multiple workers or nodes
 Deploy desktop issuance and exchange changes together. Pending desktop grants
 are held in the existing process-local Octane cache and are invalidated by its
 restart; do not mix worker versions while relying on outstanding grants.
+An OIDC desktop grant also retains its source token ID. Exchange locks and
+rechecks that token's ownership, validity and current expiry, so revoking the
+source token or signing out all sessions invalidates its pending grant.
 
 ## Explicitly link an existing account
 
@@ -145,6 +148,10 @@ no-store` and `Referrer-Policy: no-referrer`. No caller-controlled return URL is
 Web-server, reverse-proxy and observability configuration must omit/redact query strings
 for the OIDC callback, which necessarily receives an authorization code from the provider.
 Do not log client secrets, authorization codes, ID/access tokens, or full provider errors.
+Authentication startup/callback failures write only a fixed event label and exception
+class to the explicit local `stderr` channel. The exception object, message, trace,
+request and response are not passed to that logger; a logging-sink failure does not
+change the authentication response or cleanup.
 
 ## Validation and rollback
 
