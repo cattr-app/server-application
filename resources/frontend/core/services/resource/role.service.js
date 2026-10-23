@@ -6,6 +6,6 @@ export default class RoleService extends ResourceService {
      * @returns {Promise<AxiosResponse<T>>}
      */
     getAll() {
-        return axios.get('roles/list');
+        return axios.get('roles/list', { ignoreCancel: true });
     }
 }
