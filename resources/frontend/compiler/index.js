@@ -3,6 +3,15 @@ const fs = require('fs'),
     isObject = require('lodash/isObject'),
     merge = require('lodash/merge');
 
+// Escape characters that can be unsafe in generated JavaScript without
+// re-escaping quotes or backslashes already handled by JSON.stringify.
+const toJsLiteral = value =>
+    JSON.stringify(value)
+        .replace(/</g, '\\u003C')
+        .replace(/>/g, '\\u003E')
+        .replace(/\u2028/g, '\\u2028')
+        .replace(/\u2029/g, '\\u2029');
+
 module.exports = () => {
     console.log('Reading modules config file...');
     const p = path.join(__dirname, '..', 'etc', 'modules.config.json');
@@ -44,7 +53,7 @@ module.exports = () => {
                 }
 
                 // Package registration is build-time; its activation is runtime-only.
-                fdArray.push(`    { name: ${JSON.stringify(moduleName)}, load: () => require(${JSON.stringify(ref)}) },`);
+                fdArray.push(`    { name: ${toJsLiteral(moduleName)}, load: () => require(${toJsLiteral(ref)}) },`);
                 console.log(`${moduleName} => added package to the bundle`);
             }
         }
