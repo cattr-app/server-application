@@ -19,6 +19,9 @@
                         {{ $t('time_intervals.task_select.retry') }}
                     </button>
                 </template>
+                <template v-else-if="isLoading || (query.length >= 3 && currentPage === 0)">
+                    {{ $t('time_intervals.task_select.loading') }}
+                </template>
                 <template v-else>{{ $t('time_intervals.task_select.no_options') }}</template>
             </div>
             <template #list-footer>
