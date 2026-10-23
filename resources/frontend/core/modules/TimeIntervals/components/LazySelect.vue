@@ -1,6 +1,7 @@
 <template>
     <div class="at-select">
         <v-select
+            :key="userID"
             :options="options"
             :filterable="false"
             :loading="isLoading"
@@ -88,6 +89,7 @@
         },
         watch: {
             userID() {
+                this.inputHandler(null);
                 this.restartSearch();
             },
         },
@@ -101,6 +103,7 @@
             this.debouncedSearch.cancel();
             this.requestId += 1;
             this.observer?.disconnect();
+            this.observer = null;
         },
         methods: {
             onOpen() {
@@ -136,7 +139,7 @@
                 }
             },
             infiniteScroll([{ isIntersecting }]) {
-                if (isIntersecting) {
+                if (isIntersecting && this.observer) {
                     this.observer.disconnect();
                     this.loadNextPage(this.requestId);
                 }
