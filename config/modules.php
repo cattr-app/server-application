@@ -2,17 +2,18 @@
 
 use App\Services\ModuleActivatorService;
 
-// Frontend flags are the only runtime source of external frontend module activation.
-// This configuration is rebuilt when the container starts (artisan config:cache).
-$frontendActivation = [];
-foreach (getenv() as $key => $value) {
-    if (preg_match('/^MODULE_FRONTEND_([A-Z][A-Z0-9_]*)_ENABLED$/D', $key, $matches)) {
-        $frontendActivation[$matches[1]] = $value === 'true';
+// External module activation is determined once, when artisan config:cache runs.
+// Neither the frontend nor backend needs to query environment variables at runtime.
+$moduleActivation = ['FRONTEND' => [], 'BACKEND' => []];
+foreach (array_merge($_ENV, getenv() ?: []) as $key => $value) {
+    if (preg_match('/^MODULE_(FRONTEND|BACKEND)_([A-Z][A-Z0-9_]*)_ENABLED$/D', $key, $matches)) {
+        $moduleActivation[$matches[1]][$matches[2]] = $value === 'true';
     }
 }
 
 return [
-    'frontend_activation' => $frontendActivation,
+    'frontend_activation' => $moduleActivation['FRONTEND'],
+    'backend_activation' => $moduleActivation['BACKEND'],
 
     /*
     |--------------------------------------------------------------------------

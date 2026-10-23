@@ -660,8 +660,10 @@ MODULE_BACKEND_CATTR_GITLAB_INTEGRATION_ENABLED=true
 ```
 
 Only the exact lowercase string `true` enables an external module. Missing variables,
-`false`, `1`, and other values disable it. A changed container environment takes
-effect after the container is recreated; no image rebuild is needed. Set backend flags
+`false`, `1`, and other values disable it. Backend and frontend activation flags
+are resolved by Laravel's `artisan config:cache` into `bootstrap/cache/config.php`
+when the container starts. A changed container environment takes effect after the
+container is recreated; no image rebuild is needed. Set backend flags
 consistently for the application, queue, scheduler, and migration roles.
 
 The flag name comes from the module's identifier converted to uppercase snake case:
