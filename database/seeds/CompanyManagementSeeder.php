@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Enums\ScreenshotsState;
 use Illuminate\Database\Seeder;
 use Settings;
-use phpseclib3\Crypt\RSA;
+use phpseclib4\Crypt\RSA;
 
 class CompanyManagementSeeder extends Seeder
 {

@@ -32,7 +32,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use MessagePack\MessagePack;
-use phpseclib3\Crypt\RSA;
+use phpseclib4\Crypt\RSA;
 use Settings;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
 use Storage;
