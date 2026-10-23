@@ -38,8 +38,13 @@ module.exports = () => {
             const moduleConfig = moduleList[moduleName];
 
             if (moduleConfig.type === 'package') {
+                const ref = moduleConfig.ref;
+                if (typeof ref !== 'string' || !ref.trim()) {
+                    throw new TypeError(`Invalid package reference for module ${moduleName}: expected a non-empty string`);
+                }
+
                 // Package registration is build-time; its activation is runtime-only.
-                fdArray.push(`    { name: ${JSON.stringify(moduleName)}, load: () => require(${JSON.stringify(moduleConfig.ref)}) },`);
+                fdArray.push(`    { name: ${JSON.stringify(moduleName)}, load: () => require(${JSON.stringify(ref)}) },`);
                 console.log(`${moduleName} => added package to the bundle`);
             }
         }
