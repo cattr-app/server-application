@@ -169,11 +169,17 @@
                 }
 
                 this.isLoading = true;
+                let scrollContainer = null;
+                let scrollTop = 0;
                 try {
                     const { data } = await this.service.getWithFilters(filters);
                     if (requestId !== this.requestId) {
                         return;
                     }
+
+                    // Vue Select can scroll back to the first option when results change.
+                    scrollContainer = this.$refs.load?.offsetParent;
+                    scrollTop = scrollContainer?.scrollTop ?? 0;
 
                     this.currentPage = data.pagination.currentPage;
                     this.totalPages = data.pagination.totalPages;
@@ -192,6 +198,9 @@
                     if (requestId === this.requestId) {
                         this.isLoading = false;
                         await this.$nextTick();
+                        if (this.isOpen && scrollContainer?.isConnected) {
+                            scrollContainer.scrollTop = scrollTop;
+                        }
                         this.observeNextPage();
                     }
                 }
