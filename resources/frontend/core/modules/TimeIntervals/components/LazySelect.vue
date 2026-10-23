@@ -12,11 +12,27 @@
             @close="onClose"
             @search="onSearch"
         >
-            <div slot="no-options">{{ $t('time_intervals.task_select.no_options') }}</div>
+            <div slot="no-options">
+                <template v-if="loadFailed">
+                    {{ $t('time_intervals.task_select.load_failed') }}
+                    <button type="button" class="task-select__retry" @click.stop="retryLoad">
+                        {{ $t('time_intervals.task_select.retry') }}
+                    </button>
+                </template>
+                <template v-else>{{ $t('time_intervals.task_select.no_options') }}</template>
+            </div>
             <template #list-footer>
-                <li v-if="hasNextPage" ref="load" class="task-select__loader">
-                    {{ $t('time_intervals.task_select.loading') }}
-                    <i class="icon icon-loader" />
+                <li v-if="options.length && (hasNextPage || loadFailed)" ref="load" class="task-select__loader">
+                    <template v-if="loadFailed">
+                        {{ $t('time_intervals.task_select.load_failed') }}
+                        <button type="button" class="task-select__retry" @click.stop="retryLoad">
+                            {{ $t('time_intervals.task_select.retry') }}
+                        </button>
+                    </template>
+                    <template v-else>
+                        {{ $t('time_intervals.task_select.loading') }}
+                        <i class="icon icon-loader" />
+                    </template>
                 </li>
             </template>
         </v-select>
@@ -110,6 +126,12 @@
                     this.debouncedSearch(this.requestId);
                 }
             },
+            retryLoad() {
+                if (this.loadFailed && !this.isLoading) {
+                    this.loadFailed = false;
+                    this.loadNextPage(this.requestId);
+                }
+            },
             infiniteScroll([{ isIntersecting }]) {
                 if (isIntersecting) {
                     this.observer.disconnect();
@@ -182,5 +204,15 @@
     .task-select__loader {
         padding: 8px;
         text-align: center;
+    }
+
+    .task-select__retry {
+        margin-left: 6px;
+        padding: 0;
+        border: 0;
+        background: none;
+        color: inherit;
+        cursor: pointer;
+        text-decoration: underline;
     }
 </style>
