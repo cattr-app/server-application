@@ -39,6 +39,18 @@ check_valid v4.1.0-beta.2 4.1.0-beta.2 false '4.1.0-beta.2'
 check_valid v4.1.0-alpha.1 4.1.0-alpha.1 false '4.1.0-alpha.1'
 check_valid v4.1.0-1 4.1.0-1 false '4.1.0-1'
 
+# OCI image tags may contain at most 128 characters. Cover both release
+# classifications and verify overlong inputs produce no output metadata.
+printf -v long_prerelease '%*s' 122 ''
+long_prerelease="${long_prerelease// /a}"
+check_valid "v1.2.3-${long_prerelease}" "1.2.3-${long_prerelease}" false "1.2.3-${long_prerelease}"
+check_invalid "v1.2.3-${long_prerelease}a"
+
+printf -v long_patch '%*s' 124 ''
+long_patch="${long_patch// /1}"
+check_valid "v1.2.${long_patch}" "1.2.${long_patch}" true "$(printf '1.2.%s\nlatest' "${long_patch}")"
+check_invalid "v1.2.${long_patch}1"
+
 for invalid in vfoo v v4.1 v4.1.0.1 v04.1.0 v4.01.0 v4.1.00 \
     v4.1.0- v4.1.0-rc..1 v4.1.0-rc.01 v4.1.0-01 \
     v4.1.0+build.1 v4.1.0-rc.1+build.1; do

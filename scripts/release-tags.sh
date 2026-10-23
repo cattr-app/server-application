@@ -12,6 +12,13 @@ if [[ ! "${tag}" =~ ${semver} ]]; then
 fi
 
 version="${tag#v}"
+
+# SemVer accepted here is ASCII-only, so character count equals OCI tag length.
+if (( ${#version} > 128 )); then
+    echo "::error::Release tag exceeds the 128-character OCI image tag limit: ${tag}" >&2
+    exit 1
+fi
+
 stable=true
 
 if [[ "${version}" == *-* ]]; then
