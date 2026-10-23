@@ -49,7 +49,7 @@ mix.before(() => {
     })
     .generateIntegrityHash()
     .generateSW({
-        swDest: 'sw.js',
+        swDest: 'service-worker.js',
     })
     .clean({
         cleanOnceBeforeBuildPatterns: ['**/*', '!index.php', '!robots.txt', '!vendor/**', '!favicon.ico', '!storage/**'],

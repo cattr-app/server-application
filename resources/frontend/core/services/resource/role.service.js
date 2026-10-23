@@ -3,9 +3,11 @@ import axios from 'axios';
 
 export default class RoleService extends ResourceService {
     /**
-     * @returns {Promise<AxiosResponse<T>>}
+     * Fetch the role list, bypassing cancellation triggered by route changes.
+     *
+     * @returns {Promise<AxiosResponse<T>>} Response with roles in `data.data`; rejects on request failure.
      */
     getAll() {
-        return axios.get('roles/list');
+        return axios.get('roles/list', { ignoreCancel: true });
     }
 }

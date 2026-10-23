@@ -63,7 +63,7 @@ composer.phar
 /public/images
 /public/vendor
 
-/public/sw.*
+/public/service-worker.*
 /public/workbox*
 /pages-dist/
 
