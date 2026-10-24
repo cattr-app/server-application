@@ -36,7 +36,7 @@ return [
     |
     */
 
-    'server' => 'swoole',
+    'server' => env('OCTANE_SERVER', 'swoole'),
 
     'swoole' => [ 'options' => [ 'package_max_length' => 512 * 1024 * 1024, ], ],
 
