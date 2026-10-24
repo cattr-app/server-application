@@ -15,8 +15,6 @@ import '@/plugins/vee-validate';
 import '@/policies';
 import Gate from '@/plugins/gate';
 import vueKanban from 'vue-kanban';
-import * as Sentry from '@sentry/vue';
-import { BrowserTracing } from '@sentry/tracing';
 import { Workbox } from 'workbox-window';
 
 //Global components
@@ -44,29 +42,6 @@ if ('serviceWorker' in navigator) {
     const wb = new Workbox('/service-worker.js');
 
     wb.register();
-}
-
-if (
-    process.env.NODE_ENV !== 'development' &&
-    'MIX_SENTRY_DSN' in process.env &&
-    process.env.MIX_SENTRY_DSN !== 'undefined'
-) {
-    Sentry.init({
-        Vue,
-        release: process.env.MIX_APP_VERSION,
-        environment: process.env.NODE_ENV,
-        dsn: process.env.MIX_SENTRY_DSN,
-        integrations: [
-            new BrowserTracing({
-                routingInstrumentation: Sentry.vueRouterInstrumentation(router),
-                tracePropagationTargets: [window.location.origin],
-            }),
-        ],
-        tracesSampleRate: 0.2,
-    });
-
-    if ('MIX_DOCKER_VERSION' in process.env && process.env.MIX_DOCKER_VERSION !== 'undefined')
-        Sentry.setTag('docker', process.env.MIX_DOCKER_VERSION);
 }
 
 routerInit();

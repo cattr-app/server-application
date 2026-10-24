@@ -64,15 +64,6 @@ class Handler extends ExceptionHandler
         'password_confirmation',
     ];
 
-    public function register(): void
-    {
-        $this->reportable(function (Throwable $e) {
-            if (app()->bound('sentry')) {
-                app('sentry')->captureException($e);
-            }
-        });
-    }
-
     /**
      * Get the default context variables for logging.
      *

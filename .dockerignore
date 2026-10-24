@@ -12,7 +12,6 @@
 /.vagrant
 .env
 .env.testing
-.env.sentry
 *.log
 *.zip
 *.tar
