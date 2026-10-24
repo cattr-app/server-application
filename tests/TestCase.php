@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Testing\LoggedExceptionCollection;
 use App\Events\ChangeEvent;
+use Settings;
 
 /**
  * @method TestResponse get($uri, array $headers = [])
@@ -25,12 +26,13 @@ use App\Events\ChangeEvent;
  */
 abstract class TestCase extends BaseTestCase
 {
-    use CreatesApplication;
     use DatabaseTransactions;
 
     protected function setUp(): void
     {
         parent::setUp();
+
+        Settings::scope('core')->set('installed', true);
 
         Event::fake([ChangeEvent::class]);
     }
