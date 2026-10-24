@@ -107,6 +107,19 @@ return [
 
     'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_cache_'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Serializable Classes
+    |--------------------------------------------------------------------------
+    |
+    | Only scalars and arrays are stored in the cache, so object unserialization
+    | is disabled. This prevents deserialization gadget chains if the cache
+    | storage is ever compromised. Add explicit classes here if ever needed.
+    |
+    */
+
+    'serializable_classes' => false,
+
     // Amount of time to cache roles for
     'role_caching_ttl' => 300,
 ];
