@@ -1,55 +1,79 @@
 <?php
 
-/*
-|--------------------------------------------------------------------------
-| Create The Application
-|--------------------------------------------------------------------------
-|
-| The first thing we will do is create a new Laravel application instance
-| which serves as the "glue" for all the components of Laravel, and is
-| the IoC container for the system binding all of the various parts.
-|
-*/
+use App\Http\Middleware\Authenticate;
+use App\Http\Middleware\RegisterModulesEvents;
+use App\Http\Middleware\SentryContext;
+use Illuminate\Contracts\Debug\ExceptionHandler;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull;
+use Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance;
+use Illuminate\Foundation\Http\Middleware\TrimStrings;
+use Illuminate\Foundation\Http\Middleware\ValidatePostSize;
+use Illuminate\Http\Middleware\HandleCors;
+use Illuminate\Http\Middleware\TrustProxies;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Route;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Laravel\Sanctum\Http\Middleware\CheckAbilities;
+use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
-$app = new Illuminate\Foundation\Application(
-    realpath(__DIR__ . '/../')
-);
+return Application::configure(basePath: dirname(__DIR__))
+    ->withRouting(
+        web: __DIR__ . '/../routes/web.php',
+        api: __DIR__ . '/../routes/api.php',
+        commands: __DIR__ . '/../routes/console.php',
+        apiPrefix: 'api',
+        then: static function (): void {
+            Route::prefix('actuator')->name('actuator.')->group(base_path('routes/actuator.php'));
+        },
+    )
+    ->withBroadcasting(__DIR__ . '/../routes/channels.php', ['middleware' => ['auth:sanctum']])
+    ->withMiddleware(static function (Middleware $middleware): void {
+        $middleware->use([
+            PreventRequestsDuringMaintenance::class,
+            ValidatePostSize::class,
+            TrimStrings::class,
+            ConvertEmptyStringsToNull::class,
+            HandleCors::class,
+            SentryContext::class,
+            TrustProxies::class,
+            RegisterModulesEvents::class,
+        ]);
 
-/*
-|--------------------------------------------------------------------------
-| Bind Important Interfaces
-|--------------------------------------------------------------------------
-|
-| Next, we need to bind some important interfaces into the container so
-| we will be able to resolve them when needed. The kernels serve the
-| incoming requests to this application from both the web and CLI.
-|
-*/
+        $middleware->group('web', [
+            EncryptCookies::class,
+            AddQueuedCookiesToResponse::class,
+            StartSession::class,
+            ShareErrorsFromSession::class,
+            SubstituteBindings::class,
+        ]);
 
-$app->singleton(
-    Illuminate\Contracts\Http\Kernel::class,
-    App\Http\Kernel::class
-);
+        $middleware->group('api', [
+            SubstituteBindings::class,
+            EnsureFrontendRequestsAreStateful::class,
+        ]);
 
-$app->singleton(
-    Illuminate\Contracts\Console\Kernel::class,
-    App\Console\Kernel::class
-);
+        $middleware->alias([
+            'auth' => Authenticate::class,
+            'abilities' => CheckAbilities::class,
+            'ability' => CheckForAnyAbility::class,
+        ]);
 
-$app->singleton(
-    Illuminate\Contracts\Debug\ExceptionHandler::class,
-    App\Exceptions\Handler::class
-);
+        $middleware->trimStrings(except: [
+            'password',
+            'password_confirmation',
+        ]);
 
-/*
-|--------------------------------------------------------------------------
-| Return The Application
-|--------------------------------------------------------------------------
-|
-| This script returns the application instance. The instance is given to
-| the calling script so we can separate the building of the instances
-| from the actual running of the application and sending responses.
-|
-*/
-
-return $app;
+        // The pre-11 kernel had no guest redirect; keep unauthenticated requests without a redirect target.
+        $middleware->redirectGuestsTo(null);
+    })
+    ->withExceptions()
+    ->withSingletons([
+        ExceptionHandler::class => App\Exceptions\Handler::class,
+    ])
+    ->create();
