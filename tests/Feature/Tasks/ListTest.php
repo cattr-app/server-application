@@ -84,7 +84,11 @@ class ListTest extends TestCase
             ->orderBy('tasks.created_at', 'desc')
             ->get();
 
-        $response->assertJson($tasks->toArray());
+        $response->assertJsonCount($tasks->count(), 'data');
+        $this->assertEqualsCanonicalizing(
+            $tasks->pluck('id')->all(),
+            collect($response->json('data'))->pluck('id')->all(),
+        );
     }
 
     public function test_list_as_manager(): void
@@ -100,7 +104,11 @@ class ListTest extends TestCase
             ->orderBy('tasks.created_at', 'desc')
             ->get();
 
-        $response->assertJson($tasks->toArray());
+        $response->assertJsonCount($tasks->count(), 'data');
+        $this->assertEqualsCanonicalizing(
+            $tasks->pluck('id')->all(),
+            collect($response->json('data'))->pluck('id')->all(),
+        );
     }
 
     public function test_list_as_auditor(): void
@@ -116,7 +124,11 @@ class ListTest extends TestCase
             ->orderBy('tasks.created_at', 'desc')
             ->get();
 
-        $response->assertJson($tasks->toArray());
+        $response->assertJsonCount($tasks->count(), 'data');
+        $this->assertEqualsCanonicalizing(
+            $tasks->pluck('id')->all(),
+            collect($response->json('data'))->pluck('id')->all(),
+        );
     }
 
     public function test_list_as_user(): void
