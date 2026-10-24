@@ -1,0 +1,12 @@
+{
+  "CattrRedmineIntegration": "CATTR_REDMINE_INTEGRATION",
+  "AmazingCat_RedmineIntegration": "AMAZING_CAT_REDMINE_INTEGRATION",
+  "AmazingCat_DemoModule": "AMAZING_CAT_DEMO_MODULE",
+  "CattrDemo": "CATTR_DEMO",
+  "Module2": "MODULE2",
+  "GitLabV2Sync": "GIT_LAB_V2_SYNC",
+  "already_snake_case": "ALREADY_SNAKE_CASE",
+  "with-dashes.and spaces": "WITH_DASHES_AND_SPACES",
+  "__Leading__Trailing__": "LEADING_TRAILING",
+  "HTTPServer": "HTTPSERVER"
+}

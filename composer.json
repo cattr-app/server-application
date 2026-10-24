@@ -39,8 +39,7 @@
     "promphp/prometheus_client_php": "^2.15",
     "rybakit/msgpack": "^0.10.0",
     "spatie/temporary-directory": "^2.2",
-    "staudenmeir/laravel-adjacency-list": "^1.24",
-    "wikimedia/composer-merge-plugin": "^2.1"
+    "staudenmeir/laravel-adjacency-list": "^1.24"
   },
   "require-dev": {
     "barryvdh/laravel-ide-helper": "^3.7",
@@ -90,24 +89,10 @@
     "optimize-autoloader": true,
     "gitlab-domains": ["git.amazingcat.net"],
     "allow-plugins": {
-      "wikimedia/composer-merge-plugin": true,
-      "php-http/discovery": true
+      "php-http/discovery": true,
+      "wikimedia/composer-merge-plugin": false
     }
   },
   "minimum-stability": "stable",
-  "prefer-stable": true,
-  "extra": {
-    "merge-plugin": {
-      "include": [
-        "./modules/*/composer.json"
-      ],
-      "recurse": true,
-      "replace": false,
-      "ignore-duplicates": false,
-      "merge-dev": true,
-      "merge-extra": false,
-      "merge-extra-deep": false,
-      "merge-scripts": false
-    }
-  }
+  "prefer-stable": true
 }

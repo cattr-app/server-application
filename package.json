@@ -15,6 +15,7 @@
         "hot": "mix watch --hot",
         "prod": "mix --production",
         "lint": "eslint --ext .js,.vue -c .eslintrc.js resources/frontend/",
+        "test": "node --test tests/js/*.test.cjs",
         "build:pages": "node scripts/build-pages.cjs",
         "build:base": "node scripts/build-base-images.cjs"
     },

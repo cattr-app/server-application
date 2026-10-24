@@ -3,6 +3,24 @@ const fs = require('fs'),
     isObject = require('lodash/isObject'),
     merge = require('lodash/merge');
 
+// Escape characters that can be unsafe in generated JavaScript without
+// re-escaping quotes or backslashes already handled by JSON.stringify.
+const toJsLiteral = value =>
+    JSON.stringify(value)
+        .replace(/</g, '\\u003C')
+        .replace(/>/g, '\\u003E')
+        .replace(/\u2028/g, '\\u2028')
+        .replace(/\u2029/g, '\\u2029');
+
+// Chunk names end up inside a /* */ comment and in file names: keep only a safe subset.
+const toChunkName = value => {
+    const safe = String(value)
+        .toLowerCase()
+        .replace(/[^a-z0-9_-]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    return `module-${safe || 'package'}`;
+};
+
 module.exports = () => {
     console.log('Reading modules config file...');
     const p = path.join(__dirname, '..', 'etc', 'modules.config.json');
@@ -37,12 +55,22 @@ module.exports = () => {
         if (isObject(moduleList[moduleName])) {
             const moduleConfig = moduleList[moduleName];
 
-            if (
-                moduleConfig.type === 'package' &&
-                (Object.prototype.hasOwnProperty.call(moduleConfig, 'enabled') ? moduleConfig.enabled : true)
-            ) {
-                fdArray.push(`    () => require('${moduleConfig.ref}'),`);
-                console.log(`${moduleName} => added package as static require dependency`);
+            if (moduleConfig.type === 'package') {
+                const ref = moduleConfig.ref;
+                if (typeof ref !== 'string' || !ref.trim()) {
+                    throw new TypeError(
+                        `Invalid package reference for module ${moduleName}: expected a non-empty string`,
+                    );
+                }
+
+                // Package registration is build-time; its activation is runtime-only.
+                // Each package becomes a separate chunk, fetched only when its flag is enabled.
+                fdArray.push(
+                    `    { name: ${toJsLiteral(moduleName)}, load: () => import(/* webpackChunkName: "${toChunkName(
+                        moduleName,
+                    )}" */ ${toJsLiteral(ref)}) },`,
+                );
+                console.log(`${moduleName} => added package as a lazy-loaded chunk`);
             }
         }
     });

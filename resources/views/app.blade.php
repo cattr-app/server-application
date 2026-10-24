@@ -15,6 +15,9 @@
     <strong>We're sorry but Cattr doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
 </noscript>
 <div id="app"></div>
+<script>
+    window.__CATTR_FRONTEND_MODULES__ = @json(config('modules.frontend_activation', []));
+</script>
 <x:sri.script mix src="/dist/app.js"></x:sri-script>
 </body>
 </html>

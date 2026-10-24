@@ -1,9 +1,13 @@
 <?php
 
 use App\Services\ModuleActivatorService;
-use Nwidart\Modules\Activators\FileActivator;
+
+// Resolved once by artisan config:cache; no runtime environment reads.
+$moduleActivation = ModuleActivatorService::getActivation();
 
 return [
+    'frontend_activation' => $moduleActivation['FRONTEND'],
+    'backend_activation' => $moduleActivation['BACKEND'],
 
     /*
     |--------------------------------------------------------------------------
@@ -185,28 +189,13 @@ return [
         'files' => 'register',
     ],
 
-    /*
-   |--------------------------------------------------------------------------
-   | Activators
-   |--------------------------------------------------------------------------
-   |
-   | You can define new types of activators here, file, database etc. The only
-   | required parameter is 'class'.
-   | The file activator will store the activation status in storage/installed_modules
-   */
+    // Module activation is exclusively controlled by MODULE_BACKEND_*_ENABLED.
+    // File and database activators must not override that decision.
     'activators' => [
-        'file' => [
-            'class' => FileActivator::class,
-            'statuses-file' => base_path('modules_statuses.json'),
-            'cache-key' => 'activator.installed',
-            'cache-lifetime' => 604800,
-        ],
         'amazing' => [
             'class' => ModuleActivatorService::class,
-            'file_name' => 'modules',
-            'cache_key' => 'modules.active',
         ],
     ],
 
-    'activator' => env('MODULES_ACTIVATOR_NAME', 'amazing'),
+    'activator' => 'amazing',
 ];

@@ -647,62 +647,95 @@ Routine dependency upgrades should normally be submitted separately from unrelat
 
 ## Module system
 
-Cattr supports backend and frontend modules.
+Cattr always initializes built-in frontend modules. External frontend and backend modules
+are bundled or installed with the application, but **disabled by default**.
 
-### Backend modules
-
-Backend modules are stored under:
-
-```text
-modules/
-```
-
-Composer merges module-level Composer definitions from:
+Enable each external module independently with an explicit environment variable:
 
 ```text
-modules/*/composer.json
+MODULE_FRONTEND_AMAZING_CAT_REDMINE_INTEGRATION_ENABLED=true
+MODULE_BACKEND_CATTR_REDMINE_INTEGRATION_ENABLED=true
+MODULE_FRONTEND_AMAZING_CAT_GITLAB_INTEGRATION_ENABLED=true
+MODULE_BACKEND_CATTR_GITLAB_INTEGRATION_ENABLED=true
 ```
 
-using `wikimedia/composer-merge-plugin`.
+Only the exact lowercase string `true` enables an external module. Missing variables,
+`false`, `1`, and other values disable it. Backend and frontend activation flags
+are resolved by Laravel's `artisan config:cache` into `bootstrap/cache/config.php`
+when the container starts. A changed container environment takes effect after the
+container is recreated; no image rebuild is needed. Set backend flags
+consistently for the application, queue, scheduler, and migration roles.
 
-The root `modules.json` contains backend module configuration.
+The flag name is the module identifier converted to upper snake case with the rules in
+[docs/dev/module-activation-flags.md](docs/dev/module-activation-flags.md): `CattrRedmineIntegration`
+(backend `module.json` name) becomes `MODULE_BACKEND_CATTR_REDMINE_INTEGRATION_ENABLED`,
+`AmazingCat_RedmineIntegration` (frontend `ModuleConfig.moduleName`) becomes
+`MODULE_FRONTEND_AMAZING_CAT_REDMINE_INTEGRATION_ENABLED`. The same algorithm is implemented in
+`App\Services\ModuleActivatorService::flagName()` and `resources/frontend/core/utils/moduleFlagName.js`
+and both are tested against `tests/fixtures/module-flag-names.json`. Frontend and backend modules
+are installed and enabled independently and do not depend on one another's flags.
 
-The base repository currently does not enable additional modules by default.
+Backend module discovery still reads `module.json` for names and providers. Its `active` field
+does **not** control activation, and `modules*.json` files are not consulted. Artisan
+`module:enable` / `module:disable` refuse to run; `module:delete` and the activator reset only log
+a warning that nothing changed. The legacy `modules` database table has been dropped.
 
-Core code should not assume that an optional module is installed.
-
-### Frontend modules
-
-The base frontend module configuration is:
-
-```text
-resources/frontend/etc/modules.config.json
-```
-
-Additional configuration is merged in this order:
-
-```text
-modules.config.json
-modules.<NODE_ENV>.json
-modules.ci.json
-modules.local.json
-```
-
-Later configuration overrides earlier values.
-
-`modules.local.json` is intended for developer-specific configuration and is ignored by Git.
-
-Package-based frontend modules are statically included during compilation when configured as:
+External frontend package registration is build-time configuration in
+`resources/frontend/etc/modules.config.json` (with the existing optional overlays). For example:
 
 ```json
 {
-    "type": "package",
-    "ref": "package-name",
-    "enabled": true
+    "AmazingCat_RedmineIntegration": {
+        "type": "package",
+        "ref": "@amazingcat/cattr-redmine-integration"
+    }
 }
 ```
 
-`enabled` defaults to `true`.
+The key of each entry must equal the package's `ModuleConfig.moduleName`: the frontend derives the
+flag name from that key before the chunk is downloaded.
+
+These files **only determine what gets bundled**, not what gets enabled. Package modules are
+emitted as separate webpack chunks and are imported lazily only when their runtime flag is
+`true`, so disabled modules do not ship in the main bundle. An optional module must already
+be installed when building the image; adding an env flag cannot install missing code. Local
+frontend modules are discovered in `resources/frontend/vendor_modules/<vendor>/<module>/module.init.js`;
+`ModuleConfig.enabled` has no effect on activation. Internal frontend modules always initialize.
+
+### Installing backend modules
+
+Backend modules are ordinary Composer packages of type `laravel-module`; `nwidart/laravel-modules`
+discovers `module.json` both in `modules/` and in `vendor/*/*`. The Composer merge plugin is no
+longer used, so a directory dropped into `modules/` does not get its dependencies or autoload
+installed; install modules through Composer instead:
+
+```bash
+# published package
+composer require cattr/redmine_integration-module
+
+# local checkout, symlinked for development (any path outside the repository works)
+composer config repositories.redmine path ../redmine-integration
+composer require cattr/redmine_integration-module:@dev
+```
+
+The path repository is a local setting; do not commit it. Then set
+`MODULE_BACKEND_<FLAG_NAME>_ENABLED=true` in `.env`, run `php artisan migrate` for the module
+migrations and restart Octane. `php artisan module:list` shows what was discovered and whether
+the flag enabled it.
+
+### Installing frontend modules
+
+Frontend modules are npm packages. Add the package (or link a local checkout) and register it in
+`modules.config.json` (or a local overlay):
+
+```bash
+pnpm add @amazingcat/cattr-redmine-integration
+# or, for a local checkout
+pnpm link ../redmine-integration/frontend
+```
+
+Then set `MODULE_FRONTEND_<FLAG_NAME>_ENABLED=true` and rebuild the assets (`pnpm prod` or
+`pnpm watch`).
 
 ## Container architecture
 
