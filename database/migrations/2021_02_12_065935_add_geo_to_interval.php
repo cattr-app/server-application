@@ -14,7 +14,7 @@ class AddGeoToInterval extends Migration
     public function up(): void
     {
         Schema::table('time_intervals', static function (Blueprint $table) {
-            $table->point('location')->nullable();
+            $table->geometry('location', subtype: 'point')->nullable();
         });
     }
 

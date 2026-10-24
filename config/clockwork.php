@@ -174,7 +174,6 @@ return [
 		// List of URIs that should not be collected
 		'except' => [
 			'/horizon/.*', // Laravel Horizon requests
-			'/telescope/.*', // Laravel Telescope requests
 			'/_debugbar/.*', // Laravel DebugBar requests
 		],
 

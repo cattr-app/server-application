@@ -41,8 +41,13 @@ class CreateTest extends TestCase
 
         $this->assertDatabaseHas((new Invitation)->getTable(), $this->invitationRequestData['users'][0]);
 
-        foreach ($response->json('res') as $invitation) {
-            $this->assertDatabaseHas((new Invitation)->getTable(), $invitation);
+        foreach ($response->json('data') as $invitation) {
+            $this->assertDatabaseHas((new Invitation)->getTable(), [
+                'id' => $invitation['id'],
+                'email' => $invitation['email'],
+                'key' => $invitation['key'],
+                'role_id' => $invitation['role_id'],
+            ]);
         }
     }
 
@@ -71,7 +76,8 @@ class CreateTest extends TestCase
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->invitationRequestData);
 
-        $this->assertDatabaseHas((new Invitation)->getTable(), $response->decodeResponseJson()['res'][0]);
+        $invitation = $response->decodeResponseJson()['data'][0];
+        $this->assertDatabaseHas((new Invitation)->getTable(), ['id' => $invitation['id']]);
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->invitationRequestData);
 

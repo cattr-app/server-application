@@ -55,24 +55,24 @@ class BulkRemoveTest extends TestCase
     public function test_bulk_remove_as_admin(): void
     {
         foreach ($this->intervals as $interval) {
-            $this->assertDatabaseHas('time_intervals', $interval->toArray());
+            $this->assertDatabaseHas('time_intervals', Arr::except($interval->getAttributes(), ['updated_at']));
         }
 
         $requestData = ['intervals' => $this->intervals->pluck('id')->toArray()];
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $requestData);
 
-        $response->assertOk();
+        $response->assertNoContent();
 
         foreach ($this->intervals as $interval) {
-            $this->assertSoftDeleted('time_intervals', $interval->toArray());
+            $this->assertSoftDeleted('time_intervals', ['id' => $interval->id]);
         }
     }
 
     public function test_bulk_remove_as_manager(): void
     {
         foreach ($this->intervals as $interval) {
-            $this->assertDatabaseHas('time_intervals', $interval->toArray());
+            $this->assertDatabaseHas('time_intervals', Arr::except($interval->getAttributes(), ['updated_at']));
         }
 
         $requestData = ['intervals' => $this->intervals->pluck('id')->toArray()];
@@ -85,24 +85,24 @@ class BulkRemoveTest extends TestCase
     public function test_bulk_remove_your_own_as_manager(): void
     {
         foreach ($this->intervalsForManager as $interval) {
-            $this->assertDatabaseHas('time_intervals', $interval->toArray());
+            $this->assertDatabaseHas('time_intervals', Arr::except($interval->getAttributes(), ['updated_at']));
         }
 
         $requestData = ['intervals' => $this->intervalsForManager->pluck('id')->toArray()];
 
         $response = $this->actingAs($this->manager)->postJson(self::URI, $requestData);
 
-        $response->assertOk();
+        $response->assertNoContent();
 
         foreach ($this->intervalsForManager as $interval) {
-            $this->assertDatabaseHas('time_intervals', $interval->toArray());
+            $this->assertSoftDeleted('time_intervals', ['id' => $interval->id]);
         }
     }
 
     public function test_bulk_remove_as_user(): void
     {
         foreach ($this->intervals as $interval) {
-            $this->assertDatabaseHas('time_intervals', $interval->toArray());
+            $this->assertDatabaseHas('time_intervals', Arr::except($interval->getAttributes(), ['updated_at']));
         }
 
         $requestData = ['intervals' => $this->intervals->pluck('id')->toArray()];
@@ -115,34 +115,34 @@ class BulkRemoveTest extends TestCase
     public function test_bulk_remove_your_own_as_user(): void
     {
         foreach ($this->intervalsForUser as $interval) {
-            $this->assertDatabaseHas('time_intervals', $interval->toArray());
+            $this->assertDatabaseHas('time_intervals', Arr::except($interval->getAttributes(), ['updated_at']));
         }
 
         $requestData = ['intervals' => $this->intervalsForUser->pluck('id')->toArray()];
 
         $response = $this->actingAs($this->user)->postJson(self::URI, $requestData);
 
-        $response->assertOk();
+        $response->assertNoContent();
 
         foreach ($this->intervalsForUser as $interval) {
-            $this->assertDatabaseHas('time_intervals', $interval->toArray());
+            $this->assertSoftDeleted('time_intervals', ['id' => $interval->id]);
         }
     }
 
     public function test_bulk_remove_your_own_as_auditor(): void
     {
         foreach ($this->intervalsForAuditor as $interval) {
-            $this->assertDatabaseHas('time_intervals', $interval->toArray());
+            $this->assertDatabaseHas('time_intervals', Arr::except($interval->getAttributes(), ['updated_at']));
         }
 
         $requestData = ['intervals' => $this->intervalsForAuditor->pluck('id')->toArray()];
 
         $response = $this->actingAs($this->auditor)->postJson(self::URI, $requestData);
 
-        $response->assertOk();
+        $response->assertNoContent();
 
         foreach ($this->intervalsForAuditor as $interval) {
-            $this->assertDatabaseHas('time_intervals', $interval->toArray());
+            $this->assertSoftDeleted('time_intervals', ['id' => $interval->id]);
         }
     }
 
@@ -153,7 +153,7 @@ class BulkRemoveTest extends TestCase
         $requestData = ['intervals' => array_merge($this->intervals->pluck('id')->toArray(), $nonIntervals)];
 
         foreach ($this->intervals as $interval) {
-            $this->assertDatabaseHas('time_intervals', $interval->toArray());
+            $this->assertDatabaseHas('time_intervals', Arr::except($interval->getAttributes(), ['updated_at']));
         }
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $requestData);

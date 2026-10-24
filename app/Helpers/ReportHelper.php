@@ -113,11 +113,11 @@ class ReportHelper
         } else {
 //              If interval spans over midnight, divide it at midnight
             $startOfDay = $endAt->copy()->startOfDay();
-            $startDateDuration = $startOfDay->diffInSeconds($startAt);
+            $startDateDuration = (int) $startOfDay->diffInSeconds($startAt, true);
 
             $durationByDay[$startDate] = $startDateDuration;
 
-            $endDateDuration = $endAt->diffInSeconds($startOfDay);
+            $endDateDuration = (int) $endAt->diffInSeconds($startOfDay, true);
 
             $durationByDay[$endDate] = $endDateDuration;
         }

@@ -18,7 +18,8 @@ class ProjectPolicy
 
     public function view(User $user, Project $project): bool
     {
-        return $user->hasProjectRole(Role::ANY, $project->id);
+        return $user->hasRole([Role::MANAGER, Role::AUDITOR])
+            || $user->hasProjectRole(Role::ANY, $project->id);
     }
 
     public function viewAny(): bool

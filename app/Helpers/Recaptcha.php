@@ -4,9 +4,8 @@ namespace App\Helpers;
 
 use App\Exceptions\Entities\AuthorizationException;
 use Cache;
-use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Http;
 use Request;
-use Throwable;
 
 class Recaptcha
 {
@@ -177,26 +176,18 @@ class Recaptcha
             return;
         }
 
-        $response = (new Client())->post(config('recaptcha.google_url'), [
-            'form_params' => [
-                'secret' => config('recaptcha.secret_key'),
-                'response' => $captchaToken,
-            ],
+        $response = Http::asForm()->post(config('recaptcha.google_url'), [
+            'secret' => config('recaptcha.secret_key'),
+            'response' => $captchaToken,
         ]);
 
-        if ($response->getStatusCode() !== 200) {
+        if ($response->status() !== 200) {
             return;
         }
 
-        $response = $response->getBody();
+        $data = $response->json();
 
-        if ($response === null) {
-            return;
-        }
-
-        try {
-            $data = json_decode($response, true, 512, JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR);
-        } catch (Throwable $throwable) {
+        if (!is_array($data)) {
             return;
         }
 

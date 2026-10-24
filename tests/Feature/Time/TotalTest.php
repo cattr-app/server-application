@@ -40,7 +40,7 @@ class TotalTest extends TestCase
         $response->assertOk();
 
         $totalTime = $this->intervals->sum(static function ($interval) {
-            return Carbon::parse($interval->end_at)->diffInSeconds($interval->start_at);
+            return (int) Carbon::parse($interval->end_at)->diffInSeconds($interval->start_at, true);
         });
 
         $response->assertJson(['time' => $totalTime]);

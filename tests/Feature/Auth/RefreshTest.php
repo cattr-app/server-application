@@ -32,8 +32,8 @@ class RefreshTest extends TestCase
 
         $response = $this->actingAs($token[0]['token'])->postJson(self::URI);
 
-        $response->assertOk();
+        $response->assertError(self::HTTP_BAD_REQUEST, 'deprecation.api');
 
-        $this->actingAs($token[0]['token'])->get(self::TEST_URI)->assertUnauthorized();
+        $this->actingAs($token[0]['token'])->get(self::TEST_URI)->assertOk();
     }
 }

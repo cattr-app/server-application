@@ -36,7 +36,7 @@ return [
     |
     */
 
-    'server' => env('OCTANE_SERVER', 'swoole'),
+    'server' => 'swoole',
 
     'swoole' => [ 'options' => [ 'package_max_length' => 512 * 1024 * 1024, ], ],
 
@@ -192,7 +192,7 @@ return [
         'routes',
         'composer.lock',
         '.env',
-        'Modules/**/*.php',
+        'modules/**/*.php',
     ],
 
     /*

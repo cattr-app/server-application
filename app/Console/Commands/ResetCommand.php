@@ -7,6 +7,7 @@ use Illuminate\Console\Command;
 use DB;
 use Illuminate\Database\Console\Seeds\SeedCommand;
 use Nwidart\Modules\Commands\SeedCommand as ModuleSeedCommand;
+use Illuminate\Support\Facades\Schema;
 use Settings;
 use Storage;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -43,7 +44,7 @@ class ResetCommand extends Command
 
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
-        $tables = DB::connection()->getDoctrineSchemaManager()->listTableNames();
+        $tables = Schema::getTableListing(DB::connection()->getDatabaseName(), false);
         foreach ($tables as $table) {
             if (!in_array($table, $this->protectedTables, true)) {
                 DB::table($table)->truncate();

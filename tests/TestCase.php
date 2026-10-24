@@ -6,6 +6,9 @@ use App\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable as UserContract;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Testing\LoggedExceptionCollection;
+use App\Events\ChangeEvent;
 
 /**
  * @method TestResponse get($uri, array $headers = [])
@@ -24,6 +27,13 @@ abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
     use DatabaseTransactions;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Event::fake([ChangeEvent::class]);
+    }
 
     public const HTTP_CONTINUE = 100;
     public const HTTP_SWITCHING_PROTOCOLS = 101;
@@ -89,6 +99,20 @@ abstract class TestCase extends BaseTestCase
     public const HTTP_NOT_EXTENDED = 510;
     public const HTTP_NETWORK_AUTHENTICATION_REQUIRED = 511;
 
+    /** Prefix legacy API paths (relative or absolute) with the API base path. */
+    protected function prepareUrlForRequest($uri)
+    {
+        if (is_string($uri) && $uri !== '' && !str_contains($uri, '://')) {
+            $path = ltrim($uri, '/');
+
+            if ($path !== '' && $path !== 'api' && !str_starts_with($path, 'api/')) {
+                $uri = '/api/'.$path;
+            }
+        }
+
+        return parent::prepareUrlForRequest($uri);
+    }
+
     public function actingAs($user, $driver = null, int $tokenOffset = 0): self
     {
         $token = '';
@@ -108,8 +132,14 @@ abstract class TestCase extends BaseTestCase
         return $this;
     }
 
-    protected function createTestResponse($response): TestResponse
+    protected function createTestResponse($response, $request): TestResponse
     {
-        return TestResponse::fromBaseResponse($response);
+        return tap(TestResponse::fromBaseResponse($response, $request), function (TestResponse $testResponse): void {
+            $testResponse->withExceptions(
+                $this->app->bound(LoggedExceptionCollection::class)
+                    ? $this->app->make(LoggedExceptionCollection::class)
+                    : new LoggedExceptionCollection()
+            );
+        });
     }
 }

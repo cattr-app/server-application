@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Contracts\AttachmentAble;
+use App\Enums\Role;
 use App\Scopes\TaskAccessScope;
 use App\Traits\ExposePermissions;
 use App\Traits\HasAttachments;
@@ -168,26 +169,37 @@ class Task extends Model implements AttachmentAble
         });
 
         static::created(static function (Task $task) {
-            dispatch(static function () use ($task) {
-                foreach ($task->users as $user) {
-                    $task->project->users()->firstOrCreate(
-                        ['id' => $user->id],
-                        ['role_id' => \App\Enums\Role::USER]
-                    );
-                }
-            });
+            dispatch(static fn() => static::addAssigneesToProject($task));
         });
 
         static::updated(static function (Task $task) {
-            dispatch(static function () use ($task) {
-                foreach ($task->users as $user) {
-                    $task->project->users()->firstOrCreate(
-                        ['id' => $user->id],
-                        ['role_id' => \App\Enums\Role::USER]
-                    );
-                }
-            });
+            dispatch(static fn() => static::addAssigneesToProject($task));
         });
+    }
+
+    /**
+     * Make sure every task assignee is a member of the task's project.
+     * Only missing members are attached (with the project user role); existing
+     * memberships and their roles are left untouched, and no User is ever created.
+     */
+    protected static function addAssigneesToProject(Task $task): void
+    {
+        $project = $task->project;
+
+        if ($project === null) {
+            return;
+        }
+
+        $projectUsers = $project->users();
+        $missing = $task->users->pluck('id')->diff($projectUsers->pluck('users.id'));
+
+        if ($missing->isEmpty()) {
+            return;
+        }
+
+        $projectUsers->attach(
+            $missing->mapWithKeys(static fn($id) => [$id => ['role_id' => Role::USER->value]])->all(),
+        );
     }
 
     public function timeIntervals(): HasMany

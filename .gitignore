@@ -71,3 +71,6 @@ erd.svg
 
 apidoc
 .cattr-base-*
+
+.local
+.worktrees

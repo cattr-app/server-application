@@ -112,7 +112,7 @@ class TimeController extends Controller
 
         $timeIntervals = $itemsQuery->get();
 
-        $totalTime = $timeIntervals->sum(static fn($el) => Carbon::parse($el->end_at)->diffInSeconds($el->start_at));
+        $totalTime = $timeIntervals->sum(static fn($el) => (int) Carbon::parse($el->end_at)->diffInSeconds($el->start_at, true));
 
         return responder()->success([
             'time' => $totalTime,
@@ -242,7 +242,7 @@ class TimeController extends Controller
                     $taskTime = 0;
 
                     foreach ($userIntervals as $interval) {
-                        $taskTime += Carbon::parse($interval->end_at)->diffInSeconds($interval->start_at);
+                        $taskTime += (int) Carbon::parse($interval->end_at)->diffInSeconds($interval->start_at, true);
                     }
 
                     $firstUserInterval = $userIntervals->first();

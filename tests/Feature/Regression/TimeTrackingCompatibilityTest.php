@@ -4,6 +4,7 @@ namespace Tests\Feature\Regression;
 
 use App\Enums\Role;
 use App\Models\CronTaskWorkers;
+use App\Models\Priority;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\User;
@@ -18,6 +19,11 @@ class TimeTrackingCompatibilityTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        // A migrated database may not have the initial priority seeder applied.
+        if (! Priority::query()->exists()) {
+            Priority::query()->create(['name' => 'Low']);
+        }
 
         $this->user = User::factory()->create(['role_id' => Role::ADMIN->value]);
         $this->task = TaskFactory::refresh()->forUser($this->user)->create();

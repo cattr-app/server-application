@@ -211,13 +211,14 @@ class PasswordResetController extends BaseController
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_INVALID_PASSWORD_RESET_DATA);
         }
 
+        $resetUser = null;
         $response = Password::broker()->reset(
             $request->all(),
-            static function (User $user, string $password) {
+            static function (User $user, string $password) use (&$resetUser) {
                 $user->password = $password;
                 $user->save();
                 event(new PasswordResetEvent($user));
-                auth()->login($user);
+                $resetUser = $user;
             }
         );
 
@@ -225,13 +226,13 @@ class PasswordResetController extends BaseController
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
 
-        $token = auth()->setTTL(config('auth.lifetime_minutes.jwt'))->refresh();
+        $token = $resetUser->createToken('password-reset')->plainTextToken;
 
         return new JsonResponse([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => now()->addMinutes(config('auth.lifetime_minutes.jwt'))->toIso8601String(),
-            'user' => auth()->user(),
+            'expires_in' => null,
+            'user' => $resetUser,
         ]);
     }
 }

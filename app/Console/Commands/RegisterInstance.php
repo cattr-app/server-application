@@ -3,10 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Helpers\ModuleHelper;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Console\Command;
-use JsonException;
+use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Facades\Http;
 use Exception;
 use Settings;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -34,9 +33,8 @@ class RegisterInstance extends Command
      * @param Client $client
      *
      * @return int
-     * @throws JsonException|GuzzleException
      */
-    public function handle(Client $client): int
+    public function handle(): int
     {
         if (Settings::scope('core')->get('instance')) {
             echo 'Application already registered';
@@ -46,21 +44,15 @@ class RegisterInstance extends Command
         try {
             $appVersion = config('app.version');
 
-            $response = $client->post(config('app.stats_collector_url') . '/instance', [
-                'json' => [
+            $responseBody = Http::acceptJson()
+                ->post(config('app.stats_collector_url') . '/v2/instance', [
                     'ownerEmail' => $this->argument('adminEmail'),
                     'version' => $appVersion,
                     'modules' => ModuleHelper::getModulesInfo(),
-                    'image' => getenv('IMAGE_VERSION')
-                ]
-            ]);
-
-            $responseBody = json_decode(
-                $response->getBody()->getContents(),
-                true,
-                512,
-                JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
-            );
+                    'image' => getenv('IMAGE_VERSION'),
+                ])
+                ->throw()
+                ->json();
 
             if (isset($responseBody['instanceId'])) {
                 Settings::scope('core')->set('instance', $responseBody['instanceId']);
@@ -76,7 +68,7 @@ class RegisterInstance extends Command
                 $this->alert("New version is available: {$responseBody['release']['lastVersion']}");
             }
 
-            if ($responseBody['release']['vulnerable']) {
+            if ($responseBody['release']['vulnerable'] ?? false) {
                 if ($this->option('i')) {
                     // Interactive mode
                     return $this->confirm('You have a vulnerable version, are you sure you want to continue?');
@@ -86,18 +78,12 @@ class RegisterInstance extends Command
             }
 
             return 0;
-        } catch (Exception $e) {
-            if ($e->getResponse()) {
-                $error = json_decode(
-                    $e->getResponse()->getBody(),
-                    true,
-                    512,
-                    JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
-                );
-                $this->warn($error['message']);
-            } else {
-                $this->warn('Сould not get a response from the server to check the relevance of your version.');
-            }
+        } catch (RequestException $e) {
+            $this->warn($e->response->json('message') ?? $e->getMessage());
+
+            return 0;
+        } catch (Exception) {
+            $this->warn('Сould not get a response from the server to check the relevance of your version.');
 
             return 0;
         }
