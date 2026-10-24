@@ -4,18 +4,14 @@ const path = require('node:path');
 const test = require('node:test');
 const vm = require('node:vm');
 
-const compilerSource = fs.readFileSync(
-    path.join(__dirname, '../../resources/frontend/compiler/index.js'),
-    'utf8',
-);
+const compilerSource = fs.readFileSync(path.join(__dirname, '../../resources/frontend/compiler/index.js'), 'utf8');
 const frontendDir = '/test/frontend';
 
 function compile(moduleList) {
     let generated;
     const fakeFs = {
         existsSync: file =>
-            file === path.join(frontendDir, 'generated') ||
-            file === path.join(frontendDir, 'etc/modules.config.json'),
+            file === path.join(frontendDir, 'generated') || file === path.join(frontendDir, 'etc/modules.config.json'),
         writeFileSync: (_file, contents) => {
             generated = contents;
         },
@@ -41,31 +37,20 @@ function compile(moduleList) {
     return generated;
 }
 
-// Independent re-statement of the expected escaping (JSON + HTML/line-separator safe).
-const escapedLiteral = value =>
-    JSON.stringify(value)
-        .replace(/</g, '\\u003C')
-        .replace(/>/g, '\\u003E')
-        .replace(/\u2028/g, '\\u2028')
-        .replace(/\u2029/g, '\\u2029');
-
-test('emits valid, faithfully escaped JavaScript package references', () => {
+test('emits plain literals for valid module names and package references', () => {
     for (const ref of [
         '@amazingcat/cattr-redmine-integration',
         '@scope/subpath/module',
-        'a"b\\c\nd',
-        '</script>\u2028\u2029',
-        'pkg"); globalThis.injected = true; //',
+        'plain-package',
+        './generated/fake-module.js',
+        '../sibling/module.init.js',
     ]) {
-        const name = 'External"</script>\u2028Module';
+        const name = 'External_Module2';
         const output = compile({ [name]: { type: 'package', ref } });
-        assert.doesNotMatch(output, /<\/script>/);
-        assert.doesNotMatch(output, /[\u2028\u2029]/);
-        assert.match(output, /\\u003C/);
         assert.doesNotMatch(output, /\brequire\(/);
         assert.ok(
             output.includes(
-                `load: () => import(/* webpackChunkName: "module-external-script-module" */ ${escapedLiteral(ref)}) }`,
+                `{ name: '${name}', load: () => import(/* webpackChunkName: "module-external_module2" */ '${ref}') }`,
             ),
             output,
         );
@@ -80,13 +65,37 @@ test('emits valid, faithfully escaped JavaScript package references', () => {
         assert.equal(sandbox.module.exports.length, 1);
         assert.equal(sandbox.module.exports[0].name, name);
         assert.equal(sandbox.module.exports[0].load(), ref);
-        assert.equal(sandbox.injected, undefined);
+    }
+});
+
+test('rejects module names and package references outside the allowlist', () => {
+    for (const name of [
+        'External"</script>\u2028Module',
+        'AmazingCat_Redmine*/Integration',
+        'name with spaces',
+        "x'; globalThis.injected = true; //",
+    ]) {
+        assert.throws(() => compile({ [name]: { type: 'package', ref: 'pkg' } }), /Invalid module name/);
+    }
+    for (const ref of [
+        'a"b\\c\nd',
+        '</script>\u2028\u2029',
+        "pkg'); globalThis.injected = true; //",
+        '../../etc/passwd',
+        './dir/../escape.js',
+        '/absolute/path.js',
+        'pkg with space',
+    ]) {
+        assert.throws(
+            () => compile({ ValidModule: { type: 'package', ref } }),
+            /Invalid package reference for module ValidModule/,
+        );
     }
 });
 
 test('emits one lazy chunk per package with a sanitized chunk name', () => {
     const output = compile({
-        'AmazingCat_Redmine*/Integration': { type: 'package', ref: '@amazingcat/cattr-redmine' },
+        AmazingCat_RedmineIntegration: { type: 'package', ref: '@amazingcat/cattr-redmine' },
         Other_Module: { type: 'package', ref: 'other-module' },
     });
 
@@ -94,8 +103,8 @@ test('emits one lazy chunk per package with a sanitized chunk name', () => {
         output,
         [
             'export default [',
-            '    { name: "AmazingCat_Redmine*/Integration", load: () => import(/* webpackChunkName: "module-amazingcat_redmine-integration" */ "@amazingcat/cattr-redmine") },',
-            '    { name: "Other_Module", load: () => import(/* webpackChunkName: "module-other_module" */ "other-module") },',
+            "    { name: 'AmazingCat_RedmineIntegration', load: () => import(/* webpackChunkName: \"module-amazingcat_redmineintegration\" */ '@amazingcat/cattr-redmine') },",
+            "    { name: 'Other_Module', load: () => import(/* webpackChunkName: \"module-other_module\" */ 'other-module') },",
             '];',
         ].join('\n'),
     );
