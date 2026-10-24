@@ -47,7 +47,7 @@
     import ProjectGroupsService from '@/services/resource/project-groups.service';
     import GroupCollapsable from '../components/GroupCollapsable';
     import Preloader from '@/components/Preloader';
-    import debounce from 'lodash/debounce';
+    import debounce from 'lodash.debounce';
 
     const service = new ProjectGroupsService();
 

@@ -19,7 +19,7 @@ class TaskAccessScope implements Scope
      */
     public function apply(Builder $builder, Model $model): Builder
     {
-        if (app()->runningInConsole()) {
+        if (app()->runningInConsole() && (!app()->runningUnitTests() || request()->route() === null)) {
             return $builder;
         }
 
@@ -33,7 +33,7 @@ class TaskAccessScope implements Scope
 
         return $builder
             // A user with the user project role sees only their own tasks
-            ->whereHas('users', static fn(Builder $builder) => $builder->where('id', $user->id))
+            ->whereHas('users', static fn(Builder $builder) => $builder->where('users.id', $user->id))
             ->orWhereHas('project.users', static fn(Builder $builder) => $builder
                 ->where('user_id', $user->id)
                 ->whereIn(
@@ -44,6 +44,6 @@ class TaskAccessScope implements Scope
                         Role::AUDITOR->value,
                     ],
                 ))
-            ->orderBy('created_at', 'desc');
+            ->orderBy($model->qualifyColumn('created_at'), 'desc');
     }
 }

@@ -11,6 +11,7 @@ use App\Models\Task;
 use App\Models\TaskHistory;
 use App\Models\TimeInterval;
 use App\Observers\AttachmentObserver;
+use App\Scopes\ProjectAccessScope;
 use CatEvent;
 use Filter;
 use Closure;
@@ -55,7 +56,7 @@ class RegisterModulesEvents
             if ($entityType === 'projects_members') {
                 $entityType = 'projects';
                 $projectId = $data[0];
-                $model = Project::query()->find($projectId);
+                $model = Project::withoutGlobalScope(ProjectAccessScope::class)->find($projectId);
             } elseif ($entityType === 'task_comments') {
                 $entityType = 'tasks_activities';
                 $model = $data[0];

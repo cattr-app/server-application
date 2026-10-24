@@ -37,7 +37,7 @@ class ResendTest extends TestCase
 
         $response->assertOk();
         $response->assertNotEquals(
-            $response->decodeResponseJson()['res']['expires_at'],
+            $response->decodeResponseJson()['data']['expires_at'],
             $this->invitation->expires_at->toISOString()
         );
     }

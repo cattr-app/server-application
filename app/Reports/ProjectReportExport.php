@@ -47,7 +47,8 @@ class ProjectReportExport extends AppReport implements FromCollection, WithMappi
             $interval->hour = $date->hour;
             $interval->day = $date->format('Y-m-d');
             $interval->minute = round($date->minute, -1);
-            $interval->duration = Carbon::make($interval->end_at)?->diffInSeconds(Carbon::make($interval->start_at));
+            $duration = Carbon::make($interval->end_at)?->diffInSeconds(Carbon::make($interval->start_at), true);
+            $interval->duration = $duration === null ? null : (int) $duration;
 
             $interval->durationByDay = ReportHelper::getIntervalDurationByDay($interval, $that->companyTimezone);
 

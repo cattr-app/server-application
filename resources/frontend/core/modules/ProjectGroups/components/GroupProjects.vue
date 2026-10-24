@@ -26,7 +26,7 @@
     import ProjectService from '@/services/resource/project.service';
     import TeamAvatars from '@/components/TeamAvatars';
     import i18n from '@/i18n';
-    import debounce from 'lodash/debounce';
+    import debounce from 'lodash.debounce';
 
     const service = new ProjectService();
 

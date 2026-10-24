@@ -33,7 +33,7 @@ class ListTest extends TestCase
 
         $this->intervals->each(function (TimeInterval $interval) {
             $this->userIds[] = $interval->user_id;
-            $this->duration += Carbon::parse($interval->end_at)->diffInSeconds($interval->start_at);
+            $this->duration += (int) Carbon::parse($interval->end_at)->diffInSeconds($interval->start_at, true);
         });
 
         $this->requestData = [

@@ -13,23 +13,17 @@ class DropIndexOnDeletedAt extends Migration
      */
     public function up()
     {
-        Schema::table('screenshots', function (Blueprint $table) {
-            $sm = Schema::getConnection()->getDoctrineSchemaManager();
-            $indexesFound = $sm->listTableIndexes('screenshots');
-
-            if (array_key_exists('screenshots_deleted_at_index', $indexesFound)) {
+        if (Schema::hasIndex('screenshots', 'screenshots_deleted_at_index')) {
+            Schema::table('screenshots', function (Blueprint $table) {
                 $table->dropIndex('screenshots_deleted_at_index');
-            }
-        });
+            });
+        }
 
-        Schema::table('tasks', function (Blueprint $table) {
-            $sm = Schema::getConnection()->getDoctrineSchemaManager();
-            $indexesFound = $sm->listTableIndexes('tasks');
-
-            if (array_key_exists('tasks_deleted_at_index', $indexesFound)) {
+        if (Schema::hasIndex('tasks', 'tasks_deleted_at_index')) {
+            Schema::table('tasks', function (Blueprint $table) {
                 $table->dropIndex('tasks_deleted_at_index');
-            }
-        });
+            });
+        }
     }
 
     /**

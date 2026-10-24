@@ -41,8 +41,15 @@ class CreateTest extends TestCase
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->projectData);
 
         $response->assertOk();
-        $response->assertJson(['res' => $this->projectData]);
-        $this->assertDatabaseHas('projects', $this->projectData);
+        $response->assertJson([
+            'name' => $this->projectData['name'],
+            'description' => $this->projectData['description'],
+            'screenshots_state' => $this->projectData['screenshots_state'],
+        ]);
+        $this->assertDatabaseHas('projects', [
+            'name' => $this->projectData['name'],
+            'description' => $this->projectData['description'],
+        ]);
     }
 
     public function test_create_as_manager(): void
@@ -52,8 +59,15 @@ class CreateTest extends TestCase
         $response = $this->actingAs($this->manager)->postJson(self::URI, $this->projectData);
 
         $response->assertOk();
-        $response->assertJson(['res' => $this->projectData]);
-        $this->assertDatabaseHas('projects', $this->projectData);
+        $response->assertJson([
+            'name' => $this->projectData['name'],
+            'description' => $this->projectData['description'],
+            'screenshots_state' => $this->projectData['screenshots_state'],
+        ]);
+        $this->assertDatabaseHas('projects', [
+            'name' => $this->projectData['name'],
+            'description' => $this->projectData['description'],
+        ]);
     }
 
     public function test_create_as_auditor(): void

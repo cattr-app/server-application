@@ -11,9 +11,9 @@ use Illuminate\Contracts\Validation\ValidationRule;
 class TimeIntervalDoesNotExist implements ValidationRule
 {
     /**
-     * @var User
+     * @var User|null
      */
-    private User $user;
+    private ?User $user;
 
     /**
      * @var Carbon

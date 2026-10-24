@@ -3,6 +3,7 @@
 namespace Tests\Factories;
 
 use App\Models\Project;
+use App\Enums\ScreenshotsState;
 use Faker\Factory as FakerFactory;
 use Tests\Facades\TaskFactory;
 
@@ -68,6 +69,7 @@ class ProjectFactory extends Factory
             'name' => $faker->company,
             'description' => $faker->text(self::DESCRIPTION_LENGTH),
             'source' => 'internal',
+            'screenshots_state' => ScreenshotsState::REQUIRED->value,
         ];
     }
 

@@ -66,17 +66,17 @@ class BulkEditTest extends TestCase
         $this->intervals->each->setAttribute('task_id', $this->task->id);
 
         foreach ($this->intervals as $interval) {
-            $this->assertDatabaseMissing('time_intervals', $interval->toArray());
+            $this->assertDatabaseMissing('time_intervals', $interval->getAttributes());
         }
 
         $requestData = ['intervals' => $this->intervals->toArray()];
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $requestData);
 
-        $response->assertOk();
+        $response->assertNoContent();
 
         foreach ($this->intervals as $interval) {
-            $this->assertDatabaseHas('time_intervals', $interval->toArray());
+            $this->assertDatabaseHas('time_intervals', Arr::except($interval->getAttributes(), ['updated_at']));
         }
     }
 
@@ -85,7 +85,7 @@ class BulkEditTest extends TestCase
         $this->intervals->each->setAttribute('task_id', $this->task->id);
 
         foreach ($this->intervals as $interval) {
-            $this->assertDatabaseMissing('time_intervals', $interval->toArray());
+            $this->assertDatabaseMissing('time_intervals', $interval->getAttributes());
         }
 
         $requestData = ['intervals' => $this->intervals->toArray()];
@@ -100,17 +100,17 @@ class BulkEditTest extends TestCase
         $this->intervals->each->setAttribute('task_id', $this->task->id);
 
         foreach ($this->intervalsForManager as $interval) {
-            $this->assertDatabaseHas('time_intervals', $interval->toArray());
+            $this->assertDatabaseHas('time_intervals', $interval->getAttributes());
         }
 
         $requestData = ['intervals' => $this->intervalsForManager->toArray()];
 
         $response = $this->actingAs($this->manager)->postJson(self::URI, $requestData);
 
-        $response->assertOk();
+        $response->assertNoContent();
 
         foreach ($this->intervalsForManager as $interval) {
-            $this->assertDatabaseHas('time_intervals', $interval->toArray());
+            $this->assertDatabaseHas('time_intervals', Arr::except($interval->getAttributes(), ['updated_at']));
         }
     }
 
@@ -119,7 +119,7 @@ class BulkEditTest extends TestCase
         $this->intervals->each->setAttribute('task_id', $this->task->id);
 
         foreach ($this->intervals as $interval) {
-            $this->assertDatabaseMissing('time_intervals', $interval->toArray());
+            $this->assertDatabaseMissing('time_intervals', $interval->getAttributes());
         }
 
         $requestData = ['intervals' => $this->intervals->toArray()];
@@ -134,17 +134,17 @@ class BulkEditTest extends TestCase
         $this->intervals->each->setAttribute('task_id', $this->task->id);
 
         foreach ($this->intervalsForAuditor as $interval) {
-            $this->assertDatabaseHas('time_intervals', $interval->toArray());
+            $this->assertDatabaseHas('time_intervals', $interval->getAttributes());
         }
 
         $requestData = ['intervals' => $this->intervalsForAuditor->toArray()];
 
         $response = $this->actingAs($this->auditor)->postJson(self::URI, $requestData);
 
-        $response->assertOk();
+        $response->assertNoContent();
 
         foreach ($this->intervalsForAuditor as $interval) {
-            $this->assertDatabaseHas('time_intervals', $interval->toArray());
+            $this->assertDatabaseHas('time_intervals', Arr::except($interval->getAttributes(), ['updated_at']));
         }
     }
 
@@ -153,7 +153,7 @@ class BulkEditTest extends TestCase
         $this->intervals->each->setAttribute('task_id', $this->task->id);
 
         foreach ($this->intervals as $interval) {
-            $this->assertDatabaseMissing('time_intervals', $interval->toArray());
+            $this->assertDatabaseMissing('time_intervals', $interval->getAttributes());
         }
 
         $requestData = ['intervals' => $this->intervals->toArray()];
@@ -168,17 +168,17 @@ class BulkEditTest extends TestCase
         $this->intervals->each->setAttribute('task_id', $this->task->id);
 
         foreach ($this->intervalsForUser as $interval) {
-            $this->assertDatabaseHas('time_intervals', $interval->toArray());
+            $this->assertDatabaseHas('time_intervals', $interval->getAttributes());
         }
 
         $requestData = ['intervals' => $this->intervalsForUser->toArray()];
 
         $response = $this->actingAs($this->user)->postJson(self::URI, $requestData);
 
-        $response->assertOk();
+        $response->assertNoContent();
 
         foreach ($this->intervalsForUser as $interval) {
-            $this->assertDatabaseHas('time_intervals', $interval->toArray());
+            $this->assertDatabaseHas('time_intervals', Arr::except($interval->getAttributes(), ['updated_at']));
         }
     }
 
@@ -194,7 +194,7 @@ class BulkEditTest extends TestCase
         $requestData = ['intervals' => array_merge($this->intervals->toArray(), $nonIntervals)];
 
         foreach ($this->intervals as $interval) {
-            $this->assertDatabaseMissing('time_intervals', $interval->toArray());
+            $this->assertDatabaseMissing('time_intervals', $interval->getAttributes());
         }
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $requestData);

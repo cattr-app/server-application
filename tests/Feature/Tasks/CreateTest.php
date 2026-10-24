@@ -79,7 +79,7 @@ class CreateTest extends TestCase
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->taskRequest);
 
         $response->assertSuccess();
-        $response->assertJson(['res' => $this->taskData]);
+        $response->assertJson($this->taskData);
         $this->assertDatabaseHas('tasks', $this->taskData);
     }
 
@@ -90,12 +90,12 @@ class CreateTest extends TestCase
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->taskRequest);
 
         $response->assertOk();
-        $response->assertJson(['res' => $this->taskData]);
+        $response->assertJson($this->taskData);
         $this->assertDatabaseHas('tasks', $this->taskData);
 
         foreach ($this->taskRequest['users'] as $user) {
             $this->assertDatabaseHas('tasks_users', [
-                'task_id' => $response->json()['res']['id'],
+                'task_id' => $response->json('data.id'),
                 'user_id' => $user,
             ]);
         }
@@ -108,12 +108,12 @@ class CreateTest extends TestCase
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->taskRequestWithMultipleUsers);
 
         $response->assertOk();
-        $response->assertJson(['res' => $this->taskData]);
+        $response->assertJson($this->taskData);
         $this->assertDatabaseHas('tasks', $this->taskData);
 
         foreach ($this->taskRequestWithMultipleUsers['users'] as $user) {
             $this->assertDatabaseHas('tasks_users', [
-                'task_id' => $response->json()['res']['id'],
+                'task_id' => $response->json('data.id'),
                 'user_id' => $user,
             ]);
         }
@@ -126,12 +126,12 @@ class CreateTest extends TestCase
         $response = $this->actingAs($this->manager)->postJson(self::URI, $this->taskRequest);
 
         $response->assertOk();
-        $response->assertJson(['res' => $this->taskData]);
+        $response->assertJson($this->taskData);
         $this->assertDatabaseHas('tasks', $this->taskData);
 
         foreach ($this->taskRequest['users'] as $user) {
             $this->assertDatabaseHas('tasks_users', [
-                'task_id' => $response->json()['res']['id'],
+                'task_id' => $response->json('data.id'),
                 'user_id' => $user,
             ]);
         }
@@ -144,12 +144,12 @@ class CreateTest extends TestCase
         $response = $this->actingAs($this->manager)->postJson(self::URI, $this->taskRequestWithMultipleUsers);
 
         $response->assertOk();
-        $response->assertJson(['res' => $this->taskData]);
+        $response->assertJson($this->taskData);
         $this->assertDatabaseHas('tasks', $this->taskData);
 
         foreach ($this->taskRequestWithMultipleUsers['users'] as $user) {
             $this->assertDatabaseHas('tasks_users', [
-                'task_id' => $response->json()['res']['id'],
+                'task_id' => $response->json('data.id'),
                 'user_id' => $user,
             ]);
         }
@@ -176,12 +176,12 @@ class CreateTest extends TestCase
         $response = $this->actingAs($this->projectManager)->postJson(self::URI, $this->taskRequest);
 
         $response->assertOk();
-        $response->assertJson(['res' => $this->taskData]);
+        $response->assertJson($this->taskData);
         $this->assertDatabaseHas('tasks', $this->taskData);
 
         foreach ($this->taskRequest['users'] as $user) {
             $this->assertDatabaseHas('tasks_users', [
-                'task_id' => $response->json()['res']['id'],
+                'task_id' => $response->json('data.id'),
                 'user_id' => $user,
             ]);
         }
@@ -194,12 +194,12 @@ class CreateTest extends TestCase
         $response = $this->actingAs($this->projectManager)->postJson(self::URI, $this->taskRequestWithMultipleUsers);
 
         $response->assertOk();
-        $response->assertJson(['res' => $this->taskData]);
+        $response->assertJson($this->taskData);
         $this->assertDatabaseHas('tasks', $this->taskData);
 
         foreach ($this->taskRequestWithMultipleUsers['users'] as $user) {
             $this->assertDatabaseHas('tasks_users', [
-                'task_id' => $response->json()['res']['id'],
+                'task_id' => $response->json('data.id'),
                 'user_id' => $user,
             ]);
         }

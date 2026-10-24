@@ -13,7 +13,7 @@ use Tests\TestCase;
 
 class TaskTest extends TestCase
 {
-    private const URI = 'project-report/list/tasks';
+    private const URI = '/api/report/project';
 
     private User $admin;
 
@@ -38,35 +38,40 @@ class TaskTest extends TestCase
         ]);
 
         $this->requestData = [
-            'start_at' => $this->intervals->min('start_at'),
-            'end_at' => $this->intervals->max('end_at')->addMinute(),
-            'uid' => $this->intervals->first()->user->id
+            'start_at' => Carbon::parse($this->intervals->min('start_at'))->startOfDay()->toDateTimeString(),
+            'end_at' => Carbon::parse($this->intervals->max('end_at'))->endOfDay()->toDateTimeString(),
+            'users' => $this->intervals->pluck('user_id')->unique()->values()->all(),
+            'projects' => [$this->task->project_id]
         ];
 
         $this->duration = $this->intervals->sum(
-            fn ($interval) => Carbon::parse($interval->end_at)->diffInSeconds($interval->start_at)
+            fn ($interval) => (int) Carbon::parse($interval->end_at)->diffInSeconds($interval->start_at, true)
         );
     }
 
     public function test_list_task(): void
     {
-        $response = $this->actingAs($this->admin)->postJson(self::URI . '/' . $this->task->id, $this->requestData);
+        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->requestData);
 
         $response->assertOk();
-        $response->assertJsonFragment(['duration' => (string)$this->duration]);
+        $projects = collect($response->json('data'));
+        $tasks = $projects->flatMap(static fn (array $project) => collect($project['users'])
+            ->flatMap(static fn (array $user) => $user['tasks']));
+
+        $this->assertSame($this->duration, (int) $tasks->where('id', $this->task->id)->sum('time'));
     }
 
     public function test_unauthorized(): void
     {
-        $response = $this->getJson(self::URI . '/' . $this->task->id);
+        $response = $this->postJson(self::URI, $this->requestData);
 
         $response->assertUnauthorized();
     }
 
     public function test_without_params(): void
     {
-        $response = $this->actingAs($this->admin)->getJson(self::URI . '/' . $this->task->id);
+        $response = $this->actingAs($this->admin)->postJson(self::URI);
 
-        $response->assertValidationError();
+        $response->assertStatus(self::HTTP_UNPROCESSABLE_ENTITY);
     }
 }

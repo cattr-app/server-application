@@ -41,12 +41,6 @@ Route::group([
             ->name('auth.refresh');
         $router->get('me', [AuthController::class, 'me'])
             ->name('auth.me');
-        $router->post('password/reset/request', [PasswordResetController::class, 'request'])
-            ->name('auth.reset.request');
-        $router->post('password/reset/validate', [PasswordResetController::class, 'validate'])
-            ->name('auth.reset.validate');
-        $router->post('password/reset/process', [PasswordResetController::class, 'process'])
-            ->name('auth.reset.process');
 
         $router->get('register/{key}', [RegistrationController::class, 'getForm'])
             ->name('auth.register.form');

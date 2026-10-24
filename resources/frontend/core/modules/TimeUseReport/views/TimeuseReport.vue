@@ -40,7 +40,7 @@
     import UserSelect from '@/components/UserSelect';
     import Calendar from '@/components/Calendar';
     import { mapGetters } from 'vuex';
-    import debounce from 'lodash/debounce';
+    import debounce from 'lodash.debounce';
 
     const timeUseService = new TimeUseReportService();
     const usersService = new UsersService();
