@@ -3,6 +3,7 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
@@ -30,8 +31,10 @@ class LogoutTest extends TestCase
 
         $response = $this->actingAs($token[0]['token'])->postJson(self::URI);
 
-        $response->assertOk();
+        $response->assertNoContent();
+        $this->assertSame(0, $this->user->tokens()->count());
 
+        Auth::forgetGuards();
         $response = $this->actingAs($token[0]['token'])->get(self::TEST_URI);
 
         $response->assertUnauthorized();

@@ -5,7 +5,6 @@ import merge from 'lodash/merge';
 import veeValidateEn from 'vee-validate/dist/locale/en.json';
 import veeValidateRu from 'vee-validate/dist/locale/ru.json';
 import moment from 'moment';
-import * as Sentry from '@sentry/vue';
 
 export function getLangCookie() {
     const v = document.cookie.match('(^|;) ?lang=([^;]*)(;|$)');
@@ -58,8 +57,6 @@ merge(messages, {
 merge(pluralizationRules, require('./pluralizationRules'));
 
 const locale = getLangCookie() || getUserLang();
-
-Sentry.setTag('locale', locale);
 
 moment.locale(locale);
 

@@ -3,8 +3,6 @@
 namespace App\Helpers;
 
 use Composer\InstalledVersions;
-use CzProject\GitPhp\Git;
-use CzProject\GitPhp\GitException;
 use Exception;
 use Illuminate\Support\Str;
 use Nwidart\Modules\Facades\Module;
@@ -34,7 +32,7 @@ class Version
 
     public static function getModules(): array
     {
-        return cache()->rememberForever('app.modules', static function() {
+        return cache()->rememberForever('app.modules', static function () {
             try {
                 return Module::toCollection()->map(static function (\Nwidart\Modules\Laravel\Module $module) {
                     $modulePath = $module->getPath();
@@ -45,11 +43,7 @@ class Version
                         try {
                             return self::getFileVersion($modulePath);
                         } catch (Throwable) {
-                            try {
-                                return self::getGitVersion($modulePath);
-                            } catch (Throwable) {
-                                return 'dev';
-                            }
+                            return 'dev';
                         }
                     }
                 })->toArray();
@@ -93,18 +87,6 @@ class Version
         throw_unless(isset($module['version']));
 
         return $module['version'];
-    }
-
-    /**
-     * @throws GitException
-     */
-    private static function getGitVersion(string $path): string
-    {
-        $repo = (new Git())->open($path);
-
-        $tags = $repo->getTags();
-
-        return array_pop($tags);
     }
 
     public function __toString(): string

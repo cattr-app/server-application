@@ -63,8 +63,14 @@ class EditTest extends TestCase
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->project->toArray());
 
         $response->assertOk();
-        $response->assertJson(['res' => $this->project->toArray()]);
-        $this->assertDatabaseHas('projects', $this->project->toArray());
+        $response->assertJsonPath('data.id', $this->project->id);
+        $response->assertJsonPath('data.name', $this->project->name);
+        $response->assertJsonPath('data.description', $this->project->description);
+        $this->assertDatabaseHas('projects', [
+            'id' => $this->project->id,
+            'name' => $this->project->name,
+            'description' => $this->project->description,
+        ]);
     }
 
     public function test_edit_as_manager(): void
@@ -75,8 +81,14 @@ class EditTest extends TestCase
         $response = $this->actingAs($this->manager)->postJson(self::URI, $this->project->toArray());
 
         $response->assertOk();
-        $response->assertJson(['res' => $this->project->toArray()]);
-        $this->assertDatabaseHas('projects', $this->project->toArray());
+        $response->assertJsonPath('data.id', $this->project->id);
+        $response->assertJsonPath('data.name', $this->project->name);
+        $response->assertJsonPath('data.description', $this->project->description);
+        $this->assertDatabaseHas('projects', [
+            'id' => $this->project->id,
+            'name' => $this->project->name,
+            'description' => $this->project->description,
+        ]);
     }
 
     public function test_edit_as_auditor(): void
@@ -107,8 +119,14 @@ class EditTest extends TestCase
         $response = $this->actingAs($this->projectManager)->postJson(self::URI, $this->project->toArray());
 
         $response->assertOk();
-        $response->assertJson(['res' => $this->project->toArray()]);
-        $this->assertDatabaseHas('projects', $this->project->toArray());
+        $response->assertJsonPath('data.id', $this->project->id);
+        $response->assertJsonPath('data.name', $this->project->name);
+        $response->assertJsonPath('data.description', $this->project->description);
+        $this->assertDatabaseHas('projects', [
+            'id' => $this->project->id,
+            'name' => $this->project->name,
+            'description' => $this->project->description,
+        ]);
     }
 
     public function test_edit_as_project_auditor(): void

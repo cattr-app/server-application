@@ -4,6 +4,7 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
@@ -28,13 +29,16 @@ class LogoutFromAllTest extends TestCase
         $this->assertNotEmpty($tokens);
 
         foreach ($tokens as $token) {
+            Auth::forgetGuards();
             $this->actingAs($token['token'])->get(self::TEST_URI)->assertOk();
         }
 
         $response = $this->actingAs($tokens[0]['token'])->postJson(self::URI);
-        $response->assertOk();
+        $response->assertNoContent();
+        $this->assertSame(0, $this->user->tokens()->count());
 
         foreach ($tokens as $token) {
+            Auth::forgetGuards();
             $this->actingAs($token['token'])->get(self::TEST_URI)->assertUnauthorized();
         }
     }

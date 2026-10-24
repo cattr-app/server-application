@@ -19,7 +19,7 @@ class ProjectAccessScope implements Scope
      */
     public function apply(Builder $builder, Model $model): Builder
     {
-        if (app()->runningInConsole()) {
+        if (app()->runningInConsole() && (!app()->runningUnitTests() || request()->route() === null)) {
             return $builder;
         }
 

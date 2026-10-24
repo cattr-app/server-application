@@ -47,11 +47,19 @@ return [
             'table' => 'cache',
             'connection' => null,
             'lock_connection' => null,
+            'lock_table' => env('DB_CACHE_LOCK_TABLE'),
         ],
 
         'file' => [
             'driver' => 'file',
             'path' => storage_path('framework/cache/data'),
+            'lock_path' => storage_path('framework/cache/locks'),
+        ],
+
+        'storage' => [
+            'driver' => 'storage',
+            'disk' => env('CACHE_STORAGE_DISK'),
+            'path' => env('CACHE_STORAGE_PATH', 'framework/cache/data'),
         ],
 
         'memcached' => [
@@ -92,6 +100,14 @@ return [
             'driver' => 'octane',
         ],
 
+        'failover' => [
+            'driver' => 'failover',
+            'stores' => [
+                'database',
+                'array',
+            ],
+        ],
+
     ],
 
     /*
@@ -106,6 +122,19 @@ return [
     */
 
     'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_cache_'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Serializable Classes
+    |--------------------------------------------------------------------------
+    |
+    | Only scalars and arrays are stored in the cache, so object unserialization
+    | is disabled. This prevents deserialization gadget chains if the cache
+    | storage is ever compromised. Add explicit classes here if ever needed.
+    |
+    */
+
+    'serializable_classes' => false,
 
     // Amount of time to cache roles for
     'role_caching_ttl' => 300,

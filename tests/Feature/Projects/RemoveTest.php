@@ -54,26 +54,26 @@ class RemoveTest extends TestCase
 
     public function test_remove_as_admin(): void
     {
-        $this->assertDatabaseHas('projects', $this->project->toArray());
+        $this->assertDatabaseHas('projects', ['id' => $this->project->id]);
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->project->only('id'));
 
-        $response->assertOk();
+        $response->assertNoContent();
         $this->assertSoftDeleted('projects', $this->project->only('id'));
     }
     public function test_remove_as_manager(): void
     {
-        $this->assertDatabaseHas('projects', $this->project->toArray());
+        $this->assertDatabaseHas('projects', ['id' => $this->project->id]);
 
         $response = $this->actingAs($this->manager)->postJson(self::URI, $this->project->only('id'));
 
-        $response->assertOk();
+        $response->assertNoContent();
         $this->assertSoftDeleted('projects', $this->project->only('id'));
     }
 
     public function test_remove_as_auditor(): void
     {
-        $this->assertDatabaseHas('projects', $this->project->toArray());
+        $this->assertDatabaseHas('projects', ['id' => $this->project->id]);
 
         $response = $this->actingAs($this->auditor)->postJson(self::URI, $this->project->only('id'));
 
@@ -82,7 +82,7 @@ class RemoveTest extends TestCase
 
     public function test_remove_as_user(): void
     {
-        $this->assertDatabaseHas('projects', $this->project->toArray());
+        $this->assertDatabaseHas('projects', ['id' => $this->project->id]);
 
         $response = $this->actingAs($this->user)->postJson(self::URI, $this->project->only('id'));
 
@@ -91,17 +91,16 @@ class RemoveTest extends TestCase
 
     public function test_remove_as_project_manager(): void
     {
-        $this->assertDatabaseHas('projects', $this->project->toArray());
+        $this->assertDatabaseHas('projects', ['id' => $this->project->id]);
 
         $response = $this->actingAs($this->projectManager)->postJson(self::URI, $this->project->only('id'));
 
-        $response->assertOk();
-        $this->assertSoftDeleted('projects', $this->project->only('id'));
+        $response->assertForbidden();
     }
 
     public function test_remove_as_project_auditor(): void
     {
-        $this->assertDatabaseHas('projects', $this->project->toArray());
+        $this->assertDatabaseHas('projects', ['id' => $this->project->id]);
 
         $response = $this->actingAs($this->projectAuditor)->postJson(self::URI, $this->project->only('id'));
 
@@ -110,7 +109,7 @@ class RemoveTest extends TestCase
 
     public function test_remove_as_project_user(): void
     {
-        $this->assertDatabaseHas('projects', $this->project->toArray());
+        $this->assertDatabaseHas('projects', ['id' => $this->project->id]);
 
         $response = $this->actingAs($this->projectUser)->postJson(self::URI, $this->project->only('id'));
 

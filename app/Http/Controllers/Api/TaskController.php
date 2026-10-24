@@ -327,7 +327,7 @@ class TaskController extends ItemController
                 $nearestChildDate = min($nearestChildStartDate, $nearestChildDueDate);
             }
 
-            $delta = $nearestChildDate->diffInDays($newDate, false);
+            $delta = (int) $nearestChildDate->diffInDays($newDate, false);
 
             dispatch(fn() => Task::withInitialQueryConstraint(function (Builder $query) use ($newDate) {
                 $query->where(fn(Builder $q) => $q
@@ -812,7 +812,7 @@ class TaskController extends ItemController
             RegisterModulesEvents::broadcastEvent('gantt', 'updateAll', $child->project);
         } elseif ($parentDateKey && $childDateKey && $child->$childDateKey->lt($parent->$parentDateKey)) {
             // child date is before parent date - move child and its descendants dates
-            $delta = $child->$childDateKey->diffInDays($parent->$parentDateKey, false);
+            $delta = (int) $child->$childDateKey->diffInDays($parent->$parentDateKey, false);
             dispatch(function () use ($delta, $child) {
                 $child->descendantsAndSelf()->groupBy('id')->lazyById()
                     ->each(static function (Task $child) use ($delta) {
@@ -1118,8 +1118,8 @@ class TaskController extends ItemController
             foreach ($period as $date) {
                 $tasksByWeek[$date->format(static::ISO8601_DATE_FORMAT)]['tasks'][] = [
                     'task_id' => $task->id,
-                    'start_week_day' => $task->start_date->greaterThan($date) ? $task->start_date->diffInDays($date) : 0,
-                    'end_week_day' => $task->due_date->lessThan($date->clone()->addDays(7)) ? $task->due_date->diffInDays($date) : 6,
+                    'start_week_day' => $task->start_date->greaterThan($date) ? (int) $task->start_date->diffInDays($date, true) : 0,
+                    'end_week_day' => $task->due_date->lessThan($date->clone()->addDays(7)) ? (int) $task->due_date->diffInDays($date, true) : 6,
                 ];
             }
 

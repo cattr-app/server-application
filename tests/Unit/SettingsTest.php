@@ -10,44 +10,46 @@ class SettingsTest extends TestCase
 {
     public function test_get_setting(): void
     {
-        $service = resolve(SettingsProviderService::class);
+        $service = resolve(SettingsProviderService::class)->scope('test');
+        $service->set('language', 'en');
 
-        $service->set('test', 'language', 'en');
-
-        $setting = $service->get('test', 'language');
-
-        $this->assertEquals($setting, 'en');
+        $this->assertSame('en', $service->get('language'));
     }
 
     public function test_get_all_settings(): void
     {
-        $service = resolve(SettingsProviderService::class);
+        $service = resolve(SettingsProviderService::class)->scope('test');
+        $service->set(['language' => 'en', 'key' => 'value']);
 
-        $service->set('test', 'language', 'en');
-        $service->set('test', 'key', 'value');
-
-        $settings = $service->all('test');
-
-        $this->assertDatabaseHas((new Setting)->getTable(), ['value' => reset($settings)]);
+        $settings = $service->all();
+        $this->assertCount(2, $settings);
+        $this->assertSame('en', $settings['language']);
+        $this->assertSame('value', $settings['key']);
     }
 
     public function test_set_one_setting(): void
     {
-        $service = resolve(SettingsProviderService::class);
+        $service = resolve(SettingsProviderService::class)->scope('test');
+        $service->set('language', 'en');
 
-        $result = $service->set('test', 'language', 'en');
-
-        $this->assertEquals($result, ['language' => 'en']);
+        $this->assertDatabaseHas((new Setting)->getTable(), [
+            'module_name' => 'test',
+            'key' => 'language',
+            'value' => 'en',
+        ]);
     }
 
     public function test_set_multiple_settings(): void
     {
-        $service = resolve(SettingsProviderService::class);
-
+        $service = resolve(SettingsProviderService::class)->scope('test');
         $data = ['language' => 'en', 'timezone' => 'utc'];
 
-        $result = $service->set('test', $data);
+        $service->set($data);
 
-        $this->assertEquals($result, $data);
+        $settings = $service->all();
+        ksort($data);
+        ksort($settings);
+
+        $this->assertSame($data, $settings);
     }
 }

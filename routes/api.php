@@ -41,12 +41,6 @@ Route::group([
             ->name('auth.refresh');
         $router->get('me', [AuthController::class, 'me'])
             ->name('auth.me');
-        $router->post('password/reset/request', [PasswordResetController::class, 'request'])
-            ->name('auth.reset.request');
-        $router->post('password/reset/validate', [PasswordResetController::class, 'validate'])
-            ->name('auth.reset.validate');
-        $router->post('password/reset/process', [PasswordResetController::class, 'process'])
-            ->name('auth.reset.process');
 
         $router->get('register/{key}', [RegistrationController::class, 'getForm'])
             ->name('auth.register.form');
@@ -224,8 +218,6 @@ Route::group([
             ->name('intervals.count');
         $router->post('time-intervals/create', [IntervalController::class, 'create'])
             ->name('intervals.create');
-        $router->post('time-intervals/edit', [IntervalController::class, 'edit'])
-            ->name('intervals.edit');
         $router->post('time-intervals/bulk-edit', [IntervalController::class, 'bulkEdit'])
             ->name('intervals.edit.bulk');
         $router->any('time-intervals/show', [IntervalController::class, 'show'])

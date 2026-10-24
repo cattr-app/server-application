@@ -8,7 +8,6 @@ use App\Http\Requests\Interval\BulkDestroyTimeIntervalRequest;
 use App\Http\Requests\Interval\BulkEditTimeIntervalRequest;
 use App\Http\Requests\Interval\CreateTimeIntervalRequest;
 use App\Http\Requests\Interval\DestroyTimeIntervalRequest;
-use App\Http\Requests\Interval\EditTimeIntervalRequest;
 use App\Http\Requests\Interval\IntervalTasksRequest;
 use App\Http\Requests\Interval\IntervalTotalRequest;
 use App\Http\Requests\Interval\ListIntervalRequest;
@@ -138,24 +137,6 @@ class IntervalController extends ItemController
      */
 
     /**
-     * @param EditTimeIntervalRequest $request
-     *
-     * @return JsonResponse
-     * @throws Throwable
-     */
-    public function edit(EditTimeIntervalRequest $request): JsonResponse
-    {
-        Filter::listen(Filter::getRequestFilterName(), static function ($requestData) {
-            $requestData['start_at'] = Carbon::parse($requestData['start_at'])->setTimezone('UTC')->toDateTimeString();
-            $requestData['end_at'] = Carbon::parse($requestData['end_at'])->setTimezone('UTC')->toDateTimeString();
-        });
-
-        return $this->_edit($request);
-    }
-
-
-
-    /**
      * @throws Exception
      * @api             {get,post} /time-intervals/count Count
      * @apiDescription  Count Time Intervals
@@ -182,49 +163,6 @@ class IntervalController extends ItemController
     {
         return $this->_count($request);
     }
-
-    /**
-     * @api             {post} /time-intervals/edit Edit
-     * @apiDescription  Edit Time Interval
-     *
-     * @apiVersion      1.0.0
-     * @apiName         Edit
-     * @apiGroup        Time Interval
-     *
-     * @apiUse          AuthHeader
-     *
-     * @apiPermission   time_intervals_edit
-     * @apiPermission   time_intervals_full_access
-     *
-     * @apiParam {Integer}  id           Time Interval id
-     *
-     * @apiUse          TimeIntervalParams
-     *
-     * @apiSuccess {Object}   res      TimeInterval
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "res": {
-     *      "id":1,
-     *      "task_id":1,
-     *      "start_at":"2018-10-03 10:00:00",
-     *      "end_at":"2018-10-03 10:00:00",
-     *      "created_at":"2018-10-15 05:50:39",
-     *      "updated_at":"2018-10-15 05:50:43",
-     *      "deleted_at":null,
-     *      "activity_fill": 42,
-     *      "mouse_fill": 43,
-     *      "keyboard_fill": 43,
-     *      "user_id":1
-     *    }
-     *  }
-     *
-     * @apiUse          400Error
-     * @apiUse          ValidationError
-     * @apiUse          UnauthorizedError
-     * @apiUse          ItemNotFoundError
-     */
 
 
 
@@ -910,7 +848,7 @@ class IntervalController extends ItemController
 
         CatEvent::dispatch(Filter::getAfterActionEventName(), [$timeIntervals, $filters]);
 
-        $totalTime = $timeIntervals->sum(static fn($el) => Carbon::parse($el->end_at)->diffInSeconds($el->start_at));
+        $totalTime = $timeIntervals->sum(static fn($el) => (int) Carbon::parse($el->end_at)->diffInSeconds($el->start_at, true));
 
         return responder()->success([
             'time' => $totalTime,
@@ -1010,7 +948,7 @@ class IntervalController extends ItemController
                 foreach ($taskIntervals as $userId => $userIntervals) {
                     $taskTime = 0;
                     foreach ($userIntervals as $interval) {
-                        $taskTime += Carbon::parse($interval->end_at)->diffInSeconds($interval->start_at);
+                        $taskTime += (int) Carbon::parse($interval->end_at)->diffInSeconds($interval->start_at, true);
                     }
 
                     $firstUserInterval = $userIntervals->first();

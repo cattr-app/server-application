@@ -29,7 +29,7 @@ class TimeIntervalObserver
         $viewRecord->user_id = $timeInterval->user_id;
         $viewRecord->task_id = $timeInterval->task_id;
 
-        $viewRecord->offset += Carbon::parse($timeInterval->end_at)->diffInSeconds($timeInterval->start_at);
+        $viewRecord->offset += (int) Carbon::parse($timeInterval->end_at)->diffInSeconds($timeInterval->start_at, true);
 
         $viewRecord->save();
     }
@@ -78,7 +78,7 @@ class TimeIntervalObserver
             return;
         }
 
-        $viewRecord->offset -= Carbon::parse($timeInterval->end_at)->diffInSeconds($timeInterval->start_at);
+        $viewRecord->offset -= (int) Carbon::parse($timeInterval->end_at)->diffInSeconds($timeInterval->start_at, true);
 
         $viewRecord->save();
     }

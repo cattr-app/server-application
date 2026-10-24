@@ -36,7 +36,8 @@ class TimeUseReportExport extends AppReport implements FromCollection, WithMappi
         $that = $this;
 
         return $this->queryReport()->map(static function ($interval) use ($that) {
-            $interval->duration = Carbon::make($interval->end_at)?->diffInSeconds(Carbon::make($interval->start_at));
+            $duration = Carbon::make($interval->end_at)?->diffInSeconds(Carbon::make($interval->start_at), true);
+            $interval->duration = $duration === null ? null : (int) $duration;
 
             $interval->durationByDay = ReportHelper::getIntervalDurationByDay($interval, $that->companyTimezone);
 

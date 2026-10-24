@@ -7,14 +7,13 @@ use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Tests\Facades\IntervalFactory;
-use Tests\Facades\ScreenshotFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 use Tests\TestResponse;
 
 class ListTest extends TestCase
 {
-    private const URI = 'project-report/list';
+    private const URI = '/api/report/project';
 
     private const INTERVALS_AMOUNT = 10;
 
@@ -30,7 +29,7 @@ class ListTest extends TestCase
 
     private function collectResponseProjects(TestResponse $response): Collection
     {
-        return collect($response->json('projects'));
+        return collect($response->json('data'));
     }
 
     private function collectResponseUsers(TestResponse $response): Collection
@@ -47,18 +46,17 @@ class ListTest extends TestCase
         $this->intervals = IntervalFactory::withRandomRelations()->createMany(self::INTERVALS_AMOUNT);
 
         $this->intervals->each(function (TimeInterval $interval) {
-            ScreenshotFactory::fake()->forInterval($interval)->create();
             $this->uids[] = $interval->user_id;
             $this->pids[] = $interval->task->project->id;
-            $this->duration += Carbon::parse($interval->end_at)->diffInSeconds($interval->start_at);
+            $this->duration += (int) Carbon::parse($interval->end_at)->diffInSeconds($interval->start_at, true);
         });
 
 
         $this->requestData = [
-            'start_at' => $this->intervals->min('start_at'),
-            'end_at' => $this->intervals->max('end_at')->addMinute(),
-            'uids' => $this->uids,
-            'pids' => $this->pids
+            'start_at' => Carbon::parse($this->intervals->min('start_at'))->startOfDay()->toDateTimeString(),
+            'end_at' => Carbon::parse($this->intervals->max('end_at'))->endOfDay()->toDateTimeString(),
+            'users' => array_values(array_unique($this->uids)),
+            'projects' => array_values(array_unique($this->pids))
         ];
     }
 
@@ -70,23 +68,21 @@ class ListTest extends TestCase
 
         $users = $this->collectResponseUsers($response);
 
-        $this->assertEquals($this->duration, $users->sum('tasks_time'));
-        $this->assertEquals(count($this->uids), $users->count());
-
-        //TODO change later
+        $this->assertSame($this->duration, (int) $users->sum('time'));
+        $this->assertEqualsCanonicalizing(array_unique($this->uids), $users->pluck('id')->all());
     }
 
     public function test_unauthorized(): void
     {
-        $response = $this->getJson(self::URI);
+        $response = $this->postJson(self::URI, $this->requestData);
 
         $response->assertUnauthorized();
     }
 
     public function test_without_params(): void
     {
-        $response = $this->actingAs($this->admin)->getJson(self::URI);
+        $response = $this->actingAs($this->admin)->postJson(self::URI);
 
-        $response->assertValidationError();
+        $response->assertStatus(self::HTTP_UNPROCESSABLE_ENTITY);
     }
 }

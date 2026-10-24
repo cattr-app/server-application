@@ -33,7 +33,7 @@ class SendInviteTest extends TestCase
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->user->only('id'));
 
-        $response->assertOk();
+        $response->assertNoContent();
     }
 
     public function test_send_invite_as_manager(): void

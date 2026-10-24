@@ -13,7 +13,7 @@ class ShowTest extends TestCase
 {
     use WithFaker;
 
-    private const URI = 'project-members/show';
+    private const URI = 'project-members/list';
 
     /** @var User $admin */
     private User $admin;

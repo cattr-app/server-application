@@ -36,7 +36,7 @@ class LoginTest extends TestCase
         $response = $this->postJson(self::URI, $this->loginData);
         $response->assertOk();
 
-        $this->actingAs($response->decodeResponseJson()['access_token'])->get(self::TEST_URI)->assertOk();
+        $this->actingAs($response->decodeResponseJson()['data']['access_token'])->get(self::TEST_URI)->assertOk();
     }
 
     public function test_wrong_credentials(): void
@@ -68,7 +68,7 @@ class LoginTest extends TestCase
     {
         $response = $this->postJson(self::URI);
 
-        $response->assertError(self::HTTP_BAD_REQUEST);
+        $response->assertStatus(self::HTTP_UNPROCESSABLE_ENTITY);
     }
 
     public function test_recaptcha(): void
@@ -82,14 +82,14 @@ class LoginTest extends TestCase
             self::CAPTCHA_CACHE_KEY
         );
 
-        $this->assertFalse(Cache::has($cacheKey));
+        $this->assertFalse(Cache::store('octane')->has($cacheKey));
 
         $this->loginData['password'] = 'wrong_password';
         $this->postJson(self::URI, $this->loginData);
 
-        $this->assertTrue(Cache::has($cacheKey));
+        $this->assertTrue(Cache::store('octane')->has($cacheKey));
 
-        $this->assertEquals(1, Cache::get($cacheKey));
+        $this->assertEquals(1, Cache::store('octane')->get($cacheKey));
 
         $response = $this->postJson(self::URI, $this->loginData);
 
@@ -105,14 +105,14 @@ class LoginTest extends TestCase
 
         $cacheKey = str_replace('{ip}', '127.0.0.1', self::BAN_CACHE_KEY);
 
-        $this->assertFalse(Cache::has($cacheKey));
+        $this->assertFalse(Cache::store('octane')->has($cacheKey));
 
         $this->loginData['password'] = 'wrong_password';
         $this->postJson(self::URI, $this->loginData);
 
-        $this->assertTrue(Cache::has($cacheKey));
+        $this->assertTrue(Cache::store('octane')->has($cacheKey));
 
-        $cacheResponse = Cache::get($cacheKey);
+        $cacheResponse = Cache::store('octane')->get($cacheKey);
 
         $this->assertArrayHasKey('amounts', $cacheResponse);
         $this->assertArrayHasKey('time', $cacheResponse);

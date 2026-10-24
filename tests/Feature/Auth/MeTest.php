@@ -24,7 +24,9 @@ class MeTest extends TestCase
         $response = $this->actingAs($this->user)->getJson(self::URI);
 
         $response->assertOk();
-        $response->assertJson(['user' => $this->user->toArray()]);
+        $response->assertJsonPath('data.id', $this->user->id);
+        $response->assertJsonPath('data.email', $this->user->email);
+        $response->assertJsonPath('data.role_id', $this->user->role_id);
     }
 
     public function test_without_auth(): void

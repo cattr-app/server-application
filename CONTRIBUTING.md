@@ -267,9 +267,12 @@ The repository contains both the server-side application and the web frontend.
 | Path                  | Purpose                                               |
 |-----------------------|-------------------------------------------------------|
 | `app/`                | Laravel application code                              |
+| `bootstrap/app.php`   | Application setup: routing, middleware, and exceptions |
+| `bootstrap/providers.php` | Service providers registered for the application  |
 | `config/`             | Application configuration                             |
 | `database/`           | Migrations, seeders, and factories                    |
 | `routes/`             | API, web, and operational routes                      |
+| `routes/console.php`  | Artisan commands and scheduled tasks                  |
 | `resources/frontend/` | Vue frontend application                              |
 | `modules/`            | Backend modules                                       |
 | `tests/`              | Backend unit and feature tests                        |
@@ -478,7 +481,7 @@ Generated frontend output should not be committed.
 
 ## Backend development
 
-The backend is a Laravel 10 application running on PHP 8.3.
+The backend is a Laravel 13 application running on PHP 8.3.
 
 Available Artisan commands can be inspected with:
 
@@ -512,6 +515,11 @@ Backend tests live under:
 tests/Unit/
 tests/Feature/
 ```
+
+`mockery/mockery` is kept in `require-dev` even though the suite does not call it
+directly: Laravel's console test helper `$this->artisan()` (`PendingCommand`) needs it
+for output expectations, and `$this->mock()` / `$this->partialMock()` / `$this->spy()`
+helpers depend on it as well.
 
 Create a testing environment:
 

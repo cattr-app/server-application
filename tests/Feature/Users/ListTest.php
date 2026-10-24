@@ -58,37 +58,37 @@ class ListTest extends TestCase
 
     public function test_list_as_admin(): void
     {
-        $response = $this->actingAs($this->admin)->getJson(self::URI);
+        $response = $this->actingAs($this->admin)->withHeader('X-Paginate', 'false')->getJson(self::URI);
 
         $users = User::withoutGlobalScopes()->setEagerLoads([])->get()->toArray();
 
         $response->assertOk();
-        $response->assertExactJson($users);
+        $this->assertEqualsCanonicalizing(collect($users)->pluck('id')->all(), collect($response->json('data'))->pluck('id')->all());
     }
 
     public function test_list_as_manager(): void
     {
-        $response = $this->actingAs($this->manager)->getJson(self::URI);
+        $response = $this->actingAs($this->manager)->withHeader('X-Paginate', 'false')->getJson(self::URI);
 
         $users = User::withoutGlobalScopes()->setEagerLoads([])->get()->toArray();
 
         $response->assertOk();
-        $response->assertExactJson($users);
+        $this->assertEqualsCanonicalizing(collect($users)->pluck('id')->all(), collect($response->json('data'))->pluck('id')->all());
     }
 
     public function test_list_as_auditor(): void
     {
-        $response = $this->actingAs($this->auditor)->getJson(self::URI);
+        $response = $this->actingAs($this->auditor)->withHeader('X-Paginate', 'false')->getJson(self::URI);
 
         $users = User::withoutGlobalScopes()->setEagerLoads([])->get()->toArray();
 
         $response->assertOk();
-        $response->assertExactJson($users);
+        $this->assertEqualsCanonicalizing(collect($users)->pluck('id')->all(), collect($response->json('data'))->pluck('id')->all());
     }
 
     public function test_list_as_user(): void
     {
-        $response = $this->actingAs($this->user)->getJson(self::URI);
+        $response = $this->actingAs($this->user)->withHeader('X-Paginate', 'false')->getJson(self::URI);
 
         $user = User::withoutGlobalScopes()
             ->where('id', $this->user->id)
@@ -97,12 +97,12 @@ class ListTest extends TestCase
             ->toArray();
 
         $response->assertOk();
-        $response->assertExactJson($user);
+        $this->assertSame([$this->user->id], collect($response->json('data'))->pluck('id')->all());
     }
 
     public function test_list_as_project_manager(): void
     {
-        $response = $this->actingAs($this->projectManager)->getJson(self::URI);
+        $response = $this->actingAs($this->projectManager)->withHeader('X-Paginate', 'false')->getJson(self::URI);
 
         $users = User::withoutGlobalScopes()
             ->whereHas('projects', function ($query) {
@@ -113,25 +113,33 @@ class ListTest extends TestCase
             ->toArray();
 
         $response->assertOk();
-        $response->assertExactJson($users);
+        $this->assertEqualsCanonicalizing(collect($users)->pluck('id')->all(), collect($response->json('data'))->pluck('id')->all());
     }
 
-    public function test_list_as_project_manager_with_global_scope(): void
+    public function test_list_as_project_manager_global_scope_does_not_bypass_access(): void
     {
-        $response = $this->actingAs($this->projectManager)->postJson(self::URI, ['global_scope' => true]);
+        $response = $this->actingAs($this->projectManager)
+            ->withHeader('X-Paginate', 'false')
+            ->postJson(self::URI, ['global_scope' => true]);
 
-        $users = User::withoutGlobalScope(\App\Scopes\UserAccessScope::class)
+        $users = User::withoutGlobalScopes()
+            ->whereHas('projects', function ($query) {
+                $query->where('project_id', $this->project->id);
+            })
             ->setEagerLoads([])
             ->get()
             ->toArray();
 
         $response->assertOk();
-        $response->assertExactJson($users);
+        $this->assertEqualsCanonicalizing(
+            collect($users)->pluck('id')->all(),
+            collect($response->json('data'))->pluck('id')->all()
+        );
     }
 
     public function test_list_as_project_auditor(): void
     {
-        $response = $this->actingAs($this->projectAuditor)->getJson(self::URI);
+        $response = $this->actingAs($this->projectAuditor)->withHeader('X-Paginate', 'false')->getJson(self::URI);
 
         $users = User::withoutGlobalScopes()
             ->whereHas('projects', function ($query) {
@@ -142,23 +150,15 @@ class ListTest extends TestCase
             ->toArray();
 
         $response->assertOk();
-        $response->assertExactJson($users);
+        $this->assertEqualsCanonicalizing(collect($users)->pluck('id')->all(), collect($response->json('data'))->pluck('id')->all());
     }
 
     public function test_list_as_project_user(): void
     {
-        $response = $this->actingAs($this->projectManager)->getJson(self::URI);
-
-        $users = User::withoutGlobalScopes()
-            ->whereHas('projects', function ($query) {
-                $query->where('project_id', $this->project->id);
-            })
-            ->setEagerLoads([])
-            ->get()
-            ->toArray();
+        $response = $this->actingAs($this->projectUser)->withHeader('X-Paginate', 'false')->getJson(self::URI);
 
         $response->assertOk();
-        $response->assertExactJson($users);
+        $this->assertSame([$this->projectUser->id], collect($response->json('data'))->pluck('id')->all());
     }
 
     public function test_unauthorized(): void

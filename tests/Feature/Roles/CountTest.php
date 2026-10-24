@@ -1,36 +1,15 @@
 <?php
 namespace Tests\Feature\Roles;
 
-use App\Models\Role;
-use App\Models\User;
-use Tests\Facades\UserFactory;
+use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
 
 class CountTest extends TestCase
 {
     private const URI = 'roles/count';
 
-    private User $admin;
-
-    protected function setUp(): void
+    public function test_count_route_is_not_registered(): void
     {
-        parent::setUp();
-
-        $this->admin = UserFactory::withTokens()->asAdmin()->create();
-    }
-
-    public function test_count(): void
-    {
-        $response = $this->actingAs($this->admin)->getJson(self::URI);
-
-        $response->assertOk();
-        $response->assertJson(['total' => Role::count()]);
-    }
-
-    public function test_unauthorized(): void
-    {
-        $response = $this->getJson(self::URI);
-
-        $response->assertUnauthorized();
+        $this->assertFalse(Route::has('roles.count'));
     }
 }

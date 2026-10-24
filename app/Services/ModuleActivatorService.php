@@ -35,8 +35,10 @@ class ModuleActivatorService implements ActivatorInterface
      * @inheritDoc
      * @throws Exception
      */
-    public function hasStatus(Module $module, bool $status): bool
+    public function hasStatus(Module|string $module, bool $status): bool
     {
+        $name = $module instanceof Module ? $module->getName() : $module;
+
         $moduleStatuses = Cache::store('octane')
             ->rememberForever(config('modules.activators.amazing.cache_key'), function () {
                 $configFile = config('modules.activators.amazing.file_name');
@@ -60,11 +62,11 @@ class ModuleActivatorService implements ActivatorInterface
                 );
             });
 
-        if (isset($moduleStatuses[$module->getName()])) {
-            return $moduleStatuses[$module->getName()] ?? false === $status;
+        if (isset($moduleStatuses[$name])) {
+            return (bool) $moduleStatuses[$name] === $status;
         }
 
-        return (bool)$module->json()?->active;
+        return ($module instanceof Module ? (bool) $module->json()?->active : false) === $status;
     }
 
     /**

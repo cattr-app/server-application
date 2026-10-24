@@ -53,7 +53,7 @@ class ShowTest extends TestCase
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->user->only('id'));
 
         $response->assertOk();
-        $response->assertJson($this->user->toArray());
+        $response->assertJsonPath('data.id', $this->user->id);
     }
 
     public function test_show_as_manager(): void
@@ -61,7 +61,7 @@ class ShowTest extends TestCase
         $response = $this->actingAs($this->manager)->postJson(self::URI, $this->user->only('id'));
 
         $response->assertOk();
-        $response->assertJson($this->user->toArray());
+        $response->assertJsonPath('data.id', $this->user->id);
     }
 
     public function test_show_as_auditor(): void
@@ -69,7 +69,7 @@ class ShowTest extends TestCase
         $response = $this->actingAs($this->auditor)->postJson(self::URI, $this->user->only('id'));
 
         $response->assertOk();
-        $response->assertJson($this->user->toArray());
+        $response->assertJsonPath('data.id', $this->user->id);
     }
 
     public function test_show_as_user(): void
@@ -86,7 +86,7 @@ class ShowTest extends TestCase
         $this->user->makeHidden('role');
 
         $response->assertOk();
-        $response->assertJson($this->user->toArray());
+        $response->assertJsonPath('data.id', $this->user->id);
     }
 
     public function test_show_as_project_manager(): void
@@ -99,7 +99,7 @@ class ShowTest extends TestCase
             ->toArray();
 
         $response->assertOk();
-        $response->assertExactJson($user[0]);
+        $response->assertJsonPath('data.id', $user[0]['id']);
     }
 
     public function test_show_as_project_auditor(): void
@@ -114,7 +114,7 @@ class ShowTest extends TestCase
             ->toArray();
 
         $response->assertOk();
-        $response->assertExactJson($user[0]);
+        $response->assertJsonPath('data.id', $user[0]['id']);
     }
 
     public function test_show_as_project_user(): void

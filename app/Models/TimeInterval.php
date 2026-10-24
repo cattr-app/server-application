@@ -126,6 +126,8 @@ class TimeInterval extends Model
         'keyboard_fill' => 'integer',
         'is_manual' => 'boolean',
         'location' => Point::class,
+        'start_at' => 'datetime',
+        'end_at' => 'datetime',
     ];
 
     /**

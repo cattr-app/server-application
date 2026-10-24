@@ -55,8 +55,10 @@ class DashboardExport extends AppReport implements FromCollection, WithMapping, 
         $reportCollection = $this->queryReport($where)->map(static function ($interval) use ($that) {
             $start = Carbon::make($interval->start_at);
 
-            $interval->duration = Carbon::make($interval->end_at)?->diffInSeconds($start);
-            $interval->from_midnight = $start?->diffInSeconds($start?->copy()->startOfDay());
+            $duration = Carbon::make($interval->end_at)?->diffInSeconds($start, true);
+            $interval->duration = $duration === null ? null : (int) $duration;
+            $fromMidnight = $start?->diffInSeconds($start?->copy()->startOfDay(), true);
+            $interval->from_midnight = $fromMidnight === null ? null : (int) $fromMidnight;
 
             $interval->durationByDay = ReportHelper::getIntervalDurationByDay(
                 $interval,

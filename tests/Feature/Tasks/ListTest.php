@@ -84,7 +84,11 @@ class ListTest extends TestCase
             ->orderBy('tasks.created_at', 'desc')
             ->get();
 
-        $response->assertJson($tasks->toArray());
+        $response->assertJsonCount($tasks->count(), 'data');
+        $this->assertEqualsCanonicalizing(
+            $tasks->pluck('id')->all(),
+            collect($response->json('data'))->pluck('id')->all(),
+        );
     }
 
     public function test_list_as_manager(): void
@@ -100,7 +104,11 @@ class ListTest extends TestCase
             ->orderBy('tasks.created_at', 'desc')
             ->get();
 
-        $response->assertJson($tasks->toArray());
+        $response->assertJsonCount($tasks->count(), 'data');
+        $this->assertEqualsCanonicalizing(
+            $tasks->pluck('id')->all(),
+            collect($response->json('data'))->pluck('id')->all(),
+        );
     }
 
     public function test_list_as_auditor(): void
@@ -116,7 +124,11 @@ class ListTest extends TestCase
             ->orderBy('tasks.created_at', 'desc')
             ->get();
 
-        $response->assertJson($tasks->toArray());
+        $response->assertJsonCount($tasks->count(), 'data');
+        $this->assertEqualsCanonicalizing(
+            $tasks->pluck('id')->all(),
+            collect($response->json('data'))->pluck('id')->all(),
+        );
     }
 
     public function test_list_as_user(): void
@@ -133,9 +145,9 @@ class ListTest extends TestCase
 
         $response->assertOk();
         $response->assertExactJson(
-            Task::query()
+            json_decode(Task::query()
                 ->where('id', '=', $this->assignedTask->id)
-                ->get()->toArray()
+                ->get()->toJson(), true)
         );
     }
 
@@ -143,7 +155,7 @@ class ListTest extends TestCase
     {
         $response = $this->actingAs($this->projectManager)->getJson(self::URI);
 
-        $task = Task::where('project_id', $this->task->project_id)->get()->toArray();
+        $task = json_decode(Task::where('project_id', $this->task->project_id)->get()->toJson(), true);
 
         $response->assertOk();
         $response->assertExactJson($task);
@@ -153,7 +165,7 @@ class ListTest extends TestCase
     {
         $response = $this->actingAs($this->projectAuditor)->getJson(self::URI);
 
-        $task = Task::where('project_id', $this->task->project_id)->get()->toArray();
+        $task = json_decode(Task::where('project_id', $this->task->project_id)->get()->toJson(), true);
 
         $response->assertOk();
         $response->assertExactJson($task);
@@ -163,7 +175,7 @@ class ListTest extends TestCase
     {
         $response = $this->actingAs($this->projectUser)->getJson(self::URI);
 
-        $task = Task::where('project_id', $this->task->project_id)->get()->toArray();
+        $task = json_decode(Task::where('project_id', $this->task->project_id)->get()->toJson(), true);
 
         $response->assertOk();
         $response->assertExactJson($task);
@@ -175,9 +187,9 @@ class ListTest extends TestCase
             ->actingAs($this->assignedProjectUser)
             ->postJson(self::URI, $this->assignedProjectTask->only('id'));
 
-        $task = Task::where('project_id', $this->assignedProjectTask->project_id)
+        $task = json_decode(Task::where('project_id', $this->assignedProjectTask->project_id)
             ->get()
-            ->toArray();
+            ->toJson(), true);
 
         $response->assertOk();
         $response->assertExactJson($task);

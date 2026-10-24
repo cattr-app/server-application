@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
+use App\Enums\Role;
 use App\Models\User;
-use Cache;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Validation\ValidationException;
 
@@ -32,11 +32,15 @@ class UserPolicy
 
     public function view(User $user, User $model): bool
     {
-        return Cache::store('octane')->remember(
-            "role_user_user_{$user->id}_$model->id",
-            config('cache.role_caching_ttl'),
-            static fn() => User::whereId($model->id)->exists(),
-        );
+        if ($user->id === $model->id || $user->hasRole([Role::MANAGER, Role::AUDITOR])) {
+            return true;
+        }
+
+        return $model->projectsRelation()
+            ->whereIn('project_id', $user->projectsRelation()
+                ->whereIn('role_id', [Role::MANAGER->value, Role::AUDITOR->value])
+                ->select('project_id'))
+            ->exists();
     }
 
     public function create(User $user): bool

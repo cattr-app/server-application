@@ -4,6 +4,7 @@ namespace App\Http\Requests\User;
 
 use App\Http\Requests\AuthorizesAfterValidation;
 use App\Models\User;
+use App\Scopes\UserAccessScope;
 use App\Http\Requests\CattrFormRequest;
 
 class ShowUserRequest extends CattrFormRequest
@@ -12,7 +13,9 @@ class ShowUserRequest extends CattrFormRequest
 
     public function authorizeValidated(): bool
     {
-        return $this->user()->can('view', User::find(request('id')));
+        $target = User::withoutGlobalScope(UserAccessScope::class)->find(request('id'));
+
+        return $target === null || $this->user()->can('view', $target);
     }
 
     protected function _rules(): array

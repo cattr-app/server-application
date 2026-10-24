@@ -5,6 +5,7 @@ namespace Tests\Feature\TimeIntervals;
 
 use App\Models\TimeInterval;
 use App\Models\User;
+use Illuminate\Support\Arr;
 use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
@@ -42,7 +43,7 @@ class ShowTest extends TestCase
 
     public function test_show_as_admin(): void
     {
-        $this->assertDatabaseHas('time_intervals', $this->timeInterval->toArray());
+        $this->assertDatabaseHas('time_intervals', Arr::except($this->timeInterval->getAttributes(), ['updated_at']));
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->timeInterval->only('id'));
         $response->assertOk();
@@ -52,7 +53,7 @@ class ShowTest extends TestCase
 
     public function test_show_as_manager(): void
     {
-        $this->assertDatabaseHas('time_intervals', $this->timeInterval->toArray());
+        $this->assertDatabaseHas('time_intervals', Arr::except($this->timeInterval->getAttributes(), ['updated_at']));
 
         $response = $this->actingAs($this->manager)->postJson(self::URI, $this->timeInterval->only('id'));
         $response->assertOk();
@@ -62,7 +63,7 @@ class ShowTest extends TestCase
 
     public function test_show_as_auditor(): void
     {
-        $this->assertDatabaseHas('time_intervals', $this->timeInterval->toArray());
+        $this->assertDatabaseHas('time_intervals', Arr::except($this->timeInterval->getAttributes(), ['updated_at']));
 
         $response = $this->actingAs($this->auditor)->postJson(self::URI, $this->timeInterval->only('id'));
         $response->assertOk();
@@ -72,7 +73,7 @@ class ShowTest extends TestCase
 
     public function test_show_as_user(): void
     {
-        $this->assertDatabaseHas('time_intervals', $this->timeInterval->toArray());
+        $this->assertDatabaseHas('time_intervals', Arr::except($this->timeInterval->getAttributes(), ['updated_at']));
 
         $response = $this->actingAs($this->user)->postJson(self::URI, $this->timeInterval->only('id'));
 
@@ -81,7 +82,7 @@ class ShowTest extends TestCase
 
     public function test_show_your_own_as_user(): void
     {
-        $this->assertDatabaseHas('time_intervals', $this->timeIntervalForUser->toArray());
+        $this->assertDatabaseHas('time_intervals', Arr::except($this->timeIntervalForUser->getAttributes(), ['updated_at']));
 
         $response = $this
             ->actingAs($this->user)

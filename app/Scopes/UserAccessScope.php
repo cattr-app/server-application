@@ -23,7 +23,7 @@ class UserAccessScope implements Scope
             return null;
         }
 
-        if (app()->runningInConsole()) {
+        if (app()->runningInConsole() && (!app()->runningUnitTests() || request()->route() === null)) {
             return $builder;
         }
 

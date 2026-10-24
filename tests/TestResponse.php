@@ -72,22 +72,48 @@ class TestResponse extends BaseTestResponse
     public const HTTP_NOT_EXTENDED = 510;
     public const HTTP_NETWORK_AUTHENTICATION_REQUIRED = 511;
 
+    public function assertJson($value, $strict = false)
+    {
+        if ($this->hasSuccessEnvelope() && is_array($value) && !array_key_exists('data', $value)) {
+            $value = ['data' => $value];
+        }
+
+        return parent::assertJson($value, $strict);
+    }
+
+    public function assertExactJson(array $data)
+    {
+        if ($this->hasSuccessEnvelope()) {
+            $this->assertJsonPath('status', $this->getStatusCode());
+            $this->assertJsonPath('success', true);
+
+            return $this->assertJsonPath('data', $data);
+        }
+
+        return parent::assertExactJson($data);
+    }
+
+    private function hasSuccessEnvelope(): bool
+    {
+        $json = $this->json();
+
+        return is_array($json) && ($json['success'] ?? false) === true && array_key_exists('data', $json);
+    }
+
     public function assertError(int $status, string $type = null, bool $hasInfo = false): TestResponse
     {
         $this->assertStatus($status);
+        $this->assertJsonStructure(['error' => ['code', 'message']]);
 
         if ($type) {
-            $this->assertJson(['error_type' => $type]);
+            $this->assertJsonPath('error.code', $type);
         }
 
-        $structure = ['message', 'error_type'];
         if ($hasInfo) {
-            $structure[] = 'info';
+            $this->assertJsonStructure(['error' => ['info']]);
         } else {
-            PHPUnit::assertArrayNotHasKey('info', $this->decodeResponseJson());
+            PHPUnit::assertArrayNotHasKey('info', $this->decodeResponseJson()['error']);
         }
-
-        $this->assertJsonStructure($structure);
 
         return $this;
     }
@@ -106,9 +132,9 @@ class TestResponse extends BaseTestResponse
         return $this->assertError(self::HTTP_FORBIDDEN, $type, $hasInfo);
     }
 
-    public function assertValidationError(string $type = 'validation', bool $hasInfo = true): TestResponse
+    public function assertValidationError(string $type = 'validation_failed', bool $hasInfo = false): TestResponse
     {
-        return $this->assertError(self::HTTP_BAD_REQUEST, $type, $hasInfo);
+        return $this->assertError(self::HTTP_UNPROCESSABLE_ENTITY, $type, $hasInfo);
     }
 
     public function assertNotFound(string $type = 'query.item_not_found', bool $hasInfo = false): TestResponse
