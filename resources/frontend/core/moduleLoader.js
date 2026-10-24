@@ -2,9 +2,9 @@ import path from 'path';
 import Module from '@/arch/module';
 import EventEmitter from 'events';
 import kebabCase from 'lodash/kebabCase';
-import snakeCase from 'lodash/snakeCase';
 import sortBy from 'lodash/sortBy';
 import moduleRequire from '_app/generated/module.require';
+import { moduleFlagName } from '@/utils/moduleFlagName';
 
 export const moduleFilter = moduleName => true;
 export const config = { moduleFilter };
@@ -12,17 +12,36 @@ export const config = { moduleFilter };
 // Only explicit environment flags may enable external frontend modules.
 // PHP injects these flags into the page before app.js executes.
 const enabledModules = window.__CATTR_FRONTEND_MODULES__ || {};
-const isExternalModuleEnabled = name => enabledModules[snakeCase(name).toUpperCase()] === true;
+const isExternalModuleEnabled = name => enabledModules[moduleFlagName(name)] === true;
 
 export const ModuleLoaderInterceptor = new EventEmitter();
 
 const modules = {};
 
-export function localModuleLoader(router) {
-    const requireModule = require.context('_modules', true, /module.init.js$/);
+const validatePackageModule = md => {
+    if (!Object.prototype.hasOwnProperty.call(md, 'ModuleConfig')) {
+        throw new Error(
+            `Vendor module cannot be initialized. All vendor modules must export ModuleConfig object property.`,
+        );
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(md, 'init')) {
+        throw new Error(`Vendor module cannot be initialized. All vendor modules must export init function property`);
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(md.ModuleConfig, 'moduleName')) {
+        throw new Error(
+            `Vendor module cannot be initialized. All vendor modules must have a name matching the pattern Vendor_ModuleName`,
+        );
+    }
+};
+
+export async function localModuleLoader(router) {
+    // 'lazy' mode: every local vendor module is a separate chunk, fetched only when enabled.
+    const requireModule = require.context('_modules', true, /module.init.js$/, 'lazy');
     let moduleInitQueue = [];
 
-    requireModule.keys().forEach(fn => {
+    const localModules = requireModule.keys().map(fn => {
         const pathData = fn.split('/');
         const moduleVendor = pathData[1];
         const moduleName = pathData[2];
@@ -31,68 +50,44 @@ export function localModuleLoader(router) {
                 ? `${moduleVendor}_${moduleName}Module`
                 : `${moduleVendor}_${moduleName}`;
 
-        if (isExternalModuleEnabled(fullModuleName)) {
-            const md = requireModule(fn);
-            const moduleInitData = md.ModuleConfig || {};
+        return { fn, fullModuleName };
+    });
 
+    const enabledLocalModules = localModules.filter(({ fullModuleName }) => isExternalModuleEnabled(fullModuleName));
+    const loadedLocalModules = await Promise.all(enabledLocalModules.map(({ fn }) => requireModule(fn)));
+
+    enabledLocalModules.forEach(({ fn, fullModuleName }, index) => {
+        const md = loadedLocalModules[index];
+        const moduleInitData = md.ModuleConfig || {};
+
+        moduleInitQueue.push({
+            module: md,
+            order: Object.prototype.hasOwnProperty.call(moduleInitData, 'loadOrder') ? moduleInitData.loadOrder : 999,
+            moduleInitData,
+            fullModuleName,
+            fn,
+            type: 'local',
+        });
+    });
+
+    // Load enabled package modules; disabled ones are never fetched
+    const enabledPackages = moduleRequire.filter(entry => isExternalModuleEnabled(entry.name));
+    const loadedPackages = await Promise.all(enabledPackages.map(entry => entry.load()));
+
+    loadedPackages.forEach(md => {
+        validatePackageModule(md);
+
+        const moduleConfig = md.ModuleConfig;
+        if (moduleInitQueue.findIndex(el => el.fullModuleName === moduleConfig.moduleName) === -1) {
             moduleInitQueue.push({
                 module: md,
-                order: Object.prototype.hasOwnProperty.call(moduleInitData, 'loadOrder')
-                    ? moduleInitData.loadOrder
-                    : 999,
-                moduleInitData,
-                fullModuleName,
-                fn,
-                type: 'local',
+                order: Object.prototype.hasOwnProperty.call(moduleConfig, 'loadOrder') ? moduleConfig.loadOrder : 999,
+                moduleInitData: moduleConfig,
+                fullModuleName: moduleConfig.moduleName,
+                type: 'package',
             });
         }
     });
-
-    // Require package modules
-    if (moduleRequire.length > 0) {
-        moduleRequire.forEach(entry => {
-            if (!isExternalModuleEnabled(entry.name)) {
-                return;
-            }
-
-            const md = entry.load();
-
-            if (!Object.prototype.hasOwnProperty.call(md, 'ModuleConfig')) {
-                throw new Error(
-                    `Vendor module cannot be initialized. All vendor modules must export ModuleConfig object property.`,
-                );
-            }
-
-            if (!Object.prototype.hasOwnProperty.call(md, 'init')) {
-                throw new Error(
-                    `Vendor module cannot be initialized. All vendor modules must export init function property`,
-                );
-            }
-
-            const moduleConfig = md.ModuleConfig;
-            if (!Object.prototype.hasOwnProperty.call(moduleConfig, 'moduleName')) {
-                throw new Error(
-                    `Vendor module cannot be initialized. All vendor modules must have a name matching the pattern Vendor_ModuleName`,
-                );
-            }
-
-            if (
-                moduleInitQueue.findIndex(el => {
-                    return el.fullModuleName === moduleConfig.moduleName;
-                }) === -1
-            ) {
-                moduleInitQueue.push({
-                    module: md,
-                    order: Object.prototype.hasOwnProperty.call(moduleConfig, 'loadOrder')
-                        ? moduleConfig.loadOrder
-                        : 999,
-                    moduleInitData: moduleConfig,
-                    fullModuleName: moduleConfig.moduleName,
-                    type: 'package',
-                });
-            }
-        });
-    }
 
     const internalModule = require.context('_internal', true, /module.init.js$/);
 
