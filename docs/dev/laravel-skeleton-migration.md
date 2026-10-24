@@ -1,6 +1,6 @@
 # Migration to the Laravel 11+ application skeleton
 
-Status: plan, executed on branch `feat/laravel-skeleton` (based on `feat/laravel-12`, Laravel 13.38).
+Status: done
 
 ## Goal
 
@@ -82,3 +82,10 @@ vendor/bin/phpunit                # all green
 
 Compare `route:list --json` and `schedule:list` output before and after the change
 (capture both from the base commit first).
+
+## Result
+
+- WP1 landed on `feat/laravel-skeleton`: bootstrap moved to `Application::configure()` (`ea1f5bba`, merged as `d68456c3`); kernels removed, providers in `bootstrap/providers.php`, schedule in `routes/console.php`.
+- WP2 landed: keys the Laravel 13 skeleton defines and we lacked were added to the shared `config/*.php` files with skeleton defaults; no existing key, value, or env name was changed.
+- Deliberately not added: mariadb/pgsql connections, `filesystems.disks.local.serve` (would register storage routes over our `storage/app` root), and `logging.channels.daily.max_files` (`days` still read, keeps retention at 7).
+- Verified: `config:cache` and `config:clear` succeed, `about` runs, `php -l` clean on changed files, PHPUnit 332 tests green.
