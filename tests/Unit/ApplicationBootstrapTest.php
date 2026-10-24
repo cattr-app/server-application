@@ -57,7 +57,8 @@ class ApplicationBootstrapTest extends TestCase
     {
         $events = collect(app(Schedule::class)->events());
 
-        $this->assertCount(6, $events);
+        // Installed modules may add their own entries; only the core ones are asserted here.
+        $this->assertGreaterThanOrEqual(6, $events->count());
 
         $expected = [
             ['cattr:screenshots:rotate', '0 0 * * 0'],
