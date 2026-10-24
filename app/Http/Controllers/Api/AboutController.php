@@ -11,23 +11,20 @@ use App\Helpers\Version;
 use Artisan;
 use Cache;
 use Exception;
-use GuzzleHttp\Client;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
-use JsonException;
+use Illuminate\Support\Facades\Http;
 use Settings;
 
 class AboutController extends Controller
 {
-    private Client $client;
-
-    public function __construct()
+    private function statsClient(): PendingRequest
     {
-        $this->client = new Client([
-            'base_uri' => config('app.stats_collector_url') . '/v2/',
-            'headers' => ['x-cattr-instance' => Settings::scope('core')->get('instance')],
-        ]);
+        return Http::baseUrl(config('app.stats_collector_url') . '/v2')
+            ->withHeaders(['x-cattr-instance' => Settings::scope('core')->get('instance')])
+            ->acceptJson();
     }
 
     /**
@@ -65,16 +62,15 @@ class AboutController extends Controller
      * @apiUse         ForbiddenError
      */
 
-        public function reports(): JsonResponse
-        {
-            return responder()->success([
-                'types' => ReportHelper::getAvailableReportFormats(),
-            ])->respond();
-        }
+    public function reports(): JsonResponse
+    {
+        return responder()->success([
+            'types' => ReportHelper::getAvailableReportFormats(),
+        ])->respond();
+    }
 
     /**
      * Returns information about this instance.
-     * @throws JsonException
      */
     /**
      * @api             {get} /about Get Application and Module Information
@@ -162,37 +158,20 @@ class AboutController extends Controller
     private function requestReleaseInfo(): ?object
     {
         try {
-            return json_decode(
-                $this->client->get('release/' . config('app.version'))->getBody()->getContents(),
-                false,
-                512,
-                JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
-            );
+            return $this->statsClient()->get('release/' . config('app.version'))->throw()->object();
         } catch (Exception) {
             return null;
         }
     }
 
-    /**
-     * @throws JsonException
-     */
     private function requestModulesInfo(): array
     {
-        $options = [
-            'json' => ModuleHelper::getModulesInfo(),
-        ];
-
         try {
             return array_map(static function ($el) {
                 $el['version'] = (string)(new Version($el['name']));
 
                 return $el;
-            }, json_decode(
-                $this->client->post('modules', $options)->getBody()->getContents(),
-                true,
-                512,
-                JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
-            )['modules']);
+            }, $this->statsClient()->post('modules', ModuleHelper::getModulesInfo())->throw()->json('modules'));
         } catch (Exception) {
             return ModuleHelper::getModulesInfo();
         }
@@ -201,12 +180,7 @@ class AboutController extends Controller
     private function requestImageInfo(string $imageVersion): ?object
     {
         try {
-            return json_decode(
-                $this->client->get("image/$imageVersion")->getBody()->getContents(),
-                false,
-                512,
-                JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
-            );
+            return $this->statsClient()->get("image/$imageVersion")->throw()->object();
         } catch (Exception) {
             return null;
         }
