@@ -73,6 +73,13 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'monthly' => [
+            'driver' => 'monthly',
+            'path' => storage_path('logs/laravel.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'max_files' => 3,
+            'replace_placeholders' => true,
+        ],
 
         'slack' => [
             'driver' => 'slack',
@@ -99,6 +106,9 @@ return [
             'driver' => 'monolog',
             'level' => env('LOG_LEVEL', 'debug'),
             'handler' => StreamHandler::class,
+            'handler_with' => [
+                'stream' => 'php://stderr',
+            ],
             'formatter' =>  \App\Logging\CattrJsonFormatter::class,
             'with' => [
                 'stream' => 'php://stderr',
