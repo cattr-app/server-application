@@ -214,9 +214,20 @@ class CreateTest extends TestCase
 
     public function test_create_as_project_user(): void
     {
+        $this->assertDatabaseMissing('tasks', $this->taskData);
+
         $response = $this->actingAs($this->projectUser)->postJson(self::URI, $this->taskRequest);
 
-        $response->assertForbidden();
+        $response->assertOk();
+        $response->assertJson($this->taskData);
+        $this->assertDatabaseHas('tasks', $this->taskData);
+
+        foreach ($this->taskRequest['users'] as $user) {
+            $this->assertDatabaseHas('tasks_users', [
+                'task_id' => $response->json('data.id'),
+                'user_id' => $user,
+            ]);
+        }
     }
 
     public function test_unauthorized(): void
