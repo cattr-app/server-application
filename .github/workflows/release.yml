@@ -540,7 +540,6 @@ jobs:
 
           build-args: |
             APP_VERSION=${{ needs.release-metadata.outputs.version }}
-            SENTRY_DSN=${{ secrets.SENTRY_DSN }}
 
             BUILDER_BASE_IMAGE=${{ needs.runtime-images.outputs.image }}
             BUILDER_BASE_IMAGE_TAG=${{ needs.runtime-images.outputs.builder_tag }}

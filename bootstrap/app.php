@@ -2,7 +2,6 @@
 
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\RegisterModulesEvents;
-use App\Http\Middleware\SentryContext;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -40,7 +39,6 @@ return Application::configure(basePath: dirname(__DIR__))
             TrimStrings::class,
             ConvertEmptyStringsToNull::class,
             HandleCors::class,
-            SentryContext::class,
             TrustProxies::class,
             RegisterModulesEvents::class,
         ]);

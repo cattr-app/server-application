@@ -40,8 +40,6 @@ return [
         'heartbeat_period' => 30,
     ],
     'aliases' => Facade::defaultAliases()->merge([
-        'Sentry' => Sentry\Laravel\Facade::class,
-
         'Settings' => App\Facades\SettingsFacade::class,
         'Filter' => App\Facades\FilterFacade::class,
         'CatEvent' => App\Facades\EventFacade::class,
