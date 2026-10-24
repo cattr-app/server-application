@@ -20,7 +20,6 @@
     "ext-pdo": "*",
     "ext-zip": "*",
     "czproject/git-php": "^4.0",
-    "doctrine/dbal": "^3.0",
     "elhebert/laravel-sri": "^3.5",
     "erusev/parsedown": "^1.7",
     "fakerphp/faker": "^1.21",
@@ -47,7 +46,6 @@
   },
   "require-dev": {
     "barryvdh/laravel-ide-helper": "^3.7",
-    "beyondcode/laravel-er-diagram-generator": "^6.0",
     "itsgoingd/clockwork": "^5.1",
     "laravel/telescope": "^5.0",
     "laravel/tinker": "^2.8",
