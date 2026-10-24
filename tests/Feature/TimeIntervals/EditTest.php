@@ -5,6 +5,7 @@ namespace Tests\Feature\TimeIntervals;
 
 use App\Models\TimeInterval;
 use App\Models\User;
+use Illuminate\Support\Arr;
 use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
@@ -48,7 +49,7 @@ class EditTest extends TestCase
 
     public function test_edit_as_admin(): void
     {
-        $this->assertDatabaseHas('time_intervals', $this->timeInterval->toArray());
+        $this->assertDatabaseHas('time_intervals', Arr::except($this->timeInterval->getAttributes(), ['updated_at']));
 
         $editedInterval = clone $this->timeInterval;
         $editedInterval->user_id = UserFactory::refresh()->asUser()->create()->id;
@@ -56,12 +57,13 @@ class EditTest extends TestCase
         $response = $this->actingAs($this->admin)->postJson(self::URI, $editedInterval->toArray());
 
         $response->assertOk();
-        $this->assertDatabaseHas('time_intervals', $editedInterval->toArray());
+        $this->assertDatabaseHas('time_intervals', Arr::except($editedInterval->getAttributes(), ['updated_at']));
+        $this->assertDatabaseMissing('time_intervals', Arr::except($this->timeInterval->getAttributes(), ['updated_at']));
     }
 
     public function test_edit_as_manager(): void
     {
-        $this->assertDatabaseHas('time_intervals', $this->timeInterval->toArray());
+        $this->assertDatabaseHas('time_intervals', Arr::except($this->timeInterval->getAttributes(), ['updated_at']));
 
         $editedInterval = clone $this->timeInterval;
         $editedInterval->user_id = UserFactory::refresh()->asUser()->create()->id;
@@ -72,7 +74,7 @@ class EditTest extends TestCase
 
     public function test_edit_your_own_as_manager(): void
     {
-        $this->assertDatabaseHas('time_intervals', $this->timeInterval->toArray());
+        $this->assertDatabaseHas('time_intervals', Arr::except($this->timeIntervalForManager->getAttributes(), ['updated_at']));
 
         $editedInterval = clone $this->timeIntervalForManager;
         $editedInterval->user_id = UserFactory::refresh()->asUser()->create()->id;
@@ -80,12 +82,13 @@ class EditTest extends TestCase
         $response = $this->actingAs($this->manager)->postJson(self::URI, $editedInterval->toArray());
 
         $response->assertOk();
-        $this->assertDatabaseHas('time_intervals', $editedInterval->toArray());
+        $this->assertDatabaseHas('time_intervals', Arr::except($editedInterval->getAttributes(), ['updated_at']));
+        $this->assertDatabaseMissing('time_intervals', Arr::except($this->timeIntervalForManager->getAttributes(), ['updated_at']));
     }
 
     public function test_edit_as_auditor(): void
     {
-        $this->assertDatabaseHas('time_intervals', $this->timeInterval->toArray());
+        $this->assertDatabaseHas('time_intervals', Arr::except($this->timeInterval->getAttributes(), ['updated_at']));
 
         $editedInterval = clone $this->timeInterval;
         $editedInterval->user_id = UserFactory::refresh()->asUser()->create()->id;
@@ -97,7 +100,7 @@ class EditTest extends TestCase
 
     public function test_edit_your_own_as_auditor(): void
     {
-        $this->assertDatabaseHas('time_intervals', $this->timeIntervalForAuditor->toArray());
+        $this->assertDatabaseHas('time_intervals', Arr::except($this->timeIntervalForAuditor->getAttributes(), ['updated_at']));
 
         $editedInterval = clone $this->timeIntervalForAuditor;
         $editedInterval->user_id = UserFactory::refresh()->asUser()->create()->id;
@@ -105,12 +108,13 @@ class EditTest extends TestCase
         $response = $this->actingAs($this->auditor)->postJson(self::URI, $editedInterval->toArray());
 
         $response->assertOk();
-        $this->assertDatabaseHas('time_intervals', $editedInterval->toArray());
+        $this->assertDatabaseHas('time_intervals', Arr::except($editedInterval->getAttributes(), ['updated_at']));
+        $this->assertDatabaseMissing('time_intervals', Arr::except($this->timeIntervalForAuditor->getAttributes(), ['updated_at']));
     }
 
     public function test_edit_as_user(): void
     {
-        $this->assertDatabaseHas('time_intervals', $this->timeInterval->toArray());
+        $this->assertDatabaseHas('time_intervals', Arr::except($this->timeInterval->getAttributes(), ['updated_at']));
 
         $editedInterval = clone $this->timeInterval;
         $editedInterval->user_id = UserFactory::refresh()->asUser()->create()->id;
@@ -122,7 +126,7 @@ class EditTest extends TestCase
 
     public function test_edit_your_own_as_user(): void
     {
-        $this->assertDatabaseHas('time_intervals', $this->timeIntervalForManager->toArray());
+        $this->assertDatabaseHas('time_intervals', Arr::except($this->timeIntervalForUser->getAttributes(), ['updated_at']));
 
         $editedInterval = clone $this->timeIntervalForUser;
         $editedInterval->user_id = UserFactory::refresh()->asUser()->create()->id;
@@ -132,7 +136,8 @@ class EditTest extends TestCase
             ->postJson(self::URI, $editedInterval->toArray());
 
         $response->assertOk();
-        $this->assertDatabaseHas('time_intervals', $editedInterval->toArray());
+        $this->assertDatabaseHas('time_intervals', Arr::except($editedInterval->getAttributes(), ['updated_at']));
+        $this->assertDatabaseMissing('time_intervals', Arr::except($this->timeIntervalForUser->getAttributes(), ['updated_at']));
     }
 
     public function test_unauthorized(): void

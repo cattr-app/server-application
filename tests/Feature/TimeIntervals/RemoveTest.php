@@ -5,6 +5,7 @@ namespace Tests\Feature\TimeIntervals;
 
 use App\Models\TimeInterval;
 use App\Models\User;
+use Illuminate\Support\Arr;
 use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
@@ -48,17 +49,17 @@ class RemoveTest extends TestCase
 
     public function test_remove_as_admin(): void
     {
-        $this->assertDatabaseHas('time_intervals', $this->timeInterval->toArray());
+        $this->assertDatabaseHas('time_intervals', Arr::except($this->timeInterval->getAttributes(), ['updated_at']));
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->timeInterval->only('id'));
 
-        $response->assertOk();
+        $response->assertNoContent();
         $this->assertSoftDeleted('time_intervals', ['id' => $this->timeInterval->id]);
     }
 
     public function test_remove_as_manager(): void
     {
-        $this->assertDatabaseHas('time_intervals', $this->timeInterval->toArray());
+        $this->assertDatabaseHas('time_intervals', Arr::except($this->timeInterval->getAttributes(), ['updated_at']));
 
         $response = $this->actingAs($this->manager)->postJson(self::URI, $this->timeInterval->only('id'));
 
@@ -67,19 +68,19 @@ class RemoveTest extends TestCase
 
     public function test_remove_your_own_as_manager(): void
     {
-        $this->assertDatabaseHas('time_intervals', $this->timeIntervalForManager->toArray());
+        $this->assertDatabaseHas('time_intervals', Arr::except($this->timeIntervalForManager->getAttributes(), ['updated_at']));
 
         $response = $this
             ->actingAs($this->manager)
             ->postJson(self::URI, $this->timeIntervalForManager->only('id'));
 
-        $response->assertOk();
+        $response->assertNoContent();
         $this->assertSoftDeleted('time_intervals', ['id' => $this->timeIntervalForManager->id]);
     }
 
     public function test_remove_as_auditor(): void
     {
-        $this->assertDatabaseHas('time_intervals', $this->timeInterval->toArray());
+        $this->assertDatabaseHas('time_intervals', Arr::except($this->timeInterval->getAttributes(), ['updated_at']));
 
         $response = $this->actingAs($this->auditor)->postJson(self::URI, $this->timeInterval->only('id'));
 
@@ -88,19 +89,19 @@ class RemoveTest extends TestCase
 
     public function test_remove_your_own_as_auditor(): void
     {
-        $this->assertDatabaseHas('time_intervals', $this->timeIntervalForManager->toArray());
+        $this->assertDatabaseHas('time_intervals', Arr::except($this->timeIntervalForManager->getAttributes(), ['updated_at']));
 
         $response = $this
             ->actingAs($this->auditor)
             ->postJson(self::URI, $this->timeIntervalForAuditor->only('id'));
 
-        $response->assertOk();
+        $response->assertNoContent();
         $this->assertSoftDeleted('time_intervals', ['id' => $this->timeIntervalForAuditor->id]);
     }
 
     public function test_remove_as_user(): void
     {
-        $this->assertDatabaseHas('time_intervals', $this->timeInterval->toArray());
+        $this->assertDatabaseHas('time_intervals', Arr::except($this->timeInterval->getAttributes(), ['updated_at']));
 
         $response = $this->actingAs($this->user)->postJson(self::URI, $this->timeInterval->only('id'));
 
@@ -109,13 +110,13 @@ class RemoveTest extends TestCase
 
     public function test_remove_your_own_as_user(): void
     {
-        $this->assertDatabaseHas('time_intervals', $this->timeIntervalForManager->toArray());
+        $this->assertDatabaseHas('time_intervals', Arr::except($this->timeIntervalForManager->getAttributes(), ['updated_at']));
 
         $response = $this
             ->actingAs($this->user)
             ->postJson(self::URI, $this->timeIntervalForUser->only('id'));
 
-        $response->assertOk();
+        $response->assertNoContent();
         $this->assertSoftDeleted('time_intervals', ['id' => $this->timeIntervalForUser->id]);
     }
 
