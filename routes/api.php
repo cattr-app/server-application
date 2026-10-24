@@ -218,8 +218,6 @@ Route::group([
             ->name('intervals.count');
         $router->post('time-intervals/create', [IntervalController::class, 'create'])
             ->name('intervals.create');
-        $router->post('time-intervals/edit', [IntervalController::class, 'edit'])
-            ->name('intervals.edit');
         $router->post('time-intervals/bulk-edit', [IntervalController::class, 'bulkEdit'])
             ->name('intervals.edit.bulk');
         $router->any('time-intervals/show', [IntervalController::class, 'show'])
