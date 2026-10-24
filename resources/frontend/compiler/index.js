@@ -49,7 +49,9 @@ module.exports = () => {
             if (moduleConfig.type === 'package') {
                 const ref = moduleConfig.ref;
                 if (typeof ref !== 'string' || !ref.trim()) {
-                    throw new TypeError(`Invalid package reference for module ${moduleName}: expected a non-empty string`);
+                    throw new TypeError(
+                        `Invalid package reference for module ${moduleName}: expected a non-empty string`,
+                    );
                 }
 
                 // Package registration is build-time; its activation is runtime-only.
