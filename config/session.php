@@ -223,8 +223,12 @@ return [
     |
     | Supported: "json", "php"
     |
+    | Kept at "php" so that sessions written before this upgrade stay readable;
+    | switching to "json" invalidates every active session and must be a
+    | deliberate deployment step.
+    |
     */
 
-    'serialization' => 'json',
+    'serialization' => 'php',
 
 ];
