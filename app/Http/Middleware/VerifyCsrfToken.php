@@ -2,9 +2,9 @@
 
 namespace App\Http\Middleware;
 
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken as BaseVerifier;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 
-class VerifyCsrfToken extends BaseVerifier
+class VerifyCsrfToken extends PreventRequestForgery
 {
     /**
      * The URIs that should be excluded from CSRF verification.

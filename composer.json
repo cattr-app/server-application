@@ -13,7 +13,7 @@
     "source": "https://github.com/cattr-app/server-application"
   },
   "require": {
-    "php": "~8.2",
+    "php": "^8.3",
     "ext-gd": "*",
     "ext-json": "*",
     "ext-openssl": "*",
@@ -26,8 +26,8 @@
     "flugger/laravel-responder": "^3.3.0",
     "guzzlehttp/guzzle": "^7.2",
     "intervention/image": "^2.7",
-    "kalnoy/nestedset": "6.0.6",
-    "laravel/framework": "^12.0",
+    "kalnoy/nestedset": "^7.0",
+    "laravel/framework": "^13.0",
     "laravel/octane": "^2.2",
     "laravel/reverb": "^1.0",
     "laravel/sanctum": "^4.0",
@@ -35,23 +35,23 @@
     "matanyadaev/laravel-eloquent-spatial": "^4.8",
     "mpdf/mpdf": "^8.0",
     "nesbot/carbon": "^3.0",
-    "nwidart/laravel-modules": "^12.0",
+    "nwidart/laravel-modules": "^13.0",
     "phpseclib/phpseclib": "^4.0",
     "rybakit/msgpack": "^0.10.0",
     "sentry/sentry-laravel": "^4.1",
     "spatie/temporary-directory": "^2.2",
     "staudenmeir/laravel-adjacency-list": "^1.24",
     "wikimedia/composer-merge-plugin": "^2.1",
-    "arquivei/laravel-prometheus-exporter": "^6.0"
+    "promphp/prometheus_client_php": "^2.15"
   },
   "require-dev": {
     "barryvdh/laravel-ide-helper": "^3.7",
     "itsgoingd/clockwork": "^5.1",
     "laravel/telescope": "^5.0",
-    "laravel/tinker": "^2.8",
+    "laravel/tinker": "^3.0",
     "mockery/mockery": "^1.5",
     "nunomaduro/collision": "^8.0",
-    "phpunit/phpunit": "^11.0",
+    "phpunit/phpunit": "^12.0",
     "roave/security-advisories": "dev-latest",
     "squizlabs/php_codesniffer": "^4"
   },
