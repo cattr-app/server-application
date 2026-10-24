@@ -12,6 +12,15 @@ const toJsLiteral = value =>
         .replace(/\u2028/g, '\\u2028')
         .replace(/\u2029/g, '\\u2029');
 
+// Chunk names end up inside a /* */ comment and in file names: keep only a safe subset.
+const toChunkName = value => {
+    const safe = String(value)
+        .toLowerCase()
+        .replace(/[^a-z0-9_-]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    return `module-${safe || 'package'}`;
+};
+
 module.exports = () => {
     console.log('Reading modules config file...');
     const p = path.join(__dirname, '..', 'etc', 'modules.config.json');
@@ -55,8 +64,13 @@ module.exports = () => {
                 }
 
                 // Package registration is build-time; its activation is runtime-only.
-                fdArray.push(`    { name: ${toJsLiteral(moduleName)}, load: () => require(${toJsLiteral(ref)}) },`);
-                console.log(`${moduleName} => added package to the bundle`);
+                // Each package becomes a separate chunk, fetched only when its flag is enabled.
+                fdArray.push(
+                    `    { name: ${toJsLiteral(moduleName)}, load: () => import(/* webpackChunkName: "${toChunkName(
+                        moduleName,
+                    )}" */ ${toJsLiteral(ref)}) },`,
+                );
+                console.log(`${moduleName} => added package as a lazy-loaded chunk`);
             }
         }
     });
