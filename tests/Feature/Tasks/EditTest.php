@@ -94,7 +94,7 @@ class EditTest extends TestCase
 
         foreach ($this->taskRequest['users'] as $user) {
             $this->assertDatabaseHas('tasks_users', [
-                'task_id' => $response->json()['res']['id'],
+                'task_id' => $response->json('data.id'),
                 'user_id' => $user,
             ]);
         }
@@ -112,7 +112,7 @@ class EditTest extends TestCase
 
         foreach ($this->taskRequestWithMultipleUsers['users'] as $user) {
             $this->assertDatabaseHas('tasks_users', [
-                'task_id' => $response->json()['res']['id'],
+                'task_id' => $response->json('data.id'),
                 'user_id' => $user,
             ]);
         }
@@ -130,7 +130,7 @@ class EditTest extends TestCase
 
         foreach ($this->taskRequest['users'] as $user) {
             $this->assertDatabaseHas('tasks_users', [
-                'task_id' => $response->json()['res']['id'],
+                'task_id' => $response->json('data.id'),
                 'user_id' => $user,
             ]);
         }
@@ -148,7 +148,7 @@ class EditTest extends TestCase
 
         foreach ($this->taskRequestWithMultipleUsers['users'] as $user) {
             $this->assertDatabaseHas('tasks_users', [
-                'task_id' => $response->json()['res']['id'],
+                'task_id' => $response->json('data.id'),
                 'user_id' => $user,
             ]);
         }
@@ -184,7 +184,7 @@ class EditTest extends TestCase
 
         foreach ($this->taskRequest['users'] as $user) {
             $this->assertDatabaseHas('tasks_users', [
-                'task_id' => $response->json()['res']['id'],
+                'task_id' => $response->json('data.id'),
                 'user_id' => $user,
             ]);
         }
@@ -202,7 +202,7 @@ class EditTest extends TestCase
 
         foreach ($this->taskRequestWithMultipleUsers['users'] as $user) {
             $this->assertDatabaseHas('tasks_users', [
-                'task_id' => $response->json()['res']['id'],
+                'task_id' => $response->json('data.id'),
                 'user_id' => $user,
             ]);
         }
