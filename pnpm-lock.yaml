@@ -187,9 +187,6 @@ importers:
       axios:
         specifier: ^1.18.5
         version: 1.20.0(debug@4.4.3(supports-color@5.5.0))(supports-color@5.5.0)
-      axios-concurrency:
-        specifier: ^1.0.4
-        version: 1.0.4(debug@4.4.3(supports-color@5.5.0))
       caret-pos:
         specifier: ^2.0.0
         version: 2.0.0
@@ -199,9 +196,6 @@ importers:
       color-convert:
         specifier: ^2.0.1
         version: 2.0.1
-      cross-env:
-        specifier: ^7.0.3
-        version: 7.0.3
       echarts:
         specifier: ^5.4.3
         version: 5.6.0
@@ -220,9 +214,6 @@ importers:
       lodash:
         specifier: ^4.18.0
         version: 4.18.1
-      lodash.debounce:
-        specifier: 4.0.8
-        version: 4.0.8
       markdown-it:
         specifier: ^14.2.0
         version: 14.3.2
@@ -289,12 +280,6 @@ importers:
       vue-loading-skeleton:
         specifier: ^1.1.9
         version: 1.1.9(vue@2.7.16)
-      vue-moment:
-        specifier: ^4.1.0
-        version: 4.1.0(vue@2.7.16)
-      vue-multiselect:
-        specifier: ^2.1.8
-        version: 2.1.9
       vue-recaptcha:
         specifier: ^2.0.3
         version: 2.0.3(vue@2.7.16)
@@ -332,21 +317,12 @@ importers:
       autoprefixer:
         specifier: ^10.4.16
         version: 10.6.1(postcss@8.5.28)
-      chokidar:
-        specifier: ^3.5.3
-        version: 3.6.0
       clean-webpack-plugin:
         specifier: ^4.0.0
         version: 4.0.0(webpack@5.91.0)
-      compression-webpack-plugin:
-        specifier: ^12.0.0
-        version: 12.0.0(webpack@5.91.0)
       core-js:
         specifier: ^3.35.0
         version: 3.50.0
-      css-loader:
-        specifier: ^7.1.5
-        version: 7.1.5(webpack@5.91.0)
       eslint:
         specifier: ^8.56.0
         version: 8.57.1(supports-color@5.5.0)
@@ -362,9 +338,6 @@ importers:
       laravel-mix:
         specifier: ^6.0.49
         version: 6.0.49(@babel/core@7.29.7(supports-color@5.5.0))(@babel/plugin-proposal-object-rest-spread@7.20.7(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-syntax-dynamic-import@7.8.3(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-transform-runtime@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(csso@4.2.0)(debug@4.4.3(supports-color@5.5.0))(html-minifier-terser@5.1.1)(postcss@8.5.28)(supports-color@5.5.0)(uglify-js@3.19.3)(webpack-cli@4.10.0)(webpack@5.91.0)
-      laravel-mix-alias:
-        specifier: ^1.0.3
-        version: 1.0.3(laravel-mix@6.0.49(@babel/core@7.29.7(supports-color@5.5.0))(@babel/plugin-proposal-object-rest-spread@7.20.7(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-syntax-dynamic-import@7.8.3(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-transform-runtime@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(csso@4.2.0)(debug@4.4.3(supports-color@5.5.0))(html-minifier-terser@5.1.1)(postcss@8.5.28)(supports-color@5.5.0)(uglify-js@3.19.3)(webpack-cli@4.10.0)(webpack@5.91.0))
       laravel-mix-bundle-analyzer:
         specifier: ^1.0.5
         version: 1.0.5(laravel-mix@6.0.49(@babel/core@7.29.7(supports-color@5.5.0))(@babel/plugin-proposal-object-rest-spread@7.20.7(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-syntax-dynamic-import@7.8.3(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-transform-runtime@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(csso@4.2.0)(debug@4.4.3(supports-color@5.5.0))(html-minifier-terser@5.1.1)(postcss@8.5.28)(supports-color@5.5.0)(uglify-js@3.19.3)(webpack-cli@4.10.0)(webpack@5.91.0))(supports-color@5.5.0)
@@ -412,7 +385,7 @@ importers:
         version: 9.4.3(eslint@8.57.1(supports-color@5.5.0))(supports-color@5.5.0)
       vue-loader:
         specifier: ^15.11.1
-        version: 15.11.1(css-loader@7.1.5(webpack@5.91.0))(ejs@3.1.10)(handlebars@4.7.9)(lodash@4.18.1)(prettier@3.2.5)(vue-template-compiler@2.7.16)(webpack@5.91.0)
+        version: 15.11.1(css-loader@5.2.7(webpack@5.91.0))(ejs@3.1.10)(handlebars@4.7.9)(lodash@4.18.1)(prettier@3.2.5)(vue-template-compiler@2.7.16)(webpack@5.91.0)
       webpack:
         specifier: ^5.91.0
         version: 5.91.0(clean-css@5.3.3)(cssnano@5.1.15(postcss@8.5.28))(csso@4.2.0)(html-minifier-terser@5.1.1)(postcss@8.5.28)(uglify-js@3.19.3)(webpack-cli@4.10.0)
@@ -1886,12 +1859,6 @@ packages:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
 
-  axios-concurrency@1.0.4:
-    resolution: {integrity: sha512-KDtlv1uWln80fmr6D4aq2je/HAtiMZ6k3nY8uCbQlSQWHznpm2v3aZPlBatPBGUBWuDeFRpMF9aFFpO+xyiW4g==}
-
-  axios@0.21.4:
-    resolution: {integrity: sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==}
-
   axios@1.20.0:
     resolution: {integrity: sha512-r8aOh8j9cGKpgQAqpzrUHnSIc6a59Y3Xf/cv8sy1DrHCkZHzQGEuoq1tARk6qSyDdtQGSDgpb9kFlruzPvrgwg==}
 
@@ -2472,11 +2439,6 @@ packages:
   create-hmac@1.1.7:
     resolution: {integrity: sha512-MJG9liiZ+ogc4TzUwuvbER1JRdgvUFSB5+VR/g5h82fGaIRWMWddtKBHi7/sVhfjQZ6SehlyhvQYrcYkaUIpLg==}
 
-  cross-env@7.0.3:
-    resolution: {integrity: sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw==}
-    engines: {node: '>=10.14', npm: '>=6', yarn: '>=1'}
-    hasBin: true
-
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
@@ -2506,18 +2468,6 @@ packages:
     engines: {node: '>= 10.13.0'}
     peerDependencies:
       webpack: ^4.27.0 || ^5.0.0
-
-  css-loader@7.1.5:
-    resolution: {integrity: sha512-Q7iAfQkU2twNBryKX/vGAlE+GAmkF7quhSzAGNK8fBimxk3+tqg245rH52UPb9dioBolBc8rP0ihmHBaDTJQBA==}
-    engines: {node: '>= 18.12.0'}
-    peerDependencies:
-      '@rspack/core': 0.x || ^1.0.0 || ^2.0.0-0
-      webpack: ^5.27.0
-    peerDependenciesMeta:
-      '@rspack/core':
-        optional: true
-      webpack:
-        optional: true
 
   css-select@4.3.0:
     resolution: {integrity: sha512-wPpOYtnsVontu2mODhA19JrqWxNsfdatRKd64kmpRbQgh1KtItko5sTnEpPdpSaJszTOhEMlF/RPz28qj4HqhQ==}
@@ -3714,11 +3664,6 @@ packages:
   laravel-echo@1.19.0:
     resolution: {integrity: sha512-o/X4XH8BIRwij66PSjtotZfM88Z8g/4P3gzxQf2BTcZBKmGqucvI5JYYLprR2OZQ9XlGsmJ2v+hDpPGEbXwUWw==}
     engines: {node: '>=10'}
-
-  laravel-mix-alias@1.0.3:
-    resolution: {integrity: sha512-iRYxorg8rzoFrLll0wM+jOpaa3KUpRVYZWgC/hja1mVQ81+5/Nv7fu/XUDK+xNshBinE/rlHGyGh2fii6uiN6A==}
-    peerDependencies:
-      laravel-mix: '>=2.0.0'
 
   laravel-mix-bundle-analyzer@1.0.5:
     resolution: {integrity: sha512-Oeq1mW6oDaZZhjs1Yga/xZpj5kfH2TonKbqzSPW5BJiI8WomvMBGUmq9yHzy/Zh2fw0R/133U9/hFANTTrgjfQ==}
@@ -5538,15 +5483,6 @@ packages:
     resolution: {integrity: sha512-5gMrI9equv0PMVLD5EMa4NTUvqDM3Bq/wiO4NftbEaVNeoGomG/XslB4Ev8Ued+WiE2Y/9HsIx5YXhDXimyqZw==}
     peerDependencies:
       vue: ^2.6.11
-
-  vue-moment@4.1.0:
-    resolution: {integrity: sha512-Gzisqpg82ItlrUyiD9d0Kfru+JorW2o4mQOH06lEDZNgxci0tv/fua1Hl0bo4DozDV2JK1r52Atn/8QVCu8qQw==}
-    peerDependencies:
-      vue: '>=1.x.x'
-
-  vue-multiselect@2.1.9:
-    resolution: {integrity: sha512-nGEppmzhQQT2iDz4cl+ZCX3BpeNhygK50zWFTIRS+r7K7i61uWXJWSioMuf+V/161EPQjexI8NaEBdUlF3dp+g==}
-    engines: {node: '>= 4.0.0', npm: '>= 3.0.0'}
 
   vue-recaptcha@2.0.3:
     resolution: {integrity: sha512-Rz0kLIETUgmOrp7CxFvaFE65DkhKdWu4pteWOTt2i+yTajTHPqtyOW6DqTg0BvALWTm+WUvWVV7k5XXFijQnBw==}
@@ -7447,8 +7383,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  ajv-formats@3.0.1:
-    dependencies:
+  ajv-formats@3.0.1(ajv@8.20.0):
+    optionalDependencies:
       ajv: 8.20.0
 
   ajv-keywords@3.5.2(ajv@6.15.0):
@@ -7581,18 +7517,6 @@ snapshots:
   available-typed-arrays@1.0.7:
     dependencies:
       possible-typed-array-names: 1.1.0
-
-  axios-concurrency@1.0.4(debug@4.4.3(supports-color@5.5.0)):
-    dependencies:
-      axios: 0.21.4(debug@4.4.3(supports-color@5.5.0))
-    transitivePeerDependencies:
-      - debug
-
-  axios@0.21.4(debug@4.4.3(supports-color@5.5.0)):
-    dependencies:
-      follow-redirects: 1.16.0(debug@4.4.3(supports-color@5.5.0))
-    transitivePeerDependencies:
-      - debug
 
   axios@1.20.0(debug@4.4.3(supports-color@5.5.0))(supports-color@5.5.0):
     dependencies:
@@ -8085,10 +8009,6 @@ snapshots:
       safe-buffer: 5.2.1
       sha.js: 2.4.12
 
-  cross-env@7.0.3:
-    dependencies:
-      cross-spawn: 7.0.6
-
   cross-spawn@7.0.6:
     dependencies:
       path-key: 3.1.1
@@ -8134,19 +8054,6 @@ snapshots:
       postcss-value-parser: 4.2.0
       schema-utils: 3.3.0
       semver: 7.8.5
-      webpack: 5.91.0(clean-css@5.3.3)(cssnano@5.1.15(postcss@8.5.28))(csso@4.2.0)(html-minifier-terser@5.1.1)(postcss@8.5.28)(uglify-js@3.19.3)(webpack-cli@4.10.0)
-
-  css-loader@7.1.5(webpack@5.91.0):
-    dependencies:
-      icss-utils: 5.1.0(postcss@8.5.28)
-      postcss: 8.5.28
-      postcss-modules-extract-imports: 3.1.0(postcss@8.5.28)
-      postcss-modules-local-by-default: 4.2.0(postcss@8.5.28)
-      postcss-modules-scope: 3.2.1(postcss@8.5.28)
-      postcss-modules-values: 4.0.0(postcss@8.5.28)
-      postcss-value-parser: 4.2.0
-      semver: 7.8.5
-    optionalDependencies:
       webpack: 5.91.0(clean-css@5.3.3)(cssnano@5.1.15(postcss@8.5.28))(csso@4.2.0)(html-minifier-terser@5.1.1)(postcss@8.5.28)(uglify-js@3.19.3)(webpack-cli@4.10.0)
 
   css-select@4.3.0:
@@ -9473,10 +9380,6 @@ snapshots:
 
   laravel-echo@1.19.0: {}
 
-  laravel-mix-alias@1.0.3(laravel-mix@6.0.49(@babel/core@7.29.7(supports-color@5.5.0))(@babel/plugin-proposal-object-rest-spread@7.20.7(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-syntax-dynamic-import@7.8.3(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-transform-runtime@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(csso@4.2.0)(debug@4.4.3(supports-color@5.5.0))(html-minifier-terser@5.1.1)(postcss@8.5.28)(supports-color@5.5.0)(uglify-js@3.19.3)(webpack-cli@4.10.0)(webpack@5.91.0)):
-    dependencies:
-      laravel-mix: 6.0.49(@babel/core@7.29.7(supports-color@5.5.0))(@babel/plugin-proposal-object-rest-spread@7.20.7(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-syntax-dynamic-import@7.8.3(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-transform-runtime@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(csso@4.2.0)(debug@4.4.3(supports-color@5.5.0))(html-minifier-terser@5.1.1)(postcss@8.5.28)(supports-color@5.5.0)(uglify-js@3.19.3)(webpack-cli@4.10.0)(webpack@5.91.0)
-
   laravel-mix-bundle-analyzer@1.0.5(laravel-mix@6.0.49(@babel/core@7.29.7(supports-color@5.5.0))(@babel/plugin-proposal-object-rest-spread@7.20.7(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-syntax-dynamic-import@7.8.3(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-transform-runtime@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(csso@4.2.0)(debug@4.4.3(supports-color@5.5.0))(html-minifier-terser@5.1.1)(postcss@8.5.28)(supports-color@5.5.0)(uglify-js@3.19.3)(webpack-cli@4.10.0)(webpack@5.91.0))(supports-color@5.5.0):
     dependencies:
       laravel-mix: 6.0.49(@babel/core@7.29.7(supports-color@5.5.0))(@babel/plugin-proposal-object-rest-spread@7.20.7(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-syntax-dynamic-import@7.8.3(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-transform-runtime@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(csso@4.2.0)(debug@4.4.3(supports-color@5.5.0))(html-minifier-terser@5.1.1)(postcss@8.5.28)(supports-color@5.5.0)(uglify-js@3.19.3)(webpack-cli@4.10.0)(webpack@5.91.0)
@@ -10688,7 +10591,7 @@ snapshots:
     dependencies:
       '@types/json-schema': 7.0.15
       ajv: 8.20.0
-      ajv-formats: 3.0.1
+      ajv-formats: 3.0.1(ajv@8.20.0)
       ajv-keywords: 5.1.0(ajv@8.20.0)
 
   select-hose@2.0.0: {}
@@ -11362,10 +11265,10 @@ snapshots:
 
   vue-lazyload@1.3.5: {}
 
-  vue-loader@15.11.1(css-loader@7.1.5(webpack@5.91.0))(ejs@3.1.10)(handlebars@4.7.9)(lodash@4.18.1)(prettier@3.2.5)(vue-template-compiler@2.7.16)(webpack@5.91.0):
+  vue-loader@15.11.1(css-loader@5.2.7(webpack@5.91.0))(ejs@3.1.10)(handlebars@4.7.9)(lodash@4.18.1)(prettier@3.2.5)(vue-template-compiler@2.7.16)(webpack@5.91.0):
     dependencies:
       '@vue/component-compiler-utils': 3.3.0(ejs@3.1.10)(handlebars@4.7.9)(lodash@4.18.1)
-      css-loader: 7.1.5(webpack@5.91.0)
+      css-loader: 5.2.7(webpack@5.91.0)
       hash-sum: 1.0.2
       loader-utils: 1.4.2
       vue-hot-reload-api: 2.3.4
@@ -11433,13 +11336,6 @@ snapshots:
     dependencies:
       core-js: 2.6.12
       vue: 2.7.16
-
-  vue-moment@4.1.0(vue@2.7.16):
-    dependencies:
-      moment: 2.31.0
-      vue: 2.7.16
-
-  vue-multiselect@2.1.9: {}
 
   vue-recaptcha@2.0.3(vue@2.7.16):
     dependencies:

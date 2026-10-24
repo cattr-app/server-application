@@ -62,7 +62,7 @@
     import Preloader from '@/components/Preloader';
     import ExportDropdown from '@/components/ExportDropdown';
     import { mapGetters } from 'vuex';
-    import debounce from 'lodash.debounce';
+    import debounce from 'lodash/debounce';
 
     const reportService = new ProjectReportService();
 

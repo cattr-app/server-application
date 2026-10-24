@@ -9,7 +9,6 @@ import router from '@/router';
 import { store, init as routerInit } from '@/store';
 import AtComponents from '@amazingcat/cattr-ui';
 import DatePicker from 'vue2-datepicker';
-import moment from 'vue-moment';
 import i18n from '@/i18n';
 import VueLazyload from 'vue-lazyload';
 import '@/plugins/vee-validate';
@@ -26,7 +25,6 @@ import installGlobalComponents from './global-extension';
 Vue.config.productionTip = false;
 
 Vue.use(AtComponents);
-Vue.use(moment);
 Vue.use(DatePicker);
 Vue.use(VueLazyload, {
     lazyComponent: true,
