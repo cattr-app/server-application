@@ -41,6 +41,14 @@ function compile(moduleList) {
     return generated;
 }
 
+// Independent re-statement of the expected escaping (JSON + HTML/line-separator safe).
+const escapedLiteral = value =>
+    JSON.stringify(value)
+        .replace(/</g, '\\u003C')
+        .replace(/>/g, '\\u003E')
+        .replace(/\u2028/g, '\\u2028')
+        .replace(/\u2029/g, '\\u2029');
+
 test('emits valid, faithfully escaped JavaScript package references', () => {
     for (const ref of [
         '@amazingcat/cattr-redmine-integration',
@@ -54,14 +62,43 @@ test('emits valid, faithfully escaped JavaScript package references', () => {
         assert.doesNotMatch(output, /<\/script>/);
         assert.doesNotMatch(output, /[\u2028\u2029]/);
         assert.match(output, /\\u003C/);
-        const sandbox = { module: { exports: null }, require: requested => requested };
-        vm.runInNewContext(output.replace(/^export default \[/, 'module.exports = ['), sandbox);
+        assert.doesNotMatch(output, /\brequire\(/);
+        assert.ok(
+            output.includes(
+                `load: () => import(/* webpackChunkName: "module-external-script-module" */ ${escapedLiteral(ref)}) }`,
+            ),
+            output,
+        );
+
+        // vm scripts cannot run a dynamic import() without a loader: route it to a stub.
+        const sandbox = { module: { exports: null }, __import: requested => requested };
+        vm.runInNewContext(
+            output.replace(/^export default \[/, 'module.exports = [').replace(/=> import\(/g, '=> __import('),
+            sandbox,
+        );
 
         assert.equal(sandbox.module.exports.length, 1);
         assert.equal(sandbox.module.exports[0].name, name);
         assert.equal(sandbox.module.exports[0].load(), ref);
         assert.equal(sandbox.injected, undefined);
     }
+});
+
+test('emits one lazy chunk per package with a sanitized chunk name', () => {
+    const output = compile({
+        'AmazingCat_Redmine*/Integration': { type: 'package', ref: '@amazingcat/cattr-redmine' },
+        Other_Module: { type: 'package', ref: 'other-module' },
+    });
+
+    assert.equal(
+        output,
+        [
+            'export default [',
+            '    { name: "AmazingCat_Redmine*/Integration", load: () => import(/* webpackChunkName: "module-amazingcat_redmine-integration" */ "@amazingcat/cattr-redmine") },',
+            '    { name: "Other_Module", load: () => import(/* webpackChunkName: "module-other_module" */ "other-module") },',
+            '];',
+        ].join('\n'),
+    );
 });
 
 test('rejects absent, non-string, and empty package references', () => {
