@@ -8,7 +8,6 @@
 </template>
 
 <script>
-    import * as Sentry from '@sentry/vue';
     import moment from 'moment';
     import { getLangCookie, setLangCookie } from '@/i18n';
 
@@ -37,13 +36,6 @@
                     this.$Loading.start();
                     await userApi.checkApiAuth();
                     await userApi.getCompanyData();
-
-                    Sentry.setUser({
-                        full_name: this.$store.state.user.user.data.full_name,
-                        id: this.$store.state.user.user.data.id,
-                        role: this.$store.state.user.user.data.role_id,
-                        locale: this.$store.state.user.user.data.user_language,
-                    });
                 } catch (e) {
                     console.log(e);
                     // Whoops
