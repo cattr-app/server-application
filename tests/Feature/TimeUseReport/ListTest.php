@@ -12,7 +12,7 @@ use Tests\TestCase;
 
 class ListTest extends TestCase
 {
-    private const URI = 'time-use-report/list';
+    private const URI = '/api/report/time';
 
     private const INTERVALS_AMOUNT = 10;
 
@@ -37,9 +37,9 @@ class ListTest extends TestCase
         });
 
         $this->requestData = [
-            'start_at' => $this->intervals->min('start_at'),
-            'end_at' => $this->intervals->max('end_at')->addMinute(),
-            'user_ids' => $this->userIds
+            'start_at' => Carbon::parse($this->intervals->min('start_at'))->startOfDay()->toDateTimeString(),
+            'end_at' => Carbon::parse($this->intervals->max('end_at'))->endOfDay()->toDateTimeString(),
+            'users' => array_values(array_unique($this->userIds)),
         ];
     }
 
@@ -48,22 +48,26 @@ class ListTest extends TestCase
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->requestData);
         $response->assertOk();
 
-        $totalTime = collect($response->json())->pluck('total_time')->sum();
+        $report = collect($response->json('data'));
 
-        $this->assertEquals($this->duration, $totalTime);
+        $this->assertSame($this->duration, (int) $report->sum('time'));
+        $this->assertEqualsCanonicalizing(
+            array_unique($this->userIds),
+            $report->pluck('user.id')->all()
+        );
     }
 
     public function test_unauthorized(): void
     {
-        $response = $this->getJson(self::URI);
+        $response = $this->postJson(self::URI, $this->requestData);
 
         $response->assertUnauthorized();
     }
 
     public function test_without_params(): void
     {
-        $response = $this->actingAs($this->admin)->getJson(self::URI);
+        $response = $this->actingAs($this->admin)->postJson(self::URI);
 
-        $response->assertValidationError();
+        $response->assertStatus(self::HTTP_UNPROCESSABLE_ENTITY);
     }
 }
