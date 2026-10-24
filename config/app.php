@@ -2,7 +2,7 @@
 
 use App\Enums\ScreenshotsState;
 use App\Helpers\Version;
-use Arquivei\LaravelPrometheusExporter\PrometheusServiceProvider;
+use App\Providers\PrometheusServiceProvider;
 use Illuminate\Support\Facades\Facade;
 
 return [
