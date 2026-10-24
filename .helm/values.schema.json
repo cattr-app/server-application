@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "cattr-server values",
+  "type": "object",
+  "properties": {
+    "cattr": {
+      "type": "object",
+      "properties": {
+        "logChannel": {
+          "type": "string",
+          "description": "Laravel log channel; must be one defined in config/logging.php. The sentry channel was removed together with the Sentry integration.",
+          "enum": ["stack", "single", "daily", "monthly", "slack", "papertrail", "stderr", "syslog", "errorlog", "null", "emergency"]
+        }
+      }
+    }
+  }
+}

@@ -29,7 +29,9 @@ cattr:
   appEnv: production
   ## @param cattr.appDebug Enable application debug mode
   appDebug: "false"
-  ## @param cattr.logChannel Log channel (stderr recommended for Kubernetes)
+  ## @param cattr.logChannel Log channel (stderr recommended for Kubernetes). Must be a channel defined in
+  ## config/logging.php: stack, single, daily, monthly, slack, papertrail, stderr, syslog, errorlog, null, emergency.
+  ## The former `sentry` channel no longer exists; overrides that still select it are rejected by values.schema.json.
   logChannel: stderr
   ## @param cattr.extraEnvVars Array of extra environment variables
   extraEnvVars: []
