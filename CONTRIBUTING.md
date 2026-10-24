@@ -481,7 +481,7 @@ Generated frontend output should not be committed.
 
 ## Backend development
 
-The backend is a Laravel 10 application running on PHP 8.3.
+The backend is a Laravel 13 application running on PHP 8.3.
 
 Available Artisan commands can be inspected with:
 

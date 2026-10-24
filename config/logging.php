@@ -110,9 +110,6 @@ return [
                 'stream' => 'php://stderr',
             ],
             'formatter' =>  \App\Logging\CattrJsonFormatter::class,
-            'with' => [
-                'stream' => 'php://stderr',
-            ],
             'processors' => [PsrLogMessageProcessor::class],
         ],
 
