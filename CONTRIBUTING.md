@@ -666,19 +666,22 @@ when the container starts. A changed container environment takes effect after th
 container is recreated; no image rebuild is needed. Set backend flags
 consistently for the application, queue, scheduler, and migration roles.
 
-The flag name comes from the module's identifier converted to uppercase snake case:
-`AmazingCat_RedmineIntegration` (frontend) or `CattrRedmineIntegration`
-(backend). Frontend and backend modules do not depend on one another's flags.
+The flag name is the module identifier converted to upper snake case with the rules in
+[docs/dev/module-activation-flags.md](docs/dev/module-activation-flags.md): `CattrRedmineIntegration`
+(backend `module.json` name) becomes `MODULE_BACKEND_CATTR_REDMINE_INTEGRATION_ENABLED`,
+`AmazingCat_RedmineIntegration` (frontend `ModuleConfig.moduleName`) becomes
+`MODULE_FRONTEND_AMAZING_CAT_REDMINE_INTEGRATION_ENABLED`. The same algorithm is implemented in
+`App\Services\ModuleActivatorService::flagName()` and `resources/frontend/core/utils/moduleFlagName.js`
+and both are tested against `tests/fixtures/module-flag-names.json`. Frontend and backend modules
+are installed and enabled independently and do not depend on one another's flags.
 
-Backend module discovery still reads `module.json` for names and providers. Its
-`active` field does **not** control activation. The `modules` database table and
-`modules*.json` files are not consulted; attempts to change activation with Artisan
-module-management commands will fail. The legacy table is left intact for upgrade
-compatibility but is no longer used.
+Backend module discovery still reads `module.json` for names and providers. Its `active` field
+does **not** control activation, and `modules*.json` files are not consulted. Artisan
+`module:enable` / `module:disable` refuse to run; `module:delete` and the activator reset only log
+a warning that nothing changed. The legacy `modules` database table has been dropped.
 
 External frontend package registration is build-time configuration in
-`resources/frontend/etc/modules.config.json` (with the existing optional overlays).
-For example:
+`resources/frontend/etc/modules.config.json` (with the existing optional overlays). For example:
 
 ```json
 {
@@ -689,17 +692,47 @@ For example:
 }
 ```
 
-These files **only determine what gets bundled**, not what gets enabled. An optional
-external module must already be installed when building the image; adding an env flag
-cannot install missing code. For local frontend modules, the module entrypoint is
-discovered in `resources/frontend/vendor_modules/<vendor>/<module>/module.init.js`.
-`ModuleConfig.enabled` has no effect on activation. Package modules are included in
-the compiled assets, but are loaded/initialized only if their runtime flag is true.
-Frontend loading remains synchronous; internal frontend modules always initialize.
+These files **only determine what gets bundled**, not what gets enabled. Package modules are
+emitted as separate webpack chunks and are imported lazily only when their runtime flag is
+`true`, so disabled modules do not ship in the main bundle. An optional module must already
+be installed when building the image; adding an env flag cannot install missing code. Local
+frontend modules are discovered in `resources/frontend/vendor_modules/<vendor>/<module>/module.init.js`;
+`ModuleConfig.enabled` has no effect on activation. Internal frontend modules always initialize.
 
-Backend modules are installed in `modules/` or discovered from `vendor/` by
-`nwidart/laravel-modules`. The existing Composer merge plugin includes
-`modules/*/composer.json` when installing module-level dependencies.
+### Installing backend modules
+
+Backend modules are ordinary Composer packages of type `laravel-module`; `nwidart/laravel-modules`
+discovers `module.json` both in `modules/` and in `vendor/*/*`. The Composer merge plugin is no
+longer used, so a directory dropped into `modules/` does not get its dependencies or autoload
+installed; install modules through Composer instead:
+
+```bash
+# published package
+composer require cattr/redmine_integration-module
+
+# local checkout, symlinked for development (any path outside the repository works)
+composer config repositories.redmine path ../redmine-integration
+composer require cattr/redmine_integration-module:@dev
+```
+
+The path repository is a local setting; do not commit it. Then set
+`MODULE_BACKEND_<FLAG_NAME>_ENABLED=true` in `.env`, run `php artisan migrate` for the module
+migrations and restart Octane. `php artisan module:list` shows what was discovered and whether
+the flag enabled it.
+
+### Installing frontend modules
+
+Frontend modules are npm packages. Add the package (or link a local checkout) and register it in
+`modules.config.json` (or a local overlay):
+
+```bash
+pnpm add @amazingcat/cattr-redmine-integration
+# or, for a local checkout
+pnpm link ../redmine-integration/frontend
+```
+
+Then set `MODULE_FRONTEND_<FLAG_NAME>_ENABLED=true` and rebuild the assets (`pnpm prod` or
+`pnpm watch`).
 
 ## Container architecture
 
