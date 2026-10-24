@@ -28,7 +28,7 @@ class UpdateTest extends TestCase
     {
         $response = $this->actingAs($this->admin)->patchJson(self::URI);
 
-        $response->assertOk();
+        $response->assertNoContent();
     }
 
     public function test_index_wrong_params(): void

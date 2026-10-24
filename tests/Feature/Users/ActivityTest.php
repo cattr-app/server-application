@@ -28,8 +28,8 @@ class ActivityTest extends TestCase
 
         $user = User::find($this->admin->id);
 
-        $response->assertOk();
-        $this->assertNotEquals($lastActivity->toString(), $user->last_activity->toString());
+        $response->assertNoContent();
+        $this->assertNotEquals((string) $lastActivity, (string) $user->last_activity);
         $this->assertTrue($user->online);
     }
 
