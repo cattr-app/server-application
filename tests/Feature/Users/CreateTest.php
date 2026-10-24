@@ -41,11 +41,11 @@ class CreateTest extends TestCase
         unset($this->userData['password']);
 
         $response->assertOk();
+        $this->userData['screenshots_state'] = (string) $this->userData['screenshots_state']->value;
         $this->assertDatabaseHas('users', $this->userData);
 
-        $responseData = $response->json('res');
-        unset($responseData['online']);
-        $this->assertDatabaseHas('users', $responseData);
+        $createdUser = User::findOrFail($response->json('data.id'));
+        $this->assertDatabaseHas('users', $createdUser->getAttributes());
     }
 
     public function test_create_as_manager(): void
