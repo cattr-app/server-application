@@ -47,6 +47,7 @@
     "barryvdh/laravel-ide-helper": "^3.7",
     "itsgoingd/clockwork": "^5.1",
     "laravel/tinker": "^3.0",
+    "mockery/mockery": "^1.6",
     "nunomaduro/collision": "^8.0",
     "phpunit/phpunit": "^12.0",
     "roave/security-advisories": "dev-latest",

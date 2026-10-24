@@ -513,6 +513,11 @@ tests/Unit/
 tests/Feature/
 ```
 
+`mockery/mockery` is kept in `require-dev` even though the suite does not call it
+directly: Laravel's console test helper `$this->artisan()` (`PendingCommand`) needs it
+for output expectations, and `$this->mock()` / `$this->partialMock()` / `$this->spy()`
+helpers depend on it as well.
+
 Create a testing environment:
 
 ```bash
