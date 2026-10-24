@@ -64,11 +64,11 @@ export default class AccountService extends SettingsService {
         return axios.post('users/edit', data).then(({ data }) => {
             return {
                 data: {
-                    id: data.res.id,
-                    password: data.res.password,
-                    email: data.res.email,
-                    full_name: data.res.full_name,
-                    user_language: data.res.user_language,
+                    id: data.data.id,
+                    password: data.data.password,
+                    email: data.data.email,
+                    full_name: data.data.full_name,
+                    user_language: data.data.user_language,
                 },
             };
         });
