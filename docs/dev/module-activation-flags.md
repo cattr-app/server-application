@@ -31,3 +31,11 @@ Digits do not start a new word (`Module2` -> `MODULE2`), and runs of capitals st
 | `AmazingCat_RedmineIntegration` (frontend `moduleName`) | `MODULE_FRONTEND_AMAZING_CAT_REDMINE_INTEGRATION_ENABLED` |
 | `CattrDemo` | `MODULE_BACKEND_CATTR_DEMO_ENABLED` |
 | `AmazingCat_DemoModule` | `MODULE_FRONTEND_AMAZING_CAT_DEMO_MODULE_ENABLED` |
+
+## Frontend package modules
+
+For a package module the flag is checked before its chunk is downloaded, so the frontend derives
+`<FLAG_NAME>` from the module's key in `resources/frontend/etc/modules.config.json`, not from the
+`ModuleConfig.moduleName` inside the package. Register packages under a key equal to their
+`moduleName` (for example `"AmazingCat_RedmineIntegration": { "type": "package", "ref": "@amazingcat/cattr-redmine-integration" }`),
+otherwise the flag name in the documentation of the module will not match.

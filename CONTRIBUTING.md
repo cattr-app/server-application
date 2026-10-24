@@ -692,6 +692,9 @@ External frontend package registration is build-time configuration in
 }
 ```
 
+The key of each entry must equal the package's `ModuleConfig.moduleName`: the frontend derives the
+flag name from that key before the chunk is downloaded.
+
 These files **only determine what gets bundled**, not what gets enabled. Package modules are
 emitted as separate webpack chunks and are imported lazily only when their runtime flag is
 `true`, so disabled modules do not ship in the main bundle. An optional module must already
