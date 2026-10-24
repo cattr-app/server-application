@@ -267,9 +267,12 @@ The repository contains both the server-side application and the web frontend.
 | Path                  | Purpose                                               |
 |-----------------------|-------------------------------------------------------|
 | `app/`                | Laravel application code                              |
+| `bootstrap/app.php`   | Application setup: routing, middleware, and exceptions |
+| `bootstrap/providers.php` | Service providers registered for the application  |
 | `config/`             | Application configuration                             |
 | `database/`           | Migrations, seeders, and factories                    |
 | `routes/`             | API, web, and operational routes                      |
+| `routes/console.php`  | Artisan commands and scheduled tasks                  |
 | `resources/frontend/` | Vue frontend application                              |
 | `modules/`            | Backend modules                                       |
 | `tests/`              | Backend unit and feature tests                        |

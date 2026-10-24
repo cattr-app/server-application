@@ -47,11 +47,19 @@ return [
             'table' => 'cache',
             'connection' => null,
             'lock_connection' => null,
+            'lock_table' => env('DB_CACHE_LOCK_TABLE'),
         ],
 
         'file' => [
             'driver' => 'file',
             'path' => storage_path('framework/cache/data'),
+            'lock_path' => storage_path('framework/cache/locks'),
+        ],
+
+        'storage' => [
+            'driver' => 'storage',
+            'disk' => env('CACHE_STORAGE_DISK'),
+            'path' => env('CACHE_STORAGE_PATH', 'framework/cache/data'),
         ],
 
         'memcached' => [
@@ -90,6 +98,14 @@ return [
 
         'octane' => [
             'driver' => 'octane',
+        ],
+
+        'failover' => [
+            'driver' => 'failover',
+            'stores' => [
+                'database',
+                'array',
+            ],
         ],
 
     ],

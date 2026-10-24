@@ -36,12 +36,15 @@ return [
     'mailers' => [
         'smtp' => [
             'transport' => 'smtp',
+            'scheme' => env('MAIL_SCHEME'),
+            'url' => env('MAIL_URL'),
             'host' => env('MAIL_HOST', 'localhost'),
             'port' => env('MAIL_PORT', 25),
             'encryption' => env('MAIL_ENCRYPTION', 'none'),
             'username' => env('MAIL_USERNAME'),
             'password' => env('MAIL_PASSWORD'),
             'timeout' => null,
+            'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
             'auth_mode' => null,
             'verify_peer' => false,
         ],
@@ -56,6 +59,10 @@ return [
 
         'postmark' => [
             'transport' => 'postmark',
+        ],
+
+        'resend' => [
+            'transport' => 'resend',
         ],
 
         'sendmail' => [
@@ -79,6 +86,16 @@ return [
                 'sendmail',
                 'log',
             ],
+            'retry_after' => 60,
+        ],
+
+        'roundrobin' => [
+            'transport' => 'roundrobin',
+            'mailers' => [
+                'ses',
+                'postmark',
+            ],
+            'retry_after' => 60,
         ],
     ],
 

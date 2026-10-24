@@ -36,6 +36,7 @@ return [
 
         'database' => [
             'driver' => 'database',
+            'connection' => env('DB_QUEUE_CONNECTION'),
             'table' => 'jobs',
             'queue' => 'default',
             'retry_after' => 90,
@@ -71,6 +72,38 @@ return [
             'after_commit' => false,
         ],
 
+        'deferred' => [
+            'driver' => 'deferred',
+        ],
+
+        'background' => [
+            'driver' => 'background',
+        ],
+
+        'failover' => [
+            'driver' => 'failover',
+            'connections' => [
+                'database',
+                'deferred',
+            ],
+        ],
+
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Job Batching
+    |--------------------------------------------------------------------------
+    |
+    | The following options configure the database and table that store job
+    | batching information. These options can be updated to any database
+    | connection and table which has been defined by your application.
+    |
+    */
+
+    'batching' => [
+        'database' => env('DB_CONNECTION', 'sqlite'),
+        'table' => 'job_batches',
     ],
 
     /*

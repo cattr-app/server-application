@@ -20,6 +20,11 @@ return [
     'fallback_locale' => 'en',
     'faker_locale' => 'en_US',
     'key' => env('APP_KEY'),
+    'previous_keys' => [
+        ...array_filter(
+            explode(',', (string) env('APP_PREVIOUS_KEYS', ''))
+        ),
+    ],
     'stats_collector_url' => env('STATS_COLLECTOR_URL', 'https://stats.cattr.app'),
     'cipher' => 'AES-256-CBC',
     'recaptcha' => [
@@ -27,6 +32,7 @@ return [
     ],
     'maintenance' => [
         'driver' => 'file',
+        'store' => env('APP_MAINTENANCE_STORE', 'database'),
         // 'store'  => 'redis',
     ],
     'user_activity' => [
