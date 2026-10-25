@@ -18,11 +18,18 @@ Temporary files (uploads being processed, offline-sync archives) always stay on 
 | `AWS_DEFAULT_REGION` | region, `us-east-1` by default (any value for MinIO) |
 | `AWS_BUCKET` | bucket, shared by all S3-backed disks |
 | `AWS_ROOT` | optional key prefix inside the bucket |
-| `AWS_ENDPOINT` | endpoint of a non-AWS service, e.g. `http://minio:9000` |
+| `AWS_ENDPOINT` | endpoint of a non-AWS service, e.g. `https://minio.example.com`; presigned links are signed for this host (see below) |
 | `AWS_USE_PATH_STYLE_ENDPOINT` | `true` for MinIO and most self-hosted services |
-| `AWS_TEMPORARY_URL` | public base URL used in presigned links when browsers cannot reach `AWS_ENDPOINT` (e.g. an in-cluster MinIO behind an ingress) |
+| `AWS_TEMPORARY_URL` | optional; replaces the scheme, host and port of presigned links, only for a CDN / proxy that preserves the signed host (see below) |
 
 The bucket stays private: browsers get presigned links only.
+
+### Endpoint for presigned links
+
+A presigned link is signed with AWS Signature V4 for the host of `AWS_ENDPOINT`, and `Host` is part of the signature (`X-Amz-SignedHeaders=host`). The storage rejects a link that arrives with a different `Host`.
+
+- **Recommended:** set `AWS_ENDPOINT` to an address that both the Cattr Pods and browsers reach under the same name, for example the public URL of MinIO (`https://minio.example.com`) with `AWS_USE_PATH_STYLE_ENDPOINT=true`, and leave `AWS_TEMPORARY_URL` empty.
+- `AWS_TEMPORARY_URL` does not re-sign anything: Laravel signs the link for `AWS_ENDPOINT` and then replaces only the scheme, host and port (a path in `AWS_TEMPORARY_URL` is ignored). Use it only for a CDN or reverse proxy that forwards requests to the storage with the `Host` of `AWS_ENDPOINT`. An internal endpoint such as `http://minio:9000` plus an ingress that passes the browser's public `Host` gives `SignatureDoesNotMatch`.
 
 ## How browsers get files
 

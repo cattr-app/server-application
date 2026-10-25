@@ -11,8 +11,11 @@ $s3Disk = static fn (string $root = '') => [
     'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     'bucket' => env('AWS_BUCKET'),
     'url' => env('AWS_URL'),
+    // Presigned links are signed for this host (SigV4 signs "Host"), so prefer an endpoint that both the
+    // app and browsers reach under the same name, e.g. the public MinIO URL.
     'endpoint' => env('AWS_ENDPOINT'),
-    // Public base URL for presigned links when the endpoint is not reachable by browsers (e.g. in-cluster MinIO).
+    // Only rewrites scheme, host and port of an already signed link (path ignored). Use it only for a CDN /
+    // proxy that forwards requests to the storage with the original AWS_ENDPOINT Host, or signatures fail.
     'temporary_url' => env('AWS_TEMPORARY_URL'),
     // MinIO and most self-hosted S3 implementations need path-style URLs.
     'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
