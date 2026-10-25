@@ -24,6 +24,15 @@ class VerifyAttachmentHash implements ShouldQueue, ShouldBeUnique
     public bool $deleteWhenMissingModels = true;
 
     /**
+     * Lifetime of the unique lock: the dispatcher takes it and the worker releases it, so a lock
+     * that is never released (crashed worker, cache store not shared with the worker) must expire
+     * before the next daily cattr:attachments:verify run.
+     *
+     * @var int
+     */
+    public int $uniqueFor = 3600;
+
+    /**
      * Create a new job instance.
      */
     public function __construct(public Attachment $attachment)
