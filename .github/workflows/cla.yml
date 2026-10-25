@@ -10,6 +10,12 @@ name: CLA
 # bodies are only compared in job `if:` conditions), every job only calls a
 # cattr-app/cla-actions reusable workflow, and GITHUB_TOKEN is limited to
 # `contents: read`. Keep it that way when editing this file.
+# Note the real privilege: the forwarded CATTR_CLA_BOT_* / CATTR_CLA_REGISTRY_*
+# secrets let the called workflows mint GitHub App tokens with write access
+# (sign.yml@v1: issues, pull-requests and checks on this repository, contents
+# on cla-registry). `@v1` is a moving tag of our own repository, so every
+# change to cattr-app/cla-actions must be reviewed as carefully as a change
+# to this workflow.
 on:
   pull_request_target:  # zizmor: ignore[dangerous-triggers] see above
     types:

@@ -148,6 +148,38 @@ jobs:
           docker run --rm -e GH_TOKEN -v "${GITHUB_WORKSPACE}:/repo:ro" -w /repo \
             "${ZIZMOR_IMAGE}" --format github .
 
+      # zizmor's unpinned-images only reports untagged / `latest` images at
+      # the default persona (a tag without a digest is a pedantic finding),
+      # so digest pins are enforced here: job `container` images, `services`
+      # images and `docker://` step references must contain `@sha256:`.
+      # Images passed to `docker run` through env vars are not covered.
+      - name: Check image digests
+        run: |
+          set -euo pipefail
+          status=0
+          for file in .github/workflows/*.yml .github/workflows/*.yaml; do
+            [ -e "$file" ] || continue
+            refs="$(yq -r '
+              .jobs[] |
+              ((.container | select(tag == "!!str")),
+               .container.image,
+               .services[].image,
+               (.steps[].uses | select(. != null and test("^docker://"))))
+              | select(. != null)
+            ' "$file")"
+            while IFS= read -r ref; do
+              [ -n "$ref" ] || continue
+              case "$ref" in
+                *@sha256:*) ;;
+                *)
+                  echo "::error file=${file}::Image is not pinned by digest: ${ref}"
+                  status=1
+                  ;;
+              esac
+            done <<< "$refs"
+          done
+          exit "$status"
+
   zizmor-sarif:
     name: zizmor SARIF upload
     # Code scanning upload needs `security-events: write`, which fork PRs
