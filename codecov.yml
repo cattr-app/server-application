@@ -1,0 +1,10 @@
+# Coverage is advisory for now: statuses are reported on PRs but never fail.
+# Switch patch to a blocking target once the baseline is known (issue #339).
+coverage:
+  status:
+    project:
+      default:
+        informational: true
+    patch:
+      default:
+        informational: true
