@@ -6,67 +6,13 @@
 # as the underlying files are fixed.
 
 misconfigurations:
-  # --- Helm chart: .helm/templates/configmap.yaml ----------------------------
-
-  # False positive: the rule matches the key names DB_PORT and
-  # S6_CMD_WAIT_FOR_SERVICES_MAXTIME; neither holds sensitive data
-  # (credentials are read from the chart Secret).
-  - id: KSV-01010
-    paths:
-      - .helm/templates/configmap.yaml
-    statement: Non-sensitive ConfigMap keys flagged by name (false positive)
-
-  # --- Helm chart: .helm/templates/deployment.yaml ---------------------------
-
-  # The wait-for-mysql init container (busybox) and the bundled MySQL
-  # container have no securityContext. Fix: give them a restricted
-  # securityContext like the app container's containerSecurityContext.
-  - id: KSV-0001
-    paths:
-      - .helm/templates/deployment.yaml
-      - .helm/templates/mysql-deployment.yaml
-    statement: Missing allowPrivilegeEscalation=false (baseline, issue #339)
-  - id: KSV-0012
-    paths:
-      - .helm/templates/deployment.yaml
-      - .helm/templates/mysql-deployment.yaml
-    statement: Missing runAsNonRoot=true (baseline, issue #339)
-  - id: KSV-0104
-    paths:
-      - .helm/templates/deployment.yaml
-      - .helm/templates/mysql-deployment.yaml
-    statement: Missing seccomp profile (baseline, issue #339)
-
-  # readOnlyRootFilesystem is not set for the app, init and MySQL containers.
-  # The app already mounts emptyDirs for its writable paths, so it may be
-  # possible to enable; needs testing of the runtime image first.
-  - id: KSV-0014
-    paths:
-      - .helm/templates/deployment.yaml
-      - .helm/templates/mysql-deployment.yaml
-    statement: readOnlyRootFilesystem not enabled (baseline, issue #339)
-
-  # image.tag defaults to "" and falls back to appVersion "latest".
-  # Fix: default the tag to a released version.
-  - id: KSV-0013
-    paths:
-      - .helm/templates/deployment.yaml
-    statement: Image tag defaults to latest (baseline, issue #339)
+  # --- Helm chart --------------------------------------------------------------
 
   # Trivy's built-in trusted-registry list does not include the chart's
-  # registries (registry.git.amazingcat.net, docker.io); policy choice, not
-  # a misconfiguration.
+  # registries (ghcr.io for Cattr, docker.io for the demo MySQL); policy
+  # choice, not a misconfiguration. Images are pinned by tag (optional digest).
   - id: KSV-0125
     paths:
       - .helm/templates/deployment.yaml
       - .helm/templates/mysql-deployment.yaml
     statement: Registry not in Trivy's trusted list (policy, not a defect)
-
-  # --- Helm chart: .helm/templates/mysql-deployment.yaml ---------------------
-
-  # The bundled MySQL deployment runs with the default (root) security
-  # context. Fix: set a pod/container securityContext for MySQL.
-  - id: KSV-0118
-    paths:
-      - .helm/templates/mysql-deployment.yaml
-    statement: MySQL uses the default security context (baseline, issue #339)

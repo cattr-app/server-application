@@ -1,6 +1,7 @@
 name: PR checks
 
-# Required PR checks (Dependency Review, actionlint, Hadolint, Trivy config)
+# Required PR checks (Dependency Review, actionlint, Hadolint, Trivy config),
+# the Helm chart check
 # plus the advisory zizmor audit. No workflow-level `paths` filters on
 # purpose: required checks must report on every pull request.
 
@@ -95,7 +96,8 @@ jobs:
       #
       # --helm-set: the chart fails to render without its required keys, and
       # Trivy then silently skips the Helm templates. Dummy values keep the
-      # chart covered.
+      # chart covered (APP_KEY must decode to 32 bytes); mysql.enabled=true
+      # also renders the built-in MySQL templates.
       - name: Scan configuration
         uses: docker://aquasec/trivy@sha256:790fd66d1697395d8693d1acaa1ea702406a20f109b6fc7bac8db623eca6c06c  # 0.76.1
         with:
@@ -104,10 +106,31 @@ jobs:
             --scanners misconfig
             --severity MEDIUM,HIGH,CRITICAL
             --ignorefile .trivyignore.yaml
-            --helm-set cattr.appKey=ci-dummy,cattr.reverbAppSecret=ci-dummy
+            --helm-set cattr.appUrl=https://cattr.example.com,cattr.appKey=base64:Y2ktZHVtbXktYXBwLWtleS0zMi1ieXRlcy1sb25nISE=,cattr.reverbAppSecret=ci-dummy,mysql.enabled=true,database.username=ci-dummy,database.password=ci-dummy,database.rootPassword=ci-dummy,setup.admin.enabled=false
             --exit-code 1
             --no-progress
             .
+
+  helm-chart:
+    name: Helm chart
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      # helm lint --strict, helm template for every .helm/ci/*-values.yaml
+      # (rendered twice, must be identical), kubeconform -strict for
+      # Kubernetes 1.29 and 1.34, and renders that must fail. alpine/k8s
+      # bundles helm 4 and kubeconform; pinned by digest.
+      - name: Lint, render and validate
+        uses: docker://alpine/k8s@sha256:d50424976a0a888d2531f13035dce45c004ec2b6f877f233005ba35c0d61be5d  # 1.34.12
+        with:
+          entrypoint: sh
+          args: .helm/ci/check.sh
 
   zizmor:
     name: zizmor (advisory)
