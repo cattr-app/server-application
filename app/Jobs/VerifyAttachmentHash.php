@@ -35,7 +35,9 @@ class VerifyAttachmentHash implements ShouldQueue, ShouldBeUnique
     /**
      * Seconds the worker lets the job run. On S3 verification downloads and hashes the whole
      * object (worst case a 512 MB attachment at ~5 Mbit/s), far beyond the 60 s worker default.
-     * Must stay below the queue `retry_after` (QUEUE_RETRY_AFTER) and below $uniqueFor.
+     * Must stay below the queue `retry_after` (QUEUE_RETRY_AFTER) and below $uniqueFor. The default
+     * connection is `database`; with QUEUE_CONNECTION=sqs, which has no `retry_after`, the SQS queue
+     * visibility timeout must be set above 900 s instead.
      *
      * @var int
      */
