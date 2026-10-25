@@ -1,0 +1,32 @@
+# CI render: s3 mode (separate Deployments) with external Redis, scaled queue,
+# NetworkPolicy and PDB. Needs a Cattr version with S3 storage support at runtime.
+cattr:
+  appUrl: https://cattr.example.com
+  appKey: Y2ktZHVtbXktYXBwLWtleS0zMi1ieXRlcy1sb25nISE=
+  reverbAppSecret: ci-dummy-reverb-secret
+database:
+  host: mysql.db.svc.cluster.local
+  username: cattr
+  password: ci-dummy-db-password
+storage:
+  type: s3
+  s3:
+    bucket: cattr
+    region: us-east-1
+    endpoint: https://minio.example.com
+    usePathStyleEndpoint: true
+    accessKeyId: ci-dummy-access-key
+    secretAccessKey: ci-dummy-secret-key
+redis:
+  enabled: true
+  host: redis.cache.svc.cluster.local
+  password: ci-dummy-redis-password
+queue:
+  replicas: 3
+  pdb:
+    enabled: true
+networkPolicy:
+  enabled: true
+setup:
+  admin:
+    enabled: false

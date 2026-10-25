@@ -1,0 +1,22 @@
+summary: Cattr restart policy for orchestrated deployments
+
+description: |
+  Optional layer, installed into $PEBBLE/layers by cattr-entrypoint when
+  CATTR_RESTART_POLICY=shutdown (the default for every role set except `all`).
+  A crashed queue worker, Reverb or scheduler then stops Pebble (exit code 10)
+  instead of being restarted in place, so the container exits and the
+  orchestrator (Kubernetes, Compose restart policy) restarts it and records
+  the restart. Clean exits keep `on-success: restart` from 001-cattr.yaml.
+
+services:
+  queue:
+    override: merge
+    on-failure: shutdown
+
+  reverb:
+    override: merge
+    on-failure: shutdown
+
+  scheduler:
+    override: merge
+    on-failure: shutdown

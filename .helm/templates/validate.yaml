@@ -1,0 +1,2 @@
+{{- /* Renders nothing; fails the render on invalid values. See _validate.tpl. */ -}}
+{{- include "cattr.validate" . -}}

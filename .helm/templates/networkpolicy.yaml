@@ -1,0 +1,84 @@
+{{- if .Values.networkPolicy.enabled }}
+{{- /*
+Ingress to the Pods running Caddy/Reverb: 8080 (Caddy) from httpFrom or
+anywhere; 8081 (Reverb) only from Cattr queue/scheduler/setup Pods; Octane
+8090 and everything else is denied. Egress is not restricted.
+*/}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "cattr.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "cattr.labels" . | nindent 4 }}
+  {{- with (include "cattr.annotations" .) }}
+  annotations:
+    {{- . | nindent 4 }}
+  {{- end }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "cattr.webSelectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - port: 8080
+          protocol: TCP
+      {{- with .Values.networkPolicy.httpFrom }}
+      from:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    - ports:
+        - port: 8081
+          protocol: TCP
+      from:
+        - podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/instance
+                operator: In
+                values:
+                  - {{ .Release.Name | quote }}
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - {{ include "cattr.name" . | quote }}
+              - key: app.kubernetes.io/component
+                operator: In
+                values:
+                  - queue
+                  - scheduler
+                  - setup
+---
+# Queue, scheduler and setup Pods serve nothing: deny all ingress.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "cattr.fullname" . }}-workers
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "cattr.labels" . | nindent 4 }}
+  {{- with (include "cattr.annotations" .) }}
+  annotations:
+    {{- . | nindent 4 }}
+  {{- end }}
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/instance
+        operator: In
+        values:
+          - {{ .Release.Name | quote }}
+      - key: app.kubernetes.io/name
+        operator: In
+        values:
+          - {{ include "cattr.name" . | quote }}
+      - key: app.kubernetes.io/component
+        operator: In
+        values:
+          - queue
+          - scheduler
+          - setup
+  policyTypes:
+    - Ingress
+{{- end }}

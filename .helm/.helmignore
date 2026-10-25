@@ -1,0 +1,6 @@
+# Not part of the packaged chart.
+ci/
+.git/
+*.swp
+*.bak
+*.tmp

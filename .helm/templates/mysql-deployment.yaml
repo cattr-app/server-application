@@ -1,4 +1,8 @@
 {{- if .Values.mysql.enabled }}
+{{- /*
+Built-in MySQL: single-node demo/evaluation database. Name and selector are
+kept from chart 0.1.x so existing demo installs upgrade in place.
+*/}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -21,12 +25,15 @@ spec:
     metadata:
       labels:
         {{- include "cattr.mysql.selectorLabels" . | nindent 8 }}
+      annotations:
+        checksum/secret: {{ include "cattr.secretChecksum" . | quote }}
     spec:
-      {{- with (concat (.Values.global.imagePullSecrets | default list) (.Values.imagePullSecrets | default list)) }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
+      {{- with (include "cattr.imagePullSecrets" .) }}
+      {{- . | nindent 6 }}
       {{- end }}
-      {{- with .Values.mysql.containerSecurityContext }}
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      {{- with .Values.mysql.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -39,37 +46,42 @@ spec:
               containerPort: 3306
               protocol: TCP
           env:
-            - name: MYSQL_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "cattr.secretName" . }}
-                  key: MYSQL_ROOT_PASSWORD
+            {{- $sec := dict "context" . "chartSecret" (include "cattr.secretName" .) }}
+            {{- include "cattr.secretEnv" (merge (dict "var" "MYSQL_ROOT_PASSWORD") $sec) | nindent 12 }}
             - name: MYSQL_DATABASE
               value: {{ .Values.database.name | quote }}
             - name: MYSQL_USER
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "cattr.secretName" . }}
-                  key: DB_USERNAME
+                  {{- include "cattr.secretRef" (merge (dict "var" "DB_USERNAME") $sec) | nindent 18 }}
             - name: MYSQL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "cattr.secretName" . }}
-                  key: DB_PASSWORD
+                  {{- include "cattr.secretRef" (merge (dict "var" "DB_PASSWORD") $sec) | nindent 18 }}
           args:
             - --log-bin-trust-function-creators=1
+          {{- with .Values.mysql.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           volumeMounts:
             - name: data
               mountPath: /var/lib/mysql
-          {{- if .Values.mysql.startupProbe.enabled }}
+            - name: run
+              mountPath: /var/run/mysqld
+            - name: tmp
+              mountPath: /tmp
+          {{- with .Values.mysql.startupProbe }}
+          {{- if .enabled }}
           startupProbe:
             tcpSocket:
               port: mysql
-            initialDelaySeconds: {{ .Values.mysql.startupProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.mysql.startupProbe.periodSeconds }}
-            failureThreshold: {{ .Values.mysql.startupProbe.failureThreshold }}
+            periodSeconds: {{ .periodSeconds }}
+            failureThreshold: {{ .failureThreshold }}
           {{- end }}
-          {{- if .Values.mysql.readinessProbe.enabled }}
+          {{- end }}
+          {{- with .Values.mysql.readinessProbe }}
+          {{- if .enabled }}
           readinessProbe:
             exec:
               command:
@@ -77,10 +89,13 @@ spec:
                 - ping
                 - -h
                 - localhost
-            periodSeconds: {{ .Values.mysql.readinessProbe.periodSeconds }}
-            failureThreshold: {{ .Values.mysql.readinessProbe.failureThreshold }}
+            periodSeconds: {{ .periodSeconds }}
+            timeoutSeconds: {{ .timeoutSeconds }}
+            failureThreshold: {{ .failureThreshold }}
           {{- end }}
-          {{- if .Values.mysql.livenessProbe.enabled }}
+          {{- end }}
+          {{- with .Values.mysql.livenessProbe }}
+          {{- if .enabled }}
           livenessProbe:
             exec:
               command:
@@ -88,17 +103,19 @@ spec:
                 - ping
                 - -h
                 - localhost
-            periodSeconds: {{ .Values.mysql.livenessProbe.periodSeconds }}
-            failureThreshold: {{ .Values.mysql.livenessProbe.failureThreshold }}
+            periodSeconds: {{ .periodSeconds }}
+            timeoutSeconds: {{ .timeoutSeconds }}
+            failureThreshold: {{ .failureThreshold }}
+          {{- end }}
           {{- end }}
           resources:
             {{- toYaml .Values.mysql.resources | nindent 12 }}
       volumes:
         - name: data
-          {{- if .Values.mysql.persistence.enabled }}
           persistentVolumeClaim:
             claimName: {{ .Values.mysql.persistence.existingClaim | default (include "cattr.mysql.fullname" .) }}
-          {{- else }}
+        - name: run
           emptyDir: {}
-          {{- end }}
+        - name: tmp
+          emptyDir: {}
 {{- end }}
