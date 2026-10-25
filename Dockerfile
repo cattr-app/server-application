@@ -56,13 +56,10 @@ ARG APP_ENV=production
 ARG REVERB_SCHEME=http
 ARG REVERB_PORT=8081
 
-# REVERB_APP_KEY is a public identifier compiled into the frontend bundle, not
-# a secret. REVERB_APP_SECRET, APP_KEY and DB credentials must be supplied at runtime.
-# trivy:ignore:DS-0031
+# REVERB_APP_SECRET, APP_KEY and DB credentials must be supplied at runtime.
 ENV IMAGE_VERSION=6.0.0 \
     APP_VERSION=${APP_VERSION} \
     APP_ENV=${APP_ENV} \
-    REVERB_APP_KEY=cattr \
     REVERB_HOST=127.0.0.1 \
     REVERB_SCHEME=${REVERB_SCHEME} \
     REVERB_PORT=${REVERB_PORT} \
@@ -70,6 +67,11 @@ ENV IMAGE_VERSION=6.0.0 \
     DB_HOST=db \
     LOG_CHANNEL=stderr \
     PEBBLE=/opt/cattr/.pebble
+
+# REVERB_APP_KEY is a public identifier compiled into the frontend bundle, not
+# a secret. Kept as its own instruction so the ignore below covers only it.
+# trivy:ignore:DS-0031
+ENV REVERB_APP_KEY=cattr
 
 WORKDIR /opt/cattr/app
 
