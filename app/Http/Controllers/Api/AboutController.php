@@ -204,6 +204,7 @@ class AboutController extends Controller
      *
      * @apiSuccess {Number}     threshold                      The storage usage threshold percentage before thinning is needed.
      * @apiSuccess {Boolean}    need_thinning                  Indicates if the storage requires thinning.
+     * @apiSuccess {Boolean}    rotation_supported             False on object storage (S3): space is not measured, rotation is a no-op.
      * @apiSuccess {Number}     screenshots_available          The number of available screenshots in the storage.
      *
      * @apiSuccess {Object}     thinning                       Information about the thinning process.
@@ -220,6 +221,7 @@ class AboutController extends Controller
      *      },
      *      "threshold": 75,
      *      "need_thinning": true,
+     *      "rotation_supported": true,
      *      "screenshots_available": 0,
      *      "thinning": {
      *        "now": null,
@@ -243,6 +245,8 @@ class AboutController extends Controller
             ],
             'threshold' => config('cleaner.threshold'),
             'need_thinning' => StorageCleaner::needThinning(),
+            // false on object storage (S3): no free space to measure, rotation is a no-op
+            'rotation_supported' => StorageCleaner::isSupported(),
             'screenshots_available' => StorageCleaner::countAvailableScreenshots(),
             'thinning' => [
                 'now' => Cache::store('octane')->get('thinning_now'),

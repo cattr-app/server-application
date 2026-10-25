@@ -2,11 +2,13 @@
 
 namespace App\Contracts;
 
+use App\Helpers\StorageHelper;
 use App\Jobs\GenerateScreenshotThumbnail;
 use App\Models\TimeInterval;
 use Intervention\Image\ImageManagerStatic as Image;
 use Intervention\Image\Constraint;
 use Storage;
+use URL;
 
 abstract class ScreenshotService
 {
@@ -15,6 +17,8 @@ abstract class ScreenshotService
     public const THUMBS_FOLDER = 'thumbs/';
     private const THUMB_WIDTH = 280;
     private const QUALITY = 50;
+    /** Lifetime of signed / presigned screenshot URLs */
+    public const URL_TTL_MINUTES = 10;
 
     /** Get screenshot path by interval */
     abstract public function getScreenshotPath(TimeInterval|int $interval): string;
@@ -23,10 +27,8 @@ abstract class ScreenshotService
 
     public function saveScreenshot($file, $timeInterval): void
     {
-        if (!Storage::exists(self::PARENT_FOLDER)) {
-            Storage::makeDirectory(self::PARENT_FOLDER);
-        }
-
+        // $file is a local path or UploadedFile; the result goes to the default disk (local or S3).
+        // Storage::put() creates missing directories itself, no makeDirectory() round-trips on S3.
         $path = is_string($file) ? $file : $file->path();
 
         $image = Image::make($path);
@@ -38,11 +40,7 @@ abstract class ScreenshotService
 
     public function createThumbnail(TimeInterval|int $timeInterval): void
     {
-        if (!Storage::exists(self::PARENT_FOLDER . self::THUMBS_FOLDER)) {
-            Storage::makeDirectory(self::PARENT_FOLDER . self::THUMBS_FOLDER);
-        }
-
-        $image = Image::make(Storage::path($this->getScreenshotPath($timeInterval)));
+        $image = Image::make(Storage::get($this->getScreenshotPath($timeInterval)));
 
         $thumb = $image->resize(self::THUMB_WIDTH, null, fn(Constraint $constraint) => $constraint->aspectRatio());
 
@@ -53,6 +51,44 @@ abstract class ScreenshotService
     {
         Storage::delete($this->getScreenshotPath($interval));
         Storage::delete($this->getThumbPath($interval));
+    }
+
+    /**
+     * Temporary URL of the screenshot (or its thumbnail) that browsers can load directly.
+     *
+     * Local disk: relative URL of a route protected by the "signed" middleware that streams the file.
+     * S3: presigned object URL.
+     */
+    public function getTemporaryUrl(TimeInterval|int $interval, bool $thumbnail = false): string
+    {
+        $id = $interval instanceof TimeInterval ? $interval->id : $interval;
+        $expiresAt = now()->addMinutes(self::URL_TTL_MINUTES);
+
+        if (StorageHelper::isLocal()) {
+            return URL::temporarySignedRoute(
+                $thumbnail ? 'intervals.screenshot.thumb' : 'intervals.screenshot.original',
+                $expiresAt,
+                ['interval' => $id],
+                absolute: false,
+            );
+        }
+
+        return Storage::temporaryUrl(
+            $thumbnail ? $this->getThumbPath($id) : $this->getScreenshotPath($id),
+            $expiresAt,
+        );
+    }
+
+    /**
+     * @return array{screenshot_url: string, thumbnail_url: string, expires_in: int}
+     */
+    public function getTemporaryUrls(TimeInterval|int $interval): array
+    {
+        return [
+            'screenshot_url' => $this->getTemporaryUrl($interval),
+            'thumbnail_url' => $this->getTemporaryUrl($interval, true),
+            'expires_in' => self::URL_TTL_MINUTES * 60,
+        ];
     }
 
     public static function getFullPath(): string

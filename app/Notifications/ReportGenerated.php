@@ -5,8 +5,8 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Mail\Attachment;
 use Illuminate\Notifications\Notification;
-use Storage;
 
 class ReportGenerated extends Notification implements ShouldQueue
 {
@@ -25,7 +25,7 @@ class ReportGenerated extends Notification implements ShouldQueue
     {
         return (new MailMessage)
                     ->line('In attachment see report you have requested.')
-                    ->attach(Storage::drive($this->drive)->path($this->fileName));
+                    ->attach(Attachment::fromStorageDisk($this->drive, $this->fileName));
     }
 
     public function toArray($notifiable): array

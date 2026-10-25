@@ -5,6 +5,7 @@ namespace App\Contracts;
 use App\Models\Attachment;
 use App\Models\Project;
 use App\Models\Task;
+use DateTimeInterface;
 use Illuminate\Http\UploadedFile;
 
 interface AttachmentService
@@ -32,6 +33,12 @@ interface AttachmentService
     public function getPath(Attachment $attachment): string;
 
     public function getFullPath(Attachment $attachment): string;
+
+    /**
+     * Presigned download URL when attachments are on object storage (S3); null for the local disk or an
+     * expiration beyond the S3 limit (the signed attachment.temporary-download route streams the file then).
+     */
+    public function getTemporaryUrl(Attachment $attachment, DateTimeInterface $expiresAt): ?string;
 
     public function getHashAlgo(): string;
 

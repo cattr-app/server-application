@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Contracts\ScreenshotService;
 use App\Enums\ScreenshotsState;
+use App\Exceptions\Entities\AuthorizationException;
 use App\Http\Requests\Interval\BulkDestroyTimeIntervalRequest;
 use App\Http\Requests\Interval\BulkEditTimeIntervalRequest;
 use App\Http\Requests\Interval\CreateTimeIntervalRequest;
@@ -28,6 +29,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use MessagePack\MessagePack;
@@ -36,7 +38,7 @@ use Settings;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
 use Storage;
 use Str;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 use Validator;
 use ZipArchive;
@@ -86,6 +88,14 @@ class IntervalController extends ItemController
             return $filters;
         });
 
+        Filter::listen(Filter::getActionFilterName(), static function ($items) {
+            $items->each(
+                static fn (TimeInterval $interval) => $interval->append(TimeInterval::SCREENSHOT_URL_ATTRIBUTES)
+            );
+
+            return $items;
+        });
+
         return $this->_index($request);
     }
 
@@ -123,6 +133,11 @@ class IntervalController extends ItemController
      */
     public function show(ShowIntervalRequest $request): JsonResponse
     {
+        Filter::listen(
+            Filter::getActionFilterName(),
+            static fn (?TimeInterval $interval) => $interval?->append(TimeInterval::SCREENSHOT_URL_ATTRIBUTES),
+        );
+
         return $this->_show($request);
     }
 
@@ -450,7 +465,6 @@ class IntervalController extends ItemController
      * @apiSuccess {String}   created_at     Creation timestamp
      * @apiSuccess {String}   updated_at     Last update timestamp
      * @apiSuccess {Boolean}  is_manual      Indicates whether the time was logged manually (true) or automatically
-     * @apiSuccess {Integer}  has_screenshot Indicates if there is a screenshot for this interval
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
@@ -462,8 +476,7 @@ class IntervalController extends ItemController
      *   "end_at": "2024-08-16T18:10:00.000000Z",
      *   "created_at": "2024-08-16T20:07:14.000000Z",
      *   "updated_at": "2024-08-16T20:07:14.000000Z",
-     *   "is_manual": true,
-     *   "has_screenshot": true
+     *   "is_manual": true
      * }
      *
      * @apiUse          400Error
@@ -488,7 +501,8 @@ class IntervalController extends ItemController
         $screenshotService = $this->screenshotService;
 
         if ($request->hasFile('screenshot') && optional($request->file('screenshot'))->isValid()) {
-            $path = $request->file('screenshot')->store('tmp');
+            // The upload is only a local temporary copy; the encoded screenshot goes to the default disk.
+            $path = $request->file('screenshot')->store('tmp', 'local');
 
             CatEvent::listen(
                 Filter::getAfterActionEventName(),
@@ -499,8 +513,8 @@ class IntervalController extends ItemController
                     if ($mustCapture
                         || ($optionalCapture && $interval->user->screenshots_state === ScreenshotsState::REQUIRED)
                     ) {
-                        $screenshotService->saveScreenshot(Storage::path($path), $interval);
-                        dispatch(static fn() => Storage::delete($path))->delay(now()->addMinute());
+                        $screenshotService->saveScreenshot(Storage::disk('local')->path($path), $interval);
+                        dispatch(static fn() => Storage::disk('local')->delete($path))->delay(now()->addMinute());
                     }
                 }
             );
@@ -518,28 +532,96 @@ class IntervalController extends ItemController
         return $this->_create($request);
     }
 
-    public function showScreenshot(ScreenshotRequest $request, TimeInterval $interval): BinaryFileResponse
+    /**
+     * @api             {get} /time-intervals/:id/screenshot Screenshot
+     * @apiDescription  Stream the screenshot of an interval. Not authenticated: access is granted by the
+     *                  temporary signature (10 min) of the URL from `screenshot_url` or `screenshot-urls`.
+     *                  Used only with the local disk; on S3 the URLs point to the bucket directly.
+     *
+     * @apiVersion      4.0.0
+     * @apiName         Screenshot
+     * @apiGroup        Time Interval
+     *
+     * @apiParam {Integer}  expires    Signature expiration timestamp
+     * @apiParam {String}   signature  URL signature
+     *
+     * @apiSuccess {File}   screenshot JPEG image
+     * @apiError (403) InvalidSignature Missing, invalid or expired signature
+     * @apiUse          ItemNotFoundError
+     */
+    public function showScreenshot(Request $request, int $interval): StreamedResponse
     {
-        $path = $this->screenshotService->getScreenshotPath($interval);
-        if (!Storage::exists($path)) {
-            abort(404);
-        }
-
-        $fullPath = Storage::path($path);
-
-        return response()->file($fullPath);
+        return $this->streamScreenshot($request, $this->screenshotService->getScreenshotPath($interval));
     }
 
-    public function showThumbnail(ScreenshotRequest $request, TimeInterval $interval): BinaryFileResponse
+    /**
+     * @api             {get} /time-intervals/:id/thumb Thumbnail
+     * @apiDescription  Stream the screenshot thumbnail of an interval, see Screenshot.
+     *
+     * @apiVersion      4.0.0
+     * @apiName         Thumbnail
+     * @apiGroup        Time Interval
+     *
+     * @apiParam {Integer}  expires    Signature expiration timestamp
+     * @apiParam {String}   signature  URL signature
+     *
+     * @apiSuccess {File}   thumbnail  JPEG image
+     * @apiError (403) InvalidSignature Missing, invalid or expired signature
+     * @apiUse          ItemNotFoundError
+     */
+    public function showThumbnail(Request $request, int $interval): StreamedResponse
     {
-        $path = $this->screenshotService->getThumbPath($interval);
-        if (!Storage::exists($path)) {
-            abort(404);
-        }
+        return $this->streamScreenshot($request, $this->screenshotService->getThumbPath($interval));
+    }
 
-        $fullPath = Storage::path($path);
+    /**
+     * @throws Throwable
+     */
+    private function streamScreenshot(Request $request, string $path): StreamedResponse
+    {
+        // Checked here rather than by the "signed" middleware: its InvalidSignatureException renders as 500
+        throw_unless(
+            $request->hasValidSignature(absolute: false),
+            new AuthorizationException(AuthorizationException::ERROR_TYPE_FORBIDDEN)
+        );
+        abort_unless(Storage::exists($path), 404);
 
-        return response()->file($fullPath);
+        return Storage::response($path, headers: [
+            'Content-Type' => 'image/jpeg',
+            'Cache-Control' => 'private, max-age=' . ScreenshotService::URL_TTL_MINUTES * 60,
+        ]);
+    }
+
+    /**
+     * @api             {get} /time-intervals/:id/screenshot-urls Screenshot URLs
+     * @apiDescription  Fresh temporary URLs of the interval screenshot and thumbnail
+     *                  (for pages open longer than the URL lifetime and for report payloads without URLs)
+     *
+     * @apiVersion      4.0.0
+     * @apiName         ScreenshotUrls
+     * @apiGroup        Time Interval
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiSuccess {String}   screenshot_url  Temporary URL of the screenshot
+     * @apiSuccess {String}   thumbnail_url   Temporary URL of the thumbnail
+     * @apiSuccess {Integer}  expires_in      URL lifetime in seconds
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "screenshot_url": "/api/time-intervals/1/screenshot?expires=1698316277&signature=...",
+     *    "thumbnail_url": "/api/time-intervals/1/thumb?expires=1698316277&signature=...",
+     *    "expires_in": 600
+     *  }
+     *
+     * @apiUse          UnauthorizedError
+     * @apiUse          ForbiddenError
+     * @apiUse          ItemNotFoundError
+     */
+    public function screenshotUrls(ScreenshotRequest $request, TimeInterval $interval): JsonResponse
+    {
+        return responder()->success($this->screenshotService->getTemporaryUrls($interval))->respond();
     }
 
     public function putScreenshot(PutScreenshotRequest $request, TimeInterval $interval): JsonResponse
@@ -761,7 +843,7 @@ class IntervalController extends ItemController
             }
             try {
                 dispatch(static function () use ($screenshotService, $interval, $screenshotPath) {
-                    $screenshotService->saveScreenshot(Storage::path($screenshotPath), $interval);
+                    $screenshotService->saveScreenshot(Storage::disk('local')->path($screenshotPath), $interval);
                     $interval->screenshot_id = null;
                     $interval->save();
                 });

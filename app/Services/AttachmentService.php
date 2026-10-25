@@ -4,14 +4,18 @@ namespace App\Services;
 
 use App\Contracts\AttachmentAble;
 use App\Enums\AttachmentStatus;
+use App\Helpers\StorageHelper;
 use App\Jobs\VerifyAttachmentHash;
 use App\Models\Attachment;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\TaskComment;
+use DateTimeInterface;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
 use Storage;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 
 class AttachmentService implements \App\Contracts\AttachmentService
 {
@@ -161,6 +165,29 @@ class AttachmentService implements \App\Contracts\AttachmentService
     public function getFullPath(Attachment $attachment): string
     {
         return $this->storage->path($this->getPath($attachment));
+    }
+
+    public function getTemporaryUrl(Attachment $attachment, DateTimeInterface $expiresAt): ?string
+    {
+        // SigV4 presigned URLs live at most 7 days; longer links (the UI offers 14 days) use the signed
+        // app route, which streams from any disk.
+        if (StorageHelper::isLocal($this::DISK) || $expiresAt > now()->addWeek()) {
+            return null;
+        }
+
+        $options = [
+            // Same download headers as AttachmentController::streamDownloadLogic() sends for the local disk
+            'ResponseContentDisposition' => HeaderUtils::makeDisposition(
+                HeaderUtils::DISPOSITION_ATTACHMENT,
+                $attachment->original_name,
+                str_replace(['%', '/', '\\'], '_', Str::ascii($attachment->original_name)) ?: 'attachment',
+            ),
+        ];
+        if ($attachment->mime_type !== '') {
+            $options['ResponseContentType'] = $attachment->mime_type;
+        }
+
+        return $this->storage->temporaryUrl($this->getPath($attachment), $expiresAt, $options);
     }
 
     public function readStream(Attachment $attachment)
