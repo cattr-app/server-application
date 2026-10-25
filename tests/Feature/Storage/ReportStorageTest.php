@@ -6,9 +6,13 @@ use App\Jobs\GenerateAndSendReport;
 use App\Models\User;
 use App\Notifications\ReportGenerated;
 use App\Reports\DashboardExport;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
+use League\Flysystem\FilesystemAdapter as FlysystemAdapter;
+use League\Flysystem\FilesystemOperator;
+use RuntimeException;
 use Symfony\Component\Mime\Email;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
@@ -16,6 +20,9 @@ use Tests\TestCase;
 class ReportStorageTest extends TestCase
 {
     private User $admin;
+
+    /** @var resource|null the last stream handed out by nonSeekableStream() */
+    private $source = null;
 
     protected function setUp(): void
     {
@@ -77,17 +84,63 @@ class ReportStorageTest extends TestCase
         ];
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('reportDrivers')]
-    public function test_report_mail_attaches_file_from_the_reports_disk(string $driver): void
+    /**
+     * Replace the (fake) reports disk with one whose readStream() returns $readStream($path).
+     */
+    private function swapReportsReadStream(callable $readStream): void
     {
-        config(['filesystems.disks.reports.driver' => $driver]);
-        Storage::fake('reports');
+        $fake = Storage::disk('reports');
+        Storage::set('reports', new class ($fake->getDriver(), $fake->getAdapter(), $fake->getConfig(), $readStream)
+            extends FilesystemAdapter {
+            /** @var callable */
+            private $reader;
 
-        $this->generateReport();
-        $path = $this->reportPath();
-        $stored = Storage::disk('reports')->get($path);
-        $this->assertNotEmpty($stored);
+            public function __construct(
+                FilesystemOperator $driver,
+                FlysystemAdapter $adapter,
+                array $config,
+                callable $reader
+            ) {
+                parent::__construct($driver, $adapter, $config);
+                $this->reader = $reader;
+            }
 
+            public function readStream($path)
+            {
+                return ($this->reader)($path);
+            }
+        });
+    }
+
+    /**
+     * A non-seekable read stream, like the HTTP body stream an S3 disk returns from readStream():
+     * the read end of a socket pair. Remembered in $this->source to check that it gets closed.
+     *
+     * @return resource
+     */
+    private function nonSeekableStream(string $content)
+    {
+        // the whole content has to fit into the socket buffer, the writer is closed before reading
+        $this->assertLessThan(64 * 1024, strlen($content));
+        [$reader, $writer] = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, STREAM_IPPROTO_IP);
+        fwrite($writer, $content);
+        fclose($writer);
+
+        $this->assertFalse(stream_get_meta_data($reader)['seekable']);
+        $this->assertSame(-1, @fseek($reader, 0));
+
+        return $this->source = $reader;
+    }
+
+    private function useNonSeekableReportStream(): void
+    {
+        $this->swapReportsReadStream(
+            fn (string $path) => $this->nonSeekableStream(Storage::disk('reports')->get($path))
+        );
+    }
+
+    private function sentNotification(): ReportGenerated
+    {
         $sent = null;
         Notification::assertSentTo(
             $this->admin,
@@ -99,7 +152,26 @@ class ReportStorageTest extends TestCase
             }
         );
 
-        $mail = $sent->toMail($this->admin);
+        return $sent;
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('reportDrivers')]
+    public function test_report_mail_attaches_file_from_the_reports_disk(string $driver): void
+    {
+        config(['filesystems.disks.reports.driver' => $driver]);
+        Storage::fake('reports');
+
+        $this->generateReport();
+        $path = $this->reportPath();
+        $stored = Storage::disk('reports')->get($path);
+        $this->assertNotEmpty($stored);
+
+        if ($driver === 's3') {
+            // Storage::fake() is a local disk: hand bufferReport() a non-seekable stream like a real S3 disk does
+            $this->useNonSeekableReportStream();
+        }
+
+        $mail = $this->sentNotification()->toMail($this->admin);
         $this->assertSame([], $mail->attachments);
         $this->assertCount(1, $mail->rawAttachments);
         $attachment = $mail->rawAttachments[0];
@@ -119,5 +191,55 @@ class ReportStorageTest extends TestCase
             chunk_split(base64_encode($stored), 76, "\r\n"),
             implode('', iterator_to_array($email->toIterable(), false)),
         );
+
+        if ($driver === 's3') {
+            // the non-seekable source was read and closed by bufferReport()
+            $this->assertNotNull($this->source);
+            $this->assertFalse(is_resource($this->source));
+        }
+    }
+
+    public function test_truncated_report_stream_fails_instead_of_mailing_a_partial_report(): void
+    {
+        Storage::fake('reports');
+        $this->generateReport();
+        $stored = Storage::disk('reports')->get($this->reportPath());
+        $this->swapReportsReadStream(fn () => $this->nonSeekableStream(substr($stored, 0, -1)));
+
+        try {
+            $this->sentNotification()->toMail($this->admin);
+            $this->fail('A truncated report has been attached');
+        } catch (RuntimeException $e) {
+            $this->assertStringContainsString(
+                sprintf('copied %d of %d bytes', strlen($stored) - 1, strlen($stored)),
+                $e->getMessage(),
+            );
+        }
+
+        $this->assertFalse(is_resource($this->source));
+    }
+
+    public function test_report_fails_when_the_buffer_cannot_be_opened(): void
+    {
+        Storage::fake('reports');
+        $this->generateReport();
+        $path = $this->reportPath();
+        $this->useNonSeekableReportStream();
+
+        $notification = new class ($path, 'reports') extends ReportGenerated {
+            protected function openBuffer()
+            {
+                return false;
+            }
+        };
+
+        try {
+            $notification->toMail($this->admin);
+            $this->fail('The report has been attached without a buffer');
+        } catch (RuntimeException $e) {
+            $this->assertStringContainsString('Unable to open a buffer', $e->getMessage());
+        }
+
+        $this->assertFalse(is_resource($this->source));
     }
 }

@@ -8,6 +8,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
+use Throwable;
 
 class ReportGenerated extends Notification implements ShouldQueue
 {
@@ -53,15 +54,46 @@ class ReportGenerated extends Notification implements ShouldQueue
             throw new RuntimeException("Unable to read report $this->fileName from the $this->drive disk");
         }
 
+        $buffer = false;
         try {
-            $buffer = fopen(self::BUFFER, 'w+b');
-            stream_copy_to_stream($source, $buffer);
+            $buffer = $this->openBuffer();
+            if ($buffer === false) {
+                throw new RuntimeException("Unable to open a buffer for report $this->fileName");
+            }
+
+            // fail the job rather than mail a truncated report
+            $copied = stream_copy_to_stream($source, $buffer);
+            $expected = Storage::drive($this->drive)->size($this->fileName);
+            if ($copied !== $expected) {
+                throw new RuntimeException(sprintf(
+                    'Report %s: copied %s of %d bytes from the %s disk',
+                    $this->fileName,
+                    var_export($copied, true),
+                    $expected,
+                    $this->drive,
+                ));
+            }
+
             rewind($buffer);
+        } catch (Throwable $e) {
+            if (is_resource($buffer)) {
+                fclose($buffer);
+            }
+
+            throw $e;
         } finally {
             fclose($source);
         }
 
         return $buffer;
+    }
+
+    /**
+     * @return resource|false
+     */
+    protected function openBuffer()
+    {
+        return fopen(self::BUFFER, 'w+b');
     }
 
     public function toArray($notifiable): array
