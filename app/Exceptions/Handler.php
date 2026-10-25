@@ -17,6 +17,7 @@ use PDOException;
 use Str;
 use Symfony\Component\HttpFoundation\Response;
 use Flugg\Responder\Exceptions\Http\HttpException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Throwable;
 
@@ -26,6 +27,15 @@ use Throwable;
 class Handler extends ExceptionHandler
 {
     use ConvertsExceptions;
+
+    /**
+     * Error codes for HTTP exceptions whose status already has an application-specific code.
+     * Other statuses get the snake-cased reason phrase (e.g. "too_many_requests").
+     */
+    private const HTTP_ERROR_CODES = [
+        Response::HTTP_UNAUTHORIZED => Entities\AuthorizationException::ERROR_TYPE_UNAUTHORIZED,
+        Response::HTTP_FORBIDDEN => Entities\AuthorizationException::ERROR_TYPE_FORBIDDEN,
+    ];
 
     /**
      * A list of exception types with their corresponding custom log levels.
@@ -118,6 +128,24 @@ class Handler extends ExceptionHandler
             return $this->renderResponse($e);
         }
 
+        if ($e instanceof HttpExceptionInterface) {
+            return $this->renderSymfonyHttpException($e);
+        }
+
         return responder()->error($e->getCode(), $e->getMessage())->respond();
+    }
+
+    /**
+     * Keep the status and headers of HTTP exceptions (abort(), signed URLs, throttling, maintenance mode, ...)
+     * instead of flattening them to 500.
+     */
+    protected function renderSymfonyHttpException(HttpExceptionInterface $e): Response
+    {
+        $status = $e->getStatusCode();
+        $reason = Response::$statusTexts[$status] ?? 'HTTP error';
+
+        return responder()
+            ->error(self::HTTP_ERROR_CODES[$status] ?? Str::slug($reason, '_'), $e->getMessage() ?: $reason)
+            ->respond($status, $e->getHeaders());
     }
 }
