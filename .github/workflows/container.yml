@@ -59,7 +59,7 @@ jobs:
           IMAGE: ${{ steps.build.outputs.image-with-tag }}
         run: |
           set -euo pipefail
-          buildah push "${IMAGE}" "oci-archive:${RUNNER_TEMP}/image.tar"
+          buildah push "${IMAGE}" "oci:${RUNNER_TEMP}/image-oci"
 
       # The scan is advisory: it never fails the job. Findings (HIGH/CRITICAL
       # with an available fix) are written to the job summary.
@@ -70,7 +70,7 @@ jobs:
 
           docker run --rm -v "${RUNNER_TEMP}:/scan" "${TRIVY_IMAGE}" \
             image \
-            --input /scan/image.tar \
+            --input /scan/image-oci \
             --scanners vuln \
             --severity HIGH,CRITICAL \
             --ignore-unfixed \
