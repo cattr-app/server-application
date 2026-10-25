@@ -38,6 +38,14 @@ return [
     // Requests per minute and IP to the public signed screenshot routes (time-intervals/{id}/screenshot|thumb).
     // A timeline day of a user with 1-minute screenshots holds up to ~600 thumbnails (10 h of work).
     'screenshots_rate_limit' => (int) env('SCREENSHOTS_RATE_LIMIT', 600),
+    // Offline screenshots (offline-sync/upload-screenshots) are processed within the upload request, which must
+    // finish within Octane's max_execution_time (90 s). Larger archives are rejected before anything is extracted.
+    // 500 entries ≈ 5 working days of 96 screenshots, ~40 s at ~75 ms per 1920×1080 screenshot on the local disk.
+    'offline_screenshots' => [
+        'max_files' => (int) env('OFFLINE_SCREENSHOTS_MAX_FILES', 500),
+        // Total uncompressed size of all archive entries
+        'max_size' => (int) env('OFFLINE_SCREENSHOTS_MAX_SIZE_BYTES', 1024 * 1024 * 1024),
+    ],
     'user_activity' => [
         'online_status_time' => 60,
         'heartbeat_period' => 30,

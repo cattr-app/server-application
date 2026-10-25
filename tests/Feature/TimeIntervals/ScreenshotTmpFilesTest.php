@@ -21,7 +21,6 @@ use Tests\Facades\ProjectFactory;
 use Tests\Facades\TaskFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
-use ZipArchive;
 
 /**
  * Uploaded screenshots must be processed within the request and leave nothing in storage/app/tmp.
@@ -31,12 +30,11 @@ use ZipArchive;
  */
 class ScreenshotTmpFilesTest extends TestCase
 {
+    use UploadsOfflineScreenshots;
+
     private const CREATE_URI = 'time-intervals/create';
-    private const OFFLINE_URI = 'offline-sync/upload-screenshots';
 
     private ScreenshotService $screenshotService;
-    /** @var array<int, string> Tokens of users created with a fixed ID */
-    private array $tokens = [];
 
     protected function setUp(): void
     {
@@ -284,54 +282,5 @@ class ScreenshotTmpFilesTest extends TestCase
             $intervalData + ['screenshot' => UploadedFile::fake()->image('screenshot.png', 320, 240)],
             ['Accept' => 'application/json'],
         );
-    }
-
-    private function createOfflineInterval(User $user, Task $task): TimeInterval
-    {
-        $interval = IntervalFactory::forUser($user)->forTask($task)->create();
-        $interval->update(['screenshot_id' => (string)Str::uuid()]);
-
-        return $interval;
-    }
-
-    /**
-     * Creates a regular user with the given ID, to cover user IDs of different lengths.
-     */
-    private function createUserWithId(int $id): User
-    {
-        if (User::whereKey($id)->exists()) {
-            $this->markTestSkipped("User ID $id is taken.");
-        }
-
-        $user = User::forceCreate(['id' => $id] + UserFactory::createRandomModelData());
-        $this->tokens[$id] = $user->createToken('testing-token', ['*'], now()->addDay())->plainTextToken;
-
-        return $user;
-    }
-
-    /**
-     * @param array<string, string> $entries File name => content
-     */
-    private function uploadOfflineArchive(User $user, array $entries): \Illuminate\Testing\TestResponse
-    {
-        $zipPath = tempnam(sys_get_temp_dir(), 'offline');
-        $zip = new ZipArchive();
-        $zip->open($zipPath, ZipArchive::OVERWRITE);
-        foreach ($entries as $name => $content) {
-            $zip->addFromString($name, $content);
-        }
-        $zip->close();
-
-        return $this->actingAs($this->tokens[$user->id] ?? $user)->post(
-            self::OFFLINE_URI,
-            ['file' => new UploadedFile($zipPath, 'screenshots.cattr', 'application/zip', null, true)],
-            ['Accept' => 'application/json'],
-        );
-    }
-
-    private function assertTmpIsEmpty(): void
-    {
-        $this->assertSame([], Storage::disk('local')->allFiles('tmp'), 'Files left in storage/app/tmp');
-        $this->assertSame([], Storage::disk('local')->directories('tmp'), 'Directories left in storage/app/tmp');
     }
 }

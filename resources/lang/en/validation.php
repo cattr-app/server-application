@@ -114,7 +114,10 @@ return [
         'screenshot_not_attached' => 'Screenshot not attached (see logs)',
         'time_interval_already_exist' => 'The time for this interval already exists.',
         'time_interval_added' => 'Added',
-        'wrong_extension' => 'File extension should be .cattr'
+        'wrong_extension' => 'File extension should be .cattr',
+        'too_many_files' => 'The archive contains too many screenshots (:count), the maximum is :max',
+        'too_large' => 'The unpacked screenshots are too large, the maximum is :max MB',
+        'wrong_file_name' => 'The archive must contain only screenshot files without folders'
     ],
 
     'tasks-relations' => [

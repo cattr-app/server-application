@@ -149,7 +149,10 @@ return [
         'screenshot_not_attached' => 'Скриншот не прикреплён (см. логи)',
         'time_interval_already_exist' => 'Время для этого интервала уже существует.',
         'time_interval_added' => 'Добавлен',
-        'wrong_extension' => 'Расширение файла должно быть .cattr'
+        'wrong_extension' => 'Расширение файла должно быть .cattr',
+        'too_many_files' => 'Архив содержит слишком много скриншотов (:count), максимум — :max',
+        'too_large' => 'Распакованные скриншоты слишком большие, максимум — :max МБ',
+        'wrong_file_name' => 'Архив должен содержать только файлы скриншотов без папок'
     ],
 
     'tasks-relations' => [

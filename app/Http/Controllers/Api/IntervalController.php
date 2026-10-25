@@ -32,6 +32,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 use MessagePack\MessagePack;
 use phpseclib4\Crypt\RSA;
 use Settings;
@@ -807,6 +808,9 @@ class IntervalController extends ItemController
             __('Cannot open file.' . is_int($zipOpenResult) ? " ZipArchive error code: $zipOpenResult" : ""),
         );
 
+        // Before the temporary directory is created: a rejected archive leaves nothing behind.
+        $this->validateOfflineScreenshotsArchive($zip);
+
         // The archive is extracted to the local disk of this web container and processed within the request,
         // so the queue worker does not need access to these files. The directory is removed when the request
         // ends, also on failure; leftovers of interrupted requests are removed by cattr:tmp:clean.
@@ -826,6 +830,59 @@ class IntervalController extends ItemController
         }
 
         return responder()->success($creationResult)->respond();
+    }
+
+    /**
+     * Rejects the archive before anything is extracted or attached if it cannot be processed within the request
+     * (too many entries or too large when unpacked) or if an entry is not a plain file name.
+     *
+     * The desktop application exports a flat list of `<user_id>_<screenshot_id>` entries without directories.
+     *
+     * @throws ValidationException
+     */
+    private function validateOfflineScreenshotsArchive(ZipArchive $zip): void
+    {
+        $maxFiles = (int)config('app.offline_screenshots.max_files');
+        $maxSize = (int)config('app.offline_screenshots.max_size');
+
+        $fileCount = $zip->count();
+        if ($fileCount > $maxFiles) {
+            throw ValidationException::withMessages([
+                'file' => __('validation.offline-sync.too_many_files', ['count' => $fileCount, 'max' => $maxFiles]),
+            ]);
+        }
+
+        $totalSize = 0;
+        for ($index = 0; $index < $fileCount; $index++) {
+            $name = $zip->getNameIndex($index);
+            $stat = $zip->statIndex($index);
+
+            if (!is_string($name) || $stat === false || !self::isPlainArchiveEntryName($name)) {
+                throw ValidationException::withMessages([
+                    'file' => __('validation.offline-sync.wrong_file_name'),
+                ]);
+            }
+
+            $totalSize += $stat['size'];
+            if ($totalSize > $maxSize) {
+                throw ValidationException::withMessages([
+                    'file' => __('validation.offline-sync.too_large', [
+                        'max' => round($maxSize / 1024 / 1024),
+                    ]),
+                ]);
+            }
+        }
+    }
+
+    /**
+     * A plain file name: no directories, no parent references, no absolute or drive paths and no NUL bytes.
+     */
+    private static function isPlainArchiveEntryName(string $name): bool
+    {
+        return $name !== ''
+            && strpbrk($name, "/\\\0") === false
+            && !str_contains($name, '..')
+            && preg_match('/^[A-Za-z]:/', $name) !== 1;
     }
 
     /**
