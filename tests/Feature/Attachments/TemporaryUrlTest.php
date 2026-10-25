@@ -6,6 +6,7 @@ use App\Enums\AttachmentStatus;
 use App\Models\Attachment;
 use App\Models\User;
 use App\Services\AttachmentService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Tests\Facades\TaskFactory;
 use Tests\Facades\UserFactory;
@@ -59,6 +60,10 @@ class TemporaryUrlTest extends TestCase
 
         $this->assertStringStartsWith("/api/tmp-attachment-link/{$this->attachment->id}?", $url);
         $this->assertSame(now()->addSeconds(30)->getTimestamp(), (int)$query['expires']);
+
+        // The signed link must work without the bearer token set by actingAs()
+        $this->withoutHeader('Authorization');
+        Auth::forgetGuards();
 
         $this->get($url)->assertOk()->assertStreamedContent(self::CONTENT);
     }
