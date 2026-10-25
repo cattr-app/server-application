@@ -1,0 +1,95 @@
+name: Container
+
+# Advisory: builds the application image the same way release.yml does
+# (same Dockerfile, buildah, linux/amd64, OCI) without pushing, then scans it
+# with Trivy. Only the application layer is verified: the build uses the
+# published builder-latest / runtime-latest base images (the Dockerfile
+# defaults), so changes to build/base/** and build/packages/** are not
+# covered here. Until release.yml has published the Wolfi base images and
+# moved builder-latest / runtime-latest to them, those tags still point at the
+# legacy Alpine/nginx images and this build is expected to fail.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    name: Container build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    env:
+      # See the Trivy note in pr-checks.yml: official image pinned by digest
+      # instead of the (once tag-hijacked) trivy-action.
+      TRIVY_IMAGE: aquasec/trivy@sha256:790fd66d1697395d8693d1acaa1ea702406a20f109b6fc7bac8db623eca6c06c  # 0.76.1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      # A failing build is real breakage and fails the job.
+      - name: Build Cattr server
+        id: build
+        uses: redhat-actions/buildah-build@719e3c40d8af9790c23eca13f7daa339f2867034  # v3.1.0
+        with:
+          context: .
+          containerfiles: |
+            ./Dockerfile
+          image: server
+          tags: ci
+          # Same as release.yml: Cattr images are linux/amd64 only, OCI format.
+          arch: amd64
+          oci: true
+          build-args: |
+            APP_VERSION=0.0.0-ci
+          layers: true
+
+      - name: Export image
+        env:
+          IMAGE: ${{ steps.build.outputs.image-with-tag }}
+        run: |
+          set -euo pipefail
+          buildah push "${IMAGE}" "oci-archive:${RUNNER_TEMP}/image.tar"
+
+      # The scan is advisory: it never fails the job. Findings (HIGH/CRITICAL
+      # with an available fix) are written to the job summary.
+      - name: Scan image with Trivy
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+
+          docker run --rm -v "${RUNNER_TEMP}:/scan" "${TRIVY_IMAGE}" \
+            image \
+            --input /scan/image.tar \
+            --scanners vuln \
+            --severity HIGH,CRITICAL \
+            --ignore-unfixed \
+            --format json \
+            --output /scan/trivy.json \
+            --exit-code 0 \
+            --no-progress
+
+          docker run --rm -v "${RUNNER_TEMP}:/scan" "${TRIVY_IMAGE}" \
+            convert --scanners vuln --format table --output /scan/trivy.txt /scan/trivy.json
+
+          cat "${RUNNER_TEMP}/trivy.txt"
+
+          {
+            echo '## Trivy image scan (advisory)'
+            echo
+            echo 'HIGH/CRITICAL vulnerabilities with an available fix:'
+            echo
+            echo '```'
+            cat "${RUNNER_TEMP}/trivy.txt"
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY}"

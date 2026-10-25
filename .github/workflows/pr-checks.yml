@@ -1,0 +1,172 @@
+name: PR checks
+
+# Required PR checks (Dependency Review, actionlint, Hadolint, Trivy config)
+# plus the advisory zizmor audit. No workflow-level `paths` filters on
+# purpose: required checks must report on every pull request.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  dependency-review:
+    name: Dependency Review
+    # Diff-based check: it compares the PR head with its base, so it only
+    # applies to pull requests. On push the job is skipped (reported as
+    # successful for required checks).
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Review dependency changes
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294  # v5.0.0
+        with:
+          fail-on-severity: high
+          fail-on-scopes: runtime, development
+          # Results go to the job summary; posting a PR comment would need
+          # `pull-requests: write`, which fork PRs do not get anyway.
+          comment-summary-in-pr: never
+
+  actionlint:
+    name: actionlint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Lints every file under .github/workflows (actionlint's default when
+      # run from the repository root); the image bundles shellcheck.
+      - name: Lint workflows
+        uses: docker://rhysd/actionlint@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667  # 1.7.12
+        with:
+          args: -color
+
+  hadolint:
+    name: Hadolint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Picks up .hadolint.yaml from the repository root.
+      - name: Lint Dockerfile
+        uses: docker://hadolint/hadolint@sha256:32dac94127fd60b7b7e3fbfc65e1383b9b5e25c9bfd7b8536de7a539fe68a12d  # v2.15.1
+        with:
+          args: hadolint Dockerfile
+
+  trivy-config:
+    name: Trivy config
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Trivy runs from the official image pinned by digest instead of
+      # aquasecurity/trivy-action / setup-trivy: those actions had their tags
+      # hijacked in March 2026 (GHSA-69fq-xp46-6x23). 0.76.1 is newer than every
+      # affected release and patched for all published trivy advisories
+      # (latest fix: 0.72.0); the digest is immutable regardless of tags.
+      #
+      # Misconfiguration scanning only (Dockerfile, Helm chart, other IaC).
+      # Vulnerabilities are covered by Dependency Review / Dependabot and
+      # secrets by GitHub secret scanning; see issue #339.
+      - name: Scan configuration
+        uses: docker://aquasec/trivy@sha256:790fd66d1697395d8693d1acaa1ea702406a20f109b6fc7bac8db623eca6c06c  # 0.76.1
+        with:
+          args: >-
+            fs
+            --scanners misconfig
+            --severity MEDIUM,HIGH,CRITICAL
+            --ignorefile .trivyignore.yaml
+            --exit-code 1
+            --no-progress
+            .
+
+  zizmor:
+    name: zizmor (advisory)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      ZIZMOR_IMAGE: ghcr.io/zizmorcore/zizmor@sha256:42d409dbb851d4c5d35a058cf042b828bea1e3f2884378c526eb0974780e18d9  # 1.31.1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Advisory until the baseline is cleaned up: --no-exit-codes keeps the
+      # job green on findings, which are surfaced as annotations and in the
+      # job summary. The read-only token is enough for the online audits and
+      # is what fork PRs get anyway.
+      - name: Audit workflows
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          docker run --rm -e GH_TOKEN -v "${GITHUB_WORKSPACE}:/repo:ro" -w /repo \
+            "${ZIZMOR_IMAGE}" --format github --no-exit-codes .
+
+          {
+            echo '## zizmor findings (advisory)'
+            echo
+            echo '```'
+            docker run --rm -e GH_TOKEN -v "${GITHUB_WORKSPACE}:/repo:ro" -w /repo \
+              "${ZIZMOR_IMAGE}" --format plain --color never --render-links never \
+              --show-audit-urls always --no-exit-codes .
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+  zizmor-sarif:
+    name: zizmor SARIF upload
+    # Code scanning upload needs `security-events: write`, which fork PRs
+    # never get; findings from PRs are shown by the job above instead.
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: write  # Upload SARIF to GitHub code scanning.
+    env:
+      ZIZMOR_IMAGE: ghcr.io/zizmorcore/zizmor@sha256:42d409dbb851d4c5d35a058cf042b828bea1e3f2884378c526eb0974780e18d9  # 1.31.1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Audit workflows
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          docker run --rm -e GH_TOKEN -v "${GITHUB_WORKSPACE}:/repo:ro" -w /repo \
+            "${ZIZMOR_IMAGE}" --format sarif --no-exit-codes . > "${RUNNER_TEMP}/zizmor.sarif"
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370  # v4.39.1
+        with:
+          sarif_file: ${{ runner.temp }}/zizmor.sarif
+          category: zizmor
