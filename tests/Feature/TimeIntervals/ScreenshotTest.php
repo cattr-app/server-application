@@ -7,6 +7,7 @@ use App\Enums\ScreenshotsState;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\User;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\Facades\IntervalFactory;
@@ -137,6 +138,39 @@ class ScreenshotTest extends TestCase
         );
 
         $this->get($url)->assertForbidden();
+    }
+
+    public function test_signed_routes_are_throttled_per_ip(): void
+    {
+        $this->assertSame(600, config('app.screenshots_rate_limit'));
+        config(['app.screenshots_rate_limit' => 3]);
+        Storage::put($this->service->getThumbPath($this->interval), $this->fakeImage());
+        Storage::put($this->service->getScreenshotPath($this->interval), $this->fakeImage());
+
+        // thumbnails and screenshots share one budget
+        $this->get($this->service->getTemporaryUrl($this->interval, true))->assertOk()
+            ->assertHeader('X-RateLimit-Limit', 3);
+        $this->get($this->service->getTemporaryUrl($this->interval))->assertOk();
+        $this->get($this->service->getTemporaryUrl($this->interval, true))->assertOk()
+            ->assertHeader('X-RateLimit-Remaining', 0);
+
+        // Asserted as the exception: App\Exceptions\Handler currently renders HTTP exceptions that are not
+        // responder ones (ThrottleRequestsException, InvalidSignatureException) as 500, fixed separately.
+        $this->withoutExceptionHandling();
+        try {
+            $this->get($this->service->getTemporaryUrl($this->interval));
+            $this->fail('The 4th request within a minute must be throttled');
+        } catch (ThrottleRequestsException $e) {
+            $this->assertSame(429, $e->getStatusCode());
+        }
+
+        // another client is not affected
+        $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.2'])
+            ->get($this->service->getTemporaryUrl($this->interval, true))->assertOk();
+
+        $this->travel(61)->seconds();
+        $this->withServerVariables(['REMOTE_ADDR' => '127.0.0.1'])
+            ->get($this->service->getTemporaryUrl($this->interval, true))->assertOk();
     }
 
     public function test_expired_url_is_forbidden(): void

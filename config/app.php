@@ -35,6 +35,9 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
         // 'store'  => 'redis',
     ],
+    // Requests per minute and IP to the public signed screenshot routes (time-intervals/{id}/screenshot|thumb).
+    // A timeline day of a user with 1-minute screenshots holds up to ~600 thumbnails (10 h of work).
+    'screenshots_rate_limit' => (int) env('SCREENSHOTS_RATE_LIMIT', 600),
     'user_activity' => [
         'online_status_time' => 60,
         'heartbeat_period' => 30,
