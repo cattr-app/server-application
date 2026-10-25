@@ -13,6 +13,13 @@ interface AttachmentService
     /** Longest lifetime of a temporary download link: 7 days, the S3 (SigV4) presigning limit */
     public const MAX_TEMPORARY_URL_SECONDS = 7 * 24 * 60 * 60;
 
+    /**
+     * BAD attachments are moved under this prefix of the attachments disk (quarantine/projects/<project>/<id>):
+     * the file is kept for inspection, while the public key, and every presigned URL issued for it while the
+     * attachment was GOOD, stops resolving.
+     */
+    public const QUARANTINE_DIR = 'quarantine';
+
     public function storeFile(UploadedFile $file, Attachment $attachment): string|false;
 
     public function handleProjectChange(Task $parent): void;
@@ -33,6 +40,7 @@ interface AttachmentService
 
     public function getProjectPath(Project $project): string;
 
+    /** Storage key of the file; quarantine/projects/... for BAD attachments */
     public function getPath(Attachment $attachment): string;
 
     public function getFullPath(Attachment $attachment): string;

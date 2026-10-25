@@ -14,6 +14,7 @@ use DateTimeInterface;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
+use RuntimeException;
 use Storage;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 
@@ -105,11 +106,15 @@ class AttachmentService implements \App\Contracts\AttachmentService
     {
         Attachment::whereProjectId($project->id)->delete();
 
-        if ($this->storage->directoryExists($this->getProjectPath($project)) && !$this->storage->deleteDirectory($this->getProjectPath($project))) {
-            \Log::error("Unable to delete project's attachments directory", [
-                'project_id' => $project->id,
-                'path' => $this->getProjectPath($project)
-            ]);
+        // the project's quarantined (BAD) files go too: their records are gone, nothing refers to them anymore
+        $projectPath = $this->getProjectPath($project);
+        foreach ([$projectPath, $this->getQuarantinePath($projectPath)] as $path) {
+            if ($this->storage->directoryExists($path) && !$this->storage->deleteDirectory($path)) {
+                \Log::error("Unable to delete project's attachments directory", [
+                    'project_id' => $project->id,
+                    'path' => $path
+                ]);
+            }
         }
     }
 
@@ -157,9 +162,19 @@ class AttachmentService implements \App\Contracts\AttachmentService
         return match ($attachment->status) {
             AttachmentStatus::NOT_ATTACHED => "users/{$attachment->user_id}/{$attachment->id}",
             AttachmentStatus::PROCESSING,
-            AttachmentStatus::GOOD,
-            AttachmentStatus::BAD => "projects/{$attachment->project_id}/{$attachment->id}",
+            AttachmentStatus::GOOD => $this->getProjectFilePath($attachment),
+            AttachmentStatus::BAD => $this->getQuarantinePath($this->getProjectFilePath($attachment)),
         };
+    }
+
+    private function getProjectFilePath(Attachment $attachment): string
+    {
+        return "projects/{$attachment->project_id}/{$attachment->id}";
+    }
+
+    private function getQuarantinePath(string $path): string
+    {
+        return $this::QUARANTINE_DIR . "/$path";
     }
 
     public function getFullPath(Attachment $attachment): string
@@ -220,9 +235,33 @@ class AttachmentService implements \App\Contracts\AttachmentService
             $attachment->status = AttachmentStatus::GOOD;
         } elseif ($attachment->status === AttachmentStatus::GOOD && $attachment->hash !== $this->getHashSum($attachment)
         ) {
+            $this->quarantine($attachment);
             $attachment->status = AttachmentStatus::BAD;
         }
+        // BAD is final: the file stays quarantined and is never verified (and turned GOOD) again
 
         $attachment->save();
+    }
+
+    /**
+     * Move the file of an attachment that is about to become BAD from its public key to the quarantine key.
+     * Throws while the file stays at the public key, so the attachment is not marked BAD while presigned URLs
+     * issued for it still work: the verification job fails and is retried.
+     */
+    private function quarantine(Attachment $attachment): void
+    {
+        $from = $this->getProjectFilePath($attachment);
+        $to = $this->getQuarantinePath($from);
+
+        // Nothing at the public key: the file is missing, or a previous attempt has moved it but failed to save
+        // the status. Either way nothing is left to serve, the attachment can become BAD.
+        if (!$this->storage->exists($from)) {
+            return;
+        }
+
+        // S3 has no rename: move() is copy + delete, check the public key is really gone
+        if (!$this->storage->move($from, $to) || $this->storage->exists($from)) {
+            throw new RuntimeException("Unable to quarantine the file of attachment $attachment->id ($from -> $to)");
+        }
     }
 }
