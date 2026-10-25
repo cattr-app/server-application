@@ -164,11 +164,19 @@ the 0.1.x release) as `./chart-0.1`, your 0.1.x values file
 `values-0.1.yaml` (with the same `database.*` credentials as before) and the
 backups from step 1.
 
-1. Create an empty PVC for the 8.0 data directory (same size and
-   StorageClass as `<fullname>-mysql`). Leave `<fullname>-mysql` untouched:
-   it keeps the 8.4 data in case you go forward again.
+1. Create an empty PVC for the 8.0 data directory with the same size and
+   StorageClass as `<fullname>-mysql` (read from the existing claim below).
+   Leave `<fullname>-mysql` untouched: it keeps the 8.4 data in case you go
+   forward again.
 
    ```sh
+   SIZE=$(kubectl -n $NS get pvc $FULL-mysql -o jsonpath='{.spec.resources.requests.storage}')
+   SC=$(kubectl -n $NS get pvc $FULL-mysql -o jsonpath='{.spec.storageClassName}')
+   echo "size=$SIZE storageClass=${SC:-<none>}"   # check both before applying
+   # Omit storageClassName when the original claim has none: an empty string
+   # would disable dynamic provisioning instead of using the default class.
+   SC_LINE=""; [ -n "$SC" ] && SC_LINE="  storageClassName: $SC"
+
    kubectl -n $NS apply -f - <<EOF
    apiVersion: v1
    kind: PersistentVolumeClaim
@@ -176,10 +184,12 @@ backups from step 1.
      name: $FULL-mysql-80
    spec:
      accessModes: [ReadWriteOnce]
+   $SC_LINE
      resources:
        requests:
-         storage: 10Gi
+         storage: $SIZE
    EOF
+   kubectl -n $NS get pvc $FULL-mysql-80   # must become Bound (or Pending until first use with WaitForFirstConsumer)
    ```
 
 2. Deploy 0.1.x on that PVC with the application scaled to zero, so it does
