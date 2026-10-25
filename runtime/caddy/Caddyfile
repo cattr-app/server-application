@@ -62,8 +62,12 @@
     }
 
     route {
+        # Reverb does not look at the client address, so its proxy keeps Caddy's default headers.
         reverse_proxy @websocket 127.0.0.1:8081
 
+        # X-Forwarded-For is overwritten with the client address resolved by trusted_proxies: behind an
+        # ingress Caddy would otherwise append the ingress Pod ("client, ingress") and Laravel, which
+        # trusts only this Caddy (127.0.0.1), would take the ingress IP for the client.
         reverse_proxy @php 127.0.0.1:8090 {
             transport http {
                 read_timeout 300s
@@ -71,12 +75,14 @@
             }
             header_up SERVER_PORT 8080
             header_up REMOTE_ADDR {client_ip}
+            header_up X-Forwarded-For {client_ip}
         }
 
         file_server @static {
             precompressed br gzip
         }
 
+        # see above: X-Forwarded-For carries only the resolved client address
         reverse_proxy 127.0.0.1:8090 {
             transport http {
                 read_timeout 300s
@@ -84,6 +90,7 @@
             }
             header_up SERVER_PORT 8080
             header_up REMOTE_ADDR {client_ip}
+            header_up X-Forwarded-For {client_ip}
         }
     }
 }
