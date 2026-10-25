@@ -103,6 +103,8 @@ jobs:
       # Patch coverage of the lines changed by the PR. Advisory: to make it
       # blocking later, add `--fail-under=<percent>` to the diff-cover call.
       - name: Patch coverage (diff-cover)
+        # Advisory: a diff-cover or PyPI failure must not fail the required job.
+        continue-on-error: true
         if: ${{ github.event_name == 'pull_request' && !cancelled() && hashFiles('coverage/cobertura.xml') != '' }}
         run: |
           set -euo pipefail
