@@ -65,10 +65,15 @@ are set, `provision` (`cattr:make:admin`; skipped if the email exists).
   Helm creates hooks one at a time, so two migrations never run in parallel
   for one release.
 - If it fails as a `pre-install`/`pre-upgrade` hook (the default with an
-  external database), `helm install/upgrade` fails **before** any workload is
-  changed: the old Pods keep running the old version, the release is marked
-  `failed`. Inspect `kubectl logs job/<fullname>-setup`, fix the cause and run
-  the upgrade again (or `helm rollback`). The Job is kept until the next
+  external database), Helm stops **before** any workload is created or
+  changed, and the release is marked `failed`:
+  - failed `pre-install` (first install): no application workloads exist
+    yet. Fix the cause and run `helm install` again (after
+    `helm uninstall`, or with `helm upgrade --install`);
+  - failed `pre-upgrade`: the old Pods keep running the old version. Fix
+    the cause and run the upgrade again, or `helm rollback`.
+
+  Inspect `kubectl logs job/<fullname>-setup`. The Job is kept until the next
   attempt; its hook Secret `<fullname>-setup` is kept after a failure too.
 - Every application Pod starts with init container `wait-for-migrations`
   (`php artisan migrate:status --pending=1`): new code never starts against a
