@@ -22,7 +22,7 @@
     "dependencies": {
         "@amazingcat/cattr-ui": "^1.3.14",
         "@svgdotjs/svg.js": "^3.2.0",
-        "apidoc": "0.29.0",
+        "apidoc": "1.2.0",
         "axios": "^1.18.5",
         "caret-pos": "^2.0.0",
         "chart.js": "^4.3.3",
