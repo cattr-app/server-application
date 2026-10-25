@@ -99,7 +99,8 @@ class ModuleActivatorService implements ActivatorInterface
 
     public function setActiveByName(string $name, bool $active): void
     {
-        $this->denyMutation();
+        // module:make calls this after generating files; activation stays env-controlled.
+        $this->warnNothingChanged('setActiveByName');
     }
 
     public function delete(Module $module): void

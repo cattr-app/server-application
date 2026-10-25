@@ -182,7 +182,6 @@ class ModuleActivatorServiceTest extends TestCase
             'enable' => static fn () => $activator->enable($module),
             'disable' => static fn () => $activator->disable($module),
             'setActive' => static fn () => $activator->setActive($module, true),
-            'setActiveByName' => static fn () => $activator->setActiveByName('CattrRedmineIntegration', true),
         ];
 
         foreach ($mutations as $method => $mutation) {
@@ -197,7 +196,7 @@ class ModuleActivatorServiceTest extends TestCase
         self::assertFalse($activator->hasStatus($module, true));
     }
 
-    public function test_delete_and_reset_are_logged_no_ops(): void
+    public function test_delete_reset_and_set_active_by_name_are_logged_no_ops(): void
     {
         $logger = new class {
             public array $warnings = [];
@@ -213,23 +212,27 @@ class ModuleActivatorServiceTest extends TestCase
         $activator = $this->activator();
         $activator->delete($this->redmineModule());
         $activator->reset();
+        $activator->setActiveByName('CattrRedmineIntegration', false);
 
         self::assertSame([
             'Module activation is environment-controlled; delete changed nothing.',
             'Module activation is environment-controlled; reset changed nothing.',
+            'Module activation is environment-controlled; setActiveByName changed nothing.',
         ], $logger->warnings);
         self::assertTrue($activator->hasStatus('CattrRedmineIntegration', true));
     }
 
-    public function test_delete_and_reset_do_not_fail_without_a_working_logger(): void
+    public function test_logged_no_ops_do_not_fail_without_a_working_logger(): void
     {
         $activator = $this->activator();
         $activator->delete($this->redmineModule());
         $activator->reset();
+        $activator->setActiveByName('CattrRedmineIntegration', true);
 
         $this->container->bind('log', static fn () => throw new RuntimeException('logger unavailable'));
         $activator->delete($this->redmineModule());
         $activator->reset();
+        $activator->setActiveByName('CattrRedmineIntegration', true);
 
         self::assertFalse($activator->hasStatus('CattrRedmineIntegration', true));
     }

@@ -54,10 +54,22 @@ export async function localModuleLoader(router) {
     });
 
     const enabledLocalModules = localModules.filter(({ fullModuleName }) => isExternalModuleEnabled(fullModuleName));
-    const loadedLocalModules = await Promise.all(enabledLocalModules.map(({ fn }) => requireModule(fn)));
+    // A chunk that fails to load (network error, stale deploy) skips that module instead of blocking the app.
+    const loadedLocalModules = await Promise.all(
+        enabledLocalModules.map(({ fn, fullModuleName }) =>
+            requireModule(fn).catch(error => {
+                console.error(`Failed to load module ${fullModuleName}`, error);
+                return null;
+            }),
+        ),
+    );
 
     enabledLocalModules.forEach(({ fn, fullModuleName }, index) => {
         const md = loadedLocalModules[index];
+        if (md === null) {
+            return;
+        }
+
         const moduleInitData = md.ModuleConfig || {};
 
         moduleInitQueue.push({
@@ -72,7 +84,16 @@ export async function localModuleLoader(router) {
 
     // Load enabled package modules; disabled ones are never fetched
     const enabledPackages = moduleRequire.filter(entry => isExternalModuleEnabled(entry.name));
-    const loadedPackages = await Promise.all(enabledPackages.map(entry => entry.load()));
+    const loadedPackages = (
+        await Promise.all(
+            enabledPackages.map(entry =>
+                entry.load().catch(error => {
+                    console.error(`Failed to load module ${entry.name}`, error);
+                    return null;
+                }),
+            ),
+        )
+    ).filter(Boolean);
 
     loadedPackages.forEach(md => {
         validatePackageModule(md);
