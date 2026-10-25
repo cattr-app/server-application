@@ -3,13 +3,13 @@
 namespace Tests\Feature\TimeIntervals;
 
 use App\Contracts\ScreenshotService;
+use App\Enums\Role;
 use App\Enums\ScreenshotsState;
 use App\Jobs\GenerateScreenshotThumbnail;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -20,7 +20,6 @@ use Tests\Facades\IntervalFactory;
 use Tests\Facades\ProjectFactory;
 use Tests\Facades\TaskFactory;
 use Tests\Facades\UserFactory;
-use Tests\Factories\UserFactory as UserFactoryInstance;
 use Tests\TestCase;
 use ZipArchive;
 
@@ -36,7 +35,8 @@ class ScreenshotTmpFilesTest extends TestCase
     private const OFFLINE_URI = 'offline-sync/upload-screenshots';
 
     private ScreenshotService $screenshotService;
-    private ?string $offlineToken = null;
+    /** @var array<int, string> Tokens of users created with a fixed ID */
+    private array $tokens = [];
 
     protected function setUp(): void
     {
@@ -95,7 +95,7 @@ class ScreenshotTmpFilesTest extends TestCase
 
     public function test_offline_screenshots_are_attached_within_the_request(): void
     {
-        $user = $this->createSingleDigitIdAdmin();
+        $user = UserFactory::withTokens()->create();
         $task = TaskFactory::forUser($user)->create();
         $interval = $this->createOfflineInterval($user, $task);
 
@@ -115,9 +115,68 @@ class ScreenshotTmpFilesTest extends TestCase
         $this->assertTmpIsEmpty();
     }
 
+    public static function userIds(): array
+    {
+        return [
+            'single digit' => [7],
+            'two digits' => [57],
+            'four digits' => [1234],
+        ];
+    }
+
+    /**
+     * The whole number before "_" is the user ID: "57_<uuid>" belongs to user 57, not to user 7.
+     */
+    #[DataProvider('userIds')]
+    public function test_offline_screenshot_is_matched_by_the_whole_user_id(int $userId): void
+    {
+        $user = $this->createUserWithId($userId);
+        $task = TaskFactory::forUser($user)->create();
+        $interval = $this->createOfflineInterval($user, $task);
+
+        $response = $this->uploadOfflineArchive($user, [
+            "{$userId}_$interval->screenshot_id" => UploadedFile::fake()->image('s.png', 640, 480)->getContent(),
+        ]);
+
+        $response->assertOk()
+            ->assertJsonPath('data.0.success', true)
+            ->assertJsonPath('data.0.user_id', $userId)
+            ->assertJsonPath('data.0.screenshot_id', $interval->screenshot_id);
+
+        $interval->refresh();
+        $this->assertNull($interval->screenshot_id);
+        Storage::assertExists($this->screenshotService->getScreenshotPath($interval));
+
+        $this->assertTmpIsEmpty();
+    }
+
+    public static function wrongFileNames(): array
+    {
+        return [
+            'no user id' => ['_' . Str::uuid()],
+            'not a number' => ['abc_' . Str::uuid()],
+            'prefix before the user id' => ['x57_' . Str::uuid()],
+            'not a uuid' => ['57_not-a-uuid'],
+            'suffix after the uuid' => ['57_' . Str::uuid() . '.png'],
+            'no separator' => ['not-a-screenshot.txt'],
+        ];
+    }
+
+    #[DataProvider('wrongFileNames')]
+    public function test_offline_archive_with_a_wrong_file_name_is_rejected(string $fileName): void
+    {
+        $user = UserFactory::withTokens()->create();
+
+        $this->uploadOfflineArchive($user, [$fileName => 'foo'])
+            ->assertStatus(self::HTTP_BAD_REQUEST)
+            ->assertJsonPath('error.message', __('Wrong screenshot file name'));
+
+        $this->assertTmpIsEmpty();
+    }
+
     public function test_broken_offline_screenshot_is_reported_as_not_attached(): void
     {
-        $user = $this->createSingleDigitIdAdmin();
+        $user = UserFactory::withTokens()->create();
         $task = TaskFactory::forUser($user)->create();
         $interval = $this->createOfflineInterval($user, $task);
         $screenshotId = $interval->screenshot_id;
@@ -137,12 +196,70 @@ class ScreenshotTmpFilesTest extends TestCase
         $this->assertTmpIsEmpty();
     }
 
-    public function test_offline_archive_with_a_wrong_file_name_leaves_no_tmp_files(): void
+    /**
+     * The uploader may attach a screenshot only to an interval they may create (the offline intervals upload rule).
+     *
+     * @return array<string, array{callable(Task): User, bool}>
+     */
+    public static function uploaders(): array
     {
-        $user = UserFactory::asAdmin()->withTokens()->create();
+        return [
+            'admin' => [static fn (Task $task) => UserFactory::asAdmin()->withTokens()->create(), true],
+            'manager' => [static fn (Task $task) => UserFactory::asManager()->withTokens()->create(), true],
+            'project manager' => [
+                static function (Task $task) {
+                    $user = UserFactory::withTokens()->create();
+                    $user->projects()->attach($task->project_id, ['role_id' => Role::MANAGER->value]);
 
-        $this->uploadOfflineArchive($user, ['not-a-screenshot.txt' => 'foo'])
-            ->assertStatus(self::HTTP_BAD_REQUEST);
+                    return $user;
+                },
+                true,
+            ],
+            'another user' => [static fn (Task $task) => UserFactory::withTokens()->create(), false],
+            'another member of the project' => [
+                static function (Task $task) {
+                    $user = UserFactory::withTokens()->create();
+                    $user->projects()->attach($task->project_id, ['role_id' => Role::USER->value]);
+
+                    return $user;
+                },
+                false,
+            ],
+            'auditor' => [static fn (Task $task) => UserFactory::asAuditor()->withTokens()->create(), false],
+        ];
+    }
+
+    #[DataProvider('uploaders')]
+    public function test_offline_screenshot_of_another_user_is_attached_only_with_rights_on_the_interval(
+        callable $createUploader,
+        bool $attached,
+    ): void {
+        $owner = UserFactory::withTokens()->create();
+        $task = TaskFactory::forUser($owner)->create();
+        $interval = $this->createOfflineInterval($owner, $task);
+        $screenshotId = $interval->screenshot_id;
+        $uploader = $createUploader($task);
+
+        $response = $this->uploadOfflineArchive($uploader, [
+            "{$owner->id}_$screenshotId" => UploadedFile::fake()->image('s.png', 640, 480)->getContent(),
+        ]);
+
+        $response->assertOk()->assertJsonPath('data.0.success', $attached);
+
+        $interval->refresh();
+        if ($attached) {
+            $response->assertJsonPath('data.0.message', __('validation.offline-sync.screenshot_attached'));
+            $this->assertNull($interval->screenshot_id);
+            Storage::assertExists($this->screenshotService->getScreenshotPath($interval));
+        } else {
+            // Reported exactly like a missing interval, without the interval data
+            $response->assertJsonPath('data.0.message', __('validation.offline-sync.cannot_find_interval'))
+                ->assertJsonPath('data.0.interval', null);
+            $this->assertSame($screenshotId, $interval->screenshot_id);
+            Storage::assertMissing($this->screenshotService->getScreenshotPath($interval));
+            $this->assertSame([], Storage::disk('local')->allFiles(), 'Nothing must be stored');
+            Queue::assertNotPushed(GenerateScreenshotThumbnail::class);
+        }
 
         $this->assertTmpIsEmpty();
     }
@@ -177,21 +294,16 @@ class ScreenshotTmpFilesTest extends TestCase
     }
 
     /**
-     * The controller takes the user ID from the screenshot file name with /\d_.+/, which keeps only its last
-     * digit, so the archive can be matched only for users with a single-digit ID.
+     * Creates a regular user with the given ID, to cover user IDs of different lengths.
      */
-    private function createSingleDigitIdAdmin(): User
+    private function createUserWithId(int $id): User
     {
-        $takenIds = DB::table('users')->whereBetween('id', [1, 9])->pluck('id')->all();
-        $freeIds = array_values(array_diff(range(1, 9), $takenIds));
-        if ($freeIds === []) {
-            $this->markTestSkipped('No free single-digit user ID.');
+        if (User::whereKey($id)->exists()) {
+            $this->markTestSkipped("User ID $id is taken.");
         }
 
-        $user = User::forceCreate(
-            ['id' => $freeIds[0], 'role_id' => UserFactoryInstance::ADMIN_ROLE] + UserFactory::createRandomModelData()
-        );
-        $this->offlineToken = $user->createToken('testing-token', ['*'], now()->addDay())->plainTextToken;
+        $user = User::forceCreate(['id' => $id] + UserFactory::createRandomModelData());
+        $this->tokens[$id] = $user->createToken('testing-token', ['*'], now()->addDay())->plainTextToken;
 
         return $user;
     }
@@ -209,7 +321,7 @@ class ScreenshotTmpFilesTest extends TestCase
         }
         $zip->close();
 
-        return $this->actingAs($this->offlineToken ?? $user)->post(
+        return $this->actingAs($this->tokens[$user->id] ?? $user)->post(
             self::OFFLINE_URI,
             ['file' => new UploadedFile($zipPath, 'screenshots.cattr', 'application/zip', null, true)],
             ['Accept' => 'application/json'],
