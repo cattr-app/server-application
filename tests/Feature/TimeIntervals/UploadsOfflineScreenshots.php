@@ -58,6 +58,15 @@ trait UploadsOfflineScreenshots
      */
     private function uploadOfflineArchive(User $user, array $entries): TestResponse
     {
+        return $this->uploadOfflineArchiveFile($user, $this->createOfflineArchive($entries));
+    }
+
+    /**
+     * @param array<string, string> $entries File name => content
+     * @return string Path of the archive
+     */
+    private function createOfflineArchive(array $entries): string
+    {
         $zipPath = tempnam(sys_get_temp_dir(), 'offline');
         $zip = new ZipArchive();
         $zip->open($zipPath, ZipArchive::OVERWRITE);
@@ -66,6 +75,11 @@ trait UploadsOfflineScreenshots
         }
         $zip->close();
 
+        return $zipPath;
+    }
+
+    private function uploadOfflineArchiveFile(User $user, string $zipPath): TestResponse
+    {
         return $this->actingAs($this->tokens[$user->id] ?? $user)->post(
             'offline-sync/upload-screenshots',
             ['file' => new UploadedFile($zipPath, 'screenshots.cattr', 'application/zip', null, true)],

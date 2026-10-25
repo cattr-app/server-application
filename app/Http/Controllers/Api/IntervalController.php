@@ -48,6 +48,8 @@ class IntervalController extends ItemController
 {
     protected const MODEL = TimeInterval::class;
 
+    private const OFFLINE_SCREENSHOTS_EXTRACTION_CHUNK_SIZE = 64 * 1024;
+
     public function __construct(protected ScreenshotService $screenshotService)
     {
     }
@@ -818,7 +820,7 @@ class IntervalController extends ItemController
             ->location(Storage::disk('local')->path('tmp'))->force()->create();
 
         try {
-            $zip->extractTo($temporaryDirectory->path());
+            $this->extractOfflineScreenshotsArchive($zip, $temporaryDirectory->path());
             $zip->close();
 
             $creationResult = $this->attachOfflineScreenshots(
@@ -865,13 +867,64 @@ class IntervalController extends ItemController
 
             $totalSize += $stat['size'];
             if ($totalSize > $maxSize) {
-                throw ValidationException::withMessages([
-                    'file' => __('validation.offline-sync.too_large', [
-                        'max' => round($maxSize / 1024 / 1024),
-                    ]),
-                ]);
+                throw self::offlineScreenshotsArchiveTooLarge($maxSize);
             }
         }
+    }
+
+    /**
+     * Extracts the validated archive into the directory, counting the bytes that are actually written.
+     *
+     * The sizes checked by validateOfflineScreenshotsArchive() come from the zip headers and can be forged, while
+     * ZipArchive::extractTo() writes whatever the entries decompress to. Here no more than the configured total
+     * size is ever written: each entry is copied in chunks of at most the remaining budget plus one byte, and the
+     * archive is rejected as soon as that extra byte is read.
+     *
+     * @throws ValidationException
+     */
+    private function extractOfflineScreenshotsArchive(ZipArchive $zip, string $directory): void
+    {
+        $maxSize = (int)config('app.offline_screenshots.max_size');
+        $remaining = $maxSize;
+
+        $fileCount = $zip->count();
+        for ($index = 0; $index < $fileCount; $index++) {
+            // The names were checked to be plain file names by validateOfflineScreenshotsArchive()
+            $name = $zip->getNameIndex($index);
+            $source = $name === false ? false : $zip->getStreamIndex($index);
+            abort_if($source === false, 400, __('Cannot open file.'));
+
+            try {
+                $target = fopen($directory . DIRECTORY_SEPARATOR . $name, 'wb');
+                try {
+                    while (!feof($source)) {
+                        // Undecodable compressed data is reported as a warning and a failed read
+                        $chunk = @fread($source, min(self::OFFLINE_SCREENSHOTS_EXTRACTION_CHUNK_SIZE, $remaining + 1));
+                        abort_if($chunk === false, 400, __('Cannot open file.'));
+
+                        if (strlen($chunk) > $remaining) {
+                            throw self::offlineScreenshotsArchiveTooLarge($maxSize);
+                        }
+
+                        fwrite($target, $chunk);
+                        $remaining -= strlen($chunk);
+                    }
+                } finally {
+                    fclose($target);
+                }
+            } finally {
+                fclose($source);
+            }
+        }
+    }
+
+    private static function offlineScreenshotsArchiveTooLarge(int $maxSize): ValidationException
+    {
+        return ValidationException::withMessages([
+            'file' => __('validation.offline-sync.too_large', [
+                'max' => round($maxSize / 1024 / 1024),
+            ]),
+        ]);
     }
 
     /**
