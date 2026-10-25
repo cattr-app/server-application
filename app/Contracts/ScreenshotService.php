@@ -4,7 +4,7 @@ namespace App\Contracts;
 
 use App\Jobs\GenerateScreenshotThumbnail;
 use App\Models\TimeInterval;
-use Image;
+use Intervention\Image\ImageManagerStatic as Image;
 use Intervention\Image\Constraint;
 use Storage;
 

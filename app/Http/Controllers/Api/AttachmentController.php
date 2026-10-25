@@ -52,7 +52,7 @@ class AttachmentController extends ItemController
         // also cannot determine request scheme when ran inside docker
         $url = URL::temporarySignedRoute(
             'attachment.temporary-download',
-            now()->addSeconds($request->validated('seconds') ?? 3600),
+            now()->addSeconds((int)($request->validated('seconds') ?? 3600)),
             $attachment
         );
         $parsedUrl = parse_url($url);
