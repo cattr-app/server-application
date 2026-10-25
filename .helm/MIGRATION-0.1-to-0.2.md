@@ -30,6 +30,11 @@ application data (check with the command in step 2).
 
 ## 1. Back up the database
 
+The dump is mandatory: it is the only way back to 0.1.x (see
+[Rollback](#rollback)). The setup Job migrates the schema, and with the
+built-in MySQL the upgrade moves the data directory from MySQL 8.0 to 8.4,
+which MySQL 8.0 cannot open again (there is no in-place downgrade).
+
 Built-in MySQL:
 
 ```sh
@@ -140,7 +145,83 @@ Files are written as UID 10000 onto the new PVC `<fullname>-storage`.
 
 ## Rollback
 
-`helm rollback $REL <0.1.x revision>` restores the 0.1.x objects, but not the
-deleted 0.1.x PVCs (they held no application data) and not the files on
-`<fullname>-storage`; the database stays migrated. To return to 0.1.x fully,
-restore the database backup and copy the files back into the 0.1.x Pod.
+`helm rollback` alone does not return to a working 0.1.x:
+
+- **Built-in MySQL:** the upgrade moved the kept PVC `<fullname>-mysql` to
+  MySQL 8.4. A rollback starts `mysql:8.0` on that 8.4 data directory, which
+  MySQL does not support (no in-place downgrade): the server refuses to start
+  ("Invalid MySQL server downgrade"). The only way back is to restore the
+  pre-upgrade `mysqldump` from step 1 into a **fresh** MySQL 8.0 data
+  directory on a new, empty PVC.
+- **External database:** the setup Job ran the 0.2 migrations, so restore the
+  database backup from step 1 before 0.1.x runs against it.
+- Neither path restores the deleted 0.1.x PVCs (they held no application
+  data) or the files on `<fullname>-storage`; copy the files from step 2 back
+  into the 0.1.x Pod.
+
+Built-in MySQL, step by step. You need the 0.1.x chart (e.g. checked out from
+the 0.1.x release) as `./chart-0.1`, your 0.1.x values file
+`values-0.1.yaml` (with the same `database.*` credentials as before) and the
+backups from step 1.
+
+1. Create an empty PVC for the 8.0 data directory (same size and
+   StorageClass as `<fullname>-mysql`). Leave `<fullname>-mysql` untouched:
+   it keeps the 8.4 data in case you go forward again.
+
+   ```sh
+   kubectl -n $NS apply -f - <<EOF
+   apiVersion: v1
+   kind: PersistentVolumeClaim
+   metadata:
+     name: $FULL-mysql-80
+   spec:
+     accessModes: [ReadWriteOnce]
+     resources:
+       requests:
+         storage: 10Gi
+   EOF
+   ```
+
+2. Deploy 0.1.x on that PVC with the application scaled to zero, so it does
+   not migrate or seed the empty database before the restore. 0.1.x generates
+   a new random `APP_KEY` when `cattr.appKey` is empty: pass the key from the
+   Secret backup (0.1.x expects it without the `base64:` prefix).
+
+   ```sh
+   APP_KEY=$(awk '$1 == "APP_KEY:" {print $2}' cattr-secret-backup.yaml | base64 -d)
+   helm upgrade $REL ./chart-0.1 -n $NS -f values-0.1.yaml \
+     --set mysql.persistence.existingClaim=$FULL-mysql-80 \
+     --set cattr.appKey="${APP_KEY#base64:}" \
+     --set replicaCount=0 --wait --timeout 15m
+   ```
+
+   (Use `helm upgrade` with the 0.1.x chart, not `helm rollback`: a rollback
+   reuses the old values, which point MySQL at the 8.4 PVC.)
+
+3. Wait until MySQL 8.0 has initialised the empty data directory, then load
+   the dump:
+
+   ```sh
+   kubectl -n $NS rollout status deploy/$FULL-mysql
+   kubectl -n $NS exec -i deploy/$FULL-mysql -- sh -c \
+     'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE"' < cattr-backup.sql
+   ```
+
+4. Start the application again (same command with your usual
+   `replicaCount`, default 1) and copy the files from step 2 back into the
+   Pod:
+
+   ```sh
+   helm upgrade $REL ./chart-0.1 -n $NS -f values-0.1.yaml \
+     --set mysql.persistence.existingClaim=$FULL-mysql-80 \
+     --set cattr.appKey="${APP_KEY#base64:}" \
+     --set replicaCount=1 --wait --timeout 15m
+   ```
+
+5. Once 0.1.x works, `<fullname>-mysql` (8.4 data) and `<fullname>-storage`
+   can be deleted by hand; both are kept by Helm.
+
+External database: restore the backup from step 1 into the database (drop and
+recreate it, or restore into a new database and point `database.*` at it),
+then deploy 0.1.x with `values-0.1.yaml` and the `APP_KEY` from the Secret
+backup as above, and copy the files back.
