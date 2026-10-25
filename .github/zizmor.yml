@@ -1,0 +1,17 @@
+# zizmor configuration, discovered automatically from .github/zizmor.yml.
+# Docs: https://docs.zizmor.sh/configuration/
+
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        # cattr-app/cla-actions is the organization's own reusable CLA
+        # workflow. It is referenced by the moving `v1` tag on purpose, so
+        # that fixes to the CLA bot reach every cattr-app repository without
+        # per-repository bumps. Ref pins are therefore allowed for the
+        # cattr-app organization only.
+        "cattr-app/*": ref-pin
+        # Everything else (third-party actions and docker:// images) must
+        # stay pinned by commit SHA or digest. This repeats zizmor's
+        # implicit default so the policy is explicit.
+        "*": hash-pin

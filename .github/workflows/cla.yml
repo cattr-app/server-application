@@ -1,14 +1,24 @@
 name: CLA
 
+# zizmor flags pull_request_target and issue_comment as dangerous triggers;
+# both are required here and suppressed inline below:
+# - pull_request_target: CLA status must be posted on fork PRs, which only
+#   get the CATTR_CLA_BOT_* secrets under this trigger;
+# - issue_comment: the /cla-check, /cla-sign and /cla-claim commands.
+# The workflow is safe with them: it never checks out or runs PR code, has
+# no `run:` steps and no expressions built from PR/comment content (comment
+# bodies are only compared in job `if:` conditions), every job only calls a
+# cattr-app/cla-actions reusable workflow, and GITHUB_TOKEN is limited to
+# `contents: read`. Keep it that way when editing this file.
 on:
-  pull_request_target:
+  pull_request_target:  # zizmor: ignore[dangerous-triggers] see above
     types:
       - opened
       - reopened
       - synchronize
       - ready_for_review
 
-  issue_comment:
+  issue_comment:  # zizmor: ignore[dangerous-triggers] see above
     types:
       - created
 

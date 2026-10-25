@@ -1,8 +1,8 @@
 name: PR checks
 
-# Required PR checks (Dependency Review, actionlint, Hadolint, Trivy config)
-# plus the advisory zizmor audit. No workflow-level `paths` filters on
-# purpose: required checks must report on every pull request.
+# Required PR checks (Dependency Review, actionlint, Hadolint, Trivy config,
+# zizmor). No workflow-level `paths` filters on purpose: required checks must
+# report on every pull request.
 
 on:
   pull_request:
@@ -110,7 +110,7 @@ jobs:
             .
 
   zizmor:
-    name: zizmor (advisory)
+    name: zizmor
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
@@ -122,21 +122,21 @@ jobs:
         with:
           persist-credentials: false
 
-      # Advisory until the baseline is cleaned up: --no-exit-codes keeps the
-      # job green on findings, which are surfaced as annotations and in the
-      # job summary. The read-only token is enough for the online audits and
-      # is what fork PRs get anyway.
+      # Blocking. The first run writes the full report to the job summary
+      # and never fails (--no-exit-codes), so the summary is there even when
+      # the audit fails; the second run emits findings as annotations and
+      # fails the job on any finding (default persona). Accepted exceptions
+      # live in .github/zizmor.yml or in documented inline
+      # `# zizmor: ignore[...]` comments. The read-only token is enough for
+      # the online audits and is what fork PRs get anyway.
       - name: Audit workflows
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
 
-          docker run --rm -e GH_TOKEN -v "${GITHUB_WORKSPACE}:/repo:ro" -w /repo \
-            "${ZIZMOR_IMAGE}" --format github --no-exit-codes .
-
           {
-            echo '## zizmor findings (advisory)'
+            echo '## zizmor findings'
             echo
             echo '```'
             docker run --rm -e GH_TOKEN -v "${GITHUB_WORKSPACE}:/repo:ro" -w /repo \
@@ -145,10 +145,15 @@ jobs:
             echo '```'
           } >> "${GITHUB_STEP_SUMMARY}"
 
+          docker run --rm -e GH_TOKEN -v "${GITHUB_WORKSPACE}:/repo:ro" -w /repo \
+            "${ZIZMOR_IMAGE}" --format github .
+
   zizmor-sarif:
     name: zizmor SARIF upload
     # Code scanning upload needs `security-events: write`, which fork PRs
     # never get; findings from PRs are shown by the job above instead.
+    # --no-exit-codes: the SARIF must be uploaded even when there are
+    # findings, so this job never fails on them (the zizmor job does).
     if: github.event_name == 'push'
     runs-on: ubuntu-24.04
     timeout-minutes: 10

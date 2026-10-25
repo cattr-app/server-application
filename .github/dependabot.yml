@@ -1,13 +1,22 @@
 version: 2
+# cooldown: a new release is proposed only after it has been public for
+# 7 days, so a compromised version that is yanked quickly never reaches a
+# version-update PR. It applies to version updates only; Dependabot
+# security updates are not delayed (see
+# https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference#cooldown-).
 updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
   - package-ecosystem: "composer"
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
   # Keeps the SHA-pinned actions in .github/workflows up to date.
   - package-ecosystem: "github-actions"
     directory: "/"
