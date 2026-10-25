@@ -97,6 +97,9 @@ RUN caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
 # Pebble needs a writable per-user state directory; the base image creates it
 # as UID/GID 10000. The layer itself is application data copied at image build.
 COPY --chown=10000:10000 --chmod=0644 init/pebble/001-cattr.yaml /opt/cattr/.pebble/layers/001-cattr.yaml
+# Optional restart-policy layer; the entrypoint installs it into the layers
+# directory when CATTR_RESTART_POLICY=shutdown (default for split roles).
+COPY --chown=0:0 --chmod=0644 init/pebble/002-shutdown-policy.yaml /opt/cattr/etc/pebble/002-shutdown-policy.yaml
 COPY --chown=0:0 --chmod=0755 init/container-entrypoint.sh /opt/cattr/entrypoint
 
 # Hard guarantee for the final image: PID 1 and every supervised process start

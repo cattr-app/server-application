@@ -8,6 +8,13 @@ set -eu
 services=""
 run_migrations=0
 run_provision=0
+role_all=0
+
+# Optional Pebble layer that turns a crashed queue/reverb/scheduler into a
+# container exit (see init/pebble/002-shutdown-policy.yaml). Kept outside the
+# layers directory and installed per container start by apply_restart_policy.
+restart_policy_layer=/opt/cattr/etc/pebble/002-shutdown-policy.yaml
+pebble_layers_dir="${PEBBLE:-/opt/cattr/.pebble}/layers"
 
 now() {
     date -u '+%Y-%m-%dT%H:%M:%SZ'
@@ -96,6 +103,42 @@ provision_application() {
     php /opt/cattr/app/artisan cattr:make:admin --no-interaction
 }
 
+# CATTR_RESTART_POLICY:
+#   restart  - Pebble restarts crashed services in place (001-cattr.yaml).
+#   shutdown - a crashed queue/reverb/scheduler stops Pebble, so the container
+#              exits and the orchestrator restarts it.
+# Default: restart for the all-in-one `all` role, shutdown otherwise.
+resolve_restart_policy() {
+    if [ -z "${CATTR_RESTART_POLICY:-}" ]; then
+        if [ "$role_all" -eq 1 ]; then
+            CATTR_RESTART_POLICY=restart
+        else
+            CATTR_RESTART_POLICY=shutdown
+        fi
+    fi
+
+    case "$CATTR_RESTART_POLICY" in
+        restart|shutdown) ;;
+        *)
+            fail "invalid CATTR_RESTART_POLICY=${CATTR_RESTART_POLICY} (supported: restart, shutdown)"
+            ;;
+    esac
+}
+
+apply_restart_policy() {
+    target="${pebble_layers_dir}/002-shutdown-policy.yaml"
+
+    if [ "$CATTR_RESTART_POLICY" = "shutdown" ]; then
+        # Skip the write when the layer is already in place, so a read-only
+        # Pebble directory with a pre-installed layer keeps working.
+        if ! cmp -s "$restart_policy_layer" "$target" 2>/dev/null; then
+            cp "$restart_policy_layer" "$target"
+        fi
+    elif [ -e "$target" ]; then
+        rm -f "$target"
+    fi
+}
+
 log "Cattr container bootstrap starting"
 log "Identity: uid=$(id -u) gid=$(id -g) user=$(id -un 2>/dev/null || printf unknown)"
 log "Application root: /opt/cattr/app"
@@ -130,6 +173,7 @@ for role in "$@"; do
     case "$role" in
         all)
             # Preserve the historical single-container behaviour.
+            role_all=1
             run_migrations=1
             run_provision=1
             add_service caddy
@@ -181,8 +225,10 @@ for role in "$@"; do
     esac
 done
 
+resolve_restart_policy
+
 log "Resolved services: ${services:-<none>}"
-log "Bootstrap actions: config-cache=yes migrate=$([ "$run_migrations" -eq 1 ] && printf yes || printf no) provision=$([ "$run_provision" -eq 1 ] && printf yes || printf no)"
+log "Bootstrap actions: config-cache=yes migrate=$([ "$run_migrations" -eq 1 ] && printf yes || printf no) provision=$([ "$run_provision" -eq 1 ] && printf yes || printf no) restart-policy=${CATTR_RESTART_POLICY}"
 
 run_step "prepare writable runtime directories" prepare_directories
 run_step "cache Laravel configuration" cache_configuration
@@ -200,8 +246,11 @@ if [ -z "$services" ]; then
     exit 0
 fi
 
+run_step "apply restart policy ${CATTR_RESTART_POLICY}" apply_restart_policy
+
 log "Starting Pebble as PID 1"
 log "Pebble services requested: ${services}"
+log "Restart policy: ${CATTR_RESTART_POLICY} ($([ "$CATTR_RESTART_POLICY" = "shutdown" ] && printf 'crashed queue/reverb/scheduler stop the container' || printf 'Pebble restarts crashed services in place'))"
 log "Service output will be mirrored to container stdout/stderr"
 
 # `pebble enter start` is designed for container entrypoints. exec replaces
