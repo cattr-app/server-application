@@ -1,0 +1,46 @@
+{{- if .Values.httpRoute.enabled }}
+{{- $t := .Values.httpRoute.timeouts | default dict }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "cattr.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "cattr.labels" . | nindent 4 }}
+  {{- $annotations := merge (dict) (.Values.httpRoute.annotations | default dict) (.Values.commonAnnotations | default dict) }}
+  {{- with $annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+    {{- toYaml .Values.httpRoute.parentRefs | nindent 4 }}
+  {{- with .Values.httpRoute.hostnames }}
+  hostnames:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+    # Reverb WebSockets (Caddy proxies /app/* upgrades to Reverb): long-lived.
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /app
+      backendRefs:
+        - name: {{ include "cattr.fullname" . }}
+          port: {{ .Values.service.port }}
+      {{- with $t.websocket }}
+      timeouts:
+        request: {{ . }}
+      {{- end }}
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: {{ include "cattr.fullname" . }}
+          port: {{ .Values.service.port }}
+      {{- with $t.request }}
+      timeouts:
+        request: {{ . }}
+      {{- end }}
+{{- end }}

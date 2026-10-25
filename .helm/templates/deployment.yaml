@@ -1,3 +1,8 @@
+{{- if eq .Values.storage.type "pvc" }}
+{{- /*
+pvc mode: web, queue and scheduler are containers of ONE Pod sharing the RWO
+volume. Name and selector are kept from chart 0.1.x (selectors are immutable).
+*/}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -10,148 +15,15 @@ metadata:
     {{- . | nindent 4 }}
   {{- end }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: 1
+  revisionHistoryLimit: 5
+  strategy:
+    type: Recreate
+    # Chart 0.1.x used RollingUpdate; null clears the server-defaulted field on upgrade.
+    rollingUpdate: null
   selector:
     matchLabels:
       {{- include "cattr.selectorLabels" . | nindent 6 }}
   template:
-    metadata:
-      labels:
-        {{- include "cattr.selectorLabels" . | nindent 8 }}
-    spec:
-      {{- with (concat (.Values.global.imagePullSecrets | default list) (.Values.imagePullSecrets | default list)) }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.podSecurityContext }}
-      securityContext:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      initContainers:
-        {{- if .Values.mysql.enabled }}
-        - name: wait-for-mysql
-          image: busybox:1.36
-          command:
-            - sh
-            - -c
-            - |
-              until nc -z {{ include "cattr.mysql.host" . }} {{ .Values.database.port }}; do
-                echo "Waiting for MySQL..."
-                sleep 3
-              done
-              echo "MySQL is ready"
-        {{- end }}
-        {{- with .Values.initContainers }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
-      containers:
-        - name: cattr
-          image: {{ include "cattr.image" . }}
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- with .Values.containerSecurityContext }}
-          securityContext:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          ports:
-            - name: http
-              containerPort: 8080
-              protocol: TCP
-          envFrom:
-            - configMapRef:
-                name: {{ include "cattr.fullname" . }}
-          env:
-            - name: APP_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "cattr.secretName" . }}
-                  key: APP_KEY
-            - name: REVERB_APP_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "cattr.secretName" . }}
-                  key: REVERB_APP_SECRET
-            - name: DB_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "cattr.secretName" . }}
-                  key: DB_USERNAME
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "cattr.secretName" . }}
-                  key: DB_PASSWORD
-            {{- with .Values.cattr.extraEnvVars }}
-            {{- toYaml . | nindent 12 }}
-            {{- end }}
-          {{- if .Values.startupProbe.enabled }}
-          startupProbe:
-            httpGet:
-              path: /
-              port: http
-            initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.startupProbe.periodSeconds }}
-            failureThreshold: {{ .Values.startupProbe.failureThreshold }}
-          {{- end }}
-          {{- if .Values.readinessProbe.enabled }}
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
-            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
-            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
-          {{- end }}
-          {{- if .Values.livenessProbe.enabled }}
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
-            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
-          {{- end }}
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-          volumeMounts:
-            - name: var-run
-              mountPath: /var/run
-            - name: tmp
-              mountPath: /tmp
-            - name: cache
-              mountPath: /opt/cattr/app/storage/framework/cache
-            - name: sessions
-              mountPath: /opt/cattr/app/storage/framework/sessions
-            {{- if .Values.persistence.screenshots.enabled }}
-            - name: screenshots
-              mountPath: /opt/cattr/app/storage/app/uploads/screenshots
-            {{- end }}
-            {{- if .Values.persistence.attachments.enabled }}
-            - name: attachments
-              mountPath: /opt/cattr/app/storage/app/uploads/attachments
-            {{- end }}
-            {{- with .Values.extraVolumeMounts }}
-            {{- toYaml . | nindent 12 }}
-            {{- end }}
-        {{- with .Values.sidecars }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
-      volumes:
-        - name: var-run
-          emptyDir: {}
-        - name: tmp
-          emptyDir: {}
-        - name: cache
-          emptyDir: {}
-        - name: sessions
-          emptyDir: {}
-        {{- if .Values.persistence.screenshots.enabled }}
-        - name: screenshots
-          persistentVolumeClaim:
-            claimName: {{ .Values.persistence.screenshots.existingClaim | default (printf "%s-screenshots" (include "cattr.fullname" .)) }}
-        {{- end }}
-        {{- if .Values.persistence.attachments.enabled }}
-        - name: attachments
-          persistentVolumeClaim:
-            claimName: {{ .Values.persistence.attachments.existingClaim | default (printf "%s-attachments" (include "cattr.fullname" .)) }}
-        {{- end }}
-        {{- with .Values.extraVolumes }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+    {{- include "cattr.podTemplate" (dict "context" . "roles" (list "web" "queue" "scheduler") "selector" (include "cattr.selectorLabels" .) "extraAnnotations" (dict)) | nindent 4 }}
+{{- end }}

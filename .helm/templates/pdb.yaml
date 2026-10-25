@@ -1,0 +1,21 @@
+{{- /* PDBs only make sense for scalable workloads, i.e. s3 mode with replicas > 1. */}}
+{{- if eq .Values.storage.type "s3" }}
+{{- range $role := list "web" "queue" }}
+{{- $cfg := get $.Values $role }}
+{{- if and $cfg.pdb.enabled (gt (int $cfg.replicas) 1) }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ printf "%s-%s" (include "cattr.fullname" $) $role }}
+  namespace: {{ $.Release.Namespace | quote }}
+  labels:
+    {{- include "cattr.componentLabels" (dict "context" $ "component" $role) | nindent 4 }}
+spec:
+  maxUnavailable: {{ $cfg.pdb.maxUnavailable }}
+  selector:
+    matchLabels:
+      {{- include "cattr.componentSelectorLabels" (dict "context" $ "component" $role) | nindent 6 }}
+{{- end }}
+{{- end }}
+{{- end }}

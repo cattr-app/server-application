@@ -29,25 +29,64 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
-Common labels.
+Labels shared by every resource, without a component.
 */}}
-{{- define "cattr.labels" -}}
+{{- define "cattr.commonLabels" -}}
 helm.sh/chart: {{ include "cattr.chart" . }}
-{{ include "cattr.selectorLabels" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/part-of: cattr
 {{- with .Values.commonLabels }}
 {{ toYaml . }}
 {{- end }}
 {{- end }}
 
 {{/*
-Selector labels.
+Common labels (component "app", as in chart 0.1.x).
+*/}}
+{{- define "cattr.labels" -}}
+{{ include "cattr.selectorLabels" . }}
+{{ include "cattr.commonLabels" . }}
+{{- end }}
+
+{{/*
+Selector labels of the pvc-mode Deployment `<fullname>` and of its Service.
+Kept byte-identical to chart 0.1.x: Deployment selectors are immutable.
 */}}
 {{- define "cattr.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "cattr.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/component: app
+{{- end }}
+
+{{/*
+Selector labels of one component.
+Usage: include "cattr.componentSelectorLabels" (dict "context" $ "component" "web")
+*/}}
+{{- define "cattr.componentSelectorLabels" -}}
+app.kubernetes.io/name: {{ include "cattr.name" .context }}
+app.kubernetes.io/instance: {{ .context.Release.Name }}
+app.kubernetes.io/component: {{ .component }}
+{{- end }}
+
+{{/*
+Labels of one component.
+*/}}
+{{- define "cattr.componentLabels" -}}
+{{ include "cattr.componentSelectorLabels" . }}
+{{ include "cattr.commonLabels" .context }}
+{{- end }}
+
+{{/*
+Selector labels of the Pods serving HTTP (Service `<fullname>`):
+the single Pod in pvc mode, the web Pods in s3 mode.
+*/}}
+{{- define "cattr.webSelectorLabels" -}}
+{{- if eq .Values.storage.type "s3" }}
+{{- include "cattr.componentSelectorLabels" (dict "context" . "component" "web") }}
+{{- else }}
+{{- include "cattr.selectorLabels" . }}
+{{- end }}
 {{- end }}
 
 {{/*
@@ -58,12 +97,12 @@ MySQL fully qualified name.
 {{- end }}
 
 {{/*
-MySQL host.
+Database host: database.host, or the built-in MySQL Service.
 */}}
 {{- define "cattr.mysql.host" -}}
 {{- if .Values.database.host }}
 {{- .Values.database.host }}
-{{- else }}
+{{- else if .Values.mysql.enabled }}
 {{- include "cattr.mysql.fullname" . }}
 {{- end }}
 {{- end }}
@@ -72,17 +111,18 @@ MySQL host.
 MySQL labels.
 */}}
 {{- define "cattr.mysql.labels" -}}
-helm.sh/chart: {{ include "cattr.chart" . }}
 {{ include "cattr.mysql.selectorLabels" . }}
+helm.sh/chart: {{ include "cattr.chart" . }}
 app.kubernetes.io/version: {{ .Values.mysql.image.tag | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/part-of: cattr
 {{- with .Values.commonLabels }}
 {{ toYaml . }}
 {{- end }}
 {{- end }}
 
 {{/*
-MySQL selector labels.
+MySQL selector labels (byte-identical to chart 0.1.x).
 */}}
 {{- define "cattr.mysql.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "cattr.name" . }}
@@ -91,33 +131,44 @@ app.kubernetes.io/component: mysql
 {{- end }}
 
 {{/*
-Secret name.
+Name of the chart-managed Secret (kept from chart 0.1.x).
 */}}
 {{- define "cattr.secretName" -}}
 {{- include "cattr.fullname" . }}
 {{- end }}
 
 {{/*
-Cattr image.
+Name of the setup hook Secret.
 */}}
-{{- define "cattr.image" -}}
-{{- printf "%s/%s:%s" .Values.image.registry .Values.image.repository (.Values.image.tag | default .Chart.AppVersion) }}
+{{- define "cattr.setupSecretName" -}}
+{{- printf "%s-setup" (include "cattr.fullname" .) }}
 {{- end }}
 
 {{/*
-MySQL image.
+Image reference: registry/repository:tag[@digest].
+Usage: include "cattr.imageRef" .Values.image (tag fallback given as "default")
 */}}
+{{- define "cattr.imageRef" -}}
+{{- $ref := printf "%s/%s:%s" .image.registry .image.repository (.image.tag | default .default | toString) -}}
+{{- if .image.digest -}}
+{{- $ref = printf "%s@%s" $ref .image.digest -}}
+{{- end -}}
+{{- $ref -}}
+{{- end }}
+
+{{- define "cattr.image" -}}
+{{- include "cattr.imageRef" (dict "image" .Values.image "default" .Chart.AppVersion) }}
+{{- end }}
+
 {{- define "cattr.mysql.image" -}}
-{{- printf "%s/%s:%s" .Values.mysql.image.registry .Values.mysql.image.repository .Values.mysql.image.tag }}
+{{- include "cattr.imageRef" (dict "image" .Values.mysql.image "default" "") }}
 {{- end }}
 
 {{/*
 Common annotations.
 */}}
 {{- define "cattr.annotations" -}}
-{{- with .Values.commonAnnotations }}
-{{ toYaml . }}
-{{- end }}
+{{- with .Values.commonAnnotations }}{{ toYaml . }}{{ end }}
 {{- end }}
 
 {{/*
@@ -125,52 +176,47 @@ Render the storageClass for a given persistence block.
 */}}
 {{- define "cattr.storageClass" -}}
 {{- $storageClass := .persistence.storageClass | default .global.storageClass -}}
-{{- if $storageClass }}
+{{- if $storageClass -}}
 storageClassName: {{ $storageClass | quote }}
 {{- end }}
 {{- end }}
 
 {{/*
-Resolve one entry of the chart Secret's data map, already base64-encoded.
-Order: explicit value from values -> value stored in the existing chart Secret
-(kept byte-for-byte, so upgrades and rollbacks never rotate it) -> fail.
-No value is ever generated randomly.
-Usage: include "cattr.secretValue" (dict "context" $ "key" "APP_KEY" "value" $plain "hint" "set cattr.appKey ...")
+imagePullSecrets list.
 */}}
-{{- define "cattr.secretValue" -}}
-{{- $ctx := .context -}}
-{{- $secretName := include "cattr.secretName" $ctx -}}
-{{- if .value -}}
-{{- .value | b64enc -}}
-{{- else -}}
-{{- $existing := lookup "v1" "Secret" $ctx.Release.Namespace $secretName -}}
-{{- $stored := "" -}}
-{{- if $existing -}}
-{{- $stored = index ($existing.data | default dict) .key | default "" -}}
-{{- end -}}
-{{- if $stored -}}
-{{- $stored -}}
-{{- else -}}
-{{- fail (printf "%s is required: %s (not set in values and not found in the existing Secret %s/%s)" .key .hint $ctx.Release.Namespace $secretName) -}}
-{{- end -}}
-{{- end -}}
+{{- define "cattr.imagePullSecrets" -}}
+{{- with (concat (.Values.global.imagePullSecrets | default list) (.Values.imagePullSecrets | default list)) }}
+imagePullSecrets:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
 {{- end }}
 
 {{/*
-APP_KEY Secret entry. cattr.appKey accepts a raw base64 key or a Laravel
-"base64:..." key; the "base64:" prefix is added only when missing.
+ServiceAccount name.
 */}}
-{{- define "cattr.secret.appKey" -}}
-{{- $appKey := .Values.cattr.appKey | default "" -}}
-{{- if and $appKey (not (hasPrefix "base64:" $appKey)) -}}
-{{- $appKey = printf "base64:%s" $appKey -}}
-{{- end -}}
-{{- include "cattr.secretValue" (dict "context" . "key" "APP_KEY" "value" $appKey "hint" "set cattr.appKey to a Laravel application key, e.g. the output of `php artisan key:generate --show`") -}}
+{{- define "cattr.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create }}
+{{- .Values.serviceAccount.name | default (include "cattr.fullname" .) }}
+{{- else }}
+{{- .Values.serviceAccount.name | default "default" }}
+{{- end }}
 {{- end }}
 
 {{/*
-REVERB_APP_SECRET Secret entry.
+Name of the Reverb Service used by queue/scheduler in s3 mode.
 */}}
-{{- define "cattr.secret.reverbAppSecret" -}}
-{{- include "cattr.secretValue" (dict "context" . "key" "REVERB_APP_SECRET" "value" (.Values.cattr.reverbAppSecret | default "") "hint" "set cattr.reverbAppSecret to a random secret, e.g. the output of `openssl rand -hex 32`") -}}
+{{- define "cattr.reverbServiceName" -}}
+{{- printf "%s-reverb" (include "cattr.fullname" .) }}
+{{- end }}
+
+{{/*
+Helm hook events of the setup Job and its Secret. With the built-in demo MySQL
+the database only exists after install, so the install hook is post-install.
+*/}}
+{{- define "cattr.setup.hookEvents" -}}
+{{- if .Values.mysql.enabled -}}
+post-install,pre-upgrade
+{{- else -}}
+pre-install,pre-upgrade
+{{- end -}}
 {{- end }}

@@ -1,0 +1,78 @@
+{{- /*
+Setup Job: `migrate` (database migrations + InitialSeeder) and, when an
+administrator is configured, `provision` (idempotent). Runs as a Helm hook
+before install/upgrade, so a failing migration fails the Helm operation
+before any workload is changed; the app Pods additionally wait in their
+wait-for-migrations init container until the schema is current.
+With the built-in demo MySQL the install hook is post-install, because the
+database is a regular release resource that does not exist before install.
+*/}}
+{{- $roles := list "migrate" }}
+{{- if include "cattr.setup.provision" . }}
+{{- $roles = append $roles "provision" }}
+{{- end }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  {{- if .Values.setup.hook }}
+  name: {{ include "cattr.fullname" . }}-setup
+  {{- else }}
+  name: {{ printf "%s-setup-%d" (include "cattr.fullname" .) .Release.Revision }}
+  {{- end }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "cattr.componentLabels" (dict "context" . "component" "setup") | nindent 4 }}
+  annotations:
+    {{- if .Values.setup.hook }}
+    helm.sh/hook: {{ include "cattr.setup.hookEvents" . }}
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: before-hook-creation
+    {{- end }}
+    {{- with (include "cattr.annotations" .) }}
+    {{- . | nindent 4 }}
+    {{- end }}
+spec:
+  backoffLimit: {{ .Values.setup.backoffLimit }}
+  activeDeadlineSeconds: {{ .Values.setup.activeDeadlineSeconds }}
+  {{- if not .Values.setup.hook }}
+  ttlSecondsAfterFinished: {{ .Values.setup.ttlSecondsAfterFinished }}
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        {{- include "cattr.componentSelectorLabels" (dict "context" . "component" "setup") | nindent 8 }}
+        app.kubernetes.io/part-of: cattr
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- include "cattr.podCommon" . | trim | nindent 6 }}
+      restartPolicy: Never
+      initContainers:
+        {{- include "cattr.prepareContainer" (dict "context" . "roles" (list "setup")) | trim | nindent 8 }}
+        {{- include "cattr.waitDatabaseContainer" (dict "context" . "chartSecret" (include "cattr.setupSecretName" .)) | trim | nindent 8 }}
+      containers:
+        - name: setup
+          image: {{ include "cattr.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            {{- toYaml $roles | nindent 12 }}
+          env:
+            {{- include "cattr.env" (dict "context" . "role" "setup" "chartSecret" (include "cattr.setupSecretName" .)) | trim | nindent 12 }}
+          {{- with (include "cattr.envFrom" .) }}
+          {{- . | nindent 10 }}
+          {{- end }}
+          {{- with .Values.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.setup.resources | nindent 12 }}
+          volumeMounts:
+            {{- include "cattr.volumeMounts" (dict "context" . "role" "setup") | trim | nindent 12 }}
+      volumes:
+        {{- include "cattr.volumes" (dict "context" . "roles" (list "setup")) | trim | nindent 8 }}

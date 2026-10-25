@@ -1,4 +1,4 @@
-{{- if and .Values.mysql.enabled .Values.mysql.persistence.enabled (not .Values.mysql.persistence.existingClaim) }}
+{{- if and .Values.mysql.enabled (not .Values.mysql.persistence.existingClaim) }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -6,14 +6,19 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   labels:
     {{- include "cattr.mysql.labels" . | nindent 4 }}
-  {{- with (include "cattr.annotations" .) }}
   annotations:
+    # The database is never deleted by `helm uninstall` or Argo CD pruning.
+    helm.sh/resource-policy: keep
+    argocd.argoproj.io/sync-options: Delete=false
+    {{- with (include "cattr.annotations" .) }}
     {{- . | nindent 4 }}
-  {{- end }}
+    {{- end }}
 spec:
   accessModes:
     {{- toYaml .Values.mysql.persistence.accessModes | nindent 4 }}
-  {{- include "cattr.storageClass" (dict "persistence" .Values.mysql.persistence "global" .Values.global) | nindent 2 }}
+  {{- with (include "cattr.storageClass" (dict "persistence" .Values.mysql.persistence "global" .Values.global)) }}
+  {{- . | nindent 2 }}
+  {{- end }}
   resources:
     requests:
       storage: {{ .Values.mysql.persistence.size }}

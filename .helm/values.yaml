@@ -1,87 +1,190 @@
+# Cattr server chart values. See README.md for the full reference, storage
+# modes, Secret formats and the 0.1.x -> 0.2.x migration guide.
+
+## @param nameOverride Override the chart name used in resource names
+nameOverride: ""
+## @param fullnameOverride Override the full resource name prefix
+fullnameOverride: ""
+
 ## @section Global parameters
 global:
-  ## @param global.storageClass Global StorageClass for Persistent Volume(s)
+  ## @param global.storageClass Default StorageClass for every PVC created by the chart
   storageClass: ""
-  ## @param global.imagePullSecrets Global Docker registry secret names as an array
+  ## @param global.imagePullSecrets Image pull Secret names, e.g. [{name: regcred}]
   imagePullSecrets: []
 
-## @section Cattr parameters
+## @section Image
 image:
   ## @param image.registry Cattr image registry
-  registry: registry.git.amazingcat.net
+  registry: ghcr.io
   ## @param image.repository Cattr image repository
-  repository: cattr/core/app
-  ## @param image.tag Cattr image tag (immutable tags are recommended)
+  repository: cattr-app/server
+  ## @param image.tag Image tag; defaults to the chart appVersion. Never use `latest`
   tag: ""
-  ## @param image.pullPolicy Cattr image pull policy
+  ## @param image.digest Optional image digest (sha256:...); appended to the tag when set
+  digest: ""
+  ## @param image.pullPolicy Image pull policy
   pullPolicy: IfNotPresent
 
-## @param replicaCount Number of Cattr replicas to deploy
-replicaCount: 1
+## @param imagePullSecrets Additional image pull Secret names
+imagePullSecrets: []
 
-## @section Cattr application configuration
+## @section Application
 cattr:
-  ## @param cattr.appKey Laravel application key, raw base64 or prefixed `base64:...` (e.g. from `php artisan key:generate --show`). Never auto-generated: required on fresh install; if empty on upgrade, the value stored in the existing chart Secret is kept
+  ## @param cattr.appUrl Public URL of the instance, e.g. https://cattr.example.com (required)
+  ## Use the external scheme: with TLS terminated at the Ingress/Gateway this is https://...
+  appUrl: ""
+  ## @param cattr.appKey Laravel APP_KEY, raw base64 or `base64:...` (32 bytes, e.g. `php artisan key:generate --show`).
+  ## Never auto-generated: required on fresh install unless cattr.existingSecret is set; if empty on upgrade the
+  ## value stored in the chart Secret is kept byte-for-byte.
   appKey: ""
-  ## @param cattr.reverbAppSecret Laravel Reverb application secret (e.g. from `openssl rand -hex 32`). Never auto-generated: required on fresh install; if empty on upgrade, the value stored in the existing chart Secret is kept
+  ## @param cattr.reverbAppSecret Reverb application secret (e.g. `openssl rand -hex 32`). Same rules as appKey
   reverbAppSecret: ""
-  ## @param cattr.appUrl Application URL
-  appUrl: "http://cattr.local"
-  ## @param cattr.appEnv Application environment
+  ## @param cattr.existingSecret Existing Secret holding APP_KEY and REVERB_APP_SECRET (replaces appKey/reverbAppSecret)
+  existingSecret: ""
+  existingSecretKeys:
+    ## @param cattr.existingSecretKeys.appKey Key in cattr.existingSecret with the `base64:...` APP_KEY
+    appKey: APP_KEY
+    ## @param cattr.existingSecretKeys.reverbAppSecret Key in cattr.existingSecret with REVERB_APP_SECRET
+    reverbAppSecret: REVERB_APP_SECRET
+  ## @param cattr.appEnv Laravel APP_ENV
   appEnv: production
-  ## @param cattr.appDebug Enable application debug mode
-  appDebug: "false"
-  ## @param cattr.logChannel Log channel (stderr recommended for Kubernetes). Must be a channel defined in
-  ## config/logging.php: stack, single, daily, monthly, slack, papertrail, stderr, syslog, errorlog, null, emergency.
-  ## The former `sentry` channel no longer exists; overrides that still select it are rejected by values.schema.json.
+  ## @param cattr.appDebug Laravel APP_DEBUG; never enable in production
+  appDebug: false
+  ## @param cattr.logChannel Log channel from config/logging.php (stderr recommended)
   logChannel: stderr
-  ## @param cattr.extraEnvVars Array of extra environment variables
-  extraEnvVars: []
-  #  - name: FOO
-  #    value: bar
+  ## @param cattr.restartPolicy CATTR_RESTART_POLICY: `shutdown` lets Kubernetes restart a crashed
+  ## process (container exits), `restart` keeps Pebble restarting it in place. Images before 4.1.0
+  ## final ignore this variable and always restart in place.
+  restartPolicy: shutdown
+  ## @param cattr.extraEnv Extra environment variables for every Cattr container (including setup)
+  extraEnv: []
+  #  - name: MAIL_HOST
+  #    value: smtp.example.com
+  ## @param cattr.extraEnvFrom Extra envFrom sources for every Cattr container (including setup)
+  extraEnvFrom: []
 
-## @section Database parameters
+## @section Storage
+storage:
+  ## @param storage.type `pvc` (single node, shared RWO volume, one Pod) or `s3` (separate Deployments,
+  ## object storage + Redis; requires a Cattr version with S3 support)
+  type: pvc
+  pvc:
+    ## @param storage.pvc.existingClaim Use an existing PVC instead of creating `<fullname>-storage`
+    existingClaim: ""
+    ## @param storage.pvc.storageClass StorageClass for the created PVC (falls back to global.storageClass)
+    storageClass: ""
+    ## @param storage.pvc.accessModes Access modes for the created PVC
+    accessModes:
+      - ReadWriteOnce
+    ## @param storage.pvc.size Size of the created PVC
+    size: 20Gi
+    ## @param storage.pvc.annotations Extra annotations for the created PVC
+    annotations: {}
+  s3:
+    ## @param storage.s3.bucket Bucket name (AWS_BUCKET)
+    bucket: ""
+    ## @param storage.s3.region Region (AWS_DEFAULT_REGION)
+    region: ""
+    ## @param storage.s3.endpoint Endpoint for S3-compatible storage, e.g. https://minio.example.com (AWS_ENDPOINT)
+    endpoint: ""
+    ## @param storage.s3.url Public base URL of the bucket (AWS_URL), optional
+    url: ""
+    ## @param storage.s3.usePathStyleEndpoint Path-style addressing, needed by most S3-compatible servers
+    usePathStyleEndpoint: false
+    ## @param storage.s3.accessKeyId Access key id (stored in the chart Secret)
+    accessKeyId: ""
+    ## @param storage.s3.secretAccessKey Secret access key (stored in the chart Secret)
+    secretAccessKey: ""
+    ## @param storage.s3.existingSecret Existing Secret with the credentials (replaces accessKeyId/secretAccessKey)
+    existingSecret: ""
+    existingSecretKeys:
+      ## @param storage.s3.existingSecretKeys.accessKeyId Key with the access key id
+      accessKeyId: AWS_ACCESS_KEY_ID
+      ## @param storage.s3.existingSecretKeys.secretAccessKey Key with the secret access key
+      secretAccessKey: AWS_SECRET_ACCESS_KEY
+  runtime:
+    ## @param storage.runtime.sizeLimit sizeLimit of each container's node-local emptyDir
+    ## (Pebble state, bootstrap/cache, storage/framework, storage/logs, /tmp; in s3 mode also the local storage/app paths)
+    sizeLimit: 2Gi
+    ## @param storage.runtime.medium emptyDir medium ("" = node disk, Memory = tmpfs counted against the memory limit)
+    medium: ""
+
+## @section Redis (external)
+redis:
+  ## @param redis.enabled Use an external Redis for cache and locks. Optional in pvc mode, required in s3 mode
+  enabled: false
+  ## @param redis.host Redis host
+  host: ""
+  ## @param redis.port Redis port
+  port: 6379
+  ## @param redis.username Redis ACL username (optional)
+  username: ""
+  ## @param redis.password Redis password (stored in the chart Secret)
+  password: ""
+  ## @param redis.existingSecret Existing Secret with the Redis password (replaces redis.password)
+  existingSecret: ""
+  ## @param redis.existingSecretPasswordKey Key in redis.existingSecret
+  existingSecretPasswordKey: REDIS_PASSWORD
+  ## @param redis.database Redis database index for the default connection (REDIS_DB)
+  database: 0
+  ## @param redis.cacheDatabase Redis database index for the cache connection (REDIS_CACHE_DB)
+  cacheDatabase: 1
+
+## @section Database
 database:
-  ## @param database.host Database host (auto-resolved to built-in MySQL if empty)
+  ## @param database.host MySQL/MariaDB host. Required unless mysql.enabled
   host: ""
   ## @param database.port Database port
   port: 3306
   ## @param database.name Database name
   name: cattr
-  ## @param database.username Database username
-  username: cattr
-  ## @param database.password Database user password
-  password: cattr
-  ## @param database.rootPassword Database root password
-  rootPassword: cattrroot
+  ## @param database.username Database user. Required on fresh install unless database.existingSecret is set
+  username: ""
+  ## @param database.password Database password. Required on fresh install unless database.existingSecret is set
+  password: ""
+  ## @param database.rootPassword Root password of the built-in demo MySQL (mysql.enabled only)
+  rootPassword: ""
+  ## @param database.existingSecret Existing Secret with the database credentials (replaces username/password/rootPassword)
+  existingSecret: ""
+  existingSecretKeys:
+    ## @param database.existingSecretKeys.username Key with the database user
+    username: DB_USERNAME
+    ## @param database.existingSecretKeys.password Key with the database password
+    password: DB_PASSWORD
+    ## @param database.existingSecretKeys.rootPassword Key with the demo MySQL root password (mysql.enabled only)
+    rootPassword: MYSQL_ROOT_PASSWORD
 
-## @section Built-in MySQL parameters
+## @section Built-in MySQL (single-node demo only)
 mysql:
-  ## @param mysql.enabled Deploy a MySQL server as part of this chart
-  enabled: true
+  ## @param mysql.enabled Deploy a single MySQL Pod with this release. Demo/evaluation only: no backups,
+  ## no replication, no tuning. Use an external database in production.
+  enabled: false
+  ## @param mysql.acknowledgeRemoval Allow rendering with mysql.enabled=false although the release still
+  ## has the built-in MySQL Deployment (it, and its data unless the PVC is kept, would be deleted)
+  acknowledgeRemoval: false
   image:
     ## @param mysql.image.registry MySQL image registry
     registry: docker.io
     ## @param mysql.image.repository MySQL image repository
     repository: mysql
-    ## @param mysql.image.tag MySQL image tag
-    tag: "8.0"
+    ## @param mysql.image.tag MySQL image tag (pinned)
+    tag: "8.4.13"
+    ## @param mysql.image.digest Optional MySQL image digest
+    digest: ""
     ## @param mysql.image.pullPolicy MySQL image pull policy
     pullPolicy: IfNotPresent
-  ## MySQL primary persistence parameters
   persistence:
-    ## @param mysql.persistence.enabled Enable MySQL persistence using PVC
-    enabled: true
-    ## @param mysql.persistence.storageClass PVC Storage Class for MySQL volume
+    ## @param mysql.persistence.existingClaim Existing PVC for /var/lib/mysql instead of `<fullname>-mysql`
+    existingClaim: ""
+    ## @param mysql.persistence.storageClass StorageClass for the created PVC
     storageClass: ""
-    ## @param mysql.persistence.accessModes PVC Access Mode for MySQL volume
+    ## @param mysql.persistence.accessModes Access modes for the created PVC
     accessModes:
       - ReadWriteOnce
-    ## @param mysql.persistence.size PVC Storage Request for MySQL volume
+    ## @param mysql.persistence.size Size of the created PVC
     size: 10Gi
-    ## @param mysql.persistence.existingClaim Name of an existing PVC to use
-    existingClaim: ""
-  ## MySQL resource requests and limits
+  ## @param mysql.resources MySQL resources
   resources:
     requests:
       cpu: 250m
@@ -89,143 +192,291 @@ mysql:
     limits:
       cpu: "1"
       memory: 1Gi
-  ## MySQL container security context
-  containerSecurityContext: {}
-  ## MySQL startup probe (generous for first-time init on slow storage)
+  ## @param mysql.podSecurityContext MySQL Pod securityContext (the official image runs as mysql, UID 999)
+  podSecurityContext:
+    runAsUser: 999
+    runAsGroup: 999
+    runAsNonRoot: true
+    fsGroup: 999
+    fsGroupChangePolicy: OnRootMismatch
+    seccompProfile:
+      type: RuntimeDefault
+  ## @param mysql.containerSecurityContext MySQL container securityContext
+  containerSecurityContext:
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
+    seccompProfile:
+      type: RuntimeDefault
   startupProbe:
+    ## @param mysql.startupProbe.enabled Enable the MySQL startup probe
     enabled: true
-    initialDelaySeconds: 10
     periodSeconds: 10
     failureThreshold: 30
-  ## MySQL liveness probe
   livenessProbe:
+    ## @param mysql.livenessProbe.enabled Enable the MySQL liveness probe
     enabled: true
     periodSeconds: 15
+    timeoutSeconds: 5
     failureThreshold: 3
-  ## MySQL readiness probe
   readinessProbe:
+    ## @param mysql.readinessProbe.enabled Enable the MySQL readiness probe
     enabled: true
     periodSeconds: 10
+    timeoutSeconds: 5
     failureThreshold: 3
 
-## @section Cattr deployment parameters
+## @section Setup (migrations and administrator provisioning)
+setup:
+  ## @param setup.hook Run setup as a Helm hook (pre-install,pre-upgrade; post-install with mysql.enabled).
+  ## false renders a plain Job `<fullname>-setup-<revision>` instead (for tools that do not run hooks);
+  ## then nothing prevents two revisions' Jobs from running concurrently.
+  hook: true
+  ## @param setup.activeDeadlineSeconds Maximum run time of the setup Job
+  activeDeadlineSeconds: 1800
+  ## @param setup.backoffLimit Retries of the setup Job (0: a failed migration is not retried blindly)
+  backoffLimit: 0
+  ## @param setup.ttlSecondsAfterFinished TTL of the plain (setup.hook=false) Job
+  ttlSecondsAfterFinished: 86400
+  ## @param setup.resources Setup container resources
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi
+  ## @param setup.extraEnv Extra environment variables for the setup container
+  extraEnv: []
+  admin:
+    ## @param setup.admin.enabled Provision an administrator (idempotent: skipped when the email exists).
+    ## A fresh install fails to render if enabled without email and password.
+    enabled: true
+    ## @param setup.admin.email Administrator email (APP_ADMIN_EMAIL)
+    email: ""
+    ## @param setup.admin.name Administrator display name (APP_ADMIN_NAME)
+    name: Admin
+    ## @param setup.admin.password Administrator password, at least 6 characters (APP_ADMIN_PASSWORD)
+    password: ""
+    ## @param setup.admin.existingSecret Existing Secret with the administrator password (replaces setup.admin.password)
+    existingSecret: ""
+    ## @param setup.admin.existingSecretPasswordKey Key in setup.admin.existingSecret
+    existingSecretPasswordKey: APP_ADMIN_PASSWORD
+
+## @section Workloads
+## In pvc mode web, queue and scheduler are containers of one Pod (Deployment `<fullname>`, 1 replica,
+## Recreate). In s3 mode they are Deployments `<fullname>-web`, `-queue`, `-scheduler`.
+web:
+  ## @param web.replicas Web replicas (s3 mode only; pvc mode always runs 1)
+  replicas: 1
+  ## @param web.unsupportedMultiReplica Allow web.replicas > 1 in s3 mode. Unsupported: application
+  ## settings are cached per Pod (Octane) and Reverb needs Redis scaling, see README
+  unsupportedMultiReplica: false
+  ## @param web.octaneWorkers OCTANE_WORKERS (Swoole HTTP workers); empty = one per host CPU
+  octaneWorkers: "2"
+  ## @param web.octaneTaskWorkers OCTANE_TASK_WORKERS; empty = one per host CPU
+  octaneTaskWorkers: "2"
+  ## @param web.resources Web container resources (Caddy + Octane + Reverb)
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 1536Mi
+  ## @param web.preStopSleepSeconds Delay before shutdown so endpoints are removed first (0 disables)
+  preStopSleepSeconds: 5
+  startupProbe:
+    ## @param web.startupProbe.enabled GET /actuator/health/liveness until Octane answers
+    enabled: true
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 60
+  readinessProbe:
+    ## @param web.readinessProbe.enabled GET /api/status
+    enabled: true
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  livenessProbe:
+    ## @param web.livenessProbe.enabled GET /actuator/health/liveness
+    enabled: true
+    periodSeconds: 20
+    timeoutSeconds: 5
+    failureThreshold: 6
+  ## @param web.extraEnv Extra environment variables for the web container
+  extraEnv: []
+  ## @param web.podAnnotations Extra Pod annotations (s3 mode web Deployment)
+  podAnnotations: {}
+  pdb:
+    ## @param web.pdb.enabled Create a PodDisruptionBudget (s3 mode and replicas > 1 only)
+    enabled: false
+    ## @param web.pdb.maxUnavailable PDB maxUnavailable
+    maxUnavailable: 1
+
+queue:
+  ## @param queue.replicas Queue worker replicas (s3 mode only; pvc mode always runs 1)
+  replicas: 1
+  ## @param queue.resources Queue container resources
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 768Mi
+  livenessProbe:
+    ## @param queue.livenessProbe.enabled `pebble services queue` must report the service active
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 20
+    timeoutSeconds: 5
+    failureThreshold: 3
+  ## @param queue.extraEnv Extra environment variables for the queue container
+  extraEnv: []
+  ## @param queue.podAnnotations Extra Pod annotations (s3 mode queue Deployment)
+  podAnnotations: {}
+  pdb:
+    ## @param queue.pdb.enabled Create a PodDisruptionBudget (s3 mode and replicas > 1 only)
+    enabled: false
+    ## @param queue.pdb.maxUnavailable PDB maxUnavailable
+    maxUnavailable: 1
+
+scheduler:
+  ## @param scheduler.resources Scheduler container resources (always exactly one instance)
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  livenessProbe:
+    ## @param scheduler.livenessProbe.enabled `pebble services scheduler` must report the service active
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 20
+    timeoutSeconds: 5
+    failureThreshold: 3
+  ## @param scheduler.extraEnv Extra environment variables for the scheduler container
+  extraEnv: []
+  ## @param scheduler.podAnnotations Extra Pod annotations (s3 mode scheduler Deployment)
+  podAnnotations: {}
+
+## @section Pod settings shared by all Cattr Pods
+## @param podAnnotations Extra annotations for every Cattr Pod
+podAnnotations: {}
+## @param podLabels Extra labels for every Cattr Pod
+podLabels: {}
+## @param podSecurityContext Pod securityContext (restricted Pod Security Standard compatible)
 podSecurityContext:
-  ## Run the pod as the non-root UID/GID used by the runtime image.
   runAsUser: 10000
   runAsGroup: 10000
+  runAsNonRoot: true
   fsGroup: 10000
   fsGroupChangePolicy: OnRootMismatch
+  seccompProfile:
+    type: RuntimeDefault
+## @param containerSecurityContext securityContext of every Cattr container (including init containers)
 containerSecurityContext:
-  ## The runtime image is rootless and does not require privilege escalation.
   runAsNonRoot: true
   allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
   capabilities:
     drop:
       - ALL
   seccompProfile:
     type: RuntimeDefault
-
-## Cattr resource requests and limits
-resources:
+## @param terminationGracePeriodSeconds Grace period (preStop + Pebble kill-delay 30s + margin)
+terminationGracePeriodSeconds: 45
+## @param initResources Resources of the prepare / wait-for-migrations init containers
+initResources:
   requests:
-    cpu: 250m
-    memory: 512Mi
+    cpu: 50m
+    memory: 64Mi
   limits:
-    cpu: "1"
-    memory: 1Gi
-
-## Cattr startup probe (generous for Pebble + migrations)
-startupProbe:
-  enabled: true
-  initialDelaySeconds: 30
-  periodSeconds: 10
-  failureThreshold: 30
-
-## Cattr liveness probe
-livenessProbe:
-  enabled: true
-  periodSeconds: 15
-  failureThreshold: 3
-
-## Cattr readiness probe
-readinessProbe:
-  enabled: true
-  periodSeconds: 10
-  failureThreshold: 3
-
-## @param extraVolumes Optionally specify extra list of additional volumes
+    cpu: 500m
+    memory: 256Mi
+## @param priorityClassName Pod priorityClassName
+priorityClassName: ""
+## @param nodeSelector Node selector
+nodeSelector: {}
+## @param tolerations Tolerations
+tolerations: []
+## @param affinity Affinity
+affinity: {}
+## @param topologySpreadConstraints Topology spread constraints (s3 mode)
+topologySpreadConstraints: []
+## @param extraVolumes Extra volumes for every Cattr Pod
 extraVolumes: []
-## @param extraVolumeMounts Optionally specify extra list of additional volumeMounts
+## @param extraVolumeMounts Extra volumeMounts for every Cattr app container
 extraVolumeMounts: []
-## @param initContainers Add additional init containers
-initContainers: []
-## @param sidecars Add additional sidecar containers
-sidecars: []
 
-## @section Persistence parameters
-persistence:
-  screenshots:
-    ## @param persistence.screenshots.enabled Enable persistence for screenshots
-    enabled: true
-    ## @param persistence.screenshots.storageClass PVC Storage Class
-    storageClass: ""
-    ## @param persistence.screenshots.accessModes PVC Access Modes
-    accessModes:
-      - ReadWriteOnce
-    ## @param persistence.screenshots.size PVC Storage Request
-    size: 5Gi
-    ## @param persistence.screenshots.existingClaim Use an existing PVC
-    existingClaim: ""
-  attachments:
-    ## @param persistence.attachments.enabled Enable persistence for attachments
-    enabled: true
-    ## @param persistence.attachments.storageClass PVC Storage Class
-    storageClass: ""
-    ## @param persistence.attachments.accessModes PVC Access Modes
-    accessModes:
-      - ReadWriteOnce
-    ## @param persistence.attachments.size PVC Storage Request
-    size: 5Gi
-    ## @param persistence.attachments.existingClaim Use an existing PVC
-    existingClaim: ""
-
-## @section Traffic Exposure parameters
-service:
-  ## @param service.type Kubernetes Service type
-  type: ClusterIP
-  ## @param service.port Cattr service HTTP port
-  port: 80
-
-## Ingress parameters
-ingress:
-  ## @param ingress.enabled Enable ingress record generation
-  enabled: true
-  ## @param ingress.className IngressClass that will be used
-  className: nginx
-  ## @param ingress.hostname Default host for the ingress record
-  hostname: cattr.local
-  ## @param ingress.path Default path for the ingress record
-  path: /
-  ## @param ingress.pathType Ingress path type
-  pathType: Prefix
-  ## @param ingress.annotations Additional annotations for the Ingress resource
-  annotations: {}
-  ## @param ingress.tls Enable TLS configuration
-  tls: []
-  #  - secretName: cattr-tls
-  #    hosts:
-  #      - cattr.local
-
-## @section Service Account parameters
+## @section Service account
 serviceAccount:
-  ## @param serviceAccount.create Enable creation of ServiceAccount
+  ## @param serviceAccount.create Create a ServiceAccount (Cattr needs no Kubernetes API access)
   create: false
-  ## @param serviceAccount.name Name of the ServiceAccount to use
+  ## @param serviceAccount.name ServiceAccount name (default: fullname when created, else `default`)
   name: ""
-  ## @param serviceAccount.annotations Annotations for the ServiceAccount
+  ## @param serviceAccount.annotations ServiceAccount annotations
+  annotations: {}
+  ## @param serviceAccount.automountServiceAccountToken Mount the API token into Pods
+  automountServiceAccountToken: false
+
+## @section Networking
+service:
+  ## @param service.type Service type of `<fullname>` (port -> Caddy 8080)
+  type: ClusterIP
+  ## @param service.port Service port
+  port: 80
+  ## @param service.annotations Service annotations
   annotations: {}
 
-## @param commonLabels Labels to add to all deployed objects
+ingress:
+  ## @param ingress.enabled Create an Ingress (any controller; see README for nginx annotations)
+  enabled: false
+  ## @param ingress.className IngressClass name ("" = cluster default)
+  className: ""
+  ## @param ingress.annotations Ingress annotations
+  annotations: {}
+  #  nginx.ingress.kubernetes.io/proxy-body-size: 512m
+  #  nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+  #  nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+  ## @param ingress.hosts Hosts and paths
+  hosts:
+    - host: cattr.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  ## @param ingress.tls TLS entries, e.g. [{secretName: cattr-tls, hosts: [cattr.example.com]}]
+  tls: []
+
+httpRoute:
+  ## @param httpRoute.enabled Create a Gateway API HTTPRoute (needs the gateway.networking.k8s.io/v1 CRDs)
+  enabled: false
+  ## @param httpRoute.annotations HTTPRoute annotations
+  annotations: {}
+  ## @param httpRoute.parentRefs Gateways to attach to, e.g. [{name: eg, namespace: gateway, sectionName: https}]
+  parentRefs: []
+  ## @param httpRoute.hostnames Hostnames, e.g. [cattr.example.com]
+  hostnames: []
+  timeouts:
+    ## @param httpRoute.timeouts.request Request timeout for `/` ("" omits it)
+    request: 300s
+    ## @param httpRoute.timeouts.websocket Request timeout for the `/app` WebSocket rule ("0s" disables, "" omits)
+    websocket: 0s
+
+networkPolicy:
+  ## @param networkPolicy.enabled Restrict ingress to Cattr Pods: 8080 from networkPolicy.httpFrom, Reverb 8081
+  ## only from queue/scheduler/setup Pods, Octane 8090 never
+  enabled: false
+  ## @param networkPolicy.httpFrom NetworkPolicy peers allowed to reach port 8080 (empty = from anywhere)
+  httpFrom: []
+
+## @param commonLabels Labels added to every resource
 commonLabels: {}
-## @param commonAnnotations Annotations to add to all deployed objects
+## @param commonAnnotations Annotations added to every resource
 commonAnnotations: {}
