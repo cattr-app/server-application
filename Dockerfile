@@ -53,22 +53,21 @@ FROM ${RUNTIME_BASE_IMAGE}:${RUNTIME_BASE_IMAGE_TAG} AS runtime
 
 ARG APP_VERSION
 ARG APP_ENV=production
-ARG REVERB_APP_SECRET="secret"
 ARG REVERB_SCHEME=http
 ARG REVERB_PORT=8081
 
+# REVERB_APP_KEY is a public identifier compiled into the frontend bundle, not
+# a secret. REVERB_APP_SECRET, APP_KEY and DB credentials must be supplied at runtime.
+# trivy:ignore:DS-0031
 ENV IMAGE_VERSION=6.0.0 \
     APP_VERSION=${APP_VERSION} \
     APP_ENV=${APP_ENV} \
     REVERB_APP_KEY=cattr \
-    REVERB_APP_SECRET=${REVERB_APP_SECRET} \
     REVERB_HOST=127.0.0.1 \
     REVERB_SCHEME=${REVERB_SCHEME} \
     REVERB_PORT=${REVERB_PORT} \
     DB_CONNECTION=mysql \
     DB_HOST=db \
-    DB_USERNAME=root \
-    DB_PASSWORD=password \
     LOG_CHANNEL=stderr \
     PEBBLE=/opt/cattr/.pebble
 
