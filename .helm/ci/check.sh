@@ -52,6 +52,20 @@ for values in "$chart"/ci/*-values.yaml; do
     echo "::endgroup::"
 done
 
+# With serviceAccount.create=true the setup Job (pre-install hook, created
+# before the ServiceAccount) must not reference it; the workloads must.
+sa_render="$out/service-account.yaml"
+sa="$(yq 'select(.kind == "ServiceAccount") | .metadata.name' "$sa_render")"
+job_sa="$(yq 'select(.kind == "Job") | .spec.template.spec.serviceAccountName' "$sa_render")"
+job_token="$(yq 'select(.kind == "Job") | .spec.template.spec.automountServiceAccountToken' "$sa_render")"
+deploy_sa="$(yq 'select(.kind == "Deployment") | .spec.template.spec.serviceAccountName' "$sa_render" | sort -u)"
+if [ -z "$sa" ] || [ "$job_sa" != "null" ] || [ "$job_token" != "false" ] || [ "$deploy_sa" != "$sa" ]; then
+    echo "ERROR: service-account: ServiceAccount '$sa', setup Job serviceAccountName '$job_sa' (want null), automountServiceAccountToken '$job_token' (want false), Deployments '$deploy_sa' (want '$sa')"
+    status=1
+else
+    echo "ok: setup Job has no serviceAccountName with serviceAccount.create=true (Deployments use '$sa')"
+fi
+
 # name|expected message fragment|helm template arguments
 base="-f $chart/ci/default-values.yaml"
 while IFS='|' read -r name expected args; do

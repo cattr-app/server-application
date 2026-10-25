@@ -118,7 +118,10 @@ Pods run as UID/GID 10000 with `runAsNonRoot`, `fsGroup: 10000`
 (`OnRootMismatch`), seccomp `RuntimeDefault`; containers drop all
 capabilities, disallow privilege escalation and use a read-only root
 filesystem. The namespace can enforce the `restricted` Pod Security Standard
-(the demo MySQL complies too). No ServiceAccount token is mounted.
+(the demo MySQL complies too). No ServiceAccount token is mounted. The setup
+Job does not use the chart ServiceAccount (`serviceAccount.create`): as a
+pre-install hook it runs before that account exists, so it runs as the
+namespace `default` account, also without a token.
 
 | Path below `/opt/cattr/app` | `pvc` mode | `s3` mode |
 |---|---|---|

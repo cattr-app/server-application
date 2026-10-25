@@ -436,14 +436,23 @@ Usage: include "cattr.volumes" (dict "context" $ "roles" (list ...))
 
 {{/*
 Pod-level settings shared by every Cattr Pod (everything except containers and volumes).
+Usage: include "cattr.podCommon" (dict "context" $ "serviceAccount" true)
+serviceAccount=false omits serviceAccountName (the Pod runs as the namespace
+"default" account) and never mounts a token: used by the setup Job, a
+pre-install hook that runs before the chart ServiceAccount exists.
 */}}
 {{- define "cattr.podCommon" -}}
-{{- $v := .Values -}}
-{{- with (include "cattr.imagePullSecrets" .) }}
+{{- $ctx := .context -}}
+{{- $v := $ctx.Values -}}
+{{- with (include "cattr.imagePullSecrets" $ctx) }}
 {{- . }}
 {{- end }}
-serviceAccountName: {{ include "cattr.serviceAccountName" . }}
+{{- if .serviceAccount }}
+serviceAccountName: {{ include "cattr.serviceAccountName" $ctx }}
 automountServiceAccountToken: {{ $v.serviceAccount.automountServiceAccountToken }}
+{{- else }}
+automountServiceAccountToken: false
+{{- end }}
 enableServiceLinks: false
 terminationGracePeriodSeconds: {{ $v.terminationGracePeriodSeconds }}
 {{- with $v.podSecurityContext }}
@@ -499,7 +508,7 @@ metadata:
   annotations:
     {{- include "cattr.podAnnotations" (dict "context" $ctx "extra" .extraAnnotations) | nindent 4 }}
 spec:
-  {{- include "cattr.podCommon" $ctx | trim | nindent 2 }}
+  {{- include "cattr.podCommon" (dict "context" $ctx "serviceAccount" true) | trim | nindent 2 }}
   {{- if and (eq $ctx.Values.storage.type "s3") $ctx.Values.topologySpreadConstraints }}
   topologySpreadConstraints:
     {{- toYaml $ctx.Values.topologySpreadConstraints | nindent 4 }}

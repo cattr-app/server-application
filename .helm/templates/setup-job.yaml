@@ -50,7 +50,9 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
-      {{- include "cattr.podCommon" . | trim | nindent 6 }}
+      {{- /* No chart ServiceAccount: as a pre-install hook the Job runs before it
+      exists (the Pod would be rejected), and it does not call the API. */}}
+      {{- include "cattr.podCommon" (dict "context" . "serviceAccount" false) | trim | nindent 6 }}
       restartPolicy: Never
       initContainers:
         {{- include "cattr.prepareContainer" (dict "context" . "roles" (list "setup")) | trim | nindent 8 }}

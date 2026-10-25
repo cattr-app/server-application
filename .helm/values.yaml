@@ -417,7 +417,7 @@ extraVolumeMounts: []
 
 ## @section Service account
 serviceAccount:
-  ## @param serviceAccount.create Create a ServiceAccount (Cattr needs no Kubernetes API access)
+  ## @param serviceAccount.create Create a ServiceAccount (Cattr needs no Kubernetes API access). The setup Job never uses it: as a pre-install hook it runs before the account exists, so it runs as the namespace `default` account without a token
   create: false
   ## @param serviceAccount.name ServiceAccount name (default: fullname when created, else `default`)
   name: ""
