@@ -45,7 +45,7 @@ class OfflineScreenshotsArchiveLimitsTest extends TestCase
 
     public function test_default_limits(): void
     {
-        $this->assertSame(500, config('app.offline_screenshots.max_files'));
+        $this->assertSame(250, config('app.offline_screenshots.max_files'));
         $this->assertSame(1024 * 1024 * 1024, config('app.offline_screenshots.max_size'));
     }
 

@@ -40,9 +40,10 @@ return [
     'screenshots_rate_limit' => (int) env('SCREENSHOTS_RATE_LIMIT', 600),
     // Offline screenshots (offline-sync/upload-screenshots) are processed within the upload request, which must
     // finish within Octane's max_execution_time (90 s). Larger archives are rejected before anything is extracted.
-    // 500 entries ≈ 5 working days of 96 screenshots, ~40 s at ~75 ms per 1920×1080 screenshot on the local disk.
+    // 250 entries ≈ 2.5 working days of 96 screenshots: ~20 s at ~75 ms per 1920×1080 screenshot on the local disk,
+    // ~80 s at ~310 ms on S3.
     'offline_screenshots' => [
-        'max_files' => (int) env('OFFLINE_SCREENSHOTS_MAX_FILES', 500),
+        'max_files' => (int) env('OFFLINE_SCREENSHOTS_MAX_FILES', 250),
         // Total uncompressed size of all archive entries
         'max_size' => (int) env('OFFLINE_SCREENSHOTS_MAX_SIZE_BYTES', 1024 * 1024 * 1024),
     ],
