@@ -39,7 +39,11 @@ return [
             'connection' => env('DB_QUEUE_CONNECTION'),
             'table' => 'jobs',
             'queue' => 'default',
-            'retry_after' => 90,
+            // Seconds before a reserved job is handed to another worker. Must be greater than the
+            // longest job $timeout (VerifyAttachmentHash: 900), otherwise a job that is still running
+            // is started a second time. Trade-off: a job of a crashed worker is retried only after
+            // this delay. The redis and beanstalkd connections use the same value.
+            'retry_after' => (int) env('QUEUE_RETRY_AFTER', 960),
             'after_commit' => false,
         ],
 
@@ -47,7 +51,7 @@ return [
             'driver' => 'beanstalkd',
             'host' => 'localhost',
             'queue' => 'default',
-            'retry_after' => 90,
+            'retry_after' => (int) env('QUEUE_RETRY_AFTER', 960),
             'block_for' => 0,
             'after_commit' => false,
         ],
@@ -67,7 +71,7 @@ return [
             'driver' => 'redis',
             'connection' => 'default',
             'queue' => env('REDIS_QUEUE', 'default'),
-            'retry_after' => 90,
+            'retry_after' => (int) env('QUEUE_RETRY_AFTER', 960),
             'block_for' => null,
             'after_commit' => false,
         ],
