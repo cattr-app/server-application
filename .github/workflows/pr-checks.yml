@@ -92,6 +92,10 @@ jobs:
       # Misconfiguration scanning only (Dockerfile, Helm chart, other IaC).
       # Vulnerabilities are covered by Dependency Review / Dependabot and
       # secrets by GitHub secret scanning; see issue #339.
+      #
+      # --helm-set: the chart fails to render without its required keys, and
+      # Trivy then silently skips the Helm templates. Dummy values keep the
+      # chart covered.
       - name: Scan configuration
         uses: docker://aquasec/trivy@sha256:790fd66d1697395d8693d1acaa1ea702406a20f109b6fc7bac8db623eca6c06c  # 0.76.1
         with:
@@ -100,6 +104,7 @@ jobs:
             --scanners misconfig
             --severity MEDIUM,HIGH,CRITICAL
             --ignorefile .trivyignore.yaml
+            --helm-set cattr.appKey=ci-dummy,cattr.reverbAppSecret=ci-dummy
             --exit-code 1
             --no-progress
             .
