@@ -1,0 +1,83 @@
+name: Image scan
+
+# Scheduled Trivy scan of the published images. Wolfi packages in the base
+# images receive CVEs between releases; new alerts here signal that a
+# base-image rebuild (IMAGE_BUILD_REVISION / build/base/rebuild) is due.
+
+on:
+  schedule:
+    - cron: '27 5 * * 1'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    name: Scan ${{ matrix.name }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      security-events: write  # Upload SARIF to GitHub code scanning.
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Latest stable application release (release.yml tags it `latest`).
+          - name: server
+            image: ghcr.io/cattr-app/server:latest
+          - name: server-runtime
+            image: ghcr.io/cattr-app/server-runtime:runtime-latest
+    env:
+      # See the Trivy note in pr-checks.yml: official image pinned by digest
+      # instead of the (once tag-hijacked) trivy-action.
+      TRIVY_IMAGE: aquasec/trivy@sha256:790fd66d1697395d8693d1acaa1ea702406a20f109b6fc7bac8db623eca6c06c  # 0.76.1
+    steps:
+      # upload-sarif resolves the commit and ref from the checkout.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Scan image with Trivy
+        env:
+          IMAGE: ${{ matrix.image }}
+        run: |
+          set -euo pipefail
+
+          docker run --rm -v "${RUNNER_TEMP}:/scan" "${TRIVY_IMAGE}" \
+            image \
+            --image-src remote \
+            --scanners vuln \
+            --severity HIGH,CRITICAL \
+            --ignore-unfixed \
+            --format json \
+            --output /scan/trivy.json \
+            --exit-code 0 \
+            --no-progress \
+            "${IMAGE}"
+
+          docker run --rm -v "${RUNNER_TEMP}:/scan" "${TRIVY_IMAGE}" \
+            convert --format sarif --output /scan/trivy.sarif /scan/trivy.json
+
+          docker run --rm -v "${RUNNER_TEMP}:/scan" "${TRIVY_IMAGE}" \
+            convert --scanners vuln --format table --output /scan/trivy.txt /scan/trivy.json
+
+          {
+            echo "## Trivy scan of \`${IMAGE}\`"
+            echo
+            echo 'HIGH/CRITICAL vulnerabilities with an available fix:'
+            echo
+            echo '```'
+            cat "${RUNNER_TEMP}/trivy.txt"
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370  # v4.39.1
+        with:
+          sarif_file: ${{ runner.temp }}/trivy.sarif
+          category: trivy-image-${{ matrix.name }}

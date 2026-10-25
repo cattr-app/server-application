@@ -1,0 +1,9 @@
+# Hadolint configuration for the "Hadolint" PR check (.github/workflows/pr-checks.yml).
+ignored:
+  # DL3064 (sensitive data in ARG/ENV) fires on the runtime stage defaults
+  # REVERB_APP_SECRET="secret" and DB_PASSWORD=password. They are insecure
+  # placeholder defaults that deployments override at runtime, not leaked
+  # secrets. Pre-existing baseline from issue #339: drop this ignore once the
+  # Dockerfile stops baking these defaults into the image (or marks the two
+  # lines with inline `# hadolint ignore=DL3064`).
+  - DL3064
