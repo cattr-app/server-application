@@ -114,6 +114,57 @@ class AttachmentStorageTest extends TestCase
             ->assertValidationError();
     }
 
+    /**
+     * @return array<string, array{string, AttachmentStatus}>
+     */
+    public static function notDownloadableStatuses(): array
+    {
+        return [
+            'local, processing' => ['local', AttachmentStatus::PROCESSING],
+            'local, bad' => ['local', AttachmentStatus::BAD],
+            's3, processing' => ['s3', AttachmentStatus::PROCESSING],
+            's3, bad' => ['s3', AttachmentStatus::BAD],
+        ];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('notDownloadableStatuses')]
+    public function test_temporary_url_is_issued_only_for_good_attachments(
+        string $driver,
+        AttachmentStatus $status
+    ): void {
+        $this->attachment->update(['status' => $status]);
+        $driver === 's3' ? $this->useS3() : Storage::fake('attachments');
+
+        $this->actingAs($this->admin)
+            ->get("attachment/{$this->attachment->id}/temporary-url?seconds=60")
+            ->assertNotFound('page_not_found');
+    }
+
+    public static function disks(): array
+    {
+        return ['local' => ['local'], 's3' => ['s3']];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('disks')]
+    public function test_temporary_url_is_issued_for_good_attachment(string $driver): void
+    {
+        $driver === 's3' ? $this->useS3() : Storage::fake('attachments');
+
+        $this->assertNotSame('', $this->temporaryUrl(60));
+    }
+
+    public function test_local_signed_link_does_not_serve_attachment_that_turned_bad(): void
+    {
+        Storage::fake('attachments');
+        Storage::disk('attachments')->put(app(AttachmentService::class)->getPath($this->attachment), '%PDF');
+
+        $url = $this->temporaryUrl(60);
+        $this->get($url)->assertOk();
+
+        $this->attachment->update(['status' => AttachmentStatus::BAD]);
+        $this->get($url)->assertNotFound('page_not_found');
+    }
+
     public function test_presigned_url_sets_download_headers(): void
     {
         $this->useS3();
