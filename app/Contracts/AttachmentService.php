@@ -10,6 +10,9 @@ use Illuminate\Http\UploadedFile;
 
 interface AttachmentService
 {
+    /** Longest lifetime of a temporary download link: 7 days, the S3 (SigV4) presigning limit */
+    public const MAX_TEMPORARY_URL_SECONDS = 7 * 24 * 60 * 60;
+
     public function storeFile(UploadedFile $file, Attachment $attachment): string|false;
 
     public function handleProjectChange(Task $parent): void;
@@ -35,8 +38,9 @@ interface AttachmentService
     public function getFullPath(Attachment $attachment): string;
 
     /**
-     * Presigned download URL when attachments are on object storage (S3); null for the local disk or an
-     * expiration beyond the S3 limit (the signed attachment.temporary-download route streams the file then).
+     * Presigned download URL when attachments are on object storage (S3); null for the local disk
+     * (the signed attachment.temporary-download route streams the file then).
+     * The expiration must not exceed MAX_TEMPORARY_URL_SECONDS.
      */
     public function getTemporaryUrl(Attachment $attachment, DateTimeInterface $expiresAt): ?string;
 

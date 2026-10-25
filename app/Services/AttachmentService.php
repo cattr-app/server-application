@@ -169,9 +169,7 @@ class AttachmentService implements \App\Contracts\AttachmentService
 
     public function getTemporaryUrl(Attachment $attachment, DateTimeInterface $expiresAt): ?string
     {
-        // SigV4 presigned URLs live at most 7 days; longer links (the UI offers 14 days) use the signed
-        // app route, which streams from any disk.
-        if (StorageHelper::isLocal($this::DISK) || $expiresAt > now()->addWeek()) {
+        if (StorageHelper::isLocal($this::DISK)) {
             return null;
         }
 

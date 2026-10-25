@@ -242,21 +242,6 @@
                                         },
                                         `7${this.$t('time.d')}`,
                                     ),
-                                    h(
-                                        'AtButton',
-                                        {
-                                            props: {
-                                                type: 'primary',
-                                                size: 'smaller',
-                                            },
-                                            on: {
-                                                click: async () => {
-                                                    await this.handleTmpUrlCreation(params.item.id, 60 * 60 * 24 * 14);
-                                                },
-                                            },
-                                        },
-                                        `14${this.$t('time.d')}`,
-                                    ),
                                 ]),
                             ],
                         );

@@ -80,13 +80,38 @@ class AttachmentStorageTest extends TestCase
         );
     }
 
-    public function test_s3_disk_falls_back_to_signed_route_beyond_presign_limit(): void
+    public function test_s3_disk_presigns_up_to_seven_days(): void
     {
         $this->useS3();
+        $this->freezeSecond();
 
-        $url = $this->temporaryUrl(60 * 60 * 24 * 14);
+        $url = $this->temporaryUrl(AttachmentService::MAX_TEMPORARY_URL_SECONDS);
 
-        $this->assertStringStartsWith("/api/tmp-attachment-link/{$this->attachment->id}?expires=", $url);
+        $this->assertSame(604800, AttachmentService::MAX_TEMPORARY_URL_SECONDS);
+        $this->assertStringEndsWith('?expiration=' . now()->addDays(7)->getTimestamp(), $url);
+    }
+
+    /**
+     * @return array<string, array{string, int}>
+     */
+    public static function invalidLifetimes(): array
+    {
+        return [
+            'local, longer than 7 days' => ['local', AttachmentService::MAX_TEMPORARY_URL_SECONDS + 1],
+            's3, longer than 7 days' => ['s3', AttachmentService::MAX_TEMPORARY_URL_SECONDS + 1],
+            'local, 14 days' => ['local', 60 * 60 * 24 * 14],
+            'local, zero' => ['local', 0],
+        ];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('invalidLifetimes')]
+    public function test_lifetime_is_limited_to_seven_days_on_every_disk(string $driver, int $seconds): void
+    {
+        $driver === 's3' ? $this->useS3() : Storage::fake('attachments');
+
+        $this->actingAs($this->admin)
+            ->getJson("attachment/{$this->attachment->id}/temporary-url?seconds=$seconds")
+            ->assertValidationError();
     }
 
     public function test_presigned_url_sets_download_headers(): void
