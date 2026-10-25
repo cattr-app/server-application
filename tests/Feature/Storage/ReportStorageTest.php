@@ -6,8 +6,10 @@ use App\Jobs\GenerateAndSendReport;
 use App\Models\User;
 use App\Notifications\ReportGenerated;
 use App\Reports\DashboardExport;
+use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\Mime\Email;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
@@ -67,24 +69,55 @@ class ReportStorageTest extends TestCase
         $this->assertStringEndsWith($this->reportPath() . "?expiration=$expiration", $url);
     }
 
-    public function test_report_mail_attaches_file_from_the_reports_disk(): void
+    public static function reportDrivers(): array
     {
-        config(['filesystems.disks.reports.driver' => 's3']);
+        return [
+            'local' => ['local'],
+            's3' => ['s3'],
+        ];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('reportDrivers')]
+    public function test_report_mail_attaches_file_from_the_reports_disk(string $driver): void
+    {
+        config(['filesystems.disks.reports.driver' => $driver]);
         Storage::fake('reports');
 
         $this->generateReport();
         $path = $this->reportPath();
+        $stored = Storage::disk('reports')->get($path);
+        $this->assertNotEmpty($stored);
 
+        $sent = null;
         Notification::assertSentTo(
             $this->admin,
             ReportGenerated::class,
-            function (ReportGenerated $notification) use ($path) {
-                $attachments = $notification->toMail($this->admin)->rawAttachments;
+            function (ReportGenerated $notification) use (&$sent) {
+                $sent = $notification;
 
-                return count($attachments) === 1
-                    && $attachments[0]['name'] === basename($path)
-                    && $attachments[0]['data'] === Storage::disk('reports')->get($path);
+                return true;
             }
+        );
+
+        $mail = $sent->toMail($this->admin);
+        $this->assertSame([], $mail->attachments);
+        $this->assertCount(1, $mail->rawAttachments);
+        $attachment = $mail->rawAttachments[0];
+        $this->assertSame(basename($path), $attachment['name']);
+        $this->assertSame(Storage::disk('reports')->mimeType($path), $attachment['options']['mime']);
+        // the report is passed as a stream, not loaded into a string
+        $this->assertIsResource($attachment['data']);
+
+        // render it the way MailChannel does and compare the attachment with the stored file
+        $email = (new Email())->from('report@example.com')->to('admin@example.com')->text('report');
+        (new Message($email))->attachData($attachment['data'], $attachment['name'], $attachment['options']);
+        $parts = $email->getAttachments();
+        $this->assertCount(1, $parts);
+        $this->assertSame(basename($path), $parts[0]->getFilename());
+        $this->assertSame($stored, $parts[0]->getBody());
+        $this->assertStringContainsString(
+            chunk_split(base64_encode($stored), 76, "\r\n"),
+            implode('', iterator_to_array($email->toIterable(), false)),
         );
     }
 }
