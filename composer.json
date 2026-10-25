@@ -29,6 +29,7 @@
     "laravel/octane": "^2.2",
     "laravel/reverb": "^1.0",
     "laravel/sanctum": "^4.0",
+    "league/flysystem-aws-s3-v3": "^3.0",
     "maatwebsite/excel": "^3.1",
     "matanyadaev/laravel-eloquent-spatial": "^4.8",
     "mpdf/mpdf": "^8.0",
