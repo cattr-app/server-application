@@ -17,7 +17,7 @@ jobs:
 
     services:
       mysql:
-        image: mysql:8.4
+        image: mysql:8.4@sha256:76f0358884cb92d9a086d24e5671c38048d3fef40f2588703d73eb55392d6b69  # 8.4
         env:
           MYSQL_ROOT_PASSWORD: password
           MYSQL_DATABASE: cattr
@@ -38,12 +38,12 @@ jobs:
       DB_PASSWORD: password
 
     steps:
-      - uses: actions/checkout@v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
 
       - name: Set up PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962  # 2.40.0
         with:
           php-version: '8.3'
           extensions: ctype, curl, dom, fileinfo, gd, iconv, intl, json, mbstring, openssl, pdo_mysql, simplexml, tokenizer, xml, zip
@@ -69,12 +69,12 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - uses: actions/checkout@v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4.4.0
         with:
           node-version: '24'
 
