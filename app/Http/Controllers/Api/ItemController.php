@@ -289,7 +289,8 @@ abstract class ItemController extends Controller
      * @apiSuccess {Integer}  keyboard_fill  Keyboard activity fill percentage
      * @apiSuccess {Integer}  location       Additional location information, if available
      * @apiSuccess {Integer}  screenshot_id  The ID of the screenshot associated with this interval
-     * @apiSuccess {Integer}  has_screenshot Indicates if there is a screenshot for this interval
+     * @apiSuccess {String}   screenshot_url Temporary (10 min) URL of the screenshot, list/show only
+     * @apiSuccess {String}   thumbnail_url  Temporary (10 min) URL of the screenshot thumbnail, list/show only
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
@@ -308,7 +309,8 @@ abstract class ItemController extends Controller
      *       "keyboard_fill": 13,
      *       "location": null,
      *       "screenshot_id": null,
-     *       "has_screenshot": true
+     *       "screenshot_url": "/api/time-intervals/1/screenshot?expires=1698316277&signature=...",
+     *       "thumbnail_url": "/api/time-intervals/1/thumb?expires=1698316277&signature=..."
      *   },...
      *  }
      */

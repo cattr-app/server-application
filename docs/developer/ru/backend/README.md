@@ -4,6 +4,7 @@
 
 - [Политика доступа и роли](access-policy.md)
 - [События и фильтры](events-and-filters.md)
+- [Хранение файлов: локальный диск или S3](storage.md)
 - [Создание модуля интеграции на примере Jira](jira-integration.md)
 - [HTTP API](https://docs.cattr.app/api/)
 

@@ -7,7 +7,7 @@
         <AppImage
             v-if="interval && interval.id && screenshotsEnabled"
             class="modal-screenshot"
-            :src="getScreenshotPath(interval)"
+            :resolver="screenshotResolver"
             :openable="true"
         />
         <i v-else class="icon icon-camera-off modal-screenshot" />
@@ -101,9 +101,13 @@
     import moment from 'moment-timezone';
     import AppImage from './AppImage';
     import { mapGetters } from 'vuex';
+    import { getScreenshotUrl } from '@/services/screenshot-url.service';
 
+    /**
+     * Resolves the screenshot URL of an interval (Promise<string>); modules may override it via `config`.
+     */
     export function screenshotPathProvider(interval) {
-        return `time-intervals/${interval.id}/screenshot`;
+        return getScreenshotUrl(interval);
     }
 
     export const config = { screenshotPathProvider };
@@ -142,6 +146,10 @@
         computed: {
             ...mapGetters('user', ['companyData']),
             ...mapGetters('screenshots', { screenshotsEnabled: 'enabled' }),
+            screenshotResolver() {
+                const interval = this.interval;
+                return () => config.screenshotPathProvider(interval);
+            },
         },
         methods: {
             formatDate(value) {
@@ -156,9 +164,6 @@
             },
             onRemove() {
                 this.$emit('remove', this.interval.id);
-            },
-            getScreenshotPath(interval) {
-                return config.screenshotPathProvider(interval);
             },
         },
     };

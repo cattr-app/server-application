@@ -31,6 +31,11 @@ class RotateScreenshots extends Command
      */
     public function handle(): void
     {
+        if (!StorageCleaner::isSupported()) {
+            $this->info('Screenshots are on object storage: use bucket lifecycle rules instead of rotation');
+            return;
+        }
+
         if (!StorageCleaner::needThinning()) {
             $this->info('Time for thinning hasn\'t come');
             return;

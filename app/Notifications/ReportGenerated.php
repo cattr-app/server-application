@@ -6,11 +6,18 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Storage;
+use Illuminate\Support\Facades\Storage;
+use RuntimeException;
+use Throwable;
 
 class ReportGenerated extends Notification implements ShouldQueue
 {
     use Queueable;
+
+    /**
+     * Attachment buffer: up to 1 MiB in memory, the rest spills to a temporary file.
+     */
+    private const BUFFER = 'php://temp/maxmemory:1048576';
 
     public function __construct(private $fileName, private $drive)
     {
@@ -25,7 +32,68 @@ class ReportGenerated extends Notification implements ShouldQueue
     {
         return (new MailMessage)
                     ->line('In attachment see report you have requested.')
-                    ->attach(Storage::drive($this->drive)->path($this->fileName));
+                    ->attachData(
+                        $this->bufferReport(),
+                        basename($this->fileName),
+                        ['mime' => Storage::drive($this->drive)->mimeType($this->fileName) ?: null],
+                    );
+    }
+
+    /**
+     * Copy the report into a seekable temporary stream instead of loading it into a string
+     * (Attachment::fromStorageDisk() calls Storage::get()). Symfony Mime accepts a resource as the
+     * attachment body and encodes it chunk by chunk, so the report is never held in memory as a whole.
+     * The copy also makes the body seekable (an S3 read stream is not), so the message can be rendered again.
+     *
+     * @return resource
+     */
+    private function bufferReport()
+    {
+        $source = Storage::drive($this->drive)->readStream($this->fileName);
+        if (!is_resource($source)) {
+            throw new RuntimeException("Unable to read report $this->fileName from the $this->drive disk");
+        }
+
+        $buffer = false;
+        try {
+            $buffer = $this->openBuffer();
+            if ($buffer === false) {
+                throw new RuntimeException("Unable to open a buffer for report $this->fileName");
+            }
+
+            // fail the job rather than mail a truncated report
+            $copied = stream_copy_to_stream($source, $buffer);
+            $expected = Storage::drive($this->drive)->size($this->fileName);
+            if ($copied !== $expected) {
+                throw new RuntimeException(sprintf(
+                    'Report %s: copied %s of %d bytes from the %s disk',
+                    $this->fileName,
+                    var_export($copied, true),
+                    $expected,
+                    $this->drive,
+                ));
+            }
+
+            rewind($buffer);
+        } catch (Throwable $e) {
+            if (is_resource($buffer)) {
+                fclose($buffer);
+            }
+
+            throw $e;
+        } finally {
+            fclose($source);
+        }
+
+        return $buffer;
+    }
+
+    /**
+     * @return resource|false
+     */
+    protected function openBuffer()
+    {
+        return fopen(self::BUFFER, 'w+b');
     }
 
     public function toArray($notifiable): array

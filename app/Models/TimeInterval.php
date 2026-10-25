@@ -17,7 +17,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
-use Storage;
 use MatanYadaev\EloquentSpatial\SpatialBuilder as Builder;
 use MatanYadaev\EloquentSpatial\Objects\Point;
 use MatanYadaev\EloquentSpatial\Traits\HasSpatial;
@@ -41,7 +40,8 @@ use MatanYadaev\EloquentSpatial\Traits\HasSpatial;
  * @property array|null $location
  * @property-read Collection|TrackedApplication[] $apps
  * @property-read int|null $apps_count
- * @property-read bool $has_screenshot
+ * @property-read string $screenshot_url Signed / presigned URL, short-lived; appended only by the API
+ * @property-read string $thumbnail_url Signed / presigned URL, short-lived; appended only by the API
  * @property-read Collection|Property[] $properties
  * @property-read int|null $properties_count
  * @property-read Task $task
@@ -141,8 +141,6 @@ class TimeInterval extends Model
         'deleted_at',
     ];
 
-    protected $appends = ['has_screenshot'];
-
     /**
      * Override parent boot and Call deleting event
      *
@@ -170,12 +168,20 @@ class TimeInterval extends Model
         return $this->morphMany(Property::class, 'entity');
     }
 
-    public function hasScreenshot(): Attribute
+    /** Attributes the API appends to intervals it returns (see IntervalController) */
+    public const SCREENSHOT_URL_ATTRIBUTES = ['screenshot_url', 'thumbnail_url'];
+
+    public function screenshotUrl(): Attribute
     {
-        return Attribute::make(
-            get: static fn ($value) => !$value || Storage::exists(
-                app(ScreenshotService::class)->getScreenshotPath($value['id'])
-            )
+        return Attribute::get(
+            fn () => app(ScreenshotService::class)->getTemporaryUrl($this->id)
+        )->shouldCache();
+    }
+
+    public function thumbnailUrl(): Attribute
+    {
+        return Attribute::get(
+            fn () => app(ScreenshotService::class)->getTemporaryUrl($this->id, true)
         )->shouldCache();
     }
 

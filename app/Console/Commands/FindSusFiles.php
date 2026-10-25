@@ -36,7 +36,11 @@ class FindSusFiles extends Command
         SusFiles::query()->delete();
 
         $this->withProgressBar(
-            Storage::disk('attachments')->allFiles('projects'),
+            // quarantined (BAD) files keep the projects/ layout under the quarantine prefix
+            array_merge(
+                Storage::disk('attachments')->allFiles('projects'),
+                Storage::disk('attachments')->allFiles(AttachmentService::QUARANTINE_DIR . '/projects'),
+            ),
             function ($filePath) use ($service) {
                 $fileName = Str::of($filePath)->basename()->toString();
 

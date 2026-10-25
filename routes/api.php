@@ -306,6 +306,14 @@ Route::group([
     });
 
     //Screenshots routes
+    $router->get('time-intervals/{interval}/screenshot-urls', [IntervalController::class, 'screenshotUrls'])
+        ->where('interval', '[0-9]+')->name('intervals.screenshot.urls');
+});
+
+// Screenshot files on the local disk: no bearer token, access is granted by a temporary signed URL
+// (ScreenshotService::getTemporaryUrl, relative signature checked in the controller).
+// Throttled per IP by the "screenshots" limiter (AppServiceProvider), sized for a full timeline page.
+Route::middleware('throttle:screenshots')->group(static function (Router $router) {
     $router->get('time-intervals/{interval}/screenshot', [IntervalController::class, 'showScreenshot'])
         ->where('interval', '[0-9]+')->name('intervals.screenshot.original');
     $router->get('time-intervals/{interval}/thumb', [IntervalController::class, 'showThumbnail'])
