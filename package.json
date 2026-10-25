@@ -49,7 +49,7 @@
         "vue": "^2.7.16",
         "vue-avatar": "^2.3.3",
         "vue-chartjs": "^5.2.0",
-        "vue-color": "^2.8.1",
+        "vue-color": "^3.3.3",
         "vue-echarts": "^6.6.8",
         "vue-i18n": "^8.28.2",
         "vue-kanban": "^1.8.0",
