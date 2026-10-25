@@ -6,17 +6,6 @@
 # as the underlying files are fixed.
 
 misconfigurations:
-  # --- Dockerfile ---------------------------------------------------------
-
-  # Runtime stage bakes placeholder defaults REVERB_APP_SECRET="secret",
-  # DB_PASSWORD=password and REVERB_APP_KEY=cattr (the latter is a public
-  # Reverb key, not a secret). Deployments override them at runtime. Fix:
-  # stop shipping secret-like defaults in the image.
-  - id: DS-0031
-    paths:
-      - Dockerfile
-    statement: Placeholder credentials in Dockerfile ENV/ARG (baseline, issue #339)
-
   # --- Helm chart: .helm/templates/configmap.yaml ----------------------------
 
   # False positive: the rule matches the key names DB_PORT and
