@@ -95,6 +95,8 @@ are set, `provision` (`cattr:make:admin`; skipped if the email exists).
 - `setup.hook: false` renders a plain Job `<fullname>-setup-<revision>` with
   `ttlSecondsAfterFinished`, for tools that skip hooks. Nothing then prevents
   two revisions' Jobs from running at the same time: let one finish first.
+  The app Pods are gated on migrations only, so if just the administrator
+  provisioning fails they start without that administrator; check the Job.
 
 ### Restarts and probes
 
