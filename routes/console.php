@@ -1,6 +1,7 @@
 <?php
 
 use App\Console\Commands\CalculateEfficiency;
+use App\Console\Commands\CleanTmpFiles;
 use App\Console\Commands\FindSusFiles;
 use App\Console\Commands\RecreateCronTaskWorkers;
 use App\Console\Commands\RotateScreenshots;
@@ -20,3 +21,6 @@ Schedule::command(VerifyAttachments::class)->daily()->runInBackground()->without
 Schedule::command(CalculateEfficiency::class)->daily()->runInBackground()->withoutOverlapping();
 
 Schedule::command(FindSusFiles::class)->weekly()->runInBackground()->withoutOverlapping();
+
+// Leftovers in storage/app/tmp of the local disk (older versions never deleted some uploads there).
+Schedule::command(CleanTmpFiles::class)->daily()->runInBackground()->withoutOverlapping();

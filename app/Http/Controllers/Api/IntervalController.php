@@ -501,20 +501,21 @@ class IntervalController extends ItemController
         $screenshotService = $this->screenshotService;
 
         if ($request->hasFile('screenshot') && optional($request->file('screenshot'))->isValid()) {
-            // The upload is only a local temporary copy; the encoded screenshot goes to the default disk.
-            $path = $request->file('screenshot')->store('tmp', 'local');
+            // The listener runs synchronously within this request, so the upload is read straight from PHP's
+            // temporary file: nothing is copied to storage/app/tmp and nothing is left behind when the screenshot
+            // is not kept or the interval is not created. The encoded screenshot goes to the default disk.
+            $screenshot = $request->file('screenshot');
 
             CatEvent::listen(
                 Filter::getAfterActionEventName(),
-                static function (TimeInterval $interval) use ($path, $screenshotService) {
+                static function (TimeInterval $interval) use ($screenshot, $screenshotService) {
                     $projScreenshotsState = $interval->task->project->screenshots_state;
                     $mustCapture = $projScreenshotsState === ScreenshotsState::REQUIRED;
                     $optionalCapture = $projScreenshotsState === ScreenshotsState::OPTIONAL;
                     if ($mustCapture
                         || ($optionalCapture && $interval->user->screenshots_state === ScreenshotsState::REQUIRED)
                     ) {
-                        $screenshotService->saveScreenshot(Storage::disk('local')->path($path), $interval);
-                        dispatch(static fn() => Storage::disk('local')->delete($path))->delay(now()->addMinute());
+                        $screenshotService->saveScreenshot($screenshot, $interval);
                     }
                 }
             );
@@ -806,20 +807,36 @@ class IntervalController extends ItemController
             __('Cannot open file.' . is_int($zipOpenResult) ? " ZipArchive error code: $zipOpenResult" : ""),
         );
 
+        // The archive is extracted to the local disk of this web container and processed within the request,
+        // so the queue worker does not need access to these files. The directory is removed when the request
+        // ends, also on failure; leftovers of interrupted requests are removed by cattr:tmp:clean.
         $temporaryDirectory = (new TemporaryDirectory())
             ->location(Storage::disk('local')->path('tmp'))->force()->create();
-        $zip->extractTo($temporaryDirectory->path());
-        $zip->close();
 
-        $dirPath = Str::of($temporaryDirectory->path())->match('/tmp.+/');
-        dispatch(static fn() => $temporaryDirectory->delete())->delay(now()->addHour());
+        try {
+            $zip->extractTo($temporaryDirectory->path());
+            $zip->close();
 
+            $creationResult = $this->attachOfflineScreenshots('tmp/' . basename($temporaryDirectory->path()));
+        } finally {
+            $temporaryDirectory->delete();
+        }
 
+        return responder()->success($creationResult)->respond();
+    }
+
+    /**
+     * Saves the extracted offline screenshots synchronously, so that failures are reported in the result.
+     *
+     * @param string $dirPath Directory with the extracted screenshots, relative to the local disk
+     * @return array
+     */
+    private function attachOfflineScreenshots(string $dirPath): array
+    {
         $allScreenshots = Storage::disk('local')->files($dirPath);
 
         $creationResult = [];
 
-        $screenshotService = $this->screenshotService;
         foreach ($allScreenshots as $screenshotPath) {
             $pathArr = Str::of($screenshotPath)->match('/\d_.+/')->split('/_/');
             abort_if(
@@ -842,11 +859,10 @@ class IntervalController extends ItemController
                 continue;
             }
             try {
-                dispatch(static function () use ($screenshotService, $interval, $screenshotPath) {
-                    $screenshotService->saveScreenshot(Storage::disk('local')->path($screenshotPath), $interval);
-                    $interval->screenshot_id = null;
-                    $interval->save();
-                });
+                $this->screenshotService->saveScreenshot(Storage::disk('local')->path($screenshotPath), $interval);
+                $interval->screenshot_id = null;
+                $interval->save();
+
                 $creationResult[] = [
                     'interval' => $interval,
                     'user_id' => $userId,
@@ -866,7 +882,7 @@ class IntervalController extends ItemController
             }
         }
 
-        return responder()->success($creationResult)->respond();
+        return $creationResult;
     }
 
     /**
