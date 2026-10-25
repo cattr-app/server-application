@@ -170,8 +170,8 @@ importers:
   .:
     dependencies:
       '@amazingcat/cattr-ui':
-        specifier: ^1.3.9
-        version: 1.3.9
+        specifier: ^1.3.14
+        version: 1.3.14
       '@svgdotjs/svg.js':
         specifier: ^3.2.0
         version: 3.2.8
@@ -389,8 +389,8 @@ importers:
 
 packages:
 
-  '@amazingcat/cattr-ui@1.3.9':
-    resolution: {integrity: sha512-URf/lgHCyfF5O2q5JwuQXRz59kSfJd00jORAgZfn2UmRHLGRDKMc1Nftv24DQW4xls3N09ryMgM65mfaUHE1QQ==}
+  '@amazingcat/cattr-ui@1.3.14':
+    resolution: {integrity: sha512-PCB5mrruBJbl6QVIyg0q2r9/EdpKc1Ws2VE7V5MeFYiZXR1NTJzcsmhZ19BCaLU9gWT+trDWqGbzr0uKVJl7UA==}
     engines: {node: '>=6'}
 
   '@apideck/better-ajv-errors@0.3.7':
@@ -1836,6 +1836,9 @@ packages:
     resolution: {integrity: sha512-M762rNHfSF1EV3SLtnCJXFoQbbIIz0OyRwnCmV0KPC7qosSfCO0QLTSuJX3ayAebubhE6oYBAYPrBA5ljowaZg==}
     peerDependencies:
       '@babel/core': ^7.4.0 || ^8.0.0-0 <8.0.0
+
+  babel-runtime@6.26.0:
+    resolution: {integrity: sha512-ITKNuq2wKlW1fJg9sSW52eepoYgZBggvOAHC0u/CYu/qxQ9EVzThCgR69BnSXLHjy2f7SY5zaQ4yt7H9ZVxY2g==}
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
@@ -4568,6 +4571,9 @@ packages:
   regenerate@1.4.2:
     resolution: {integrity: sha512-zrceR/XhGYU/d/opr2EKO7aRHUeiBI8qjtfHqADTwZd6Szfy16la6kqD0MIUs5z5hx6AaKa+PixpPrR289+I0A==}
 
+  regenerator-runtime@0.11.1:
+    resolution: {integrity: sha512-MguG95oij0fC3QV3URf4V2SDYGJhJnJGqvIIgdECeODCT98wSWDAJ94SSuVpYQUoTcGUIL6L4yNB7j1DFFHSBg==}
+
   regenerator-runtime@0.13.11:
     resolution: {integrity: sha512-kY1AZVr2Ra+t+piVaJ4gxaFaReZVH40AKNo7UCX6W+dEwBo/2oZJzqfuN1qLq1oL45o56cPaTXELwrTh8Fpggg==}
 
@@ -5746,8 +5752,9 @@ packages:
 
 snapshots:
 
-  '@amazingcat/cattr-ui@1.3.9':
+  '@amazingcat/cattr-ui@1.3.14':
     dependencies:
+      babel-runtime: 6.26.0
       deepmerge: 2.2.1
       vue: 2.7.16
       vue-i18n: 7.8.1(vue@2.7.16)
@@ -7440,6 +7447,11 @@ snapshots:
       '@babel/helper-define-polyfill-provider': 0.6.8(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
+
+  babel-runtime@6.26.0:
+    dependencies:
+      core-js: 2.6.12
+      regenerator-runtime: 0.11.1
 
   balanced-match@1.0.2: {}
 
@@ -10267,6 +10279,8 @@ snapshots:
       regenerate: 1.4.2
 
   regenerate@1.4.2: {}
+
+  regenerator-runtime@0.11.1: {}
 
   regenerator-runtime@0.13.11: {}
 
