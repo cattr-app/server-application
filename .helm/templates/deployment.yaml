@@ -65,6 +65,11 @@ spec:
                 secretKeyRef:
                   name: {{ include "cattr.secretName" . }}
                   key: APP_KEY
+            - name: REVERB_APP_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cattr.secretName" . }}
+                  key: REVERB_APP_SECRET
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:

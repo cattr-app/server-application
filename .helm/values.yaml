@@ -21,8 +21,10 @@ replicaCount: 1
 
 ## @section Cattr application configuration
 cattr:
-  ## @param cattr.appKey Laravel application key (auto-generated if empty)
+  ## @param cattr.appKey Laravel application key, raw base64 or prefixed `base64:...` (e.g. from `php artisan key:generate --show`). Never auto-generated: required on fresh install; if empty on upgrade, the value stored in the existing chart Secret is kept
   appKey: ""
+  ## @param cattr.reverbAppSecret Laravel Reverb application secret (e.g. from `openssl rand -hex 32`). Never auto-generated: required on fresh install; if empty on upgrade, the value stored in the existing chart Secret is kept
+  reverbAppSecret: ""
   ## @param cattr.appUrl Application URL
   appUrl: "http://cattr.local"
   ## @param cattr.appEnv Application environment

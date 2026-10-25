@@ -6,6 +6,14 @@
     "cattr": {
       "type": "object",
       "properties": {
+        "appKey": {
+          "type": "string",
+          "description": "Laravel application key, either raw base64 or prefixed `base64:...`. Required on fresh install; if empty, the value stored in the existing chart Secret is kept. Never auto-generated."
+        },
+        "reverbAppSecret": {
+          "type": "string",
+          "description": "Laravel Reverb application secret. Required on fresh install; if empty, the value stored in the existing chart Secret is kept. Never auto-generated."
+        },
         "logChannel": {
           "type": "string",
           "description": "Laravel log channel; must be one defined in config/logging.php. The sentry channel was removed together with the Sentry integration.",
