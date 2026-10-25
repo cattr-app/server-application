@@ -64,7 +64,8 @@ are set, `provision` (`cattr:make:admin`; skipped if the email exists).
   `before-hook-creation`, `backoffLimit: 0`, `activeDeadlineSeconds: 1800`).
   Helm creates hooks one at a time, so two migrations never run in parallel
   for one release.
-- If it fails, `helm install/upgrade` fails **before** any workload is
+- If it fails as a `pre-install`/`pre-upgrade` hook (the default with an
+  external database), `helm install/upgrade` fails **before** any workload is
   changed: the old Pods keep running the old version, the release is marked
   `failed`. Inspect `kubectl logs job/<fullname>-setup`, fix the cause and run
   the upgrade again (or `helm rollback`). The Job is kept until the next
@@ -85,7 +86,12 @@ are set, `provision` (`cattr:make:admin`; skipped if the email exists).
   after `--wait` finished, but the app Pods wait for those migrations: install
   the demo **without `--wait`** (Helm still waits for the setup Job) and use
   `kubectl rollout status deploy/<fullname> --timeout 15m`. Upgrades use
-  `pre-upgrade` and work with `--wait`.
+  `pre-upgrade` and work with `--wait`. Because the workloads already exist
+  when the post-install Job runs, a failed first install is **not** left
+  unchanged: the release is marked `failed`, the app Pods stay in
+  `wait-for-migrations` if migrations failed, and if only the administrator
+  provisioning failed they start without that administrator. Check
+  `kubectl logs job/<fullname>-setup` and run `helm upgrade` again.
 - `setup.hook: false` renders a plain Job `<fullname>-setup-<revision>` with
   `ttlSecondsAfterFinished`, for tools that skip hooks. Nothing then prevents
   two revisions' Jobs from running at the same time: let one finish first.
@@ -169,7 +175,11 @@ Back up `APP_KEY`: without it encrypted data cannot be read.
 
 ## Database and Redis
 
-`database.host` (MySQL 8.x / MariaDB) is required. `mysql.enabled: true`
+`database.host` (MySQL 8.x / MariaDB) is required. With binary logging
+enabled (the MySQL 8 default) the database user needs
+`log_bin_trust_function_creators=1` (server option or `SET GLOBAL`), or the
+migrations that create triggers fail with error 1419 ("You do not have the
+SUPER privilege and binary logging is enabled"); the demo MySQL sets it. `mysql.enabled: true`
 deploys a single MySQL Pod (`mysql:8.4.13`, PVC `<fullname>-mysql` with
 `resource-policy: keep`) for demos and evaluation only: no backups, no
 replication. Releases upgraded from chart 0.1.x that still run the built-in
