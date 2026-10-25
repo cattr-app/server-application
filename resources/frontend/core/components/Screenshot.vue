@@ -2,8 +2,7 @@
     <div class="screenshot" @click="$emit('click', $event)">
         <AppImage
             v-if="screenshotsEnabled"
-            :is-blob="true"
-            :src="getThumbnailPath(interval)"
+            :resolver="thumbnailResolver"
             class="screenshot__image"
             :lazy="lazyImage"
             @click="onShow"
@@ -73,9 +72,13 @@
     import AppImage from './AppImage';
     import ScreenshotModal from './ScreenshotModal';
     import { mapGetters } from 'vuex';
+    import { getScreenshotUrl } from '@/services/screenshot-url.service';
 
+    /**
+     * Resolves the thumbnail URL of an interval (Promise<string>); modules may override it via `config`.
+     */
     export function thumbnailPathProvider(interval) {
-        return `time-intervals/${interval.id}/thumb`;
+        return getScreenshotUrl(interval, true);
     }
 
     export const config = { thumbnailPathProvider };
@@ -129,6 +132,10 @@
         computed: {
             ...mapGetters('user', ['companyData']),
             ...mapGetters('screenshots', { screenshotsEnabled: 'enabled' }),
+            thumbnailResolver() {
+                const interval = this.interval;
+                return () => config.thumbnailPathProvider(interval);
+            },
             screenshotTime() {
                 const timezone = this.timezone || this.companyData['timezone'];
 
@@ -159,9 +166,6 @@
             onRemove() {
                 this.onHide();
                 this.$emit('remove', this.interval);
-            },
-            getThumbnailPath(interval) {
-                return config.thumbnailPathProvider(interval);
             },
         },
     };
