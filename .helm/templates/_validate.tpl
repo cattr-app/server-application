@@ -82,6 +82,11 @@ Render-time validation. Every message names the value to fix.
 {{- fail "setup.admin.password must be at least 6 characters" -}}
 {{- end -}}
 
+{{- /* Ingress */ -}}
+{{- if and $v.ingress.enabled (not $v.ingress.hosts) -}}
+{{- fail "ingress.hosts must contain at least one host when ingress.enabled=true" -}}
+{{- end -}}
+
 {{- /* Gateway API */ -}}
 {{- if and $v.httpRoute.enabled (not (.Capabilities.APIVersions.Has "gateway.networking.k8s.io/v1/HTTPRoute")) -}}
 {{- fail "httpRoute.enabled=true but the cluster does not serve gateway.networking.k8s.io/v1 HTTPRoute: install the Gateway API CRDs (for `helm template` pass --api-versions gateway.networking.k8s.io/v1/HTTPRoute)" -}}

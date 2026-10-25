@@ -91,6 +91,8 @@ two web replicas|web.replicas > 1 is not supported|-f $chart/ci/s3-redis-values.
 scaled pvc mode|web.replicas and queue.replicas must be 1|$base --set queue.replicas=2
 admin without credentials|setup.admin.enabled=true needs|$base --set setup.admin.password=
 httpRoute without Gateway API|does not serve gateway.networking.k8s.io/v1 HTTPRoute|-f $chart/ci/httproute-values.yaml
+httpRoute without parentRefs|httpRoute.parentRefs is required|-f $chart/ci/httproute-values.yaml $gateway_api --set-json httpRoute.parentRefs=[]
+ingress without hosts|ingress.hosts must contain at least one host|$base --set ingress.enabled=true --set-json ingress.hosts=[]
 chart 0.1.x values|additional properties|$base --set replicaCount=2
 EOF
 
