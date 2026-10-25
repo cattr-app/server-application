@@ -10,10 +10,24 @@ permissions:
   contents: read
 
 jobs:
+  # Coverage is reported without external services and is advisory: it goes
+  # to job summaries and artifacts and never fails a job. Cobertura is the
+  # single machine-readable report (totals, baselines and diff-cover read
+  # it); HTML is for humans. Parsing and comparison live in
+  # .github/scripts/coverage.py.
+  #
+  # Pull requests: PHPUnit (required) runs independently. In parallel,
+  # "Coverage baseline lookup" looks for the coverage-main artifact recorded
+  # for exactly the PR base commit; if there is none (expired, or main's run
+  # failed), "Coverage baseline" computes it from the base commit. "Coverage
+  # delta" then reports base vs PR. Pushes to main record coverage-main.
   backend:
     name: PHPUnit
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    outputs:
+      lines_valid: ${{ steps.coverage.outputs.lines_valid }}
+      lines_covered: ${{ steps.coverage.outputs.lines_covered }}
 
     services:
       mysql:
@@ -41,6 +55,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
+          # On pull_request the checked-out commit is the test merge commit;
+          # its first parent is the base branch, which diff-cover compares against.
+          fetch-depth: 2
 
       - name: Set up PHP
         uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962  # 2.40.0
@@ -64,20 +81,259 @@ jobs:
           php artisan db:seed --class=InitialSeeder --force --no-interaction
 
       - name: Run PHPUnit
-        run: vendor/bin/phpunit --no-progress --coverage-clover coverage/clover.xml
+        run: >-
+          vendor/bin/phpunit --no-progress
+          --coverage-cobertura coverage/cobertura.xml
+          --coverage-html coverage/html
 
-      # Advisory: coverage is reported to Codecov but never fails this job.
-      # CODECOV_TOKEN is not available to fork PRs; Codecov accepts tokenless
-      # uploads for public repositories in that case.
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5  # v7.1.1
-        continue-on-error: true
+      - name: Coverage summary
+        id: coverage
+        if: ${{ !cancelled() && hashFiles('coverage/cobertura.xml') != '' }}
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          if [[ "${EVENT_NAME}" == push ]]; then
+            python3 .github/scripts/coverage.py summarize coverage/cobertura.xml \
+              --json coverage/coverage-main.json --sha "${HEAD_SHA}"
+          else
+            python3 .github/scripts/coverage.py summarize coverage/cobertura.xml
+          fi
+
+      # Patch coverage of the lines changed by the PR. Advisory: to make it
+      # blocking later, add `--fail-under=<percent>` to the diff-cover call.
+      - name: Patch coverage (diff-cover)
+        if: ${{ github.event_name == 'pull_request' && !cancelled() && hashFiles('coverage/cobertura.xml') != '' }}
+        run: |
+          set -euo pipefail
+          python3 -m venv "${RUNNER_TEMP}/diff-cover"
+          "${RUNNER_TEMP}/diff-cover/bin/pip" install --quiet diff-cover==10.6.0
+          # Cobertura <source> is the absolute app/ path and filenames are
+          # relative to it, so diff-cover resolves them to repository paths.
+          "${RUNNER_TEMP}/diff-cover/bin/diff-cover" coverage/cobertura.xml \
+            --compare-branch=HEAD^1 \
+            --ignore-staged --ignore-unstaged \
+            --format markdown:coverage/diff-cover.md,html:coverage/diff-cover.html
+          cat coverage/diff-cover.md >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Upload coverage report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: coverage/clover.xml
-          disable_search: true
-          flags: phpunit
-          fail_ci_if_error: false
+          name: coverage-report
+          path: |
+            coverage/cobertura.xml
+            coverage/html
+            coverage/diff-cover.md
+            coverage/diff-cover.html
+          retention-days: 7
+
+      # Baseline for PR coverage deltas, found by the lookup job below.
+      # Only uploaded when the tests passed.
+      - name: Upload main coverage baseline
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: coverage-main
+          path: coverage/coverage-main.json
+          if-no-files-found: error
+          retention-days: 90
+
+  coverage-baseline-lookup:
+    name: Coverage baseline lookup
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read  # list and download coverage-main artifacts of main runs
+    outputs:
+      found: ${{ steps.read.outputs.found }}
+      lines_valid: ${{ steps.read.outputs.lines_valid }}
+      lines_covered: ${{ steps.read.outputs.lines_covered }}
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+
+      # A successful push run of this workflow on main for exactly the PR
+      # base commit that still has a non-expired coverage-main artifact.
+      # Anything else (none, expired, API error) leaves found unset, and the
+      # baseline is computed instead.
+      - name: Download coverage-main for the PR base commit
+        id: lookup
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          runs="$(
+            gh api -X GET "repos/${REPO}/actions/workflows/tests.yml/runs" \
+              -f branch=main -f event=push -f status=success \
+              -f head_sha="${BASE_SHA}" -f per_page=10 \
+              --jq '.workflow_runs[].id'
+          )"
+          for run in ${runs}; do
+            count="$(
+              gh api -X GET "repos/${REPO}/actions/runs/${run}/artifacts" -f name=coverage-main \
+                --jq '[.artifacts[] | select(.expired | not)] | length'
+            )"
+            if [[ "${count}" != 0 ]]; then
+              gh run download "${run}" --repo "${REPO}" --name coverage-main --dir "${RUNNER_TEMP}/coverage-main"
+              echo "Found coverage-main in run ${run}."
+              echo 'downloaded=true' >> "${GITHUB_OUTPUT}"
+              exit 0
+            fi
+          done
+          echo "No coverage-main artifact for ${BASE_SHA}; the baseline will be computed."
+
+      - name: Read baseline
+        id: read
+        if: steps.lookup.outputs.downloaded == 'true'
+        continue-on-error: true
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: >-
+          python3 .github/scripts/coverage.py read-baseline
+          "${RUNNER_TEMP}/coverage-main/coverage-main.json" --sha "${BASE_SHA}"
+
+  coverage-baseline:
+    name: Coverage baseline
+    needs: coverage-baseline-lookup
+    # !cancelled(): also run when the lookup job itself failed.
+    if: >-
+      !cancelled()
+      && github.event_name == 'pull_request'
+      && needs.coverage-baseline-lookup.outputs.found != 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    # Advisory: a broken base commit must not fail the workflow.
+    continue-on-error: true
+    outputs:
+      lines_valid: ${{ steps.result.outputs.lines_valid }}
+      lines_covered: ${{ steps.result.outputs.lines_covered }}
+      reason: ${{ steps.result.outputs.reason }}
+
+    services:
+      mysql:
+        image: mysql:8.4@sha256:76f0358884cb92d9a086d24e5671c38048d3fef40f2588703d73eb55392d6b69  # 8.4
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: cattr
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h 127.0.0.1 -ppassword"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: cattr
+      DB_USERNAME: root
+      DB_PASSWORD: password
+
+    steps:
+      - name: Check out the PR base commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.base.sha }}
+
+      # The coverage script from the PR itself: the base commit may predate it.
+      - name: Check out the coverage script
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+          path: .ci-scripts
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962  # 2.40.0
+        with:
+          php-version: '8.3'
+          extensions: ctype, curl, dom, fileinfo, gd, iconv, intl, json, mbstring, openssl, pdo_mysql, simplexml, tokenizer, xml, zip
+          coverage: pcov
+          tools: composer:v2
+
+      - name: Install Composer dependencies
+        id: composer
+        continue-on-error: true
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Prepare application
+        id: prepare
+        if: steps.composer.outcome == 'success'
+        continue-on-error: true
+        run: |
+          cp .env.example .env
+          php artisan key:generate --no-interaction
+          php artisan migrate --force --no-interaction
+          php artisan db:seed --class=InitialSeeder --force --no-interaction
+
+      - name: Run PHPUnit
+        id: phpunit
+        if: steps.prepare.outcome == 'success'
+        continue-on-error: true
+        run: vendor/bin/phpunit --no-progress --coverage-cobertura coverage/cobertura.xml
+
+      - name: Result
+        id: result
+        if: ${{ !cancelled() }}
+        env:
+          COMPOSER: ${{ steps.composer.outcome }}
+          PREPARE: ${{ steps.prepare.outcome }}
+          PHPUNIT: ${{ steps.phpunit.outcome }}
+        run: |
+          if [[ "${COMPOSER}" != success ]]; then
+            reason='composer install failed on the base commit'
+          elif [[ "${PREPARE}" != success ]]; then
+            reason='migrations or seeding failed on the base commit'
+          elif [[ "${PHPUNIT}" != success ]]; then
+            reason='tests failed on the base commit'
+          elif ! python3 .ci-scripts/.github/scripts/coverage.py summarize coverage/cobertura.xml \
+              --title 'Baseline coverage (PR base commit)'; then
+            reason='could not read the base coverage report'
+          else
+            exit 0
+          fi
+          echo "${reason}"
+          echo "reason=${reason}" >> "${GITHUB_OUTPUT}"
+
+  coverage-delta:
+    name: Coverage delta
+    needs: [backend, coverage-baseline-lookup, coverage-baseline]
+    if: ${{ always() && github.event_name == 'pull_request' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    # Advisory: reports only, never fails.
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+
+      - name: Compare with the PR base
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_VALID: ${{ needs.backend.outputs.lines_valid }}
+          PR_COVERED: ${{ needs.backend.outputs.lines_covered }}
+          FOUND: ${{ needs.coverage-baseline-lookup.outputs.found }}
+          FOUND_VALID: ${{ needs.coverage-baseline-lookup.outputs.lines_valid }}
+          FOUND_COVERED: ${{ needs.coverage-baseline-lookup.outputs.lines_covered }}
+          COMPUTED_VALID: ${{ needs.coverage-baseline.outputs.lines_valid }}
+          COMPUTED_COVERED: ${{ needs.coverage-baseline.outputs.lines_covered }}
+          COMPUTED_REASON: ${{ needs.coverage-baseline.outputs.reason }}
+        run: python3 .github/scripts/coverage.py compare
 
   phpcs:
     name: PHP_CodeSniffer (advisory)
