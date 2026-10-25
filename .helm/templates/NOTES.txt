@@ -13,7 +13,7 @@ Workloads:
   Deployment {{ $fullname }}-web        web (Caddy + Octane + Reverb), replicas {{ .Values.web.replicas }}
   Deployment {{ $fullname }}-queue      queue workers, replicas {{ .Values.queue.replicas }} (scale independently)
   Deployment {{ $fullname }}-scheduler  scheduler, always 1
-  S3 mode needs a Cattr version with S3 storage support; 4.1.0-alpha.1 stores files locally.
+  S3 mode needs a Cattr version with S3 storage support; 4.1.0-alpha.2 stores files locally.
 {{- if gt (int .Values.web.replicas) 1 }}
   WARNING: web.replicas > 1 is unsupported: application settings are cached per Pod
   (Octane) and Reverb broadcasts reach only the Pod the queue happened to connect to.

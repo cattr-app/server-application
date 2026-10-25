@@ -51,7 +51,7 @@ Roles (container `args`): `web` runs Caddy, Octane and Reverb (Caddy proxies
 Pod runs migrations or creates administrators.
 
 `s3` mode needs a Cattr version with S3 storage support (separate change; the
-`4.1.0-alpha.1` image stores files on the local disk only). The chart renders
+`4.1.0-alpha.2` image stores files on the local disk only). The chart renders
 and lints it, but it is integration-tested only once that version exists.
 
 ### Setup Job, migrations and failures
@@ -104,7 +104,7 @@ outage therefore does not restart Pods; requests fail until it is back.
 `cattr.restartPolicy` sets `CATTR_RESTART_POLICY`. With `shutdown` (default)
 a crashed queue worker, Reverb or scheduler stops Pebble (exit code 10), so
 Kubernetes restarts the container and counts the restart. With `restart`
-Pebble restarts it in place. Images up to `4.1.0-alpha.1` ignore the variable
+Pebble restarts it in place. Images up to `4.1.0-alpha.2` ignore the variable
 and always restart in place (the liveness probe covers a service stuck in
 backoff).
 
