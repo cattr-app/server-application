@@ -348,8 +348,8 @@ importers:
         specifier: ^2.2.2
         version: 2.2.2(laravel-mix@6.0.49(@babel/core@7.29.7(supports-color@5.5.0))(@babel/plugin-proposal-object-rest-spread@7.20.7(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-syntax-dynamic-import@7.8.3(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-transform-runtime@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(csso@4.2.0)(debug@4.4.3(supports-color@5.5.0))(html-minifier-terser@5.1.1)(postcss@8.5.28)(supports-color@5.5.0)(uglify-js@3.19.3)(webpack-cli@4.10.0)(webpack@5.91.0))
       laravel-mix-sri:
-        specifier: ^1.0.7
-        version: 1.0.7(laravel-mix@6.0.49(@babel/core@7.29.7(supports-color@5.5.0))(@babel/plugin-proposal-object-rest-spread@7.20.7(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-syntax-dynamic-import@7.8.3(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-transform-runtime@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(csso@4.2.0)(debug@4.4.3(supports-color@5.5.0))(html-minifier-terser@5.1.1)(postcss@8.5.28)(supports-color@5.5.0)(uglify-js@3.19.3)(webpack-cli@4.10.0)(webpack@5.91.0))
+        specifier: ^1.3.0
+        version: 1.3.0(laravel-mix@6.0.49(@babel/core@7.29.7(supports-color@5.5.0))(@babel/plugin-proposal-object-rest-spread@7.20.7(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-syntax-dynamic-import@7.8.3(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-transform-runtime@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(csso@4.2.0)(debug@4.4.3(supports-color@5.5.0))(html-minifier-terser@5.1.1)(postcss@8.5.28)(supports-color@5.5.0)(uglify-js@3.19.3)(webpack-cli@4.10.0)(webpack@5.91.0))
       laravel-mix-workbox:
         specifier: ^0.1.4
         version: 0.1.4(laravel-mix@6.0.49(@babel/core@7.29.7(supports-color@5.5.0))(@babel/plugin-proposal-object-rest-spread@7.20.7(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-syntax-dynamic-import@7.8.3(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-transform-runtime@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(csso@4.2.0)(debug@4.4.3(supports-color@5.5.0))(html-minifier-terser@5.1.1)(postcss@8.5.28)(supports-color@5.5.0)(uglify-js@3.19.3)(webpack-cli@4.10.0)(webpack@5.91.0))
@@ -3634,8 +3634,8 @@ packages:
     peerDependencies:
       laravel-mix: ^6.0.0
 
-  laravel-mix-sri@1.0.7:
-    resolution: {integrity: sha512-rLMaMuwfkZCY+2r1AxKv/sH8A6uMpPGQNMO9/LpaMMq90597vPS0Jddm5C2vLlTFcd40bTNM2LSSjA2gCNQCMQ==}
+  laravel-mix-sri@1.3.0:
+    resolution: {integrity: sha512-+VIoUJErSWxITd185CdUD8lFaEDYWHHFItnUZtfxPJp/bn9l/IaJjH3ymVAwxzvcma6dYyY5UhBWMKcLPzURdA==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
       laravel-mix: ^6.0.19
@@ -9279,7 +9279,7 @@ snapshots:
     dependencies:
       laravel-mix: 6.0.49(@babel/core@7.29.7(supports-color@5.5.0))(@babel/plugin-proposal-object-rest-spread@7.20.7(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-syntax-dynamic-import@7.8.3(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-transform-runtime@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(csso@4.2.0)(debug@4.4.3(supports-color@5.5.0))(html-minifier-terser@5.1.1)(postcss@8.5.28)(supports-color@5.5.0)(uglify-js@3.19.3)(webpack-cli@4.10.0)(webpack@5.91.0)
 
-  laravel-mix-sri@1.0.7(laravel-mix@6.0.49(@babel/core@7.29.7(supports-color@5.5.0))(@babel/plugin-proposal-object-rest-spread@7.20.7(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-syntax-dynamic-import@7.8.3(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-transform-runtime@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(csso@4.2.0)(debug@4.4.3(supports-color@5.5.0))(html-minifier-terser@5.1.1)(postcss@8.5.28)(supports-color@5.5.0)(uglify-js@3.19.3)(webpack-cli@4.10.0)(webpack@5.91.0)):
+  laravel-mix-sri@1.3.0(laravel-mix@6.0.49(@babel/core@7.29.7(supports-color@5.5.0))(@babel/plugin-proposal-object-rest-spread@7.20.7(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-syntax-dynamic-import@7.8.3(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-transform-runtime@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(csso@4.2.0)(debug@4.4.3(supports-color@5.5.0))(html-minifier-terser@5.1.1)(postcss@8.5.28)(supports-color@5.5.0)(uglify-js@3.19.3)(webpack-cli@4.10.0)(webpack@5.91.0)):
     dependencies:
       laravel-mix: 6.0.49(@babel/core@7.29.7(supports-color@5.5.0))(@babel/plugin-proposal-object-rest-spread@7.20.7(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-syntax-dynamic-import@7.8.3(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-transform-runtime@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(csso@4.2.0)(debug@4.4.3(supports-color@5.5.0))(html-minifier-terser@5.1.1)(postcss@8.5.28)(supports-color@5.5.0)(uglify-js@3.19.3)(webpack-cli@4.10.0)(webpack@5.91.0)
 
