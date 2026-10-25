@@ -1,129 +1,135 @@
 <?php
 
-
 namespace App\Services;
 
-use Cache;
-use Exception;
-use JsonException;
+use Illuminate\Contracts\Config\Repository;
+use Illuminate\Contracts\Container\Container;
+use LogicException;
 use Nwidart\Modules\Contracts\ActivatorInterface;
 use Nwidart\Modules\Module;
-use App\Models\Module as ModuleModel;
+use Throwable;
 
+/**
+ * Read-only module activator: a backend module is enabled only when
+ * MODULE_BACKEND_<FLAG_NAME>_ENABLED=true was present when the configuration was built.
+ *
+ * @see docs/dev/module-activation-flags.md
+ */
 class ModuleActivatorService implements ActivatorInterface
 {
+    private const ENV_PREFIX = 'MODULE_';
 
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
-    public function enable(Module $module): void
+    private static ?array $activation = null;
+
+    private Repository $config;
+
+    public function __construct(private readonly Container $app)
     {
-        $this->setActiveByName($module->getName(), true);
+        $this->config = $app->make('config');
     }
 
     /**
-     * @inheritDoc
-     * @throws Exception
+     * Derive <FLAG_NAME> of MODULE_<SIDE>_<FLAG_NAME>_ENABLED from a module identifier.
+     * Must stay in sync with resources/frontend/core/utils/moduleFlagName.js.
      */
-    public function disable(Module $module): void
+    public static function flagName(string $identifier): string
     {
-        $this->setActiveByName($module->getName(), false);
+        // 1. Split words: a lowercase letter or digit followed by an uppercase letter.
+        $name = preg_replace('/([a-z0-9])([A-Z])/', '$1_$2', $identifier);
+        // 2. Replace every run of characters other than ASCII letters and digits with one underscore.
+        $name = preg_replace('/[^A-Za-z0-9]+/', '_', $name);
+        // 3. Uppercase.
+        $name = strtoupper($name);
+
+        // 4. Collapse repeated underscores and trim them from both ends.
+        return trim(preg_replace('/_+/', '_', $name), '_');
     }
 
     /**
-     * @inheritDoc
-     * @throws Exception
+     * @return array{FRONTEND: array<string, bool>, BACKEND: array<string, bool>}
      */
-    public function hasStatus(Module|string $module, bool $status): bool
+    public static function getActivation(): array
     {
-        $name = $module instanceof Module ? $module->getName() : $module;
-
-        $moduleStatuses = Cache::store('octane')
-            ->rememberForever(config('modules.activators.amazing.cache_key'), function () {
-                $configFile = config('modules.activators.amazing.file_name');
-
-                $databaseModules = [];
-
-                try {
-                    foreach (ModuleModel::all()->toArray() as $module) {
-                        $databaseModules[$module['name']] = $module['enabled'];
-                    }
-                } catch (Exception) {
-                    // We can't communicate with db - then do nothing
-                    // This can happen on first install when we are trying to migrate over clear database
-                }
-
-                return array_merge(
-                    $this->getFileConfig($configFile),
-                    $this->getFileConfig("$configFile." . config('app.env')),
-                    $this->getFileConfig("$configFile.local"),
-                    $databaseModules,
-                );
-            });
-
-        if (isset($moduleStatuses[$name])) {
-            return (bool) $moduleStatuses[$name] === $status;
+        if (self::$activation !== null) {
+            return self::$activation;
         }
 
-        return ($module instanceof Module ? (bool) $module->json()?->active : false) === $status;
+        $moduleActivation = ['FRONTEND' => [], 'BACKEND' => []];
+
+        foreach (array_merge($_ENV, getenv() ?: []) as $key => $value) {
+            if (!is_string($key) || !str_starts_with($key, self::ENV_PREFIX)) {
+                continue;
+            }
+
+            if (preg_match('/^MODULE_(FRONTEND|BACKEND)_([A-Z][A-Z0-9_]*)_ENABLED$/D', $key, $matches)) {
+                $moduleActivation[$matches[1]][$matches[2]] = $value === 'true';
+            }
+        }
+
+        return self::$activation = $moduleActivation;
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
+    public static function resetActivationCache(): void
+    {
+        self::$activation = null;
+    }
+
+    public function enable(Module $module): void
+    {
+        $this->denyMutation();
+    }
+
+    public function disable(Module $module): void
+    {
+        $this->denyMutation();
+    }
+
+    public function hasStatus(Module|string $module, bool $status): bool
+    {
+        // nwidart/laravel-modules >= 12 passes the module name while building the manifest.
+        $flag = self::flagName($module instanceof Module ? $module->getName() : $module);
+
+        return $this->config->get("modules.backend_activation.{$flag}", false) === $status;
+    }
+
     public function setActive(Module $module, bool $active): void
     {
-        $this->setActiveByName($module->getName(), $active);
+        $this->denyMutation();
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
     public function setActiveByName(string $name, bool $active): void
     {
-        ModuleModel::firstOrCreate(['name' => $name])->update(['enabled' => $active]);
-        $this->flushCache();
+        // module:make calls this after generating files; activation stays env-controlled.
+        $this->warnNothingChanged('setActiveByName');
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
     public function delete(Module $module): void
     {
-        ModuleModel::firstOrFail($module->getName())->delete();
-        $this->flushCache();
+        $this->warnNothingChanged('delete');
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
     public function reset(): void
     {
-        ModuleModel::truncate();
-        $this->flushCache();
+        $this->warnNothingChanged('reset');
     }
 
-    /**
-     * @param $name
-     * @return array
-     * @throws JsonException
-     */
-    private function getFileConfig($name): array
+    private function warnNothingChanged(string $operation): void
     {
-        $filePath = base_path("$name.json");
-        return file_exists($filePath) ? json_decode(file_get_contents($filePath), true, 512, JSON_THROW_ON_ERROR) : [];
+        try {
+            if ($this->app->bound('log')) {
+                $this->app->make('log')->warning(
+                    "Module activation is environment-controlled; {$operation} changed nothing."
+                );
+            }
+        } catch (Throwable) {
+            // Logging is best effort: these operations are documented no-ops and must not fail.
+        }
     }
 
-    /**
-     * @throws Exception
-     */
-    private function flushCache(): void
+    private function denyMutation(): void
     {
-        Cache::store('octane')->forget(config('modules.activators.amazing.cache_key'));
+        throw new LogicException(
+            'Module activation is read-only; configure MODULE_BACKEND_<NAME>_ENABLED and restart the container.'
+        );
     }
 }
