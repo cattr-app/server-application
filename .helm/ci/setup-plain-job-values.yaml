@@ -1,0 +1,14 @@
+# CI render: setup as a plain Job (setup.hook=false) for tools that skip Helm hooks.
+cattr:
+  appUrl: https://cattr.example.com
+  appKey: base64:Y2ktZHVtbXktYXBwLWtleS0zMi1ieXRlcy1sb25nISE=
+  reverbAppSecret: ci-dummy-reverb-secret
+database:
+  host: mysql.db.svc.cluster.local
+  username: cattr
+  password: ci-dummy-db-password
+setup:
+  hook: false
+  admin:
+    email: admin@example.com
+    password: ci-dummy-admin-password

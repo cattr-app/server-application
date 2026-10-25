@@ -6,26 +6,32 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   labels:
     {{- include "cattr.labels" . | nindent 4 }}
+  {{- $annotations := merge (dict) (.Values.ingress.annotations | default dict) (.Values.commonAnnotations | default dict) }}
+  {{- with $annotations }}
   annotations:
-    {{- include "cattr.annotations" . | nindent 4 }}
-    {{- with .Values.ingress.annotations }}
     {{- toYaml . | nindent 4 }}
-    {{- end }}
+  {{- end }}
 spec:
-  ingressClassName: {{ .Values.ingress.className }}
-  {{- if .Values.ingress.tls }}
+  {{- with .Values.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  {{- with .Values.ingress.tls }}
   tls:
-    {{- toYaml .Values.ingress.tls | nindent 4 }}
+    {{- toYaml . | nindent 4 }}
   {{- end }}
   rules:
-    - host: {{ .Values.ingress.hostname | quote }}
+    {{- range .Values.ingress.hosts }}
+    - host: {{ .host | quote }}
       http:
         paths:
-          - path: {{ .Values.ingress.path }}
-            pathType: {{ .Values.ingress.pathType }}
+          {{- range (.paths | default (list (dict "path" "/" "pathType" "Prefix"))) }}
+          - path: {{ .path | default "/" }}
+            pathType: {{ .pathType | default "Prefix" }}
             backend:
               service:
-                name: {{ include "cattr.fullname" . }}
+                name: {{ include "cattr.fullname" $ }}
                 port:
                   name: http
+          {{- end }}
+    {{- end }}
 {{- end }}

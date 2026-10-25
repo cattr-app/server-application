@@ -1,0 +1,23 @@
+# CI render: Gateway API HTTPRoute (together with Ingress).
+# Render with: --api-versions gateway.networking.k8s.io/v1/HTTPRoute
+cattr:
+  appUrl: https://cattr.example.com
+  appKey: base64:Y2ktZHVtbXktYXBwLWtleS0zMi1ieXRlcy1sb25nISE=
+  reverbAppSecret: ci-dummy-reverb-secret
+database:
+  host: mysql.db.svc.cluster.local
+  username: cattr
+  password: ci-dummy-db-password
+setup:
+  admin:
+    enabled: false
+ingress:
+  enabled: true
+httpRoute:
+  enabled: true
+  parentRefs:
+    - name: eg
+      namespace: envoy-gateway-system
+      sectionName: https
+  hostnames:
+    - cattr.example.com

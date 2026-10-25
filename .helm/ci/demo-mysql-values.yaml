@@ -1,0 +1,15 @@
+# CI render: single-node demo with the built-in MySQL.
+cattr:
+  appUrl: http://cattr.localhost
+  appKey: base64:Y2ktZHVtbXktYXBwLWtleS0zMi1ieXRlcy1sb25nISE=
+  reverbAppSecret: ci-dummy-reverb-secret
+mysql:
+  enabled: true
+database:
+  username: cattr
+  password: ci-dummy-db-password
+  rootPassword: ci-dummy-root-password
+setup:
+  admin:
+    email: admin@example.com
+    password: ci-dummy-admin-password

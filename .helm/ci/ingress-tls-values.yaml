@@ -1,0 +1,28 @@
+# CI render: ingress-nginx with TLS, upload size and WebSocket timeouts.
+cattr:
+  appUrl: https://cattr.example.com
+  appKey: base64:Y2ktZHVtbXktYXBwLWtleS0zMi1ieXRlcy1sb25nISE=
+  reverbAppSecret: ci-dummy-reverb-secret
+database:
+  host: mysql.db.svc.cluster.local
+  username: cattr
+  password: ci-dummy-db-password
+setup:
+  admin:
+    enabled: false
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 512m
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+  hosts:
+    - host: cattr.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: cattr-tls
+      hosts:
+        - cattr.example.com

@@ -1,0 +1,42 @@
+{{- if eq .Values.storage.type "s3" }}
+{{- /*
+s3 mode: one Deployment per role. Files live in object storage, cache and
+locks in Redis, so the Pods may run on different nodes.
+*/}}
+{{- range $role := list "web" "queue" "scheduler" }}
+{{- $cfg := get $.Values $role }}
+{{- $selector := include "cattr.componentSelectorLabels" (dict "context" $ "component" $role) }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-%s" (include "cattr.fullname" $) $role }}
+  namespace: {{ $.Release.Namespace | quote }}
+  labels:
+    {{- include "cattr.componentLabels" (dict "context" $ "component" $role) | nindent 4 }}
+  {{- with (include "cattr.annotations" $) }}
+  annotations:
+    {{- . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if eq $role "scheduler" }}
+  # Exactly one scheduler: Recreate never runs two at once.
+  replicas: 1
+  strategy:
+    type: Recreate
+  {{- else }}
+  replicas: {{ $cfg.replicas }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  {{- end }}
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      {{- $selector | nindent 6 }}
+  template:
+    {{- include "cattr.podTemplate" (dict "context" $ "roles" (list $role) "selector" $selector "extraAnnotations" $cfg.podAnnotations) | nindent 4 }}
+{{- end }}
+{{- end }}

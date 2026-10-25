@@ -1,0 +1,55 @@
+Cattr {{ .Chart.AppVersion }} (chart {{ .Chart.Version }}), storage mode: {{ .Values.storage.type }}
+{{- $fullname := include "cattr.fullname" . }}
+
+URL: {{ .Values.cattr.appUrl }}
+{{- if not (or .Values.ingress.enabled .Values.httpRoute.enabled) }}
+No Ingress/HTTPRoute is rendered. Route traffic to Service {{ $fullname }}:{{ .Values.service.port }}
+(Caddy, including the Reverb WebSocket upgrade on /app/*), or try it locally:
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ $fullname }} 8080:{{ .Values.service.port }}
+{{- end }}
+
+Workloads:
+{{- if eq .Values.storage.type "s3" }}
+  Deployment {{ $fullname }}-web        web (Caddy + Octane + Reverb), replicas {{ .Values.web.replicas }}
+  Deployment {{ $fullname }}-queue      queue workers, replicas {{ .Values.queue.replicas }} (scale independently)
+  Deployment {{ $fullname }}-scheduler  scheduler, always 1
+  S3 mode needs a Cattr version with S3 storage support; 4.1.0-alpha.2 stores files locally.
+{{- if gt (int .Values.web.replicas) 1 }}
+  WARNING: web.replicas > 1 is unsupported: application settings are cached per Pod
+  (Octane) and Reverb broadcasts reach only the Pod the queue happened to connect to.
+{{- end }}
+{{- else }}
+  Deployment {{ $fullname }}: one Pod with containers web, queue and scheduler sharing
+  PVC {{ include "cattr.pvcClaimName" . }} (ReadWriteOnce, strategy Recreate). Do not scale it.
+{{- end }}
+  Job {{ $fullname }}-setup{{ if not .Values.setup.hook }}-{{ .Release.Revision }}{{ end }}: migrations{{ if include "cattr.setup.provision" . }} + administrator {{ .Values.setup.admin.email }}{{ end }}
+{{- if .Values.setup.hook }} (Helm hook {{ include "cattr.setup.hookEvents" . }})
+{{- else }}
+  setup.hook=false: nothing prevents two setup Jobs from running concurrently; let one
+  revision's Job finish before the next upgrade.
+{{- end }}
+  Logs: kubectl -n {{ .Release.Namespace }} logs job/{{ $fullname }}-setup{{ if not .Values.setup.hook }}-{{ .Release.Revision }}{{ end }}
+
+{{- if .Values.mysql.enabled }}
+
+Built-in MySQL {{ $fullname }}-mysql is a single-node DEMO database without backups.
+Use database.host with an external MySQL/MariaDB for production.
+The first install runs setup as a post-install hook: do not use --wait for that install
+(the app Pods wait for the migrations that only run after the wait), use
+  kubectl -n {{ .Release.Namespace }} rollout status deploy/{{ $fullname }} --timeout 15m
+{{- end }}
+
+Secrets:
+{{- if .Values.cattr.existingSecret }}
+  APP_KEY / REVERB_APP_SECRET come from Secret {{ .Values.cattr.existingSecret }}.
+{{- else }}
+  APP_KEY / REVERB_APP_SECRET are stored in Secret {{ include "cattr.secretName" . }} (kept on uninstall).
+  Back up APP_KEY: without it encrypted data cannot be read.
+{{- end }}
+{{- if or .Values.cattr.existingSecret .Values.database.existingSecret .Values.redis.existingSecret .Values.storage.s3.existingSecret }}
+  Pods do not restart when an existing Secret changes; afterwards run
+  kubectl -n {{ .Release.Namespace }} rollout restart deployment -l app.kubernetes.io/instance={{ .Release.Name }}
+{{- end }}
+
+/actuator/prometheus and /actuator/health/* are served without authentication;
+block /actuator at your Ingress/Gateway if they must not be public.

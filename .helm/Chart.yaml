@@ -2,8 +2,11 @@ apiVersion: v2
 name: cattr-server
 description: Cattr is an open-source time-tracking solution for teams
 type: application
-version: 0.1.0
-appVersion: "latest"
+# The chart is versioned independently of the application. Chart 0.2.x targets
+# the Cattr 4.1 runtime image (Caddy + Octane + Reverb + Pebble, explicit roles).
+version: 0.2.0-alpha.2
+appVersion: "4.1.0-alpha.2"
+kubeVersion: ">=1.27.0-0"
 keywords:
   - cattr
   - time-tracking
@@ -13,4 +16,3 @@ keywords:
 home: https://cattr.app
 sources:
   - https://github.com/cattr-app/server-application
-  - https://git.amazingcat.net/cattr/core/app

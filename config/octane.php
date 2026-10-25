@@ -38,7 +38,20 @@ return [
 
     'server' => 'swoole',
 
-    'swoole' => [ 'options' => [ 'package_max_length' => 512 * 1024 * 1024, ], ],
+    'swoole' => [
+        'options' => array_filter([
+            'package_max_length' => 512 * 1024 * 1024,
+            // Default (unset/0): Swoole uses one worker per CPU of the host,
+            // which ignores container CPU limits. Set these in containers.
+            // When set, OCTANE_WORKERS / OCTANE_TASK_WORKERS take precedence
+            // over `octane:start --workers` / `--task-workers` (Swoole options
+            // override the CLI-derived values, and Octane's server state then
+            // shows the CLI number). The image starts Octane without
+            // --workers, so set the env vars instead of the flags.
+            'worker_num' => (int) env('OCTANE_WORKERS', 0) ?: null,
+            'task_worker_num' => (int) env('OCTANE_TASK_WORKERS', 0) ?: null,
+        ]),
+    ],
 
     /*
     |--------------------------------------------------------------------------
