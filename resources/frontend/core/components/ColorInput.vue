@@ -1,7 +1,7 @@
 <template>
     <div class="color-input__item">
         <at-modal v-model="modal" :showHead="false" :showClose="false" :showFooter="false">
-            <ChromePicker :value="value" @input="$emit('change', $event.hex)" />
+            <ChromePicker :value="value" @input="$emit('change', $event)" />
         </at-modal>
 
         <div class="color-input__color">
@@ -15,11 +15,12 @@
 </template>
 
 <script>
-    import { Chrome } from 'vue-color';
+    import { ChromePicker } from 'vue-color/vue2';
+    import 'vue-color/vue2/style.css';
 
     export default {
         components: {
-            ChromePicker: Chrome,
+            ChromePicker,
         },
         props: {
             value: {},
