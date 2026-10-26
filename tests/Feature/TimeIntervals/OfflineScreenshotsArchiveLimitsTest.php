@@ -173,6 +173,7 @@ class OfflineScreenshotsArchiveLimitsTest extends TestCase
             'windows absolute path' => ['C:\\evil.jpg'],
             'windows drive-relative path' => ['C:evil.jpg'],
             'directory' => ['screenshots/1_00000000-0000-0000-0000-000000000000'],
+            'current directory' => ['.'],
         ];
     }
 

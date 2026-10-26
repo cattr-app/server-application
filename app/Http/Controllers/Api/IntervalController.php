@@ -40,6 +40,7 @@ use Spatie\TemporaryDirectory\TemporaryDirectory;
 use Storage;
 use Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use RuntimeException;
 use Throwable;
 use Validator;
 use ZipArchive;
@@ -896,6 +897,9 @@ class IntervalController extends ItemController
 
             try {
                 $target = fopen($directory . DIRECTORY_SEPARATOR . $name, 'wb');
+                if ($target === false) {
+                    throw new RuntimeException("Unable to create the extracted file for archive entry $index");
+                }
                 try {
                     while (!feof($source)) {
                         // Undecodable compressed data is reported as a warning and a failed read
@@ -906,7 +910,10 @@ class IntervalController extends ItemController
                             throw self::offlineScreenshotsArchiveTooLarge($maxSize);
                         }
 
-                        fwrite($target, $chunk);
+                        // A short write (e.g. a full disk) must not leave a truncated screenshot behind
+                        if (fwrite($target, $chunk) !== strlen($chunk)) {
+                            throw new RuntimeException("Unable to write the extracted file for archive entry $index");
+                        }
                         $remaining -= strlen($chunk);
                     }
                 } finally {
@@ -928,11 +935,12 @@ class IntervalController extends ItemController
     }
 
     /**
-     * A plain file name: no directories, no parent references, no absolute or drive paths and no NUL bytes.
+     * A plain file name: not `.`, no directories, no parent references, no absolute or drive paths and no NUL bytes.
      */
     private static function isPlainArchiveEntryName(string $name): bool
     {
         return $name !== ''
+            && $name !== '.'
             && strpbrk($name, "/\\\0") === false
             && !str_contains($name, '..')
             && preg_match('/^[A-Za-z]:/', $name) !== 1;

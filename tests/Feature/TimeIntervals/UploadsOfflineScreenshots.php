@@ -47,7 +47,9 @@ trait UploadsOfflineScreenshots
 
     private function createOfflineAdmin(): User
     {
-        $user = User::forceCreate(['role_id' => UserFactoryInstance::ADMIN_ROLE] + UserFactory::createRandomModelData());
+        $user = User::forceCreate(
+            ['role_id' => UserFactoryInstance::ADMIN_ROLE] + UserFactory::createRandomModelData()
+        );
         $this->tokens[$user->id] = $user->createToken('testing-token', ['*'], now()->addDay())->plainTextToken;
 
         return $user;
