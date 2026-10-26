@@ -209,6 +209,28 @@ class OfflineScreenshotsArchiveLimitsTest extends TestCase
     }
 
     /**
+     * An entry that ends before the size declared in the zip headers (e.g. after a CRC error) must not be attached
+     * as a truncated screenshot.
+     */
+    public function test_archive_with_an_entry_shorter_than_declared_is_rejected(): void
+    {
+        $extractedFileSizes = $this->recordExtractedFileSizesOnAttach();
+        $name = "{$this->user->id}_$this->screenshotId";
+        $image = $this->image();
+        $zipPath = $this->createOfflineArchive([$name => $image]);
+        $this->forgeArchiveEntrySize($zipPath, $name, strlen($image) + 1000);
+
+        $response = $this->uploadOfflineArchiveFile($this->user, $zipPath);
+
+        $response->assertStatus(self::HTTP_BAD_REQUEST);
+        $this->assertStringContainsString(__('Cannot open file.'), $response->getContent());
+        $this->assertSame([], $extractedFileSizes->all(), 'Sizes of the extracted files when attaching');
+        $this->interval->refresh();
+        $this->assertSame($this->screenshotId, $this->interval->screenshot_id, 'The screenshot was attached');
+        $this->assertTmpIsEmpty();
+    }
+
+    /**
      * ZipArchive::extractTo() wrote such an entry as an empty file without reporting an error.
      */
     public function test_archive_with_a_corrupted_entry_is_rejected(): void

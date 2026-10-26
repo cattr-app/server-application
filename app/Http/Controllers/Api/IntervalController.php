@@ -893,8 +893,10 @@ class IntervalController extends ItemController
         for ($index = 0; $index < $fileCount; $index++) {
             // The names were checked to be plain file names by validateOfflineScreenshotsArchive()
             $name = $zip->getNameIndex($index);
-            $source = $name === false ? false : $zip->getStreamIndex($index);
+            $stat = $zip->statIndex($index);
+            $source = $name === false || $stat === false ? false : $zip->getStreamIndex($index);
             abort_if($source === false, 400, __('Cannot open file.'));
+            $written = 0;
 
             try {
                 $target = fopen($directory . DIRECTORY_SEPARATOR . $name, 'wb');
@@ -916,10 +918,14 @@ class IntervalController extends ItemController
                             throw new RuntimeException("Unable to write the extracted file for archive entry $index");
                         }
                         $remaining -= strlen($chunk);
+                        $written += strlen($chunk);
                     }
                 } finally {
                     fclose($target);
                 }
+
+                // A damaged entry can end early without a read error; never pass on a truncated screenshot
+                abort_if($written !== $stat['size'], 400, __('Cannot open file.'));
             } finally {
                 fclose($source);
             }
