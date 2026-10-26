@@ -48,11 +48,25 @@ class AttachmentController extends ItemController
 
     public function createTemporaryUrl(DownloadAttachmentRequest $request, Attachment $attachment): string
     {
+        // Only verified files are downloadable, on every disk (streamDownloadLogic() checks the same for the
+        // local route; a presigned S3 URL bypasses the app, so the check has to happen before issuing it)
+        if ($attachment->status !== AttachmentStatus::GOOD) {
+            abort(404);
+        }
+
+        // query string values arrive as strings, Carbon 3 rejects them
+        $expiresAt = now()->addSeconds((int)($request->validated('seconds') ?? 3600));
+
+        // Object storage (S3): a presigned URL of the object itself, absolute
+        if ($presignedUrl = $this->attachmentService->getTemporaryUrl($attachment, $expiresAt)) {
+            return $presignedUrl;
+        }
+
         // we do this because signature breaks if we use built in method for creating relative path
         // also cannot determine request scheme when ran inside docker
         $url = URL::temporarySignedRoute(
             'attachment.temporary-download',
-            now()->addSeconds((int)($request->validated('seconds') ?? 3600)),
+            $expiresAt,
             $attachment
         );
         $parsedUrl = parse_url($url);

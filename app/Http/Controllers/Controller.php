@@ -26,7 +26,8 @@ class Controller extends BaseController
         return [];
     }
 
-    public function frontendRoute(Request $request) {
+    public function frontendRoute(Request $request)
+    {
         return view('app');
     }
 

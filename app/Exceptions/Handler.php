@@ -99,7 +99,7 @@ class Handler extends ExceptionHandler
                 return $item;
             })->toArray();
 
-        if (config('app.debug') === false){
+        if (config('app.debug') === false) {
             try {
                 $requestContent = Crypt::encryptString(json_encode($requestContent, JSON_THROW_ON_ERROR));
             } catch (Throwable $exception) {

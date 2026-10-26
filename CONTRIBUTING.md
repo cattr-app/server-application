@@ -148,6 +148,19 @@ final fix
 
 Prefer amending or reorganizing local commits before publishing them when doing so does not rewrite already shared and reviewed history.
 
+### Optional local commit validation
+
+Developers who use [mise](https://mise.jdx.dev/) can enable the
+[hk](https://hk.jdx.dev/) `commit-msg` hook:
+
+```bash
+mise run setup-hooks
+```
+
+The hook validates Conventional Commit messages using `hk.pkl`. Mise manages
+the hk version through `mise.toml`. Local hooks are optional and are not
+required to contribute.
+
 ## Commit sign-off
 
 Every contribution commit must include a Developer Certificate of Origin style sign-off.
@@ -285,23 +298,26 @@ The repository contains both the server-side application and the web frontend.
 
 The production application is distributed as a single container containing the backend, compiled frontend, Caddy, Laravel Octane, queue worker, Laravel Reverb, and scheduled jobs.
 
-The production build is Wolfi-based: the builder uses Node.js 24 with pnpm 12.5.1,
-and the runtime uses PHP 8.3, Caddy, Pebble, Laravel Octane, and Laravel Reverb.
+The production build is Wolfi-based: the builder uses Node.js 24 and the pnpm
+version declared in `package.json`; the runtime uses PHP 8.3, Caddy, Pebble,
+Laravel Octane, and Laravel Reverb.
 
 ## Development requirements
 
 Use the versions declared by the repository whenever possible.
 
-| Dependency | Version                            |
-|------------|------------------------------------|
-| PHP        | 8.3                                |
-| Laravel    | 10.x                               |
-| Node.js    | `.nvmrc`, currently 24.21          |
-| pnpm       | `packageManager`, currently 12.5.1 |
-| Composer   | Composer 2.10.3                    |
-| Database   | MySQL-compatible database          |
+| Dependency | Version source                        |
+|------------|---------------------------------------|
+| PHP        | `.php-version`, `composer.json`        |
+| Laravel    | `composer.json`                       |
+| Node.js    | `.nvmrc`                              |
+| pnpm       | `packageManager` in `package.json`    |
+| Composer   | Composer 2.x                          |
+| Database   | MySQL-compatible database             |
 
-Corepack is required to use the pnpm version pinned by the repository.
+Mise is an optional way to install Node.js and pnpm using these version
+declarations. PHP is intentionally not managed by this repository's
+`mise.toml`; use a PHP version manager or a container-based environment.
 
 The PHP installation must provide the extensions required by `composer.json`, including GD, JSON, OpenSSL, PDO, and ZIP. When using MySQL locally, the corresponding PDO MySQL driver is also required.
 
@@ -332,15 +348,21 @@ Generate the application key:
 php artisan key:generate
 ```
 
-Activate the repository Node.js version when using `nvm`:
+Install Node.js, pnpm, and frontend dependencies with mise, if you use it:
+
+```bash
+mise install
+pnpm install --frozen-lockfile
+```
+
+Mise reads Node.js from `.nvmrc` and pnpm from the `packageManager` field
+in `package.json`.
+
+Other Node.js version managers remain supported. For example, with nvm
+and Corepack:
 
 ```bash
 nvm use
-```
-
-Enable Corepack and install frontend dependencies:
-
-```bash
 corepack enable
 pnpm install --frozen-lockfile
 ```
@@ -821,7 +843,7 @@ build/packages/corepack.yaml
 ```
 
 The generated APK is added to the builder image and Corepack activates the pnpm
-version pinned by `package.json` (`pnpm@12.5.1`).
+version pinned by `package.json`.
 
 When changing base-image dependencies, modify the relevant apko or Melange configuration instead of installing additional system packages in the application Dockerfile unless there is a specific reason to do otherwise.
 

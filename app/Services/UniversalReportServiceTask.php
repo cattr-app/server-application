@@ -49,7 +49,9 @@ class UniversalReportServiceTask
                 $query->select($userFields);
             }])
             ->select(array_merge($taskFields))->whereIn('id', $this->report->data_objects);
-        if (!empty($taskRelations)) $tasksQuery = $tasksQuery->with($taskRelations);
+        if (!empty($taskRelations)) {
+            $tasksQuery = $tasksQuery->with($taskRelations);
+        }
         $tasks = $tasksQuery->get();
         $endAt = clone $this->endAt;
         $endAt = $endAt->endOfDay();
@@ -122,8 +124,12 @@ class UniversalReportServiceTask
         }
         $tasks = $tasks->keyBy('id')->toArray();
         foreach ($tasks as &$task) {
-            if (isset($task['priority'])) $task['priority'] = $task['priority']['name'];
-            if (isset($task['status'])) $task['status'] = $task['status']['name'];
+            if (isset($task['priority'])) {
+                $task['priority'] = $task['priority']['name'];
+            }
+            if (isset($task['status'])) {
+                $task['status'] = $task['status']['name'];
+            }
         }
         return  $tasks;
     }
@@ -177,7 +183,7 @@ class UniversalReportServiceTask
             $userNames = $userTasks->pluck('full_name', 'id');
             TimeInterval::whereIn('task_id', $this->report->data_objects)
                 ->where('start_at', '>=', $this->startAt->format('Y-m-d H:i:s'))
-                ->where('end_at', '<=',  $endAt->format('Y-m-d H:i:s'))
+                ->where('end_at', '<=', $endAt->format('Y-m-d H:i:s'))
                 ->select('task_id', 'user_id')
                 ->selectRaw('DATE(start_at) as date_at')
                 ->selectRaw('SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) as total_spent_time_day_users_separately')

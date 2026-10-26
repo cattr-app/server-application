@@ -48,8 +48,7 @@ class ReportHelper
         Carbon $startAt,
         Carbon $endAt,
         array  $select = []
-    ): Builder
-    {
+    ): Builder {
         return Project::join('tasks', 'tasks.project_id', '=', 'projects.id')
             ->join('time_intervals', 'time_intervals.task_id', '=', 'tasks.id')
             ->join('users', 'time_intervals.user_id', '=', 'users.id')

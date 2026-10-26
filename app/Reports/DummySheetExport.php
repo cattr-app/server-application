@@ -3,8 +3,6 @@ namespace App\Reports;
 
 use Maatwebsite\Excel\Concerns\FromArray;
 
-
-
 class DummySheetExport implements FromArray
 {
     protected $title;

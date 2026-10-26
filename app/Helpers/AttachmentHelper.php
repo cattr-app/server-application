@@ -33,7 +33,7 @@ class AttachmentHelper
         $fileName = $file->getClientOriginalName();
         $extension = ".{$file->clientExtension()}";
         $maxNameLength = (self::MAX_FILE_NAME_LENGTH - Str::length($extension));
-        if (Str::length($fileName) > $maxNameLength || Str::endsWith($fileName, $extension) === false){
+        if (Str::length($fileName) > $maxNameLength || Str::endsWith($fileName, $extension) === false) {
             $fileName = Str::substr($fileName, 0, $maxNameLength) . $extension;
         }
 
@@ -79,7 +79,7 @@ class AttachmentHelper
         $size = trim(ini_get("upload_max_filesize") ?? '2M');
         $last = strtolower($size[strlen($size)-1]);
         $size = (float)$size;
-        switch($last) {
+        switch ($last) {
             case 'g':
                 $size *= (1024 * 1024 * 1024); //1073741824
                 break;

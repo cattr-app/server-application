@@ -1,0 +1,9 @@
+[settings]
+idiomatic_version_file_enable_tools = ["node", "pnpm"]
+
+[tools]
+hk = { version = "2.8.1", lazy = true }
+
+[tasks.setup-hooks]
+description = "Install optional local Git hooks"
+run = "hk install --mise"

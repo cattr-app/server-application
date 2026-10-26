@@ -242,21 +242,6 @@
                                         },
                                         `7${this.$t('time.d')}`,
                                     ),
-                                    h(
-                                        'AtButton',
-                                        {
-                                            props: {
-                                                type: 'primary',
-                                                size: 'smaller',
-                                            },
-                                            on: {
-                                                click: async () => {
-                                                    await this.handleTmpUrlCreation(params.item.id, 60 * 60 * 24 * 14);
-                                                },
-                                            },
-                                        },
-                                        `14${this.$t('time.d')}`,
-                                    ),
                                 ]),
                             ],
                         );
@@ -283,7 +268,8 @@
         methods: {
             async handleTmpUrlCreation(attachmentUUID, seconds = null) {
                 const url = await this.taskService.generateAttachmentTmpUrl(attachmentUUID, seconds);
-                await this.setClipboard(window.location.origin + url);
+                // relative signed route on the local disk, absolute presigned URL on S3
+                await this.setClipboard(new URL(url, window.location.origin).href);
                 Vue.prototype.$Notify.success({
                     title: this.$i18n.t('attachments.tmp_url_created'),
                     message: this.$i18n.t('attachments.copied_to_clipboard'),

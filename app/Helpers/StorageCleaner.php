@@ -9,21 +9,45 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Builder;
 use Storage;
 
+/**
+ * Screenshot rotation by free space of the local disk (PVC).
+ *
+ * Object storage (FILESYSTEM_DISK=s3) has no "free space": rotation is a no-op there,
+ * retention is expected to be handled by bucket lifecycle rules.
+ */
 class StorageCleaner
 {
+    public static function isSupported(): bool
+    {
+        return StorageHelper::isLocal();
+    }
 
     public static function getFreeSpace(): float
     {
-        return disk_free_space(Storage::path(ScreenshotService::PARENT_FOLDER));
+        if (!self::isSupported()) {
+            return 0;
+        }
+
+        $directory = Storage::path(ScreenshotService::PARENT_FOLDER);
+
+        return disk_free_space(is_dir($directory) ? $directory : Storage::path(''));
     }
 
     public static function getUsedSpace(): float
     {
+        if (!self::isSupported()) {
+            return 0;
+        }
+
         return config('cleaner.total_space') - self::getFreeSpace();
     }
 
     public static function needThinning(): bool
     {
+        if (!self::isSupported()) {
+            return false;
+        }
+
         return
             self::getUsedSpace() * 100 / config('cleaner.total_space')
             >= config('cleaner.threshold');
@@ -34,7 +58,10 @@ class StorageCleaner
      */
     public static function thin($force = false): void
     {
-        if ((!$force && !self::needThinning()) || Cache::store('octane')->get('thinning_now')) {
+        if (!self::isSupported()
+            || (!$force && !self::needThinning())
+            || Cache::store('octane')->get('thinning_now')
+        ) {
             return;
         }
 
@@ -54,8 +81,8 @@ class StorageCleaner
             }
         }
 
-        Cache::store('octane')->set('thinning_now',false);
-        Cache::store('octane')->set('last_thin',now());
+        Cache::store('octane')->set('thinning_now', false);
+        Cache::store('octane')->set('last_thin', now());
     }
 
     /**
@@ -91,6 +118,11 @@ class StorageCleaner
      */
     public static function countAvailableScreenshots(): int
     {
+        // One existence check per interval is fine on a local disk, but would be a HEAD request each on S3.
+        if (!self::isSupported()) {
+            return 0;
+        }
+
         $count = 0;
 
         $service = app()->make(ScreenshotService::class);

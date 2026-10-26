@@ -62,6 +62,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'ability' => CheckForAnyAbility::class,
         ]);
 
+        // Octane is only reached through the bundled Caddy (runtime/caddy/Caddyfile, upstream 127.0.0.1:8090),
+        // which sets X-Forwarded-* and passes on incoming ones only from its own trusted_proxies. Trust exactly
+        // that hop, so request()->ip() (rate limiters, recaptcha, desktop keys) is the client, not 127.0.0.1.
+        $middleware->trustProxies(at: ['127.0.0.1']);
+
         $middleware->trimStrings(except: [
             'password',
             'password_confirmation',

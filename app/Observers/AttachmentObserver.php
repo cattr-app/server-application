@@ -50,7 +50,7 @@ class AttachmentObserver
 
     public function attachmentCreated(Attachment $attachment, array $requestData): void
     {
-        if ($this->service->storeFile($requestData['attachment'], $attachment) === false){
+        if ($this->service->storeFile($requestData['attachment'], $attachment) === false) {
 //          TODO: throw exception or abort_if?
         }
     }
@@ -66,5 +66,4 @@ class AttachmentObserver
             parentDeleted: [[__CLASS__, 'parentDeleted']],
         ));
     }
-
 }

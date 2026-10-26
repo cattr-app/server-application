@@ -49,7 +49,9 @@ class UniversalReportServiceProject
             $query->select($userFields);
         }])
             ->select(array_merge($projectFields))->whereIn('id', $this->report->data_objects);
-        if (!empty($taskRelations)) $projectsQuery = $projectsQuery->with($taskRelations);
+        if (!empty($taskRelations)) {
+            $projectsQuery = $projectsQuery->with($taskRelations);
+        }
         $projects = $projectsQuery->get();
         $tasksId = [];
         foreach ($projects as $project) {
@@ -129,15 +131,18 @@ class UniversalReportServiceProject
             $workedTimeByDay[$intervalProjectId][$intervalDate] += $timeInterval->total_spent_time_by_day;
         }
         foreach ($projects as $project) {
-            if (isset($workedTimeByDay[$project->id]))
+            if (isset($workedTimeByDay[$project->id])) {
                 $project->worked_time_day = $workedTimeByDay[$project->id];
+            }
             foreach ($project->users as $user) {
-                if (isset($workedTimeByDayUser[$project->id][$user->id]))
+                if (isset($workedTimeByDayUser[$project->id][$user->id])) {
                     $user->workers_day =  $workedTimeByDayUser[$project->id][$user->id];
-                if (isset($totalSpentTimeUser[$project->id][$user->id]))
+                }
+                if (isset($totalSpentTimeUser[$project->id][$user->id])) {
                     $user->total_spent_time_by_user = $totalSpentTimeUser[$project->id][$user->id];
-                else
+                } else {
                     $user->total_spent_time_by_user = 0;
+                }
             }
         }
         $projects = $projects->keyBy('id')->toArray();
@@ -147,8 +152,12 @@ class UniversalReportServiceProject
                 $project['created_at'] = $date->format('Y-m-d H:i:s');
             }
             foreach ($project['tasks'] as &$task) {
-                if (isset($task['priority'])) $task['priority'] = $task['priority']['name'];
-                if (isset($task['status'])) $task['status'] = $task['status']['name'];
+                if (isset($task['priority'])) {
+                    $task['priority'] = $task['priority']['name'];
+                }
+                if (isset($task['status'])) {
+                    $task['status'] = $task['status']['name'];
+                }
             }
         }
         return $projects;

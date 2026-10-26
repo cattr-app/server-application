@@ -60,8 +60,9 @@ class ProjectMultiSheetExport extends BaseExport implements FromArray, WithTitle
     {
         if (isset($this->data['total_spent_time_day']['datasets'])) {
             foreach ($this->data['total_spent_time_day']['datasets'] as $projectId => $project) {
-                if ($projectId !== $this->project)
+                if ($projectId !== $this->project) {
                     continue;
+                }
 
                 $resultRow = [];
                 $resultRow[] = $project['label'] ?? '';
@@ -88,8 +89,9 @@ class ProjectMultiSheetExport extends BaseExport implements FromArray, WithTitle
             $result[] = $resultRow;
 
             foreach ($this->data['total_spent_time_day_and_users_separately']['datasets'] as $projectId => $userTask) {
-                if ($projectId !== $this->project)
+                if ($projectId !== $this->project) {
                     continue;
+                }
                 foreach ($userTask as $userId => $user) {
                     $resultRow = [];
                     $resultRow[] = $user['label'] ?? '';
@@ -106,8 +108,9 @@ class ProjectMultiSheetExport extends BaseExport implements FromArray, WithTitle
 
         if (isset($this->reportData)) {
             foreach ($this->reportData as $projectId => $project) {
-                if ($projectId !== $this->project)
+                if ($projectId !== $this->project) {
                     continue;
+                }
                 $resultRow = [];
                 $resultRow[] = 'Project name';
                 $resultRow[] = 'Create at';
@@ -157,8 +160,9 @@ class ProjectMultiSheetExport extends BaseExport implements FromArray, WithTitle
                         $resultRow[] = $user['email'] ?? '';
                         $resultRow[] = $user['total_spent_time_by_user'] ?? 'Отсутствует';
                         if (isset($user['workers_day'])) {
-                            foreach ($user['workers_day'] as $date => $time)
+                            foreach ($user['workers_day'] as $date => $time) {
                                 $resultRow[] = 'Data ' . $date . ' time: ' . $time;
+                            }
                         }
 
                         $result[] = $resultRow;
@@ -193,8 +197,8 @@ class ProjectMultiSheetExport extends BaseExport implements FromArray, WithTitle
             } else {
                 for ($i = $rowCount[0]; $i < $rowCount[1]; $i++) {
                     $label      = [new DataSeriesValues('String', "'" . $this->title() . "'" . '!A' . $i, null, $i)];
-                    $categories = [new DataSeriesValues('String', "'" . $this->title() . "'" . "!{$startColumn}1:{$endColumn}1", null,  $columnLast)];
-                    $values     = [new DataSeriesValues('Number', "'" . $this->title() . "'" . "!{$startColumn}" . $i . ":!{$endColumn}" . $i, null,  $columnLast)];
+                    $categories = [new DataSeriesValues('String', "'" . $this->title() . "'" . "!{$startColumn}1:{$endColumn}1", null, $columnLast)];
+                    $values     = [new DataSeriesValues('Number', "'" . $this->title() . "'" . "!{$startColumn}" . $i . ":!{$endColumn}" . $i, null, $columnLast)];
                     $series[] = $createDataSeries($label, $categories, $values);
                 }
             }
@@ -213,11 +217,13 @@ class ProjectMultiSheetExport extends BaseExport implements FromArray, WithTitle
         $charts = [];
         $columnLast =  Coordinate::stringFromColumnIndex($columnNumber + 1);
         $rowCounts = $this->rowCount();
-        if ($this->showTasksChart)
-            $charts[] = $createChart(static::TEXT_USER, static::TEXT_USER, static::POSITIONS_CHART[0],  static::OFFSET_CHART, static::COLUMN_FIRST, $columnLast, [], $columnNumber);
+        if ($this->showTasksChart) {
+            $charts[] = $createChart(static::TEXT_USER, static::TEXT_USER, static::POSITIONS_CHART[0], static::OFFSET_CHART, static::COLUMN_FIRST, $columnLast, [], $columnNumber);
+        }
 
-        if ($this->showUsersChart)
-            $charts[] = $createChart(static::TEXT_USER_INDIVIDUALLY, static::TEXT_USER_INDIVIDUALLY, static::POSITIONS_CHART[1],  static::OFFSET_CHART, static::COLUMN_FIRST, $columnLast, [4, $rowCounts + 4], $columnNumber);
+        if ($this->showUsersChart) {
+            $charts[] = $createChart(static::TEXT_USER_INDIVIDUALLY, static::TEXT_USER_INDIVIDUALLY, static::POSITIONS_CHART[1], static::OFFSET_CHART, static::COLUMN_FIRST, $columnLast, [4, $rowCounts + 4], $columnNumber);
+        }
 
         return $charts;
     }

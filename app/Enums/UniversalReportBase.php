@@ -13,8 +13,9 @@ enum UniversalReportBase: string
     case TASK = 'task';
 
 
-    public function fields() {
-        return match($this) {
+    public function fields()
+    {
+        return match ($this) {
             self::PROJECT => [
                 'base' => [
                     'name',
@@ -103,23 +104,23 @@ enum UniversalReportBase: string
 
     public function dataObjects()
     {
-        return match($this) {
-            self::PROJECT => (function() {
-                if(request()->user()->isAdmin()) {
+        return match ($this) {
+            self::PROJECT => (function () {
+                if (request()->user()->isAdmin()) {
                     return Project::select('id', 'name')->get();
                 }
 
                 return request()->user()->projects()->select('id', 'name')->get();
             })(),
-            self::USER => (function() {
+            self::USER => (function () {
                 if (request()->user()->isAdmin()) {
                     return User::select('id', 'full_name as name', 'email', 'full_name')->get();
                 }
 
                 return;
             })(),
-            self::TASK => (function() {
-                if(request()->user()->isAdmin()) {
+            self::TASK => (function () {
+                if (request()->user()->isAdmin()) {
                     return Task::select('id', 'task_name as name')->get();
                 }
 
@@ -127,7 +128,8 @@ enum UniversalReportBase: string
             })()
         };
     }
-    public function charts() {
+    public function charts()
+    {
         // [
         //     // Project
         //     "worked_all_users",// "Отработанное время всеми пользователями на проекте за указанный период",
@@ -141,7 +143,7 @@ enum UniversalReportBase: string
         //     'hours_projects',// "Часов на каждом проекте",
 
         // ];
-        return match($this) {
+        return match ($this) {
             self::PROJECT => [
                 'total_spent_time_day',
                 'total_spent_time_day_and_users_separately',
@@ -166,7 +168,7 @@ enum UniversalReportBase: string
     public function checkAccess(array $data_objects)
     {
         $user = request()->user();
-        return match($this) {
+        return match ($this) {
             self::PROJECT => $user->projects()->select('id')->whereIn('id', $data_objects)->withoutGlobalScopes()->get()->count() === count($data_objects),
             self::USER => '',
             self::TASK => $user->tasks()->select('id')->whereIn('id', $data_objects)->withoutGlobalScopes()->get()->count() === count($data_objects),
@@ -175,7 +177,7 @@ enum UniversalReportBase: string
 
     public function model()
     {
-        return match($this) {
+        return match ($this) {
             self::PROJECT => new Project(),
             self::USER => new User(),
             self::TASK => new Task(),

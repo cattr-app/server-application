@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Contracts\AppReport;
+use App\Helpers\StorageHelper;
 use App\Models\User;
 use App\Notifications\ReportGenerated;
 use Illuminate\Bus\Queueable;
@@ -15,6 +16,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Excel;
 use Storage;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use Throwable;
 
 class GenerateAndSendReport implements ShouldQueue, ShouldBeUnique
@@ -24,11 +26,30 @@ class GenerateAndSendReport implements ShouldQueue, ShouldBeUnique
     public int $uniqueFor = 60;
     private string $dir;
 
-    private const STORAGE_DRIVE = 'public';
+    /** "reports" disk: storage/app/public (served at /storage) or S3, see REPORTS_DISK */
+    private const STORAGE_DRIVE = 'reports';
+    /** Lifetime of the presigned download URL when reports are on S3 */
+    public const URL_TTL_MINUTES = 10;
 
     public function getPublicPath(): string
     {
-        return Storage::drive(self::STORAGE_DRIVE)->url($this->getReportPath());
+        if (StorageHelper::isLocal(self::STORAGE_DRIVE)) {
+            return Storage::drive(self::STORAGE_DRIVE)->url($this->getReportPath());
+        }
+
+        $fileName = basename($this->getReportPath());
+
+        return Storage::drive(self::STORAGE_DRIVE)->temporaryUrl(
+            $this->getReportPath(),
+            now()->addMinutes(self::URL_TTL_MINUTES),
+            [
+                'ResponseContentDisposition' => HeaderUtils::makeDisposition(
+                    HeaderUtils::DISPOSITION_ATTACHMENT,
+                    $fileName,
+                    str_replace(['%', '/', '\\'], '_', Str::ascii($fileName)) ?: 'report',
+                ),
+            ],
+        );
     }
 
     /**
@@ -49,8 +70,6 @@ class GenerateAndSendReport implements ShouldQueue, ShouldBeUnique
      */
     public function handle(): void
     {
-        Storage::drive(self::STORAGE_DRIVE)->makeDirectory("reports/$this->dir");
-
         $fileName = $this->getReportPath();
 
         $this->report->store($fileName, self::STORAGE_DRIVE, $this->type === 'pdf' ? Excel::MPDF : Str::ucfirst($this->type));

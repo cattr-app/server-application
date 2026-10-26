@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Attachment;
 
+use App\Contracts\AttachmentService;
 use App\Http\Requests\AuthorizesAfterValidation;
 use App\Http\Requests\CattrFormRequest;
 
@@ -17,7 +18,8 @@ class DownloadAttachmentRequest extends CattrFormRequest
     public function _rules(): array
     {
         return [
-            'seconds' => 'sometimes|int'
+            // 7 days at most on every disk (the S3 presigning limit)
+            'seconds' => 'sometimes|int|min:1|max:' . AttachmentService::MAX_TEMPORARY_URL_SECONDS,
         ];
     }
 }

@@ -35,15 +35,21 @@
 </template>
 
 <script>
-    import axios from '@/config/app';
     import { Skeleton } from 'vue-loading-skeleton';
+    import { isUrlExpired } from '@/utils/screenshotUrl';
 
     export default {
         name: 'AppImage',
         props: {
+            // Ready URL for <img src>; "none" shows the error placeholder
             src: {
                 type: String,
-                required: true,
+                default: null,
+            },
+            // Async URL provider, used instead of src; called again once when a temporary URL has expired
+            resolver: {
+                type: Function,
+                default: null,
             },
             lazy: {
                 type: Boolean,
@@ -55,75 +61,68 @@
             },
         },
         data() {
-            const baseUrl =
-                this.src.indexOf('http') === 0
-                    ? ''
-                    : (process.env.VUE_APP_API_URL !== 'null'
-                          ? process.env.VUE_APP_API_URL
-                          : `${window.location.origin}/api`) + '/';
-
-            const url = baseUrl + this.src;
-
             return {
-                error: this.src === 'none',
-                loaded: this.src === 'none',
-                url,
-                baseUrl,
+                error: false,
+                loaded: false,
+                url: null,
+                retried: false,
+                loadId: 0,
             };
         },
         components: {
             Skeleton,
         },
         methods: {
-            load() {
-                if (this.error) return;
+            async load() {
+                const loadId = ++this.loadId;
 
-                if (this.src === 'none') {
-                    this.error = true;
+                this.error = false;
+                this.loaded = false;
+                this.url = null;
+
+                let url = null;
+                try {
+                    url = this.resolver ? await this.resolver() : this.src;
+                } catch (e) {
+                    url = null;
+                }
+
+                // a newer load (src / resolver changed) took over meanwhile
+                if (loadId !== this.loadId) {
                     return;
                 }
 
-                this.loaded = false;
-
-                if (this.url) {
-                    URL.revokeObjectURL(this.url);
-                    this.url = null;
+                if (!url || url === 'none') {
+                    this.error = true;
+                } else {
+                    this.url = url;
                 }
-
-                if (this.src) {
-                    axios
-                        .get(this.src, {
-                            responseType: 'blob',
-                            muteError: true,
-                        })
-                        .then(({ data }) => {
-                            this.url = URL.createObjectURL(data);
-                        })
-                        .catch(() => {
-                            this.error = true;
-                        })
-                        .finally(() => {
-                            this.loaded = true;
-                        });
-                }
+                this.loaded = true;
+            },
+            reload() {
+                this.retried = false;
+                this.load();
             },
             handleError() {
+                // the page may stay open longer than the URL lifetime: get a fresh URL once
+                if (this.resolver && !this.retried && isUrlExpired(this.url)) {
+                    this.retried = true;
+                    this.load();
+                    return;
+                }
+
                 this.error = true;
             },
         },
         mounted() {
             this.load();
         },
-        beforeDestroy() {
-            if (this.url) {
-                URL.revokeObjectURL(this.url);
-                this.url = null;
-            }
-        },
         watch: {
             src() {
-                this.error = false;
-                this.load();
+                this.reload();
+            },
+            resolver() {
+                this.reload();
             },
         },
     };

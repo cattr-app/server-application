@@ -45,7 +45,9 @@ class UniversalReportServiceUser
         }])->with(['tasks' => function ($query) use ($taskFields) {
             $query->select($taskFields);
         }])->select(array_merge($this->report->fields['base'], ['id']))->whereIn('id', $this->report->data_objects);
-        if (!empty($taskRelations)) $usersQuery = $usersQuery->with($taskRelations);
+        if (!empty($taskRelations)) {
+            $usersQuery = $usersQuery->with($taskRelations);
+        }
         $users = $usersQuery->get();
         foreach ($users as $user) {
             foreach ($user->projects as $project) {
@@ -155,15 +157,15 @@ class UniversalReportServiceUser
             })->get();
             $taskNames = $userTasks->pluck('task_name', 'id');
             TimeInterval::whereIn('user_id', $this->report->data_objects)
-                ->where('start_at', '>=',  $this->startAt->format('Y-m-d H:i:s'))
-                ->where('end_at', '<=',  $endAt->format('Y-m-d H:i:s'))
+                ->where('start_at', '>=', $this->startAt->format('Y-m-d H:i:s'))
+                ->where('end_at', '<=', $endAt->format('Y-m-d H:i:s'))
                 ->whereIn('task_id', $userTasks->pluck('id'))
                 ->select('task_id', 'user_id')
                 ->selectRaw('DATE(start_at) as date_at')
                 ->selectRaw('SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) as total_spent_time_by_day_and_tasks')
                 ->groupBy('task_id', 'date_at', 'user_id')
                 ->get()
-                ->each(function ($timeInterval) use (&$total_spent_time_by_day_and_tasks,  $taskNames) {
+                ->each(function ($timeInterval) use (&$total_spent_time_by_day_and_tasks, $taskNames) {
                     $time = sprintf("%02d.%02d", floor($timeInterval->total_spent_time_by_day_and_tasks / 3600), floor($timeInterval->total_spent_time_by_day_and_tasks / 60) % 60);
                     if (!array_key_exists($timeInterval->user_id, $total_spent_time_by_day_and_tasks['datasets'])) {
                         $total_spent_time_by_day_and_tasks['datasets'][$timeInterval->user_id] = [];
@@ -201,7 +203,7 @@ class UniversalReportServiceUser
             })->pluck('project_id', 'id');
 
             $timeIntervals = TimeInterval::whereIn('user_id', $this->report->data_objects)
-                ->where('start_at', '>=',  $this->startAt->format('Y-m-d H:i:s'))
+                ->where('start_at', '>=', $this->startAt->format('Y-m-d H:i:s'))
                 ->where('end_at', '<=', $endAt->format('Y-m-d H:i:s'))
                 ->whereIn('task_id', $userTasks->keys())
                 ->select('task_id', 'user_id')
