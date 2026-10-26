@@ -855,7 +855,7 @@ class IntervalController extends ItemController
         foreach ($allScreenshots as $screenshotPath) {
             // File names are <user_id>_<screenshot_uuid>
             abort_unless(
-                preg_match('/^(\d+)_(.+)$/', basename($screenshotPath), $matches) === 1 && Str::isUuid($matches[2]),
+                preg_match('/^(\d+)_(.+)\z/', basename($screenshotPath), $matches) === 1 && Str::isUuid($matches[2]),
                 400,
                 __('Wrong screenshot file name')
             );

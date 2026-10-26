@@ -159,6 +159,7 @@ class ScreenshotTmpFilesTest extends TestCase
             'not a uuid' => ['57_not-a-uuid'],
             'suffix after the uuid' => ['57_' . Str::uuid() . '.png'],
             'no separator' => ['not-a-screenshot.txt'],
+            'trailing newline after the uuid' => ['57_' . Str::uuid() . "\n"],
         ];
     }
 
