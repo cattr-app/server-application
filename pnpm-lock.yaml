@@ -173,46 +173,46 @@ importers:
         specifier: ^1.3.14
         version: 1.3.14
       '@svgdotjs/svg.js':
-        specifier: ^3.2.0
+        specifier: ^3.2.8
         version: 3.2.8
       apidoc:
         specifier: 0.29.0
         version: 0.29.0
       axios:
-        specifier: ^1.18.5
+        specifier: ^1.20.0
         version: 1.20.0(debug@4.4.3(supports-color@5.5.0))(supports-color@5.5.0)
       caret-pos:
         specifier: ^2.0.0
         version: 2.0.0
       chart.js:
-        specifier: ^4.3.3
-        version: 4.5.1
+        specifier: ^4.6.1
+        version: 4.6.1
       color-convert:
-        specifier: ^2.0.1
-        version: 2.0.1
+        specifier: ^3.1.3
+        version: 3.1.3
       echarts:
-        specifier: ^5.4.3
+        specifier: ^5.6.0
         version: 5.6.0
       events:
         specifier: 3.3.0
         version: 3.3.0
       highlight.js:
-        specifier: 11.10.0
-        version: 11.10.0
+        specifier: 11.12.0
+        version: 11.12.0
       js-md5:
-        specifier: ^0.8.3
-        version: 0.8.3
+        specifier: ^0.9.2
+        version: 0.9.2
       laravel-echo:
-        specifier: ^1.16.1
-        version: 1.19.0
+        specifier: ^2.6.1
+        version: 2.6.1(pusher-js@8.6.0)
       lodash:
-        specifier: ^4.18.0
+        specifier: ^4.18.1
         version: 4.18.1
       markdown-it:
-        specifier: ^14.2.0
-        version: 14.3.2
+        specifier: ^14.3.3
+        version: 14.3.3
       markdown-it-highlightjs:
-        specifier: ^4.1.0
+        specifier: ^4.3.0
         version: 4.3.0
       markdown-it-sub:
         specifier: ^2.0.0
@@ -224,25 +224,25 @@ importers:
         specifier: 2.31.0
         version: 2.31.0
       moment-timezone:
-        specifier: ^0.5.45
-        version: 0.5.48
+        specifier: ^0.6.5
+        version: 0.6.5
       path-browserify:
         specifier: ^1.0.1
         version: 1.0.1
       pusher-js:
-        specifier: ^8.4.0-rc2
+        specifier: ^8.6.0
         version: 8.6.0
       quill:
         specifier: 1.3.7
         version: 1.3.7
       semver:
-        specifier: ^7.6.0
+        specifier: ^7.8.5
         version: 7.8.5
       v-code-diff:
         specifier: ^1.13.1
         version: 1.16.0(vue@2.7.16)
       validator:
-        specifier: ^13.15.22
+        specifier: ^13.15.35
         version: 13.15.35
       vee-validate:
         specifier: ^3.4.15
@@ -255,7 +255,7 @@ importers:
         version: 2.3.3
       vue-chartjs:
         specifier: ^5.2.0
-        version: 5.3.4(chart.js@4.5.1)(vue@2.7.16)
+        version: 5.3.4(chart.js@4.6.1)(vue@2.7.16)
       vue-color:
         specifier: ^3.3.3
         version: 3.3.3(vue@2.7.16)
@@ -1781,8 +1781,8 @@ packages:
   charenc@0.0.2:
     resolution: {integrity: sha512-yrLQ/yVUFXkzg7EDQsPieE/53+0RlaWTs+wBrvW36cyilJ2SaDWfl4Yj7MtLTXleV9uEKefbAGUPv2/iWSooRA==}
 
-  chart.js@4.5.1:
-    resolution: {integrity: sha512-GIjfiT9dbmHRiYi6Nl2yFCq7kkwdkp1W/lp2J99rX0yo9tgJGn3lKQATztIjb5tVtevcBtIdICNWqlq5+E8/Pw==}
+  chart.js@4.6.1:
+    resolution: {integrity: sha512-hJyniucsFmq//EvXYvJ6c6mahPoI3kaxdjVH8awTaJ/fDNWeSqqqArixMJWkWNN6fcYvPU3HneSANFNYtRi61g==}
     engines: {pnpm: '>=8'}
 
   check-types@8.0.3:
@@ -2680,8 +2680,8 @@ packages:
   fn.name@1.1.0:
     resolution: {integrity: sha512-GRnmB5gPyJpAhTQdSZTSp9uaPSvl09KoYcMQtsB9rQoOmzs9dH6ffeccH+Z+cv6P68Hu5bC6JjRh4Ah/mHSNRw==}
 
-  follow-redirects@1.16.0:
-    resolution: {integrity: sha512-y5rN/uOsadFT/JfYwhxRS5R7Qce+g3zG97+JrtFZlC9klX/W5hD7iiLzScI4nZqUS7DNUdhPgw4xI8W2LuXlUw==}
+  follow-redirects@1.16.2:
+    resolution: {integrity: sha512-/kVP2U8z596Ia0gwFrwyIeo74ta5aVmSeU1FfAUMAmcEP5EP7zydmag3SLiN64NaRKef3lxsq7i/g7ltJQDGow==}
     engines: {node: '>=4.0'}
     peerDependencies:
       debug: '*'
@@ -2882,10 +2882,6 @@ packages:
   he@1.2.0:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
-
-  highlight.js@11.10.0:
-    resolution: {integrity: sha512-SYVnVFswQER+zu1laSya563s+F8VDGt7o35d4utbamowvUNLLMovFqwCLSocpZTz3MgaSRA1IbqRWZv97dtErQ==}
-    engines: {node: '>=12.0.0'}
 
   highlight.js@11.12.0:
     resolution: {integrity: sha512-nbfWpyRMcMrPMmDwJB+dhX/eiaPKtc2RB+0QZskqJ3WjRA/FDS0e9hZrx8EC/lbEv8gXy98FcDbNa/dspAaJMg==}
@@ -3231,8 +3227,8 @@ packages:
     resolution: {integrity: sha512-7vuh85V5cdDofPyxn58nrPjBktZo0u9x1g8WtjQol+jZDaE+fhN+cIvTj11GndBnMnyfrUOG1sZQxCdjKh+DKg==}
     engines: {node: '>= 10.13.0'}
 
-  js-md5@0.8.3:
-    resolution: {integrity: sha512-qR0HB5uP6wCuRMrWPTrkMaev7MJZwJuuw4fnwAzRgP4J4/F8RwtodOKpGp4XpqsLBFzzgqIO42efFAyz2Et6KQ==}
+  js-md5@0.9.2:
+    resolution: {integrity: sha512-QK62elp/ozZj7kzyCG5yaeK+uWeqxPlg3w3znYDBvwyqzJs7nh5bgTAAH9KltLni2LT7qx/E1EgSVwfiOSRe0Q==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -3298,9 +3294,17 @@ packages:
   kuler@2.0.0:
     resolution: {integrity: sha512-Xq9nH7KlWZmXAtodXDDRE7vs6DU1gTU8zYDHDiWLSip45Egwq3plLHzPn27NgvzL2r1LMPC1vdqh98sQxtqj4A==}
 
-  laravel-echo@1.19.0:
-    resolution: {integrity: sha512-o/X4XH8BIRwij66PSjtotZfM88Z8g/4P3gzxQf2BTcZBKmGqucvI5JYYLprR2OZQ9XlGsmJ2v+hDpPGEbXwUWw==}
-    engines: {node: '>=10'}
+  laravel-echo@2.6.1:
+    resolution: {integrity: sha512-hKqIqy4Bl2HRdJsGzN8DbzcON7+09TNr8r5dCNZHNORZ78FUNoFbsy0cUGhYRAMei/yr8IQvCZ1ozJ8LTzzueQ==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    peerDependencies:
+      pusher-js: '*'
+      socket.io-client: '*'
+    peerDependenciesMeta:
+      pusher-js:
+        optional: true
+      socket.io-client:
+        optional: true
 
   laravel-mix-bundle-analyzer@1.0.5:
     resolution: {integrity: sha512-Oeq1mW6oDaZZhjs1Yga/xZpj5kfH2TonKbqzSPW5BJiI8WomvMBGUmq9yHzy/Zh2fw0R/133U9/hFANTTrgjfQ==}
@@ -3451,8 +3455,8 @@ packages:
     resolution: {integrity: sha512-aU1TzmBKcWNNYvH9pjq6u92BML+Hz3h5S/QpfTFwiQF852pLT+9qHsrhM9JYipkOXZxGn+sGH8oyJE9FD9WezQ==}
     hasBin: true
 
-  markdown-it@14.3.2:
-    resolution: {integrity: sha512-sHHjZ5fJKlgrG4qns2YwVcdNep35h5fERrfkD2YNsb9UFk0UIHarbiTaHKVMlPuWAoiilyK8Fv/jAm11slsY7Q==}
+  markdown-it@14.3.3:
+    resolution: {integrity: sha512-L//tDAkjTjJCU6pBUSBTgs3Kg4InVaZuUZog/b6V12UKhcDQ7S78877ibbCanRExwPuYP1CZD7Gd2dxSy1GXRg==}
     hasBin: true
 
   material-colors@1.2.6:
@@ -3565,8 +3569,8 @@ packages:
     resolution: {integrity: sha512-FP+p8RB8OWpF3YZBCrP5gtADmtXApB5AMLn+vdyA+PyxCjrCs00mjyUozssO33cwDeT3wNGdLxJ5M//YqtHAJw==}
     hasBin: true
 
-  moment-timezone@0.5.48:
-    resolution: {integrity: sha512-f22b8LV1gbTO2ms2j2z13MuPogNoh5UzxL3nzNAYKGraILnbGc9NEE6dyiiiLv46DGRb8A4kg8UKWLjPthxBHw==}
+  moment-timezone@0.6.5:
+    resolution: {integrity: sha512-KKzZAxGv2Qx4cnk6eSlvf4C+DLFW52vmMY5MN7UARY7GONbozkutylQG3DrrtmLCTXdQ5XZrqao9cI16bLFzXA==}
 
   moment@2.31.0:
     resolution: {integrity: sha512-0acOTfMiWOheYS4eoWb80yYMb/JLvVv9SHbs2PehaDzfUG0Bw855SKyk0IKTnPGa5+U2bmi3W68l1+sGLX/pvw==}
@@ -6774,7 +6778,7 @@ snapshots:
 
   axios@1.20.0(debug@4.4.3(supports-color@5.5.0))(supports-color@5.5.0):
     dependencies:
-      follow-redirects: 1.16.0(debug@4.4.3(supports-color@5.5.0))
+      follow-redirects: 1.16.2(debug@4.4.3(supports-color@5.5.0))
       form-data: 4.0.6
       https-proxy-agent: 5.0.1(supports-color@5.5.0)
       proxy-from-env: 2.1.0
@@ -7012,7 +7016,7 @@ snapshots:
 
   charenc@0.0.2: {}
 
-  chart.js@4.5.1:
+  chart.js@4.6.1:
     dependencies:
       '@kurkle/color': 0.3.4
 
@@ -7918,7 +7922,7 @@ snapshots:
 
   fn.name@1.1.0: {}
 
-  follow-redirects@1.16.0(debug@4.4.3(supports-color@5.5.0)):
+  follow-redirects@1.16.2(debug@4.4.3(supports-color@5.5.0)):
     optionalDependencies:
       debug: 4.4.3(supports-color@5.5.0)
 
@@ -8140,8 +8144,6 @@ snapshots:
 
   he@1.2.0: {}
 
-  highlight.js@11.10.0: {}
-
   highlight.js@11.12.0: {}
 
   hmac-drbg@1.0.1:
@@ -8221,7 +8223,7 @@ snapshots:
   http-proxy@1.18.1(debug@4.4.3(supports-color@5.5.0)):
     dependencies:
       eventemitter3: 4.0.7
-      follow-redirects: 1.16.0(debug@4.4.3(supports-color@5.5.0))
+      follow-redirects: 1.16.2(debug@4.4.3(supports-color@5.5.0))
       requires-port: 1.0.0
     transitivePeerDependencies:
       - debug
@@ -8490,7 +8492,7 @@ snapshots:
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
-  js-md5@0.8.3: {}
+  js-md5@0.9.2: {}
 
   js-tokens@4.0.0: {}
 
@@ -8540,7 +8542,9 @@ snapshots:
 
   kuler@2.0.0: {}
 
-  laravel-echo@1.19.0: {}
+  laravel-echo@2.6.1(pusher-js@8.6.0):
+    optionalDependencies:
+      pusher-js: 8.6.0
 
   laravel-mix-bundle-analyzer@1.0.5(laravel-mix@6.0.49(@babel/core@7.29.7(supports-color@5.5.0))(@babel/plugin-proposal-object-rest-spread@7.20.7(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-syntax-dynamic-import@7.8.3(@babel/core@7.29.7(supports-color@5.5.0)))(@babel/plugin-transform-runtime@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@5.5.0))(supports-color@5.5.0))(csso@4.2.0)(debug@4.4.3(supports-color@5.5.0))(html-minifier-terser@5.1.1)(postcss@8.5.28)(supports-color@5.5.0)(uglify-js@3.19.3)(webpack-cli@4.10.0)(webpack@5.91.0))(supports-color@5.5.0):
     dependencies:
@@ -8743,7 +8747,7 @@ snapshots:
 
   markdown-it-highlightjs@4.3.0:
     dependencies:
-      highlight.js: 11.10.0
+      highlight.js: 11.12.0
 
   markdown-it-sub@2.0.0: {}
 
@@ -8757,7 +8761,7 @@ snapshots:
       mdurl: 1.0.1
       uc.micro: 1.0.6
 
-  markdown-it@14.3.2:
+  markdown-it@14.3.3:
     dependencies:
       argparse: 2.0.1
       entities: 4.5.0
@@ -8859,7 +8863,7 @@ snapshots:
     dependencies:
       minimist: 1.2.8
 
-  moment-timezone@0.5.48:
+  moment-timezone@0.6.5:
     dependencies:
       moment: 2.31.0
 
@@ -10213,9 +10217,9 @@ snapshots:
 
   vue-avatar@2.3.3: {}
 
-  vue-chartjs@5.3.4(chart.js@4.5.1)(vue@2.7.16):
+  vue-chartjs@5.3.4(chart.js@4.6.1)(vue@2.7.16):
     dependencies:
-      chart.js: 4.5.1
+      chart.js: 4.6.1
       vue: 2.7.16
 
   vue-color@3.3.3(vue@2.7.16):
