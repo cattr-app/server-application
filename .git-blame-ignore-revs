@@ -1,6 +1,0 @@
-# Formatting-only commits that `git blame` should skip.
-# GitHub applies this file automatically; locally run once:
-#   git config blame.ignoreRevsFile .git-blame-ignore-revs
-#
-# style: apply phpcbf to the PHP_CodeSniffer baseline (#417)
-2be3344d18de8eb809d5b4e2cad149ed110b7faa
