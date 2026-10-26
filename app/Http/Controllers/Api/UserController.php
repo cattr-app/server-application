@@ -364,7 +364,10 @@ class UserController extends ItemController
                 return $user;
             }
 
-            $user->screenshots_state_locked = $request->user()->isAdmin() && ScreenshotsState::tryFrom($user->screenshots_state)->mustBeInherited();
+            // Lock by the user's own state, as in create(): the accessor applies global overrides and
+            // per-viewer substitutions, and returns the raw request value only if it was just assigned.
+            $state = ScreenshotsState::createFrom($user->getAttributes()['screenshots_state'] ?? null);
+            $user->screenshots_state_locked = $request->user()->isAdmin() && $state?->mustBeInherited();
 
             return $user;
         });
