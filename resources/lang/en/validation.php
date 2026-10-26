@@ -116,7 +116,7 @@ return [
         'time_interval_added' => 'Added',
         'wrong_extension' => 'File extension should be .cattr',
         'too_many_files' => 'The archive contains too many screenshots (:count), the maximum is :max',
-        'too_large' => 'The unpacked screenshots are too large, the maximum is :max MB',
+        'too_large' => 'The unpacked screenshots are too large, the maximum is :max',
         'wrong_file_name' => 'The archive must contain only screenshot files without folders'
     ],
 

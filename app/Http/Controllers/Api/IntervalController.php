@@ -32,6 +32,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Number;
 use Illuminate\Validation\ValidationException;
 use MessagePack\MessagePack;
 use phpseclib4\Crypt\RSA;
@@ -929,7 +930,7 @@ class IntervalController extends ItemController
     {
         return ValidationException::withMessages([
             'file' => __('validation.offline-sync.too_large', [
-                'max' => round($maxSize / 1024 / 1024),
+                'max' => Number::fileSize($maxSize, maxPrecision: 2),
             ]),
         ]);
     }

@@ -48,8 +48,75 @@ class OfflineScreenshotsArchiveLimitsTest extends TestCase
 
     public function test_default_limits(): void
     {
-        $this->assertSame(250, config('app.offline_screenshots.max_files'));
-        $this->assertSame(1024 * 1024 * 1024, config('app.offline_screenshots.max_size'));
+        $limits = $this->offlineScreenshotsConfig([])['offline_screenshots'];
+
+        $this->assertSame(150, $limits['max_files']);
+        $this->assertSame(1024 * 1024 * 1024, $limits['max_size']);
+    }
+
+    public function test_limits_can_be_overridden_by_the_environment(): void
+    {
+        $limits = $this->offlineScreenshotsConfig([
+            'OFFLINE_SCREENSHOTS_MAX_FILES' => '42',
+            'OFFLINE_SCREENSHOTS_MAX_SIZE_BYTES' => '1048576',
+        ])['offline_screenshots'];
+
+        $this->assertSame(42, $limits['max_files']);
+        $this->assertSame(1024 * 1024, $limits['max_size']);
+    }
+
+    public function test_size_limit_message_keeps_fractional_units(): void
+    {
+        config(['app.offline_screenshots.max_size' => 256 * 1024]);
+
+        $entries = $this->validEntry();
+        $entries["{$this->user->id}_" . Str::uuid()] = str_repeat("\0", 512 * 1024);
+
+        $response = $this->uploadOfflineArchive($this->user, $entries);
+
+        $this->assertRejected($response, __('validation.offline-sync.too_large', ['max' => '256 KB']));
+    }
+
+    /**
+     * Evaluates config/app.php with exactly the given OFFLINE_SCREENSHOTS_* variables set, independent of the
+     * environment the tests run in.
+     *
+     * @param array<string, string> $values
+     */
+    private function offlineScreenshotsConfig(array $values): array
+    {
+        $names = ['OFFLINE_SCREENSHOTS_MAX_FILES', 'OFFLINE_SCREENSHOTS_MAX_SIZE_BYTES'];
+        $saved = [];
+        foreach ($names as $name) {
+            $saved[$name] = [$_ENV[$name] ?? null, $_SERVER[$name] ?? null, getenv($name)];
+        }
+
+        try {
+            foreach ($names as $name) {
+                unset($_ENV[$name], $_SERVER[$name]);
+                putenv($name);
+                if (isset($values[$name])) {
+                    $_ENV[$name] = $_SERVER[$name] = $values[$name];
+                    putenv("$name=$values[$name]");
+                }
+            }
+
+            return require config_path('app.php');
+        } finally {
+            foreach ($saved as $name => [$env, $server, $getenv]) {
+                unset($_ENV[$name], $_SERVER[$name]);
+                putenv($name);
+                if ($env !== null) {
+                    $_ENV[$name] = $env;
+                }
+                if ($server !== null) {
+                    $_SERVER[$name] = $server;
+                }
+                if ($getenv !== false) {
+                    putenv("$name=$getenv");
+                }
+            }
+        }
     }
 
     public function test_archive_within_the_limits_is_attached(): void
@@ -98,7 +165,7 @@ class OfflineScreenshotsArchiveLimitsTest extends TestCase
 
         $response = $this->uploadOfflineArchive($this->user, $entries);
 
-        $this->assertRejected($response, __('validation.offline-sync.too_large', ['max' => 1]));
+        $this->assertRejected($response, __('validation.offline-sync.too_large', ['max' => '1 MB']));
     }
 
     public function test_archive_exactly_at_the_size_limit_is_attached(): void
@@ -138,7 +205,7 @@ class OfflineScreenshotsArchiveLimitsTest extends TestCase
 
         // Without the limit on extraction the 3 MiB file is written and handed over to the screenshot service
         $this->assertSame([], $extractedFileSizes->all(), 'Sizes of the extracted files when attaching');
-        $this->assertRejected($response, __('validation.offline-sync.too_large', ['max' => 1]));
+        $this->assertRejected($response, __('validation.offline-sync.too_large', ['max' => '1 MB']));
     }
 
     /**
