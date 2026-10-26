@@ -817,7 +817,10 @@ class IntervalController extends ItemController
             $zip->extractTo($temporaryDirectory->path());
             $zip->close();
 
-            $creationResult = $this->attachOfflineScreenshots('tmp/' . basename($temporaryDirectory->path()));
+            $creationResult = $this->attachOfflineScreenshots(
+                'tmp/' . basename($temporaryDirectory->path()),
+                $request->user(),
+            );
         } finally {
             $temporaryDirectory->delete();
         }
@@ -829,28 +832,42 @@ class IntervalController extends ItemController
      * Saves the extracted offline screenshots synchronously, so that failures are reported in the result.
      *
      * @param string $dirPath Directory with the extracted screenshots, relative to the local disk
+     * @param User $uploader Screenshots are attached only to intervals this user may create
      * @return array
      */
-    private function attachOfflineScreenshots(string $dirPath): array
+    private function attachOfflineScreenshots(string $dirPath, User $uploader): array
     {
         $allScreenshots = Storage::disk('local')->files($dirPath);
 
         $creationResult = [];
 
+        // Same rule as for the offline intervals upload: whoever may create the interval may attach its screenshot.
+        $canAttach = static fn(TimeInterval $interval) => $uploader->can(
+            'create',
+            [
+                TimeInterval::class,
+                $interval->user_id,
+                $interval->task_id,
+                false,
+            ],
+        );
+
         foreach ($allScreenshots as $screenshotPath) {
-            $pathArr = Str::of($screenshotPath)->match('/\d_.+/')->split('/_/');
-            abort_if(
-                count($pathArr) !== 2 || (count($pathArr) === 2 && !Str::isUuid($pathArr[1])),
+            // File names are <user_id>_<screenshot_uuid>
+            abort_unless(
+                preg_match('/^(\d+)_(.+)\z/', basename($screenshotPath), $matches) === 1 && Str::isUuid($matches[2]),
                 400,
                 __('Wrong screenshot file name')
             );
 
-            [$userId, $screenshotId] = $pathArr;
+            $userId = (int)$matches[1];
+            $screenshotId = $matches[2];
 
             $interval = TimeInterval::where('user_id', $userId)->where('screenshot_id', $screenshotId)->first();
-            if ($interval === null) {
+            // An interval of someone the uploader may not track time for is reported exactly like a missing one
+            if ($interval === null || !$canAttach($interval)) {
                 $creationResult[] = [
-                    'interval' => $interval,
+                    'interval' => null,
                     'user_id' => $userId,
                     'screenshot_id' => $screenshotId,
                     'message' => __('validation.offline-sync.cannot_find_interval'),
