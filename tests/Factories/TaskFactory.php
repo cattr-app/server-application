@@ -7,7 +7,6 @@ use App\Models\Project;
 use App\Models\Status;
 use App\Models\Task;
 use App\Models\User;
-use Faker\Factory as FakerFactory;
 use Illuminate\Database\Eloquent\Model;
 use Tests\Facades\IntervalFactory;
 use Tests\Facades\ProjectFactory;
@@ -77,7 +76,7 @@ class TaskFactory extends Factory
 
     public function createRandomModelData(): array
     {
-        $faker = FakerFactory::create();
+        $faker = fake();
 
         return [
             'task_name' => $faker->jobTitle,

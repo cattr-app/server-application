@@ -3,7 +3,6 @@
 namespace Tests\Factories;
 
 use App\Models\Invitation;
-use Faker\Factory as FakerFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class InvitationFactory extends Factory
@@ -17,7 +16,7 @@ class InvitationFactory extends Factory
 
     public function createRequestData(): array
     {
-        $faker = FakerFactory::create();
+        $faker = fake();
 
         return [
             'users' => [
@@ -31,7 +30,7 @@ class InvitationFactory extends Factory
 
     public function createRandomModelData(): array
     {
-        $faker = FakerFactory::create();
+        $faker = fake();
 
         return [
             'email' => $faker->unique()->email,
