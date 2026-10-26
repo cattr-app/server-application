@@ -224,5 +224,4 @@ class ProjectReportController
 
         return responder()->success(['url' => $job->getPublicPath()])->respond();
     }
-
 }

@@ -39,7 +39,8 @@ class AttachmentFilter
         return $rules;
     }
 
-    public static function prepareAttachmentCreateRequest($request) {
+    public static function prepareAttachmentCreateRequest($request)
+    {
         /**
          * @var $file UploadedFile
          */
@@ -63,5 +64,4 @@ class AttachmentFilter
             addRequestRulesForParent: [[__CLASS__, 'addRequestRulesForParent']]
         ));
     }
-
 }

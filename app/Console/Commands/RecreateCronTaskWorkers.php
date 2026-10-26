@@ -57,7 +57,8 @@ class RecreateCronTaskWorkers extends Command
 
         CronTaskWorkers::whereDoesntHave('task')
             ->orWhereDoesntHave('user')
-            ->orWhereHas('task',
+            ->orWhereHas(
+                'task',
                 static fn(EloquentBuilder $query) => $query
                     ->whereNotNull('deleted_at')
             )->delete();

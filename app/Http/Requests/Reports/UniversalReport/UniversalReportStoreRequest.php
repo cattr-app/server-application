@@ -31,7 +31,6 @@ class UniversalReportStoreRequest extends CattrFormRequest
                 break;
             default:
                 return throw new InvalidMainException();
-
         }
         return [
             'name' => 'required|string',

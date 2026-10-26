@@ -18,6 +18,4 @@ class CreateTaskCommentRequest extends CattrFormRequest
     {
         return ['task_id' => 'required|int|exists:tasks,id', 'content' => 'string'];
     }
-
-
 }

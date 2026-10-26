@@ -167,8 +167,7 @@ class QueryHelper
             $field = array_shift($fields);
             if (str_contains($field, '.')) {
                 [$relation, $relationField] = explode('.', $field);
-                $query->whereHas($relation, static fn(Builder $query) => $query->where($relationField, 'like', $value)
-                );
+                $query->whereHas($relation, static fn(Builder $query) => $query->where($relationField, 'like', $value));
             } else {
                 $query->where($field, 'like', $value);
             }
@@ -176,8 +175,7 @@ class QueryHelper
             foreach ($fields as $field) {
                 if (str_contains($field, '.')) {
                     [$relation, $relationField] = explode('.', $field);
-                    $query->orWhereHas($relation, static fn(Builder $query) => $query->where($relationField, 'like', $value)
-                    );
+                    $query->orWhereHas($relation, static fn(Builder $query) => $query->where($relationField, 'like', $value));
                 } else {
                     $query->orWhere($field, 'like', $value);
                 }

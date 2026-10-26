@@ -81,8 +81,8 @@ class StorageCleaner
             }
         }
 
-        Cache::store('octane')->set('thinning_now',false);
-        Cache::store('octane')->set('last_thin',now());
+        Cache::store('octane')->set('thinning_now', false);
+        Cache::store('octane')->set('last_thin', now());
     }
 
     /**

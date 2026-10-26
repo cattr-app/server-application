@@ -31,7 +31,6 @@ class UniversalReportEditRequest extends CattrFormRequest
                 break;
             default:
                 return throw new InvalidMainException();
-
         }
         return [
             'id' => 'required|int|exists:universal_reports,id',
