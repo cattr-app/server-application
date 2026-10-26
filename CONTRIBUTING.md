@@ -495,7 +495,7 @@ pnpm lint
 
 Frontend formatting is defined by `prettier.config.js`.
 
-ESLint configuration is defined by `.eslintrc.js`.
+ESLint configuration is defined by `eslint.config.js` (ESLint flat config).
 
 The frontend currently uses Vue 2.7, Vue Router 3, Vuex 3, Laravel Mix, and Webpack 5.
 
