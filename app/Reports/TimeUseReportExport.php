@@ -26,8 +26,7 @@ class TimeUseReportExport extends AppReport implements FromCollection, WithMappi
         private readonly Carbon $startAt,
         private readonly Carbon $endAt,
         private readonly string $companyTimezone
-    )
-    {
+    ) {
         $this->period = CarbonPeriod::create($this->startAt, $this->endAt);
     }
 

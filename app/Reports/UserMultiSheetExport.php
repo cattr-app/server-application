@@ -57,8 +57,9 @@ class UserMultiSheetExport extends BaseExport implements FromArray, WithTitle, W
     {
         if (isset($this->data['total_spent_time_day']['datasets'])) {
             foreach ($this->data['total_spent_time_day']['datasets'] as $userId => $user) {
-                if ($userId !== $this->user)
+                if ($userId !== $this->user) {
                     continue;
+                }
 
                 $resultRow = [];
                 $resultRow[] = $user['label'] ?? '';
@@ -85,8 +86,9 @@ class UserMultiSheetExport extends BaseExport implements FromArray, WithTitle, W
             $result[] = $resultRow;
 
             foreach ($this->data['total_spent_time_day_and_tasks']['datasets'] as $userId => $userTasks) {
-                if ($userId !== $this->user)
+                if ($userId !== $this->user) {
                     continue;
+                }
 
                 foreach ($userTasks as $taskId => $task) {
                     $resultRow = [];
@@ -113,8 +115,9 @@ class UserMultiSheetExport extends BaseExport implements FromArray, WithTitle, W
             $result[] = $resultRow;
 
             foreach ($this->data['total_spent_time_day_and_projects']['datasets'] as $userId => $userTasks) {
-                if ($userId !== $this->user)
+                if ($userId !== $this->user) {
                     continue;
+                }
 
                 foreach ($userTasks as $taskId => $task) {
                     $resultRow = [];
@@ -144,12 +147,12 @@ class UserMultiSheetExport extends BaseExport implements FromArray, WithTitle, W
             $result[] = $resultRow;
 
             foreach ($this->reportData as $userId => $user) {
-                if ($userId !== $this->user)
+                if ($userId !== $this->user) {
                     continue;
+                }
 
                 if (isset($user['projects'])) {
                     foreach ($user['projects'] as $projectId => $project) {
-
                         if (isset($project['tasks'])) {
                             foreach ($project['tasks'] as $taskId => $task) {
                                 $resultRow = [];
@@ -196,8 +199,8 @@ class UserMultiSheetExport extends BaseExport implements FromArray, WithTitle, W
             } else {
                 for ($i = $rowCount[0]; $i < $rowCount[1]; $i++) {
                     $label      = [new DataSeriesValues('String', "'" . $this->title() . "'" . '!A' . $i, null, $i)];
-                    $categories = [new DataSeriesValues('String', "'" . $this->title() . "'" . "!{$startColumn}1:{$endColumn}1", null,  $columnLast)];
-                    $values     = [new DataSeriesValues('Number', "'" . $this->title() . "'" . "!{$startColumn}" . $i . ":!{$endColumn}" . $i, null,  $columnLast)];
+                    $categories = [new DataSeriesValues('String', "'" . $this->title() . "'" . "!{$startColumn}1:{$endColumn}1", null, $columnLast)];
+                    $values     = [new DataSeriesValues('Number', "'" . $this->title() . "'" . "!{$startColumn}" . $i . ":!{$endColumn}" . $i, null, $columnLast)];
                     $series[] = $createDataSeries($label, $categories, $values);
                 }
             }
@@ -215,9 +218,9 @@ class UserMultiSheetExport extends BaseExport implements FromArray, WithTitle, W
         $columnNumber = $this->countDate;
         $charts = [];
         $columnLast = Coordinate::stringFromColumnIndex($columnNumber + 1);
-        $charts[] = $createChart(static::TEXT_USER, static::TEXT_USER, static::POSITIONS_CHART[0],   static::OFFSET_CHART, static::COLUMN_FIRST, $columnLast, [], $columnNumber);
-        $charts[] = $createChart(static::TEXT_TASK, static::TEXT_TASK, static::POSITIONS_CHART[1],   static::OFFSET_CHART, static::COLUMN_FIRST, $columnLast, [4, $this->rowCount() + 4], $columnNumber);
-        $charts[] = $createChart(static::TEXT_PROJECT, static::TEXT_PROJECT, static::POSITIONS_CHART[2],    static::OFFSET_CHART, static::COLUMN_FIRST, $columnLast, [$this->rowCount() + 5, $this->rowCountProject() + $this->rowCount() + 5], $columnNumber);
+        $charts[] = $createChart(static::TEXT_USER, static::TEXT_USER, static::POSITIONS_CHART[0], static::OFFSET_CHART, static::COLUMN_FIRST, $columnLast, [], $columnNumber);
+        $charts[] = $createChart(static::TEXT_TASK, static::TEXT_TASK, static::POSITIONS_CHART[1], static::OFFSET_CHART, static::COLUMN_FIRST, $columnLast, [4, $this->rowCount() + 4], $columnNumber);
+        $charts[] = $createChart(static::TEXT_PROJECT, static::TEXT_PROJECT, static::POSITIONS_CHART[2], static::OFFSET_CHART, static::COLUMN_FIRST, $columnLast, [$this->rowCount() + 5, $this->rowCountProject() + $this->rowCount() + 5], $columnNumber);
         return $charts;
     }
     public function headings(): array
@@ -241,8 +244,9 @@ class UserMultiSheetExport extends BaseExport implements FromArray, WithTitle, W
         $count = 0;
         if (isset($this->data['total_spent_time_day_and_tasks']['datasets'])) {
             foreach ($this->data['total_spent_time_day_and_tasks']['datasets'] as $userId => $userTasks) {
-                if ($userId !== $this->user)
+                if ($userId !== $this->user) {
                     continue;
+                }
 
                 $count += count($userTasks);
             }
@@ -256,8 +260,9 @@ class UserMultiSheetExport extends BaseExport implements FromArray, WithTitle, W
         $count = 0;
         if (isset($this->data['total_spent_time_day_and_projects']['datasets'])) {
             foreach ($this->data['total_spent_time_day_and_projects']['datasets'] as $userId => $userTasks) {
-                if ($userId !== $this->user)
+                if ($userId !== $this->user) {
                     continue;
+                }
 
                 $count += count($userTasks);
             }

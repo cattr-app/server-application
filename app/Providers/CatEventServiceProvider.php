@@ -26,7 +26,7 @@ class CatEventServiceProvider extends ServiceProvider implements DeferrableProvi
             return (new Dispatcher($app))->setQueueResolver(static function () use ($app) {
                 return $app->make(QueueFactoryContract::class);
             });
-        });
+         });
     }
 
     public function provides(): array

@@ -171,7 +171,6 @@ class UniversalReportController
                 Settings::scope('core')->get('timezone', 'UTC'),
                 $request->user()?->timezone ?? 'UTC',
             ),
-
             $request->user(),
             ReportHelper::getReportFormat($request),
         );

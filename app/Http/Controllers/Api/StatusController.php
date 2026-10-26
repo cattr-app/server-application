@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-
-
 use App\Models\Status;
 use App\Http\Requests\Status\CreateStatusRequest;
 use App\Http\Requests\Status\DestroyStatusRequest;
@@ -182,7 +180,6 @@ class StatusController extends ItemController
 
                     $item->order = $swapItemOrder;
                     $item->save();
-
                 } else {
                     $item->order = $newOrder;
                 }

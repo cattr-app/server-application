@@ -39,8 +39,7 @@ class DashboardExport extends AppReport implements FromCollection, WithMapping, 
         private readonly string               $userTimezone,
         private readonly DashboardSortBy|null $sortBy = null,
         private readonly SortDirection|null   $sortDirection = null,
-    )
-    {
+    ) {
         $this->period = CarbonPeriod::create(
             $this->startAt->clone()->setTimezone($this->userTimezone),
             $this->endAt->clone()->setTimezone($this->userTimezone)

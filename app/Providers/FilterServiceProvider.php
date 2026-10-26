@@ -26,7 +26,7 @@ class FilterServiceProvider extends ServiceProvider implements DeferrableProvide
             return (new FilterDispatcher($app))->setQueueResolver(static function () use ($app) {
                 return $app->make(QueueFactoryContract::class);
             });
-        });
+         });
     }
 
     public function provides(): array
