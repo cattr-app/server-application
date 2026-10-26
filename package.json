@@ -66,8 +66,6 @@
     "devDependencies": {
         "@babel/core": "^7.23.7",
         "@babel/eslint-parser": "^7.23.9",
-        "@commitlint/cli": "^18.4.4",
-        "@commitlint/config-conventional": "^18.4.4",
         "autoprefixer": "^10.4.16",
         "clean-webpack-plugin": "^4.0.0",
         "core-js": "^3.35.0",
