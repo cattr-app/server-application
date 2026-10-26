@@ -322,7 +322,7 @@ importers:
         version: 10.1.8(eslint@10.13.0(supports-color@5.5.0))
       eslint-plugin-prettier:
         specifier: ^5.5.7
-        version: 5.5.7(@types/eslint@9.6.1)(eslint-config-prettier@10.1.8(eslint@10.13.0(supports-color@5.5.0)))(eslint@10.13.0(supports-color@5.5.0))(prettier@3.2.5)
+        version: 5.5.7(@types/eslint@9.6.1)(eslint-config-prettier@10.1.8(eslint@10.13.0(supports-color@5.5.0)))(eslint@10.13.0(supports-color@5.5.0))(prettier@3.9.10)
       eslint-plugin-vue:
         specifier: ^10.12.0
         version: 10.12.0(eslint@10.13.0(supports-color@5.5.0))(vue-eslint-parser@10.4.1(eslint@10.13.0(supports-color@5.5.0))(supports-color@5.5.0))
@@ -357,8 +357,8 @@ importers:
         specifier: ^8.5.31
         version: 8.5.32
       prettier:
-        specifier: 3.2.5
-        version: 3.2.5
+        specifier: 3.9.10
+        version: 3.9.10
       process:
         specifier: 0.11.10
         version: 0.11.10
@@ -379,7 +379,7 @@ importers:
         version: 10.4.1(eslint@10.13.0(supports-color@5.5.0))(supports-color@5.5.0)
       vue-loader:
         specifier: ^15.11.1
-        version: 15.11.1(css-loader@5.2.7(webpack@5.91.0))(ejs@3.1.10)(handlebars@4.7.9)(lodash@4.18.1)(prettier@3.2.5)(vue-template-compiler@2.7.16)(webpack@5.91.0)
+        version: 15.11.1(css-loader@5.2.7(webpack@5.91.0))(ejs@3.1.10)(handlebars@4.7.9)(lodash@4.18.1)(prettier@3.9.10)(vue-template-compiler@2.7.16)(webpack@5.91.0)
       webpack:
         specifier: ^5.91.0
         version: 5.91.0(clean-css@5.3.3)(cssnano@5.1.15(postcss@8.5.32))(csso@4.2.0)(html-minifier-terser@5.1.1)(postcss@8.5.32)(uglify-js@3.19.3)(webpack-cli@4.10.0)
@@ -4128,8 +4128,8 @@ packages:
     engines: {node: '>=10.13.0'}
     hasBin: true
 
-  prettier@3.2.5:
-    resolution: {integrity: sha512-3/GWa9aOC0YeD7LUfvOG2NiDyhOWRvt1k+rcKhOuYnMY24iiCphgneUfJDyFXd6rZCAnuLBv6UeAULtrhT/F4A==}
+  prettier@3.9.10:
+    resolution: {integrity: sha512-skGHTH1Yb9QvaTC4hWnRTzEYtCpApF0UMBPz+t/0ZPzP8ihefo/btKd+QA7pUE0fEwA1SbS/NmhyEcstdXOIdA==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -7727,10 +7727,10 @@ snapshots:
     dependencies:
       eslint: 10.13.0(supports-color@5.5.0)
 
-  eslint-plugin-prettier@5.5.7(@types/eslint@9.6.1)(eslint-config-prettier@10.1.8(eslint@10.13.0(supports-color@5.5.0)))(eslint@10.13.0(supports-color@5.5.0))(prettier@3.2.5):
+  eslint-plugin-prettier@5.5.7(@types/eslint@9.6.1)(eslint-config-prettier@10.1.8(eslint@10.13.0(supports-color@5.5.0)))(eslint@10.13.0(supports-color@5.5.0))(prettier@3.9.10):
     dependencies:
       eslint: 10.13.0(supports-color@5.5.0)
-      prettier: 3.2.5
+      prettier: 3.9.10
       prettier-linter-helpers: 1.0.1
       synckit: 0.12.3
     optionalDependencies:
@@ -9417,7 +9417,7 @@ snapshots:
   prettier@2.8.8:
     optional: true
 
-  prettier@3.2.5: {}
+  prettier@3.9.10: {}
 
   pretty-bytes@5.6.0: {}
 
@@ -10326,7 +10326,7 @@ snapshots:
 
   vue-lazyload@1.3.5: {}
 
-  vue-loader@15.11.1(css-loader@5.2.7(webpack@5.91.0))(ejs@3.1.10)(handlebars@4.7.9)(lodash@4.18.1)(prettier@3.2.5)(vue-template-compiler@2.7.16)(webpack@5.91.0):
+  vue-loader@15.11.1(css-loader@5.2.7(webpack@5.91.0))(ejs@3.1.10)(handlebars@4.7.9)(lodash@4.18.1)(prettier@3.9.10)(vue-template-compiler@2.7.16)(webpack@5.91.0):
     dependencies:
       '@vue/component-compiler-utils': 3.3.0(ejs@3.1.10)(handlebars@4.7.9)(lodash@4.18.1)
       css-loader: 5.2.7(webpack@5.91.0)
@@ -10336,7 +10336,7 @@ snapshots:
       vue-style-loader: 4.1.3
       webpack: 5.91.0(clean-css@5.3.3)(cssnano@5.1.15(postcss@8.5.32))(csso@4.2.0)(html-minifier-terser@5.1.1)(postcss@8.5.32)(uglify-js@3.19.3)(webpack-cli@4.10.0)
     optionalDependencies:
-      prettier: 3.2.5
+      prettier: 3.9.10
       vue-template-compiler: 2.7.16
     transitivePeerDependencies:
       - arc-templates
