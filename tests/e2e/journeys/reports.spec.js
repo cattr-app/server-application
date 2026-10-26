@@ -4,6 +4,10 @@ import { test, expect } from '../support/test.js';
 import { waitForAppIdle } from '../support/app.js';
 import { SEED } from '../support/pages.js';
 
+function escapeRegExp(value) {
+    return value.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
+}
+
 /**
  * Open a report through Reports menu, then load it once more from scratch for the data checks.
  * Known bug on main@bfafed73: on client-side navigation the route change cancels the users request of
@@ -14,7 +18,7 @@ async function openFromReportsMenu(page, item, path) {
     await page.goto('/about');
     await page.locator('.navbar .at-menu__submenu', { hasText: 'Reports' }).hover();
     await page.locator('.navbar .at-menu__submenu .at-menu__item', { hasText: item }).click();
-    await expect(page).toHaveURL(new RegExp(path.replace(/\//g, '\\/')));
+    await expect(page).toHaveURL(new RegExp(escapeRegExp(path)));
     await waitForAppIdle(page);
 
     await page.evaluate(() => localStorage.removeItem('user-select.users'));

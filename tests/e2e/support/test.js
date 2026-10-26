@@ -17,7 +17,7 @@ async function isolateNetwork(context) {
         url => url.origin !== STAND_ORIGIN && url.protocol.startsWith('http'),
         route => {
             const { hostname } = new URL(route.request().url());
-            if (hostname.endsWith('gravatar.com')) {
+            if (hostname === 'gravatar.com' || hostname.endsWith('.gravatar.com')) {
                 return route.fulfill({ status: 404, body: '' });
             }
             if (hostname === 'fonts.googleapis.com') {
