@@ -35,7 +35,7 @@
 </template>
 
 <script>
-    import { Skeleton } from 'vue-loading-skeleton';
+    import Skeleton from '@/components/Skeleton';
     import { isUrlExpired } from '@/utils/screenshotUrl';
 
     export default {
