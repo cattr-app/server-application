@@ -16,6 +16,7 @@
 
 <script>
     import AboutService from '@/services/resource/about.service';
+    import { isHandledRequestError } from '@/utils/requestError';
 
     const aboutService = new AboutService();
 
@@ -35,7 +36,13 @@
             types: [],
         }),
         async created() {
-            this.types = await aboutService.getReportTypes();
+            try {
+                this.types = await aboutService.getReportTypes();
+            } catch (error) {
+                if (!isHandledRequestError(error)) {
+                    throw error;
+                }
+            }
         },
         methods: {
             onExport(format) {

@@ -95,6 +95,7 @@
     import FieldsSelect from './FieldsSelect';
     import { mapGetters, mapMutations } from 'vuex';
     import { getStartDate, getStartOfDayInTimezone, getEndOfDayInTimezone } from '@/utils/time';
+    import { isHandledRequestError } from '@/utils/requestError';
 
     const service = new UniversalReportService();
 
@@ -160,25 +161,28 @@
             },
         },
         async mounted() {
-            await service.getBases().then(({ data }) => {
-                this.setBases(data.data);
-            });
+            try {
+                const { data: bases } = await service.getBases();
+                this.setBases(bases.data);
 
-            await service.show(this.$route.params.id).then(({ data }) => {
-                service.getDataObjectsAndFields(data.data.base).then(({ data }) => {
-                    this.setFields(data.data.fields);
-                    this.setDataObjects(data.data.dataObjects);
-                    this.setCharts(data.data.charts);
-                });
+                const { data: report } = await service.show(this.$route.params.id);
+                this.setName(report.data.name);
+                this.setBase(report.data.base);
+                this.base = report.data.base;
+                this.setSelectedFields(report.data.fields);
+                this.setSelectedDataObjects(report.data.data_objects);
+                this.setSelectedCharts(report.data.charts);
+                this.setType(report.data.type);
 
-                this.setName(data.data.name);
-                this.setBase(data.data.base);
-                this.base = data.data.base;
-                this.setSelectedFields(data.data.fields);
-                this.setSelectedDataObjects(data.data.data_objects);
-                this.setSelectedCharts(data.data.charts);
-                this.setType(data.data.type);
-            });
+                const { data: options } = await service.getDataObjectsAndFields(report.data.base);
+                this.setFields(options.data.fields);
+                this.setDataObjects(options.data.dataObjects);
+                this.setCharts(options.data.charts);
+            } catch (error) {
+                if (!isHandledRequestError(error)) {
+                    throw error;
+                }
+            }
         },
         methods: {
             ...mapMutations({
