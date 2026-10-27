@@ -2,8 +2,6 @@ packages:
   - "resources/frontend/vendor_modules/*/*"
 
 allowBuilds:
-  '@parcel/watcher': false
-  canvas: false
   core-js: false
   ejs: false
   v-code-diff: true
