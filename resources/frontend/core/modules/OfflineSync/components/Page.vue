@@ -361,23 +361,23 @@
             margin-top: $spacing-03;
         }
 
-        &::v-deep {
-            .page-title {
+        & {
+            :deep(.page-title) {
                 color: $gray-1;
                 font-size: 24px;
                 margin-bottom: 0;
             }
 
-            .icon {
+            :deep(.icon) {
                 margin-right: 0.2rem;
             }
-            .icon-x-circle {
+            :deep(.icon-x-circle) {
                 color: $red-1;
             }
-            .icon-check-circle {
+            :deep(.icon-check-circle) {
                 color: $green-1;
             }
-            .offline-sync__import-result {
+            :deep(.offline-sync__import-result) {
                 display: flex;
                 flex-direction: column;
             }
@@ -390,12 +390,12 @@
         .screenshots-upload-progress {
             margin-top: 0.5rem;
             font-size: 0.8rem;
-            &::v-deep .at-progress {
+            & :deep(.at-progress) {
                 display: flex;
                 align-items: end;
-                &-bar {
-                    flex-basis: 70%;
-                }
+            }
+            & :deep(.at-progress-bar) {
+                flex-basis: 70%;
             }
         }
     }

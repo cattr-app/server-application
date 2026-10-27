@@ -513,7 +513,7 @@
         user-select: none;
         touch-action: pan-y;
         cursor: move;
-        &::v-deep canvas {
+        & :deep(canvas) {
             box-sizing: content-box;
         }
         .scrollbar-top {

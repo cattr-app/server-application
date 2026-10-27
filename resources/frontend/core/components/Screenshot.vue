@@ -180,12 +180,12 @@
             line-height: 0;
             overflow: hidden;
 
-            &::v-deep {
-                .pu-skeleton {
+            & {
+                :deep(.pu-skeleton) {
                     height: 100px;
                 }
 
-                img {
+                :deep(img) {
                     height: 150px;
                 }
             }
@@ -221,16 +221,15 @@
             white-space: nowrap;
         }
 
-        &::v-deep {
-            .at-tooltip {
+        & {
+            :deep(.at-tooltip) {
                 width: 100%;
-
-                &__trigger {
-                    width: 100%;
-                }
+            }
+            :deep(.at-tooltip__trigger) {
+                width: 100%;
             }
 
-            .at-progress__text {
+            :deep(.at-progress__text) {
                 display: none;
             }
         }

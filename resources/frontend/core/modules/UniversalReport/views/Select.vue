@@ -160,8 +160,8 @@
         position: relative;
         min-width: 240px;
 
-        &::v-deep {
-            .at-input__original {
+        & {
+            :deep(.at-input__original) {
                 border-radius: 5px;
 
                 padding-right: $spacing-08;
@@ -221,8 +221,8 @@
     .search-input {
         margin: 0;
 
-        &::v-deep {
-            .at-input__original {
+        & {
+            :deep(.at-input__original) {
                 border: 0;
                 overflow: hidden;
                 text-overflow: ellipsis;

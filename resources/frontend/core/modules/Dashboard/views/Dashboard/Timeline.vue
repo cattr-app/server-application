@@ -283,8 +283,8 @@
 </script>
 
 <style lang="scss" scoped>
-    .at-container::v-deep {
-        .modal-screenshot {
+    .at-container {
+        :deep(.modal-screenshot) {
             a {
                 max-height: inherit;
 
@@ -377,7 +377,7 @@
                 margin-bottom: $spacing-03;
             }
             .calendar {
-                &::v-deep .input {
+                & :deep(.input) {
                     width: unset;
                 }
             }

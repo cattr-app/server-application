@@ -40,8 +40,8 @@
 
 <style lang="scss" scoped>
     .settings {
-        &::v-deep {
-            .page-title {
+        & {
+            :deep(.page-title) {
                 font-size: 24px;
             }
         }
@@ -58,15 +58,17 @@
         }
     }
 
-    .settings__content::v-deep {
-        .at-container,
-        .at-container__inner,
-        .crud {
+    .settings__content {
+        :deep(.at-container),
+        :deep(.at-container__inner),
+        :deep(.crud) {
             all: unset;
+        }
 
-            &__table {
-                margin-bottom: $layout-01;
-            }
+        :deep(.at-container__table),
+        :deep(.at-container__inner__table),
+        :deep(.crud__table) {
+            margin-bottom: $layout-01;
         }
     }
 </style>

@@ -164,55 +164,49 @@
             flex-shrink: 0;
         }
 
-        &::v-deep {
-            .at-menu {
-                &__item-link {
-                    &::after {
-                        bottom: -0.75em;
-                        height: 3px;
-                    }
+        & {
+            :deep(.at-menu__item-link) {
+                &::after {
+                    bottom: -0.75em;
+                    height: 3px;
                 }
             }
 
-            .at-menu__submenu-title {
+            :deep(.at-menu__submenu-title) {
                 padding-right: 0 !important;
             }
 
-            .at-dropdown {
+            :deep(.at-dropdown) {
                 align-items: center;
                 display: flex;
-
-                &-menu {
-                    overflow: hidden;
-
-                    &__item {
-                        color: $gray-3;
-                        font-weight: 600;
-
-                        &:hover {
-                            background-color: #fff;
-                            color: $blue-2;
-                        }
-                    }
-                }
-
-                &__trigger {
-                    align-items: center;
-                    cursor: pointer;
-                    display: flex;
-
-                    .icon {
-                        margin-right: 8px;
-                    }
-                }
-
-                &__popover {
-                    width: fit-content;
-                }
 
                 .at-dropdown-menu__item .icon {
                     margin-right: 6px;
                 }
+            }
+            :deep(.at-dropdown-menu) {
+                overflow: hidden;
+            }
+            :deep(.at-dropdown-menu__item) {
+                color: $gray-3;
+                font-weight: 600;
+
+                &:hover {
+                    background-color: #fff;
+                    color: $blue-2;
+                }
+            }
+            :deep(.at-dropdown__trigger) {
+                align-items: center;
+                cursor: pointer;
+                display: flex;
+
+                .icon {
+                    margin-right: 8px;
+                }
+            }
+            :deep(.at-dropdown__popover) {
+                width: fit-content;
             }
         }
     }

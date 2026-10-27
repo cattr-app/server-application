@@ -100,7 +100,7 @@
     .right {
         flex: 1;
 
-        &::v-deep .at-progress__text {
+        & :deep(.at-progress__text) {
             display: none;
         }
     }
