@@ -1,3 +1,5 @@
+import en from './locales/en.json';
+import ru from './locales/ru.json';
 export const ModuleConfig = {
     routerPrefix: 'planned-time-report',
     loadOrder: 40,
@@ -23,8 +25,8 @@ export function init(context) {
     });
 
     context.addLocalizationData({
-        en: require('./locales/en'),
-        ru: require('./locales/ru'),
+        en,
+        ru,
     });
 
     return context;

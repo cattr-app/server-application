@@ -17,6 +17,8 @@ import {
     validateDuration,
 } from './duration';
 import { readRecentTaskIds, rememberRecentTask } from './recentTasks';
+import en from './locales/en.json';
+import ru from './locales/ru.json';
 
 export const ModuleConfig = {
     routerPrefix: 'time-intervals',
@@ -209,8 +211,8 @@ export function init(context, router) {
     context.addRoute(crud.getRouterConfig());
 
     context.addLocalizationData({
-        en: require('./locales/en'),
-        ru: require('./locales/ru'),
+        en,
+        ru,
     });
 
     return context;

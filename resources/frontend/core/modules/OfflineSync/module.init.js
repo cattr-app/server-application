@@ -1,3 +1,5 @@
+import en from './locales/en.json';
+import ru from './locales/ru.json';
 export const ModuleConfig = {
     routerPrefix: 'offline-sync',
     loadOrder: 11,
@@ -22,8 +24,8 @@ export function init(context) {
     });
 
     context.addLocalizationData({
-        en: require('./locales/en'),
-        ru: require('./locales/ru'),
+        en,
+        ru,
     });
 
     return context;

@@ -1,6 +1,8 @@
 import Vue from 'vue';
 import storeModule from './storeModule';
 import './policies';
+import en from './locales/en.json';
+import ru from './locales/ru.json';
 
 export const ModuleConfig = {
     routerPrefix: 'dashboard',
@@ -60,8 +62,8 @@ export function init(context) {
     });
 
     context.addLocalizationData({
-        en: require('./locales/en'),
-        ru: require('./locales/ru'),
+        en,
+        ru,
     });
 
     context.registerVuexModule(storeModule);

@@ -1,3 +1,6 @@
+import en from './locales/en.json';
+import ru from './locales/ru.json';
+import statusesSection from './sections/statuses';
 export const ModuleConfig = {
     routerPrefix: 'settings',
     loadOrder: 10,
@@ -5,11 +8,11 @@ export const ModuleConfig = {
 };
 
 export function init(context, router) {
-    context.addCompanySection(require('./sections/statuses').default(context, router));
+    context.addCompanySection(statusesSection(context, router));
 
     context.addLocalizationData({
-        en: require('./locales/en'),
-        ru: require('./locales/ru'),
+        en,
+        ru,
     });
 
     return context;
