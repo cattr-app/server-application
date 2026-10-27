@@ -13,7 +13,6 @@ import i18n from '@/i18n';
 import '@/plugins/vee-validate';
 import '@/policies';
 import Gate from '@/plugins/gate';
-import vueKanban from 'vue-kanban';
 import { Workbox } from 'workbox-window';
 
 //Global components
@@ -24,7 +23,6 @@ Vue.config.productionTip = false;
 Vue.use(AtComponents);
 Vue.use(DatePicker);
 Vue.use(Gate);
-Vue.use(vueKanban);
 
 installGlobalComponents(Vue);
 
