@@ -73,3 +73,8 @@ apidoc
 
 .local
 .worktrees
+
+# Playwright e2e (tests/e2e)
+/test-results/
+/playwright-report/
+/tests/e2e/.auth/

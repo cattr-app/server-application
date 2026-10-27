@@ -16,6 +16,8 @@
         "prod": "mix --production",
         "lint": "eslint --ext .js,.vue -c .eslintrc.js resources/frontend/",
         "test": "node --test tests/js/*.test.cjs",
+        "test:e2e": "playwright test",
+        "test:e2e:update": "playwright test --project=visual-desktop --project=visual-mobile --update-snapshots=changed",
         "build:pages": "node scripts/build-pages.cjs",
         "build:base": "node scripts/build-base-images.cjs"
     },
@@ -66,6 +68,7 @@
     "devDependencies": {
         "@babel/core": "^7.23.7",
         "@babel/eslint-parser": "^7.23.9",
+        "@playwright/test": "1.64.1",
         "autoprefixer": "^10.4.16",
         "clean-webpack-plugin": "^4.0.0",
         "core-js": "^3.35.0",
