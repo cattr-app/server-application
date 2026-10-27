@@ -31,12 +31,7 @@ test('switch the interface language', async ({ page }) => {
     } finally {
         const { data: current } = await api.get('auth/me');
         if (current.user_language !== 'en') {
-            // screenshots_state is sent too: users/edit without it answers 500 on main@bfafed73.
-            await api.post('users/edit', {
-                id: current.id,
-                user_language: 'en',
-                screenshots_state: current.screenshots_state,
-            });
+            await api.post('users/edit', { id: current.id, user_language: 'en' });
         }
     }
 });

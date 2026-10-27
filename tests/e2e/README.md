@@ -42,9 +42,7 @@ Stand settings that differ from production, and why:
 Seed: `php artisan migrate --force && php tests/e2e/support/seed.php`. The script runs the regular
 `cattr:reset --force --seed` (InitialSeeder + AdminSeeder + DemoDataSeeder; login `admin@cattr.app` /
 `password`) with the clock frozen at `2026-03-11 12:00:00 UTC` and a seeded Faker, then replaces
-values the factories draw from `RAND()`/`random_int()`, so every reseed yields identical data. It also
-works around two bugs of `main@bfafed73` (described in the script): duplicate `statuses.order` after
-`cattr:reset`, and the module seeder class renamed in nwidart/laravel-modules 13.
+values the factories draw from `RAND()`/`random_int()`, so every reseed yields identical data.
 
 Local helper (not in git): `/home/caelan/cattr/.local/e2e/stand.sh`; names and ports come from
 `E2E_PREFIX`, `E2E_DB_PORT`, `E2E_DB_NAME`, `E2E_APP_PORT`:
@@ -125,7 +123,6 @@ provokes on purpose with `consoleGuard.expect(/regexp/)` (e.g. the 401 of a wron
 - `BY_DESIGN` — Gravatar `d=404` probe of the avatar, cancelled requests on navigation.
 - `KNOWN_VUE2` — warnings and errors present on Vue 2 (`main@bfafed73`). They must go away in the
   migration; remove the rule together with the fix.
-- `KNOWN_BACKEND` — backend bugs the pages run into (universal report list answers 500 for an admin).
 
 Pages broken on `main@bfafed73` are marked `knownBroken` in `support/pages.js`; their smoke test is
 expected to fail and reports "unexpectedly passed" once fixed — then drop the mark.

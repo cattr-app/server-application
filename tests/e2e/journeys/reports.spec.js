@@ -3,6 +3,9 @@
 import { test, expect } from '../support/test.js';
 import { waitForAppIdle } from '../support/app.js';
 import { SEED } from '../support/pages.js';
+import { SEED_DATE } from '../support/constants.js';
+import { apiClient } from '../support/auth.js';
+import { chooseAtSelect } from '../support/form.js';
 
 function escapeRegExp(value) {
     return value.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
@@ -58,10 +61,134 @@ test('planned time report', async ({ page }) => {
     await expect(page.locator('.project__title', { hasText: SEED.project.name })).toBeVisible();
 });
 
-test('universal report', async ({ page }) => {
-    // Known backend bug (see console-allowlist.js, KNOWN_BACKEND): the report list answers 500 for an admin.
+/**
+ * The three multi-selects of the universal report form (ObjectsDataSelect, FieldsSelect, Select) share
+ * the `.select` markup and follow each other: data objects, report columns, time charts.
+ */
+const reportForm = page => page.locator('.universal-report__form');
+const multiSelect = (page, index) => reportForm(page).locator(':scope > .select').nth(index);
+
+/** Open a multi-select, toggle the given options (by their exact text) and close it again. */
+async function toggleOptions(select, options) {
+    await select.locator('.select-input').click();
+    const dropdown = select.locator('.at-select__dropdown');
+    await expect(dropdown).toBeVisible();
+    for (const option of options) {
+        const item = dropdown.locator('.select-item').filter({ has: select.page().getByText(option, { exact: true }) });
+        await expect(item).toHaveCount(1);
+        const wasActive = (await item.getAttribute('class')).split(' ').includes('active');
+        await item.click();
+        if (wasActive) {
+            await expect(item).not.toHaveClass(/\bactive\b/);
+        } else {
+            await expect(item).toHaveClass(/\bactive\b/);
+        }
+    }
+    await select.locator('.select-input').click();
+    await expect(dropdown).toBeHidden();
+}
+
+/**
+ * Wait until the edit form of report `name` has loaded its options. The form fetches them in a chain of
+ * requests after a client-side navigation, which `networkidle` does not cover. Leaving the form before
+ * the chain ends fails the test: EditUniversalReport's mounted hook does not handle the cancelled request.
+ */
+async function waitForEditForm(page, name) {
+    await expect(reportForm(page).getByPlaceholder('Report name')).toHaveValue(name);
+    await expect(multiSelect(page, 0).locator('.select-item')).toHaveCount(5);
+    await waitForAppIdle(page);
+}
+
+// Universal report create -> list -> view -> edit -> view. The report is personal to the admin and is
+// removed through the API whatever happens; universal_reports is empty in the seed.
+test('universal report: create, view, edit', async ({ page }) => {
+    const name = `E2E universal report ${Date.now()}`;
+    let reportId;
+
     await openFromReportsMenu(page, 'Universal report', '/report/universal');
-    await expect(page.locator('.page-title', { hasText: 'Universal report' })).toBeVisible();
+    const api = await apiClient(page);
+    const personal = page.locator('.sidebar').filter({ hasText: 'Personal reports' });
+    await expect(personal.getByText('No personal reports.')).toBeVisible();
+
+    try {
+        // Create: a personal report on the seeded project with its name and the time worked per day.
+        await page.getByRole('button', { name: 'Create a new report' }).click();
+        await expect(page).toHaveURL(/\/report\/universal\/create(\?|$)/);
+        await waitForAppIdle(page);
+        await reportForm(page).getByPlaceholder('Report name').fill(name);
+        await chooseAtSelect(reportForm(page).locator(':scope > .at-select'), 'Project');
+        await expect(multiSelect(page, 0).locator('.select-item')).toHaveCount(5);
+        await toggleOptions(multiSelect(page, 0), [SEED.project.name]);
+        await toggleOptions(multiSelect(page, 1), ['Project name', 'Total time spent per day']);
+        await page.getByRole('button', { name: 'Create personal' }).click();
+
+        await expect(page).toHaveURL(/\/report\/universal\/edit\/\d+(\?|$)/);
+        reportId = Number(new URL(page.url()).pathname.split('/').pop());
+        await waitForEditForm(page, name);
+        const { data: created } = await api.get(`report/universal-report/show?id=${reportId}`);
+        expect(created).toMatchObject({
+            name,
+            type: 'personal',
+            base: 'project',
+            data_objects: [SEED.project.id],
+            fields: { base: ['name'], tasks: [], users: [], calculations: ['total_spent_time_by_day'] },
+            charts: [],
+        });
+
+        // List: the report is among the personal reports and opens its edit form.
+        await page.goto('/report/universal');
+        await waitForAppIdle(page);
+        await personal.getByRole('link', { name }).click();
+        await expect(page).toHaveURL(new RegExp(`/report/universal/edit/${reportId}(\\?|$)`));
+        await waitForEditForm(page, name);
+
+        // View: the seeded project has one worker with 10 tasks x 30 intervals x 5 min = 25h on SEED_DATE.
+        const view = page.locator('.universal-report__view');
+        // One item per data object (Project.vue); its tasks are nested .list__item collapses (TaskInfo.vue).
+        const item = view.locator('.list__item:has(> .item-header)');
+        await page.getByRole('link', { name: 'Generate' }).click();
+        await expect(page).toHaveURL(new RegExp(`/report/universal/view/${reportId}(\\?|$)`));
+        await waitForAppIdle(page);
+        await expect(view.locator('.control-item.title')).toHaveText(name);
+        await expect(view.getByText(`Data for: ${SEED_DATE} - ${SEED_DATE}`)).toBeVisible();
+        await expect(item).toHaveCount(1);
+        await expect(item.locator('.item-header')).toContainText(SEED.project.name);
+        await expect(item.locator('.data-entry', { hasText: 'Worked by day:' })).toContainText(
+            new RegExp(`${SEED_DATE}:\\s*25h 0m`),
+        );
+        // Members are listed with their time only; their names are not among the selected columns yet.
+        await expect(item.locator('.base-info .members')).toContainText('25h 0m');
+        await expect(item.locator('.base-info .members')).not.toContainText(SEED.user.name);
+
+        // Edit: rename the report and add the members' names, then generate it again.
+        await page.goto(`/report/universal/edit/${reportId}`);
+        await waitForEditForm(page, name);
+        await reportForm(page).getByPlaceholder('Report name').fill(`${name} (edited)`);
+        await toggleOptions(multiSelect(page, 1), ['User name']);
+        await page.getByRole('button', { name: 'Save' }).click();
+        await expect(page.locator('.at-notification', { hasText: 'Saved successfully' })).toBeVisible();
+
+        const { data: edited } = await api.get(`report/universal-report/show?id=${reportId}`);
+        expect(edited).toMatchObject({
+            name: `${name} (edited)`,
+            data_objects: [SEED.project.id],
+            fields: { base: ['name'], users: ['full_name'], calculations: ['total_spent_time_by_day'] },
+        });
+
+        await page.getByRole('link', { name: 'Generate' }).click();
+        await expect(page).toHaveURL(new RegExp(`/report/universal/view/${reportId}(\\?|$)`));
+        await waitForAppIdle(page);
+        await expect(view.locator('.control-item.title')).toHaveText(`${name} (edited)`);
+        await expect(item.locator('.base-info .members')).toContainText(SEED.user.name);
+    } finally {
+        if (!reportId) {
+            const { data } = await api.get('report/universal-report');
+            reportId = data.personal.find(report => report.name === name)?.id;
+        }
+        if (reportId) {
+            await api.post('report/universal-report/remove', { id: reportId });
+        }
+    }
 });
 
 test('screenshots', async ({ page }) => {
