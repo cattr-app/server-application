@@ -8,7 +8,7 @@
                 <div v-if="users.length > 2" class="team-avatars__placeholder team-avatars__avatar">
                     <span>+{{ users.slice(2).length }}</span>
                 </div>
-                <template slot="content">
+                <template #content>
                     <div class="tooltip__avatars">
                         <at-tooltip
                             v-for="user of users.slice(2)"

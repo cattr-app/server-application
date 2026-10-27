@@ -130,8 +130,8 @@
 
 <style scoped lang="scss">
     .phases {
-        &::v-deep {
-            .at-input__original {
+        & {
+            :deep(.at-input__original) {
                 border: none;
                 width: 100%;
             }

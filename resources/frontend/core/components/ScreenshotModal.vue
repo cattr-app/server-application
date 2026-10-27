@@ -171,16 +171,16 @@
 
 <style lang="scss" scoped>
     .modal {
-        &::v-deep {
-            .pu-skeleton {
+        & {
+            :deep(.pu-skeleton) {
                 height: 70vh;
             }
 
-            .at-modal__mask {
+            :deep(.at-modal__mask) {
                 background: rgba(#151941, 0.7);
             }
 
-            .at-modal__wrapper {
+            :deep(.at-modal__wrapper) {
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -190,17 +190,17 @@
                 padding-bottom: 1rem;
             }
 
-            .at-modal {
+            :deep(.at-modal) {
                 border-radius: 15px;
                 top: unset;
                 height: fit-content;
             }
 
-            .at-modal__header {
+            :deep(.at-modal__header) {
                 border: 0;
             }
 
-            .at-modal__body {
+            :deep(.at-modal__body) {
                 padding: 0;
                 position: relative;
 
@@ -212,25 +212,25 @@
                 }
             }
 
-            .at-modal__footer {
+            :deep(.at-modal__footer) {
                 position: relative;
                 border: 0;
                 text-align: left;
             }
 
-            .at-modal__close {
+            :deep(.at-modal__close) {
                 color: #b1b1be;
             }
 
-            .at-progress-bar {
+            :deep(.at-progress-bar) {
                 display: block;
-                &__wraper,
-                &__inner {
-                    border-radius: 0;
-                }
+            }
+            :deep(.at-progress-bar__wraper),
+            :deep(.at-progress-bar__inner) {
+                border-radius: 0;
             }
 
-            .at-progress__text {
+            :deep(.at-progress__text) {
                 display: none;
             }
         }
@@ -306,7 +306,7 @@
         }
     }
     @media (max-width: 500px) {
-        .modal ::v-deep .at-modal__wrapper {
+        .modal :deep(.at-modal__wrapper) {
             align-items: start;
         }
     }

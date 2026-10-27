@@ -192,7 +192,7 @@
             padding: 0;
             margin: 5px 0 0 20px;
 
-            &::v-deep .at-btn__text {
+            & :deep(.at-btn__text) {
                 font-size: 14px;
             }
         }
@@ -210,20 +210,20 @@
         color: #b1b1be;
         padding: 5px 20px;
 
-        &::v-deep {
-            .at-progress-bar {
+        & {
+            :deep(.at-progress-bar) {
                 padding-right: 0;
             }
 
-            .at-progress-bar__wraper {
+            :deep(.at-progress-bar__wraper) {
                 background: #e0dfed;
             }
 
-            .at-progress--success .at-progress-bar__inner {
+            :deep(.at-progress--success .at-progress-bar__inner) {
                 background: #2dc38d;
             }
 
-            .at-progress__text {
+            :deep(.at-progress__text) {
                 display: none;
             }
         }
@@ -246,8 +246,8 @@
             color: #151941;
             border-left: 3px solid #2e2ef9;
 
-            &::v-deep {
-                .at-progress-bar__wraper {
+            & {
+                :deep(.at-progress-bar__wraper) {
                     background: #b1b1be;
                 }
             }

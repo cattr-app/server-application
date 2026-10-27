@@ -243,26 +243,26 @@
         border-radius: 5px;
         width: 100%;
 
-        &::v-deep {
-            .v-select {
+        & {
+            :deep(.v-select) {
                 height: 100%;
             }
 
-            .vs__selected-options {
+            :deep(.vs__selected-options) {
                 display: block;
                 white-space: pre;
             }
 
-            .vs__selected,
-            .vs__search {
+            :deep(.vs__selected),
+            :deep(.vs__search) {
                 display: inline;
             }
 
-            .vs--open .vs__search {
+            :deep(.vs--open .vs__search) {
                 width: 100%;
             }
 
-            .vs__actions {
+            :deep(.vs__actions) {
                 display: flex;
                 font-size: 14px;
                 margin-right: 8px;
@@ -270,22 +270,22 @@
                 position: relative;
             }
 
-            .vs__clear {
+            :deep(.vs__clear) {
                 display: block;
             }
 
-            .vs__open-indicator {
+            :deep(.vs__open-indicator) {
                 transform: none;
                 position: absolute;
                 right: 0;
             }
 
-            .vs__no-options {
+            :deep(.vs__no-options) {
                 padding: 0;
                 font-family: inherit;
             }
 
-            .vs__dropdown-menu {
+            :deep(.vs__dropdown-menu) {
                 scrollbar-width: none;
 
                 &::-webkit-scrollbar {

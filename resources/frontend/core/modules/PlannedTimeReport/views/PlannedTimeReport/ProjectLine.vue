@@ -22,40 +22,42 @@
         </div>
         <at-collapse accordion class="list__item" simple>
             <at-collapse-item v-for="task in project.tasks" :key="task.id" :name="`${task.id}`" class="task list__item">
-                <div slot="title" class="row flex-middle">
-                    <div class="col-12">
-                        <span class="h4">{{ task.task_name }}</span>
-                        <div class="task__tags">
-                            <at-tag v-if="isOverDue(companyData.timezone, task)" color="error"
-                                >{{ $t('tasks.due_date--overdue') }}
-                            </at-tag>
-                            <at-tag v-if="isOverTime(task)" color="warning"
-                                >{{ $t('tasks.estimate--overtime') }}
-                            </at-tag>
+                <template #title>
+                    <div class="row flex-middle">
+                        <div class="col-12">
+                            <span class="h4">{{ task.task_name }}</span>
+                            <div class="task__tags">
+                                <at-tag v-if="isOverDue(companyData.timezone, task)" color="error"
+                                    >{{ $t('tasks.due_date--overdue') }}
+                                </at-tag>
+                                <at-tag v-if="isOverTime(task)" color="warning"
+                                    >{{ $t('tasks.estimate--overtime') }}
+                                </at-tag>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <span v-if="task.estimate > 0" class="h4">{{ formatDurationString(task.estimate) }}</span>
+                        </div>
+                        <div class="col-4">
+                            <span class="h4">{{ formatDurationString(task.total_spent_time) }}</span>
+                        </div>
+                        <div class="col-4 task__progress">
+                            <at-progress
+                                :percent="getPercentageForProgress(task.total_spent_time, task.estimate)"
+                                :status="getProgressStatus(task)"
+                                :stroke-width="20"
+                                class="flex flex-middle"
+                            />
+                            <span class="task__progress-percent"
+                                >{{ getPercentage(task.total_spent_time, task.estimate) }}%</span
+                            >
                         </div>
                     </div>
-                    <div class="col-4">
-                        <span v-if="task.estimate > 0" class="h4">{{ formatDurationString(task.estimate) }}</span>
-                    </div>
-                    <div class="col-4">
-                        <span class="h4">{{ formatDurationString(task.total_spent_time) }}</span>
-                    </div>
-                    <div class="col-4 task__progress">
-                        <at-progress
-                            :percent="getPercentageForProgress(task.total_spent_time, task.estimate)"
-                            :status="getProgressStatus(task)"
-                            :stroke-width="20"
-                            class="flex flex-middle"
-                        />
-                        <span class="task__progress-percent"
-                            >{{ getPercentage(task.total_spent_time, task.estimate) }}%</span
-                        >
-                    </div>
-                </div>
+                </template>
 
                 <div class="row workers">
                     <div v-for="worker in task.workers" :key="`${task.id}-${worker.id}`" class="col-24">
-                        <div slot="title" class="row">
+                        <div class="row">
                             <div class="col-1">
                                 <user-avatar :size="avatarSize" :user="worker.user" />
                             </div>

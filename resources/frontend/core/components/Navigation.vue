@@ -4,7 +4,7 @@
         <div v-if="loggedIn">
             <template v-for="(item, key) in navItems">
                 <at-submenu v-if="item.type === 'dropdown'" :key="item.label" :title="$t(item.label)">
-                    <template slot="title">{{ $t(item.label) }}</template>
+                    <template #title>{{ $t(item.label) }}</template>
                     <template v-for="(child, childKey) in item.children">
                         <navigation-menu-item
                             :key="childKey"
@@ -24,16 +24,18 @@
         <at-dropdown v-if="loggedIn" placement="bottom-right" @on-dropdown-command="userDropdownHandle">
             <i class="icon icon-chevron-down at-menu__submenu-icon"></i>
             <user-avatar :border-radius="10" :user="user"></user-avatar>
-            <at-dropdown-menu slot="menu">
-                <template v-for="(item, key) of userDropdownItems">
-                    <at-dropdown-item :key="key" :name="item.to.name">
-                        <span><i class="icon" :class="[item.icon]"></i>{{ item.title }}</span>
-                    </at-dropdown-item>
-                </template>
-                <li class="at-dropdown-menu__item" @click="logout()">
-                    <i class="icon icon-log-out"></i> {{ $t('navigation.logout') }}
-                </li>
-            </at-dropdown-menu>
+            <template #menu>
+                <at-dropdown-menu>
+                    <template v-for="(item, key) of userDropdownItems">
+                        <at-dropdown-item :key="key" :name="item.to.name">
+                            <span><i class="icon" :class="[item.icon]"></i>{{ item.title }}</span>
+                        </at-dropdown-item>
+                    </template>
+                    <li class="at-dropdown-menu__item" @click="logout()">
+                        <i class="icon icon-log-out"></i> {{ $t('navigation.logout') }}
+                    </li>
+                </at-dropdown-menu>
+            </template>
         </at-dropdown>
     </at-menu>
 </template>
@@ -162,55 +164,49 @@
             flex-shrink: 0;
         }
 
-        &::v-deep {
-            .at-menu {
-                &__item-link {
-                    &::after {
-                        bottom: -0.75em;
-                        height: 3px;
-                    }
+        & {
+            :deep(.at-menu__item-link) {
+                &::after {
+                    bottom: -0.75em;
+                    height: 3px;
                 }
             }
 
-            .at-menu__submenu-title {
+            :deep(.at-menu__submenu-title) {
                 padding-right: 0 !important;
             }
 
-            .at-dropdown {
+            :deep(.at-dropdown) {
                 align-items: center;
                 display: flex;
-
-                &-menu {
-                    overflow: hidden;
-
-                    &__item {
-                        color: $gray-3;
-                        font-weight: 600;
-
-                        &:hover {
-                            background-color: #fff;
-                            color: $blue-2;
-                        }
-                    }
-                }
-
-                &__trigger {
-                    align-items: center;
-                    cursor: pointer;
-                    display: flex;
-
-                    .icon {
-                        margin-right: 8px;
-                    }
-                }
-
-                &__popover {
-                    width: fit-content;
-                }
 
                 .at-dropdown-menu__item .icon {
                     margin-right: 6px;
                 }
+            }
+            :deep(.at-dropdown-menu) {
+                overflow: hidden;
+            }
+            :deep(.at-dropdown-menu__item) {
+                color: $gray-3;
+                font-weight: 600;
+
+                &:hover {
+                    background-color: #fff;
+                    color: $blue-2;
+                }
+            }
+            :deep(.at-dropdown__trigger) {
+                align-items: center;
+                cursor: pointer;
+                display: flex;
+
+                .icon {
+                    margin-right: 8px;
+                }
+            }
+            :deep(.at-dropdown__popover) {
+                width: fit-content;
             }
         }
     }

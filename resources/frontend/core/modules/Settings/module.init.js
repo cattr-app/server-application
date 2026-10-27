@@ -1,4 +1,7 @@
 import { hasRole } from '@/utils/user';
+import sectionGeneral from './sections/general';
+import en from './locales/en.json';
+import ru from './locales/ru.json';
 
 export const ModuleConfig = {
     routerPrefix: 'settings',
@@ -7,8 +10,7 @@ export const ModuleConfig = {
 };
 
 export function init(context) {
-    const sectionGeneral = require('./sections/general');
-    context.addCompanySection(sectionGeneral.default);
+    context.addCompanySection(sectionGeneral);
     context.addUserMenuEntry({
         label: 'navigation.company_settings',
         icon: 'icon-settings',
@@ -16,8 +18,8 @@ export function init(context) {
         displayCondition: store => hasRole(store.getters['user/user'], 'admin'),
     });
     context.addLocalizationData({
-        en: require('./locales/en'),
-        ru: require('./locales/ru'),
+        en,
+        ru,
     });
 
     return context;

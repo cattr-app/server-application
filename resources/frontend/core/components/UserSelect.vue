@@ -335,19 +335,19 @@
         position: relative;
         min-width: 240px;
 
-        &::v-deep {
-            .at-input__original {
+        & {
+            :deep(.at-input__original) {
                 border-radius: 5px;
 
                 padding-right: $spacing-08;
                 cursor: text;
             }
 
-            .at-tabs-nav {
+            :deep(.at-tabs-nav) {
                 width: 100%;
             }
 
-            .at-tabs-nav__item {
+            :deep(.at-tabs-nav__item) {
                 color: #b1b1be;
                 font-size: 15px;
                 font-weight: 600;
@@ -355,25 +355,24 @@
                 margin: 0;
                 line-height: 39px;
                 width: 50%;
+            }
+            :deep(.at-tabs-nav__item--active) {
+                color: #2e2ef9;
 
-                &--active {
-                    color: #2e2ef9;
-
-                    &::after {
-                        background-color: #2e2ef9;
-                    }
+                &::after {
+                    background-color: #2e2ef9;
                 }
             }
 
-            .at-tabs__nav {
+            :deep(.at-tabs__nav) {
                 height: 39px;
             }
 
-            .at-tabs__header {
+            :deep(.at-tabs__header) {
                 margin-bottom: 0;
             }
 
-            .at-tabs__body {
+            :deep(.at-tabs__body) {
                 display: none;
             }
         }
@@ -430,8 +429,8 @@
     .user-search-input {
         margin: 0;
 
-        &::v-deep {
-            .at-input__original {
+        & {
+            :deep(.at-input__original) {
                 border: 0;
                 overflow: hidden;
                 text-overflow: ellipsis;

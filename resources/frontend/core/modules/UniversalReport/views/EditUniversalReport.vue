@@ -345,12 +345,12 @@
             color: #e2ecf4;
         }
 
-        &::v-deep {
-            .at-menu__item--active > .at-menu__item-link {
+        & {
+            :deep(.at-menu__item--active > .at-menu__item-link) {
                 color: #6190e8 !important;
             }
 
-            .at-menu__item-link::after {
+            :deep(.at-menu__item-link::after) {
                 transform: scaleX(1) !important;
             }
         }

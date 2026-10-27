@@ -2,15 +2,17 @@
     <div>
         <at-collapse simple class="list">
             <at-collapse-item class="list__item">
-                <div class="task-title" slot="title">
-                    {{ task.task_name }}
-                    <at-button
-                        v-if="task.task_name"
-                        class="icon"
-                        icon="icon-external-link"
-                        @click="redirectToTask"
-                    ></at-button>
-                </div>
+                <template #title>
+                    <div class="task-title">
+                        {{ task.task_name }}
+                        <at-button
+                            v-if="task.task_name"
+                            class="icon"
+                            icon="icon-external-link"
+                            @click="redirectToTask"
+                        ></at-button>
+                    </div>
+                </template>
                 <div>
                     <div class="data-entries">
                         <h3>{{ $t('universal-report.task_information') }}</h3>

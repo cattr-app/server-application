@@ -22,6 +22,8 @@ import ResourceSelect from '@/components/ResourceSelect.vue';
 import PhaseSelect from './components/PhaseSelect';
 import RelationsSelector from './components/RelationsSelector';
 import Attachments from './components/Attachments.vue';
+import en from './locales/en.json';
+import ru from './locales/ru.json';
 
 export const ModuleConfig = {
     routerPrefix: 'tasks',
@@ -1032,8 +1034,8 @@ export function init(context, router) {
     ]);
 
     context.addLocalizationData({
-        en: require('./locales/en'),
-        ru: require('./locales/ru'),
+        en,
+        ru,
     });
 
     context.addNavbarEntry({

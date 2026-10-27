@@ -352,28 +352,26 @@
         gap: 0.5rem;
     }
 
-    ::v-deep {
-        .tmp-link-popover {
-            display: flex;
-            gap: 0.1rem;
+    :deep(.tmp-link-popover) {
+        display: flex;
+        gap: 0.1rem;
+    }
+    :deep(.strikethrough) {
+        text-decoration: line-through;
+    }
+    :deep(.status-icon) {
+        font-size: 1rem;
+        &.icon-check-circle {
+            color: $color-success;
         }
-        .strikethrough {
-            text-decoration: line-through;
+        &.icon-slash {
+            color: $color-error;
         }
-        .status-icon {
-            font-size: 1rem;
-            &.icon-check-circle {
-                color: $color-success;
-            }
-            &.icon-slash {
-                color: $color-error;
-            }
-            &.icon-alert-circle {
-                color: $color-info;
-            }
-            &.icon-cpu {
-                color: $color-warning;
-            }
+        &.icon-alert-circle {
+            color: $color-info;
+        }
+        &.icon-cpu {
+            color: $color-warning;
         }
     }
     .upload-failed {
@@ -382,12 +380,12 @@
     .file-upload-progress {
         margin-top: 0.5rem;
         font-size: 0.8rem;
-        &::v-deep .at-progress {
+        & :deep(.at-progress) {
             display: flex;
             align-items: end;
-            &-bar {
-                flex-basis: 40%;
-            }
+        }
+        & :deep(.at-progress-bar) {
+            flex-basis: 40%;
         }
     }
 </style>

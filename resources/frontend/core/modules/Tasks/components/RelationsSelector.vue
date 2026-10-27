@@ -161,8 +161,8 @@
                 font-size: 0.8rem;
             }
         }
-        &::v-deep {
-            .at-input__original {
+        & {
+            :deep(.at-input__original) {
                 border: none;
                 width: 100%;
                 font-size: 0.8rem;
@@ -178,7 +178,7 @@
             }
             .task-select {
                 flex-basis: 100%;
-                &::v-deep ul {
+                & :deep(ul) {
                     overflow-x: hidden;
                 }
             }

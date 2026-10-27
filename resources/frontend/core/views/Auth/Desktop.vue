@@ -118,7 +118,7 @@
             text-align: center;
         }
 
-        ::v-deep .input-group {
+        :deep(.input-group) {
             margin-bottom: 0.75rem;
         }
 

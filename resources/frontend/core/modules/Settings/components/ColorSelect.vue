@@ -11,7 +11,7 @@
                     :max="100"
                     @blur="setStart(index, $event)"
                 >
-                    <template slot="append">
+                    <template #append>
                         <span v-if="config.start < 1">%</span>
                         <span v-else>{{ $t('Over Time') }}</span>
                     </template>
@@ -27,7 +27,7 @@
                     :max="100"
                     @blur="setEnd(index, $event)"
                 >
-                    <template slot="append">
+                    <template #append>
                         <span>%</span>
                     </template>
                 </at-input>

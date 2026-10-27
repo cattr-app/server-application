@@ -6,42 +6,46 @@
         </div>
         <at-collapse simple class="list__item">
             <at-collapse-item v-for="user in project.users" :key="user.id" class="list__item">
-                <div slot="title" class="row flex-middle">
-                    <div class="col-3 col-xs-2 col-md-1">
-                        <user-avatar :user="user" :size="avatarSize" />
+                <template #title>
+                    <div class="row flex-middle">
+                        <div class="col-3 col-xs-2 col-md-1">
+                            <user-avatar :user="user" :size="avatarSize" />
+                        </div>
+                        <div class="col-8 col-md-10 col-lg-11">
+                            <span class="h5">{{ user.full_name }}</span>
+                        </div>
+                        <div class="col-4 col-md-3 col-lg-2">
+                            <span class="h4">{{ formatDurationString(user.time) }}</span>
+                        </div>
+                        <div class="col-10">
+                            <at-progress
+                                status="success"
+                                :stroke-width="15"
+                                :percent="getUserPercentage(user.time, project.time)"
+                            />
+                        </div>
                     </div>
-                    <div class="col-8 col-md-10 col-lg-11">
-                        <span class="h5">{{ user.full_name }}</span>
-                    </div>
-                    <div class="col-4 col-md-3 col-lg-2">
-                        <span class="h4">{{ formatDurationString(user.time) }}</span>
-                    </div>
-                    <div class="col-10">
-                        <at-progress
-                            status="success"
-                            :stroke-width="15"
-                            :percent="getUserPercentage(user.time, project.time)"
-                        />
-                    </div>
-                </div>
+                </template>
 
                 <at-collapse simple accordion @on-change="handleCollapseTask(user, $event)">
                     <at-collapse-item v-for="task in user.tasks" :key="`tasks-${task.id}`" :name="`${task.id}`">
-                        <div slot="title" class="row">
-                            <div class="col-10 col-md-11 col-lg-12">
-                                <span class="h4">{{ task.task_name }}</span>
+                        <template #title>
+                            <div class="row">
+                                <div class="col-10 col-md-11 col-lg-12">
+                                    <span class="h4">{{ task.task_name }}</span>
+                                </div>
+                                <div class="col-4 col-md-3 col-lg-2">
+                                    <span class="h4">{{ formatDurationString(task.time) }}</span>
+                                </div>
+                                <div class="col-10">
+                                    <at-progress
+                                        status="success"
+                                        :stroke-width="15"
+                                        :percent="getUserPercentage(task.time, user.time)"
+                                    />
+                                </div>
                             </div>
-                            <div class="col-4 col-md-3 col-lg-2">
-                                <span class="h4">{{ formatDurationString(task.time) }}</span>
-                            </div>
-                            <div class="col-10">
-                                <at-progress
-                                    status="success"
-                                    :stroke-width="15"
-                                    :percent="getUserPercentage(task.time, user.time)"
-                                />
-                            </div>
-                        </div>
+                        </template>
                         <at-collapse
                             v-if="screenshotsEnabled"
                             class="project__screenshots screenshots"
@@ -54,16 +58,18 @@
                                 :key="key"
                                 :name="`${task.id}-${key}`"
                             >
-                                <div slot="title" class="row">
-                                    <div class="col-12">
-                                        <span class="h5 screenshots__date">
-                                            {{ moment(interval.date).locale($i18n.locale).format('MMMM DD, YYYY') }}
-                                        </span>
+                                <template #title>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <span class="h5 screenshots__date">
+                                                {{ moment(interval.date).locale($i18n.locale).format('MMMM DD, YYYY') }}
+                                            </span>
+                                        </div>
+                                        <div class="col-12">
+                                            <span class="h5">{{ formatDurationString(interval.time) }}</span>
+                                        </div>
                                     </div>
-                                    <div class="col-12">
-                                        <span class="h5">{{ formatDurationString(interval.time) }}</span>
-                                    </div>
-                                </div>
+                                </template>
 
                                 <template v-if="isDateOpened(`${task.id}-${key}`)">
                                     <template v-for="(hourScreens, idx) in interval.items">
@@ -308,24 +314,24 @@
             border: 2px dashed $gray-3;
         }
 
-        &::v-deep {
-            .at-collapse__header {
+        & {
+            :deep(.at-collapse__header) {
                 padding: 14px 0;
             }
 
-            img {
+            :deep(img) {
                 object-fit: cover;
                 height: 150px;
             }
 
-            .at-collapse__icon {
+            :deep(.at-collapse__icon) {
                 top: 20px;
                 left: 0;
 
                 color: black;
             }
 
-            .at-collapse__icon.icon-chevron-right {
+            :deep(.at-collapse__icon.icon-chevron-right) {
                 display: block;
             }
         }

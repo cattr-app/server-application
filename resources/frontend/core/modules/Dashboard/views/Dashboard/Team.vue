@@ -353,10 +353,10 @@
         z-index: 0;
         border-radius: 20px;
 
-        &::v-deep {
+        & {
             align-items: baseline;
 
-            .lds-ellipsis {
+            :deep(.lds-ellipsis) {
                 position: sticky;
                 top: 25px;
             }
@@ -399,7 +399,7 @@
                 margin-bottom: $spacing-03;
             }
             .calendar {
-                &::v-deep .input {
+                & :deep(.input) {
                     width: unset;
                 }
             }
@@ -430,7 +430,7 @@
 
         width: 40px;
 
-        &::v-deep .at-btn__text {
+        & :deep(.at-btn__text) {
             color: #2e2ef9;
             font-size: 25px;
         }

@@ -5,27 +5,29 @@
                 <at-button size="middle">
                     {{ $t('tasks.sort_or_filter') }} <i class="icon icon-chevron-down"></i>
                 </at-button>
-                <at-dropdown-menu slot="menu">
-                    <at-radio-group v-model="sort">
-                        <at-dropdown-item>
-                            <at-radio label="desc">{{ $t('tasks.newest_first') }}</at-radio>
-                        </at-dropdown-item>
-                        <at-dropdown-item>
-                            <at-radio label="asc">{{ $t('tasks.oldest_first') }}</at-radio>
-                        </at-dropdown-item>
-                    </at-radio-group>
-                    <at-radio-group v-model="typeActivity">
-                        <at-dropdown-item divided>
-                            <at-radio label="all">{{ $t('tasks.show_all_activity') }}</at-radio>
-                        </at-dropdown-item>
-                        <at-dropdown-item>
-                            <at-radio label="comments">{{ $t('tasks.show_comments_only') }}</at-radio>
-                        </at-dropdown-item>
-                        <at-dropdown-item>
-                            <at-radio label="history">{{ $t('tasks.show_history_only') }}</at-radio>
-                        </at-dropdown-item>
-                    </at-radio-group>
-                </at-dropdown-menu>
+                <template #menu>
+                    <at-dropdown-menu>
+                        <at-radio-group v-model="sort">
+                            <at-dropdown-item>
+                                <at-radio label="desc">{{ $t('tasks.newest_first') }}</at-radio>
+                            </at-dropdown-item>
+                            <at-dropdown-item>
+                                <at-radio label="asc">{{ $t('tasks.oldest_first') }}</at-radio>
+                            </at-dropdown-item>
+                        </at-radio-group>
+                        <at-radio-group v-model="typeActivity">
+                            <at-dropdown-item divided>
+                                <at-radio label="all">{{ $t('tasks.show_all_activity') }}</at-radio>
+                            </at-dropdown-item>
+                            <at-dropdown-item>
+                                <at-radio label="comments">{{ $t('tasks.show_comments_only') }}</at-radio>
+                            </at-dropdown-item>
+                            <at-dropdown-item>
+                                <at-radio label="history">{{ $t('tasks.show_history_only') }}</at-radio>
+                            </at-dropdown-item>
+                        </at-radio-group>
+                    </at-dropdown-menu>
+                </template>
             </at-dropdown>
         </div>
         <div ref="commentForm" class="comment-form" :class="{ 'comment-form--at-bottom': sort === 'asc' }">
@@ -190,6 +192,9 @@
 </template>
 
 <script>
+    import markdownItHighlightjs from 'markdown-it-highlightjs';
+    import markdownItSup from 'markdown-it-sup';
+    import markdownItSub from 'markdown-it-sub';
     import TeamAvatars from '@/components/TeamAvatars';
     import StatusService from '@/services/resource/status.service';
     import PriorityService from '@/services/resource/priority.service';
@@ -227,13 +232,13 @@
                     md => {
                         // Use a function to add the plugin
                         // Add the highlight.js plugin
-                        md.use(require('markdown-it-highlightjs'), {
+                        md.use(markdownItHighlightjs, {
                             auto: true,
                             code: true,
                             // inline: true
                         });
-                        md.use(require('markdown-it-sup'));
-                        md.use(require('markdown-it-sub'));
+                        md.use(markdownItSup);
+                        md.use(markdownItSub);
                     },
                 ],
                 statusService: new StatusService(),
@@ -774,77 +779,77 @@
             border: 1px solid $color-info;
             border-radius: 4px;
         }
-        &::v-deep {
-            .preview-btn-wrapper {
+        & {
+            :deep(.preview-btn-wrapper) {
                 position: absolute;
                 top: 5px;
                 right: 5px;
                 bottom: 5px;
                 pointer-events: none;
             }
-            .preview-btn {
+            :deep(.preview-btn) {
                 pointer-events: all;
                 position: sticky;
                 top: 10px;
                 background: #fff;
             }
-            img {
+            :deep(img) {
                 max-width: 35%;
             }
-            h6 {
+            :deep(h6) {
                 font-size: 14px;
             }
-            hr {
+            :deep(hr) {
                 border: 0;
                 border-top: 2px solid $gray-3;
                 border-radius: 5px;
             }
-            p {
+            :deep(p) {
                 margin: 0 0 10px;
             }
-            ul,
-            ol {
+            :deep(ul),
+            :deep(ol) {
                 all: revert;
             }
-            table {
+            :deep(table) {
                 width: 100%;
                 max-width: 100%;
                 margin-bottom: 20px;
                 border-collapse: collapse;
             }
 
-            table > caption + thead > tr:first-child > th,
-            table > colgroup + thead > tr:first-child > th,
-            table > thead:first-child > tr:first-child > th,
-            table > caption + thead > tr:first-child > td,
-            table > colgroup + thead > tr:first-child > td,
-            table > thead:first-child > tr:first-child > td {
+            :deep(table > caption + thead > tr:first-child > th),
+            :deep(table > colgroup + thead > tr:first-child > th),
+            :deep(table > thead:first-child > tr:first-child > th),
+            :deep(table > caption + thead > tr:first-child > td),
+            :deep(table > colgroup + thead > tr:first-child > td),
+            :deep(table > thead:first-child > tr:first-child > td) {
                 border-top: 0;
             }
-            table > thead > tr > th {
+            :deep(table > thead > tr > th) {
                 vertical-align: bottom;
                 border-bottom: 2px solid #ddd;
             }
-            table > tbody > tr:nth-child(odd) > td,
-            table > tbody > tr:nth-child(odd) > th {
+            :deep(table > tbody > tr:nth-child(odd) > td),
+            :deep(table > tbody > tr:nth-child(odd) > th) {
                 background-color: #f9f9f9;
             }
-            table > thead > tr > th,
-            table > tbody > tr > th,
-            table > tfoot > tr > th,
-            table > thead > tr > td,
-            table > tbody > tr > td,
-            table > tfoot > tr > td {
+            :deep(table > thead > tr > th),
+            :deep(table > tbody > tr > th),
+            :deep(table > tfoot > tr > th),
+            :deep(table > thead > tr > td),
+            :deep(table > tbody > tr > td),
+            :deep(table > tfoot > tr > td) {
                 padding: 8px;
                 line-height: 1.42857143;
                 vertical-align: top;
                 border-top: 1px solid #ddd;
             }
-            code.hljs {
+            :deep(code.hljs) {
                 white-space: pre;
                 padding: 9.5px;
             }
-            pre {
+            :deep(pre) {
                 white-space: pre !important;
                 display: block;
                 margin: 0 0 10px;
@@ -865,14 +870,14 @@
                     border-radius: 0;
                 }
             }
-            code {
+            :deep(code) {
                 padding: 2px 4px;
                 font-size: 90%;
                 color: #c7254e;
                 background-color: #f9f2f4;
                 border-radius: 4px;
             }
-            blockquote {
+            :deep(blockquote) {
                 padding: 10px 20px;
                 margin: 0 0 20px;
                 font-size: 17.5px;
@@ -892,7 +897,7 @@
     }
     .comment-form,
     .comment-content {
-        &::v-deep .comment-message textarea {
+        & :deep(.comment-message textarea) {
             min-height: 140px !important;
             max-height: 500px;
             resize: none !important;
