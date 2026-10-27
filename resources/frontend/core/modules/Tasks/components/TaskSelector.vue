@@ -307,11 +307,11 @@
 
         & {
             &:hover {
-                .vs__clear {
+                :deep(.vs__clear) {
                     display: inline-block;
                 }
 
-                .vs__open-indicator {
+                :deep(.vs__open-indicator) {
                     display: none;
                 }
             }
