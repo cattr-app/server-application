@@ -21,15 +21,14 @@
 
                         <component :is="config.authInput" @change="change" @submit="submit" />
 
-                        <vue-recaptcha
+                        <recaptcha
                             v-if="recaptchaKey"
                             ref="recaptcha"
-                            :loadRecaptchaScript="true"
                             :sitekey="recaptchaKey"
                             class="recaptcha"
                             @verify="onCaptchaVerify"
                             @expired="onCaptchaExpired"
-                        ></vue-recaptcha>
+                        ></recaptcha>
                     </div>
                     <at-button
                         class="login__btn"
@@ -51,7 +50,7 @@
 
 <script>
     import { ValidationObserver } from 'vee-validate';
-    import { VueRecaptcha } from 'vue-recaptcha';
+    import Recaptcha from '@/components/Recaptcha';
     import AuthInput from './AuthInput';
     import sloganGenerator from '@/helpers/sloganGenerator';
     import has from 'lodash/has';
@@ -63,7 +62,7 @@
 
         components: {
             ValidationObserver,
-            VueRecaptcha,
+            Recaptcha,
             AuthInput,
         },
 
@@ -256,7 +255,7 @@
             text-align: center;
         }
 
-        ::v-deep .input-group {
+        :deep(.input-group) {
             margin-bottom: 0.75rem;
         }
 
