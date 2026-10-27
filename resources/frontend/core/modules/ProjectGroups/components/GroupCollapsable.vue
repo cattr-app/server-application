@@ -114,30 +114,26 @@
         &__bread-crumbs {
             color: #0075b2;
         }
-        &::v-deep {
-            .at-collapse {
-                &__item--active {
-                    background-color: #fff;
-                    .groups__title {
-                        color: $blue-2;
-                    }
+        & {
+            :deep(.at-collapse__item--active) {
+                background-color: #fff;
+                .groups__title {
+                    color: $blue-2;
                 }
-                &__header {
-                    display: flex;
-                    align-items: center;
-                    padding: 15px;
-                }
-
-                &__content {
-                    padding: 10px;
-                }
-
-                &__icon.icon-chevron-right {
-                    position: static;
-                    display: block;
-                    color: black;
-                    margin-right: 10px;
-                }
+            }
+            :deep(.at-collapse__header) {
+                display: flex;
+                align-items: center;
+                padding: 15px;
+            }
+            :deep(.at-collapse__content) {
+                padding: 10px;
+            }
+            :deep(.at-collapse__icon.icon-chevron-right) {
+                position: static;
+                display: block;
+                color: black;
+                margin-right: 10px;
             }
         }
     }

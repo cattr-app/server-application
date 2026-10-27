@@ -74,8 +74,8 @@
 
 <style lang="scss" scoped>
     .screenshots-state-select {
-        &::v-deep {
-            .at-radio--checked {
+        & {
+            :deep(.at-radio--checked) {
                 .at-radio-button__inner {
                     background-color: $blue-2;
                     border-color: $blue-2;

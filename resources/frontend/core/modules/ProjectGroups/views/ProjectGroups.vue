@@ -207,8 +207,8 @@
                 }
             }
         }
-        &::v-deep {
-            .at-container {
+        & {
+            :deep(.at-container) {
                 overflow: hidden;
                 margin-bottom: 1rem;
             }

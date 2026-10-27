@@ -291,8 +291,8 @@
         }
     }
 
-    .screenshot::v-deep {
-        .screenshot-image {
+    .screenshot {
+        :deep(.screenshot-image) {
             img {
                 height: 150px;
                 border-radius: 5px;

@@ -776,77 +776,77 @@
             border: 1px solid $color-info;
             border-radius: 4px;
         }
-        &::v-deep {
-            .preview-btn-wrapper {
+        & {
+            :deep(.preview-btn-wrapper) {
                 position: absolute;
                 top: 5px;
                 right: 5px;
                 bottom: 5px;
                 pointer-events: none;
             }
-            .preview-btn {
+            :deep(.preview-btn) {
                 pointer-events: all;
                 position: sticky;
                 top: 10px;
                 background: #fff;
             }
-            img {
+            :deep(img) {
                 max-width: 35%;
             }
-            h6 {
+            :deep(h6) {
                 font-size: 14px;
             }
-            hr {
+            :deep(hr) {
                 border: 0;
                 border-top: 2px solid $gray-3;
                 border-radius: 5px;
             }
-            p {
+            :deep(p) {
                 margin: 0 0 10px;
             }
-            ul,
-            ol {
+            :deep(ul),
+            :deep(ol) {
                 all: revert;
             }
-            table {
+            :deep(table) {
                 width: 100%;
                 max-width: 100%;
                 margin-bottom: 20px;
                 border-collapse: collapse;
             }
 
-            table > caption + thead > tr:first-child > th,
-            table > colgroup + thead > tr:first-child > th,
-            table > thead:first-child > tr:first-child > th,
-            table > caption + thead > tr:first-child > td,
-            table > colgroup + thead > tr:first-child > td,
-            table > thead:first-child > tr:first-child > td {
+            :deep(table > caption + thead > tr:first-child > th),
+            :deep(table > colgroup + thead > tr:first-child > th),
+            :deep(table > thead:first-child > tr:first-child > th),
+            :deep(table > caption + thead > tr:first-child > td),
+            :deep(table > colgroup + thead > tr:first-child > td),
+            :deep(table > thead:first-child > tr:first-child > td) {
                 border-top: 0;
             }
-            table > thead > tr > th {
+            :deep(table > thead > tr > th) {
                 vertical-align: bottom;
                 border-bottom: 2px solid #ddd;
             }
-            table > tbody > tr:nth-child(odd) > td,
-            table > tbody > tr:nth-child(odd) > th {
+            :deep(table > tbody > tr:nth-child(odd) > td),
+            :deep(table > tbody > tr:nth-child(odd) > th) {
                 background-color: #f9f9f9;
             }
-            table > thead > tr > th,
-            table > tbody > tr > th,
-            table > tfoot > tr > th,
-            table > thead > tr > td,
-            table > tbody > tr > td,
-            table > tfoot > tr > td {
+            :deep(table > thead > tr > th),
+            :deep(table > tbody > tr > th),
+            :deep(table > tfoot > tr > th),
+            :deep(table > thead > tr > td),
+            :deep(table > tbody > tr > td),
+            :deep(table > tfoot > tr > td) {
                 padding: 8px;
                 line-height: 1.42857143;
                 vertical-align: top;
                 border-top: 1px solid #ddd;
             }
-            code.hljs {
+            :deep(code.hljs) {
                 white-space: pre;
                 padding: 9.5px;
             }
-            pre {
+            :deep(pre) {
                 white-space: pre !important;
                 display: block;
                 margin: 0 0 10px;
@@ -867,14 +867,14 @@
                     border-radius: 0;
                 }
             }
-            code {
+            :deep(code) {
                 padding: 2px 4px;
                 font-size: 90%;
                 color: #c7254e;
                 background-color: #f9f2f4;
                 border-radius: 4px;
             }
-            blockquote {
+            :deep(blockquote) {
                 padding: 10px 20px;
                 margin: 0 0 20px;
                 font-size: 17.5px;
@@ -894,7 +894,7 @@
     }
     .comment-form,
     .comment-content {
-        &::v-deep .comment-message textarea {
+        & :deep(.comment-message textarea) {
             min-height: 140px !important;
             max-height: 500px;
             resize: none !important;

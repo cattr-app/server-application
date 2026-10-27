@@ -305,7 +305,7 @@
     .task-select {
         border-radius: 5px;
 
-        &::v-deep {
+        & {
             &:hover {
                 .vs__clear {
                     display: inline-block;
@@ -316,13 +316,13 @@
                 }
             }
 
-            .vs--open {
+            :deep(.vs--open) {
                 .vs__open-indicator {
                     display: inline-block;
                 }
             }
 
-            .vs__actions {
+            :deep(.vs__actions) {
                 display: flex;
                 font-size: 14px;
                 margin-right: 8px;
@@ -330,14 +330,14 @@
                 position: relative;
             }
 
-            .vs__clear {
+            :deep(.vs__clear) {
                 padding-right: 0;
                 margin-right: 0;
                 position: absolute;
                 right: 0;
             }
 
-            .vs__open-indicator {
+            :deep(.vs__open-indicator) {
                 transform: none;
                 position: absolute;
                 right: 0;

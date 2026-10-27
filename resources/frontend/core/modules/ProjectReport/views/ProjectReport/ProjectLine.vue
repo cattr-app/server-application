@@ -314,24 +314,24 @@
             border: 2px dashed $gray-3;
         }
 
-        &::v-deep {
-            .at-collapse__header {
+        & {
+            :deep(.at-collapse__header) {
                 padding: 14px 0;
             }
 
-            img {
+            :deep(img) {
                 object-fit: cover;
                 height: 150px;
             }
 
-            .at-collapse__icon {
+            :deep(.at-collapse__icon) {
                 top: 20px;
                 left: 0;
 
                 color: black;
             }
 
-            .at-collapse__icon.icon-chevron-right {
+            :deep(.at-collapse__icon.icon-chevron-right) {
                 display: block;
             }
         }

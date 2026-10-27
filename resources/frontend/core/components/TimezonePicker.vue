@@ -136,8 +136,8 @@
     .timezone-select {
         min-width: 240px;
 
-        &::v-deep {
-            .vs__dropdown-menu {
+        & {
+            :deep(.vs__dropdown-menu) {
                 width: auto;
                 min-width: 100%;
             }

@@ -60,7 +60,7 @@
         align-items: center;
         justify-content: center;
 
-        &::v-deep .at-btn__text {
+        & :deep(.at-btn__text) {
             color: #2e2ef9;
             font-size: 25px;
         }

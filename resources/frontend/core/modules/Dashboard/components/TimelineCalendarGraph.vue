@@ -191,7 +191,7 @@
 </script>
 
 <style lang="scss" scoped>
-    .canvas ::v-deep svg {
+    .canvas :deep(svg) {
         user-select: none;
         width: 100%;
         text[my-text-type='time'] {

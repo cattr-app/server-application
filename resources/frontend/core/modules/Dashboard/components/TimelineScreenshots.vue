@@ -224,8 +224,8 @@
             z-index: 0;
         }
 
-        &::v-deep {
-            .screenshot__image {
+        & {
+            :deep(.screenshot__image) {
                 img {
                     height: 100px;
                 }

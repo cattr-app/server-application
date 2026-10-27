@@ -841,7 +841,7 @@
                 margin-bottom: $spacing-03;
             }
 
-            &::v-deep .at-select__placeholder {
+            & :deep(.at-select__placeholder) {
                 color: #3f536e;
             }
         }
@@ -862,13 +862,13 @@
         }
 
         &__filter {
-            &::v-deep {
-                .at-input-group__prepend {
+            & {
+                :deep(.at-input-group__prepend) {
                     border: 1px solid $gray-5;
                     border-right: 0;
                 }
 
-                .at-input__original {
+                :deep(.at-input__original) {
                     border: 1px solid $gray-5;
                 }
             }
@@ -884,14 +884,14 @@
         &__column-filter {
             padding: 0.5rem;
 
-            &::v-deep {
-                .at-input-group__prepend {
+            & {
+                :deep(.at-input-group__prepend) {
                     border: 1px solid $gray-5;
                     border-right: 0;
                 }
 
-                .at-input__original,
-                .at-select__selection {
+                :deep(.at-input__original),
+                :deep(.at-select__selection) {
                     border: 1px solid $gray-5;
                 }
             }
@@ -900,7 +900,7 @@
         &__table {
             position: relative;
 
-            &::v-deep .at-table {
+            & :deep(.at-table) {
                 table {
                     border-radius: $border-radius-lger;
                     display: grid;
@@ -924,39 +924,6 @@
                         background: #fff;
                         color: #c4c4cf;
                     }
-                }
-                &__thead {
-                    overflow: hidden;
-                    border-radius: 20px 20px 0 0;
-                }
-
-                &__content {
-                    border: 0;
-                }
-
-                &__tbody {
-                    tr:last-child .at-table__cell {
-                        border-bottom: 0;
-                        border-radius: 0 0 20px 20px;
-                    }
-                }
-
-                &__cell {
-                    display: flex;
-                    align-items: center;
-                    border-bottom: 2px solid $blue-3;
-
-                    position: relative;
-                }
-
-                &__cell-bg {
-                    position: absolute;
-                    display: block;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    z-index: -1;
                 }
 
                 .actions-column {
@@ -999,27 +966,56 @@
                     }
                 }
             }
+            & :deep(.at-table__thead) {
+                overflow: hidden;
+                border-radius: 20px 20px 0 0;
+            }
+            & :deep(.at-table__content) {
+                border: 0;
+            }
+            & :deep(.at-table__tbody) {
+                tr:last-child .at-table__cell {
+                    border-bottom: 0;
+                    border-radius: 0 0 20px 20px;
+                }
+            }
+            & :deep(.at-table__cell) {
+                display: flex;
+                align-items: center;
+                border-bottom: 2px solid $blue-3;
+
+                position: relative;
+            }
+            & :deep(.at-table__cell-bg) {
+                position: absolute;
+                display: block;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: -1;
+            }
         }
 
         &_style_compact {
-            &::v-deep .at-table__cell {
+            & :deep(.at-table__cell) {
                 padding-top: 0.5rem;
                 padding-bottom: 0.5rem;
             }
         }
 
         &_sortable {
-            &::v-deep .at-table__cell.at-table__column {
+            & :deep(.at-table__cell.at-table__column) {
                 cursor: pointer !important;
             }
         }
 
-        &::v-deep {
-            .primary-border .at-btn--primary {
+        & {
+            :deep(.primary-border .at-btn--primary) {
                 border-color: white;
             }
 
-            .error-border .at-btn--error {
+            :deep(.error-border .at-btn--error) {
                 border-color: white;
             }
         }
@@ -1029,7 +1025,7 @@
         border-radius: $border-radius-lger;
     }
 
-    .at-container ::v-deep {
+    .at-container {
         margin-bottom: $layout-01;
     }
 </style>
