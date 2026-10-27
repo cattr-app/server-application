@@ -6,7 +6,8 @@ use Exception;
 use Illuminate\Console\Command;
 use DB;
 use Illuminate\Database\Console\Seeds\SeedCommand;
-use Nwidart\Modules\Commands\SeedCommand as ModuleSeedCommand;
+use Nwidart\Modules\Commands\Database\SeedCommand as ModuleSeedCommand;
+use Nwidart\Modules\Facades\Module;
 use Illuminate\Support\Facades\Schema;
 use Settings;
 use Storage;
@@ -66,8 +67,12 @@ class ResetCommand extends Command
             $this->call(SeedCommand::class, [
                 '--force' => true
             ]);
+            // module:seed (nwidart/laravel-modules 13) seeds only the modules passed as arguments
+            // and prompts for them when the list is empty, so pass every enabled module explicitly.
             $this->call(ModuleSeedCommand::class, [
-                '--force' => true
+                'module' => array_keys(Module::getOrdered()),
+                '--force' => true,
+                '--no-interaction' => true,
             ]);
         }
 

@@ -36,10 +36,9 @@ class UniversalReportController
 
         if (request()->user()->isAdmin()) {
             UniversalReport::select('id', 'name', 'type')
-                ->where([
-                    ['type', '=', UniversalReportType::COMPANY->value, 'or'],
-                    ['user_id', '=', request()->user()->id, 'or']
-                ])
+                ->where(fn ($query) => $query
+                    ->where('type', UniversalReportType::COMPANY->value)
+                    ->orWhere('user_id', $user->id))
                 ->get()
                 ->each(function ($item) use (&$items) {
                     $items[$item->type->value][] = $item->toArray();
