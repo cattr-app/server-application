@@ -1,7 +1,7 @@
 <template>
     <div>
         <div v-for="(report, id) in formatedReports" :key="id" class="list__item">
-            <div slot="title" class="item-header">
+            <div class="item-header">
                 <div>
                     <div class="row flex-middle">
                         <div class="col-xs-10 col-md-10 col-lg-13">

@@ -12,18 +12,20 @@
             @close="onClose"
             @search="onSearch"
         >
-            <div slot="no-options">
-                <template v-if="loadFailed">
-                    {{ $t('time_intervals.task_select.load_failed') }}
-                    <button type="button" class="task-select__retry" @click.stop="retryLoad">
-                        {{ $t('time_intervals.task_select.retry') }}
-                    </button>
-                </template>
-                <template v-else-if="isLoading || (query.length >= 3 && currentPage === 0)">
-                    {{ $t('time_intervals.task_select.loading') }}
-                </template>
-                <template v-else>{{ $t('time_intervals.task_select.no_options') }}</template>
-            </div>
+            <template #no-options>
+                <div>
+                    <template v-if="loadFailed">
+                        {{ $t('time_intervals.task_select.load_failed') }}
+                        <button type="button" class="task-select__retry" @click.stop="retryLoad">
+                            {{ $t('time_intervals.task_select.retry') }}
+                        </button>
+                    </template>
+                    <template v-else-if="isLoading || (query.length >= 3 && currentPage === 0)">
+                        {{ $t('time_intervals.task_select.loading') }}
+                    </template>
+                    <template v-else>{{ $t('time_intervals.task_select.no_options') }}</template>
+                </div>
+            </template>
             <template #list-footer>
                 <li v-if="options.length && (hasNextPage || loadFailed)" ref="load" class="task-select__loader">
                     <template v-if="loadFailed">

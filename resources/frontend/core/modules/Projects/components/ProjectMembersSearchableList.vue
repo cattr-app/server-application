@@ -1,7 +1,7 @@
 <template>
     <div>
         <at-input v-model="search" class="search-input" :placeholder="$t('control.search')">
-            <template slot="prepend">
+            <template #prepend>
                 <i class="icon icon-search" />
             </template>
         </at-input>

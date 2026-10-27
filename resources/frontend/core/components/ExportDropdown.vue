@@ -5,11 +5,13 @@
                 <span class="icon icon-save" />
             </at-button>
 
-            <at-dropdown-menu slot="menu">
-                <at-dropdown-item v-for="(type, key) in types" :key="key" :name="key">{{
-                    key.toUpperCase()
-                }}</at-dropdown-item>
-            </at-dropdown-menu>
+            <template #menu>
+                <at-dropdown-menu>
+                    <at-dropdown-item v-for="(type, key) in types" :key="key" :name="key">{{
+                        key.toUpperCase()
+                    }}</at-dropdown-item>
+                </at-dropdown-menu>
+            </template>
         </at-dropdown>
     </div>
 </template>

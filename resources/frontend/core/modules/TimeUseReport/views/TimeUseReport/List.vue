@@ -2,27 +2,29 @@
     <div v-if="Object.keys(reportsList).length">
         <at-collapse simple class="list">
             <at-collapse-item v-for="(userReport, index) in reportsList" :key="index" class="list__item">
-                <div slot="title" class="item-header">
-                    <div class="row flex-middle">
-                        <div class="col-xs-4 col-md-2 col-lg-1">
-                            <UserAvatar :user="userReport.user" :size="35" />
-                        </div>
-                        <div class="col-xs-10 col-md-10 col-lg-13">
-                            <span class="h5">{{ userReport.user.full_name }}</span>
-                        </div>
-                        <div class="col-xs-offset-3 col-xs-7 col-md-3 col-lg-2">
-                            <span class="h4">{{ formatDurationString(userReport.time) }}</span>
-                        </div>
-                        <div class="col-xs-5 col-md-9 col-lg-8 d-xs-none">
-                            <at-progress
-                                :percent="getUserPercentage(userReport.time, userReport.time)"
-                                class="time-percentage"
-                                status="success"
-                                :stroke-width="15"
-                            />
+                <template #title>
+                    <div class="item-header">
+                        <div class="row flex-middle">
+                            <div class="col-xs-4 col-md-2 col-lg-1">
+                                <UserAvatar :user="userReport.user" :size="35" />
+                            </div>
+                            <div class="col-xs-10 col-md-10 col-lg-13">
+                                <span class="h5">{{ userReport.user.full_name }}</span>
+                            </div>
+                            <div class="col-xs-offset-3 col-xs-7 col-md-3 col-lg-2">
+                                <span class="h4">{{ formatDurationString(userReport.time) }}</span>
+                            </div>
+                            <div class="col-xs-5 col-md-9 col-lg-8 d-xs-none">
+                                <at-progress
+                                    :percent="getUserPercentage(userReport.time, userReport.time)"
+                                    class="time-percentage"
+                                    status="success"
+                                    :stroke-width="15"
+                                />
+                            </div>
                         </div>
                     </div>
-                </div>
+                </template>
 
                 <div v-for="task in userReport.tasks" :key="task.task_id" class="row flex-middle at-collapse__header">
                     <div class="col-xs-7 col-md-6 col-lg-7 text-ellipsis">

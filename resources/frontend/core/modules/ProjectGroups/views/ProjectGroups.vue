@@ -9,7 +9,7 @@
                 class="project-groups__search-container__search col-6"
                 @input="onSearch"
             >
-                <template slot="prepend">
+                <template #prepend>
                     <i class="icon icon-search" />
                 </template>
             </at-input>

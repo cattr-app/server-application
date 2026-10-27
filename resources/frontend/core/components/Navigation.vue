@@ -4,7 +4,7 @@
         <div v-if="loggedIn">
             <template v-for="(item, key) in navItems">
                 <at-submenu v-if="item.type === 'dropdown'" :key="item.label" :title="$t(item.label)">
-                    <template slot="title">{{ $t(item.label) }}</template>
+                    <template #title>{{ $t(item.label) }}</template>
                     <template v-for="(child, childKey) in item.children">
                         <navigation-menu-item
                             :key="childKey"
@@ -24,16 +24,18 @@
         <at-dropdown v-if="loggedIn" placement="bottom-right" @on-dropdown-command="userDropdownHandle">
             <i class="icon icon-chevron-down at-menu__submenu-icon"></i>
             <user-avatar :border-radius="10" :user="user"></user-avatar>
-            <at-dropdown-menu slot="menu">
-                <template v-for="(item, key) of userDropdownItems">
-                    <at-dropdown-item :key="key" :name="item.to.name">
-                        <span><i class="icon" :class="[item.icon]"></i>{{ item.title }}</span>
-                    </at-dropdown-item>
-                </template>
-                <li class="at-dropdown-menu__item" @click="logout()">
-                    <i class="icon icon-log-out"></i> {{ $t('navigation.logout') }}
-                </li>
-            </at-dropdown-menu>
+            <template #menu>
+                <at-dropdown-menu>
+                    <template v-for="(item, key) of userDropdownItems">
+                        <at-dropdown-item :key="key" :name="item.to.name">
+                            <span><i class="icon" :class="[item.icon]"></i>{{ item.title }}</span>
+                        </at-dropdown-item>
+                    </template>
+                    <li class="at-dropdown-menu__item" @click="logout()">
+                        <i class="icon icon-log-out"></i> {{ $t('navigation.logout') }}
+                    </li>
+                </at-dropdown-menu>
+            </template>
         </at-dropdown>
     </at-menu>
 </template>

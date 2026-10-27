@@ -14,7 +14,7 @@
                 class="col-6 col-xs-24 crud__filter"
                 @input="handleSearchInput"
             >
-                <template slot="prepend">
+                <template #prepend>
                     <i class="icon icon-search"></i>
                 </template>
             </at-input>
@@ -97,7 +97,7 @@
                                 :placeholder="$t(filter.placeholder)"
                                 @input="onFilterFieldChange(filter.key, $event)"
                             >
-                                <template slot="prepend">
+                                <template #prepend>
                                     <i class="icon icon-search"></i>
                                 </template>
                             </at-input>

@@ -5,27 +5,29 @@
                 <at-button size="middle">
                     {{ $t('tasks.sort_or_filter') }} <i class="icon icon-chevron-down"></i>
                 </at-button>
-                <at-dropdown-menu slot="menu">
-                    <at-radio-group v-model="sort">
-                        <at-dropdown-item>
-                            <at-radio label="desc">{{ $t('tasks.newest_first') }}</at-radio>
-                        </at-dropdown-item>
-                        <at-dropdown-item>
-                            <at-radio label="asc">{{ $t('tasks.oldest_first') }}</at-radio>
-                        </at-dropdown-item>
-                    </at-radio-group>
-                    <at-radio-group v-model="typeActivity">
-                        <at-dropdown-item divided>
-                            <at-radio label="all">{{ $t('tasks.show_all_activity') }}</at-radio>
-                        </at-dropdown-item>
-                        <at-dropdown-item>
-                            <at-radio label="comments">{{ $t('tasks.show_comments_only') }}</at-radio>
-                        </at-dropdown-item>
-                        <at-dropdown-item>
-                            <at-radio label="history">{{ $t('tasks.show_history_only') }}</at-radio>
-                        </at-dropdown-item>
-                    </at-radio-group>
-                </at-dropdown-menu>
+                <template #menu>
+                    <at-dropdown-menu>
+                        <at-radio-group v-model="sort">
+                            <at-dropdown-item>
+                                <at-radio label="desc">{{ $t('tasks.newest_first') }}</at-radio>
+                            </at-dropdown-item>
+                            <at-dropdown-item>
+                                <at-radio label="asc">{{ $t('tasks.oldest_first') }}</at-radio>
+                            </at-dropdown-item>
+                        </at-radio-group>
+                        <at-radio-group v-model="typeActivity">
+                            <at-dropdown-item divided>
+                                <at-radio label="all">{{ $t('tasks.show_all_activity') }}</at-radio>
+                            </at-dropdown-item>
+                            <at-dropdown-item>
+                                <at-radio label="comments">{{ $t('tasks.show_comments_only') }}</at-radio>
+                            </at-dropdown-item>
+                            <at-dropdown-item>
+                                <at-radio label="history">{{ $t('tasks.show_history_only') }}</at-radio>
+                            </at-dropdown-item>
+                        </at-radio-group>
+                    </at-dropdown-menu>
+                </template>
             </at-dropdown>
         </div>
         <div ref="commentForm" class="comment-form" :class="{ 'comment-form--at-bottom': sort === 'asc' }">
