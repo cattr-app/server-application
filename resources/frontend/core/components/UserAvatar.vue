@@ -47,7 +47,7 @@
         return initials.substr(0, 3).toUpperCase();
     };
 
-    // Same arithmetic as vue-avatar (css-tricks "lighten/darken color"), so the colours do not change
+    // Same arithmetic as vue-avatar (css-tricks "lighten/darken color"), padded to 6 hex digits as AtAvatar does
     const lightenColor = (hex, amount) => {
         let usePound = false;
 
@@ -62,7 +62,7 @@
         const b = clamp(((num >> 8) & 0x00ff) + amount);
         const g = clamp((num & 0x0000ff) + amount);
 
-        return (usePound ? '#' : '') + (g | (b << 8) | (r << 16)).toString(16);
+        return (usePound ? '#' : '') + (g | (b << 8) | (r << 16)).toString(16).padStart(6, '0');
     };
 
     // Avatar with the API of vue-avatar 2.3.3: an image from `src`, initials on a colour picked by the
@@ -121,7 +121,8 @@
                     height: `${size}px`,
                     borderRadius: this.rounded ? '50%' : 0,
                     lineHeight: `${size + Math.floor(size / 20)}px`,
-                    fontWeight: 'bold',
+                    // vue-avatar set `bold`, but its `font` shorthand reset it to normal
+                    fontWeight: 'normal',
                     alignItems: 'center',
                     justifyContent: 'center',
                     textAlign: 'center',
