@@ -9,7 +9,7 @@
         />
         <i v-else class="icon icon-camera-off screenshot__image" />
         <at-tooltip>
-            <template slot="content">
+            <template #content>
                 <div v-if="interval.activity_fill === null" class="screenshot__activity">
                     {{ $t('tooltip.activity_progress.not_tracked') }}
                 </div>

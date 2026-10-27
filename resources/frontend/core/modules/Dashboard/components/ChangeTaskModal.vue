@@ -68,10 +68,14 @@
             </validation-provider>
         </validation-observer>
 
-        <div slot="footer">
-            <at-button @click="cancel">{{ $t('control.cancel') }}</at-button>
-            <at-button type="primary" :disabled="disableButtons" @click="confirm">{{ $t('control.save') }} </at-button>
-        </div>
+        <template #footer>
+            <div>
+                <at-button @click="cancel">{{ $t('control.cancel') }}</at-button>
+                <at-button type="primary" :disabled="disableButtons" @click="confirm"
+                    >{{ $t('control.save') }}
+                </at-button>
+            </div>
+        </template>
     </at-modal>
 </template>
 

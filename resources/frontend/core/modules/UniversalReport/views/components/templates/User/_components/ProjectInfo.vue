@@ -1,10 +1,12 @@
 <template>
     <at-collapse simple class="list">
         <at-collapse-item class="list__item">
-            <div slot="title" class="project-title">
-                {{ project?.name }}
-                <at-button v-if="project.name" class="icon" icon="icon-external-link" @click="redirectToProject" />
-            </div>
+            <template #title>
+                <div class="project-title">
+                    {{ project?.name }}
+                    <at-button v-if="project.name" class="icon" icon="icon-external-link" @click="redirectToProject" />
+                </div>
+            </template>
             <div v-if="project">
                 <div class="data-entries">
                     <h3>{{ $t('universal-report.project_information') }}</h3>

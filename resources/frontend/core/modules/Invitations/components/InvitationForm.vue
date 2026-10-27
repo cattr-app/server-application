@@ -8,7 +8,7 @@
                         :placeholder="$t('field.email')"
                         :status="errors.length > 0 ? 'error' : ''"
                     >
-                        <template slot="prepend">{{ $t('field.email') }}</template>
+                        <template #prepend>{{ $t('field.email') }}</template>
                     </at-input>
                     <small>{{ errors[0] }}</small>
                 </validation-provider>
