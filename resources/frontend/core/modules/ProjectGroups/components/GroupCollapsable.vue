@@ -16,7 +16,7 @@
                                     :class="{ groups__disabled: group.projects_count === 0 }"
                                     class="groups__depth"
                                 >
-                                    {{ group.depth | getSpaceByDepth }}
+                                    {{ getSpaceByDepth(group.depth) }}
                                 </span>
                                 <span v-if="group.breadCrumbs" class="groups__bread-crumbs">
                                     <span
@@ -76,8 +76,6 @@
             reloadData() {
                 this.$emit('reloadData');
             },
-        },
-        filters: {
             getSpaceByDepth(value) {
                 return ''.padStart(value, '-');
             },
