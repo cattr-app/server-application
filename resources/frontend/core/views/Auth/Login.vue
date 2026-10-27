@@ -124,7 +124,9 @@
                 const apiService = this.$store.getters['user/apiService'];
 
                 try {
-                    if ('grecaptcha' in window) {
+                    // The widget exists only while a recaptcha key is set; grecaptcha may stay loaded from an
+                    // earlier visit of this page in the same tab.
+                    if (this.$refs.recaptcha) {
                         this.$refs.recaptcha.reset();
                     }
 
