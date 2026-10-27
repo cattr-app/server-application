@@ -10,19 +10,19 @@ baselines). CI uses the same image, so screenshots match.
 
 ## Layout
 
-| Path | What |
-|---|---|
-| `auth.setup.js` | project `setup`: logs in once through the UI, saves `tests/e2e/.auth/admin.json` (storageState) |
-| `smoke/pages.spec.js` | project `smoke`: every page of the checklist opens and shows its key element |
-| `journeys/*.spec.js` | project `journeys`: login/logout, grids (filter, sorting, pagination), task create/edit, kanban drag, manual time, language switch, reports and navigation |
-| `visual/pages.spec.js` | projects `visual-desktop` (1440×900) and `visual-mobile` (390×844): `toHaveScreenshot` of the pages with `visual: true` |
-| `__screenshots__/<project>/` | committed visual baseline (taken on Vue 2, `main@bfafed73`) |
-| `module-stub/` | project `module-stub` (only with `E2E_MODULE_STUB` set) and `build.sh` |
-| `fixtures/vendor_modules/Test/Stub/module.init.js` | external frontend module used by `module-stub` |
-| `support/pages.js` | the page checklist (route, key element, visual flag, masks, known breakage) |
-| `support/test.js` | base `test`: fixed language/clock/network, console guard |
-| `support/seed.php` | deterministic seed (see below) |
-| `console-allowlist.js` | console messages the guard tolerates, with the reason for each |
+| Path                                               | What                                                                                                                                                       |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auth.setup.js`                                    | project `setup`: logs in once through the UI, saves `tests/e2e/.auth/admin.json` (storageState)                                                            |
+| `smoke/pages.spec.js`                              | project `smoke`: every page of the checklist opens and shows its key element                                                                               |
+| `journeys/*.spec.js`                               | project `journeys`: login/logout, grids (filter, sorting, pagination), task create/edit, kanban drag, manual time, language switch, reports and navigation |
+| `visual/pages.spec.js`                             | projects `visual-desktop` (1440×900) and `visual-mobile` (390×844): `toHaveScreenshot` of the pages with `visual: true`                                    |
+| `__screenshots__/<project>/`                       | committed visual baseline (taken on Vue 2, `main@bfafed73`)                                                                                                |
+| `module-stub/`                                     | project `module-stub` (only with `E2E_MODULE_STUB` set) and `build.sh`                                                                                     |
+| `fixtures/vendor_modules/Test/Stub/module.init.js` | external frontend module used by `module-stub`                                                                                                             |
+| `support/pages.js`                                 | the page checklist (route, key element, visual flag, masks, known breakage)                                                                                |
+| `support/test.js`                                  | base `test`: fixed language/clock/network, console guard                                                                                                   |
+| `support/seed.php`                                 | deterministic seed (see below)                                                                                                                             |
+| `console-allowlist.js`                             | console messages the guard tolerates, with the reason for each                                                                                             |
 
 ## Stand
 
@@ -31,13 +31,13 @@ assets ("stand C" of the migration plan: `pnpm dev` or `pnpm prod` + `php artisa
 
 Stand settings that differ from production, and why:
 
-| Setting | Why |
-|---|---|
-| `QUEUE_CONNECTION=sync` | no queue worker: screenshot thumbnails and task-assignee jobs run inline |
-| `BROADCAST_DRIVER=log` | no Reverb: the reverb broadcaster appends a 500 ("Unable to parse URI") to API responses |
-| `CACHE_DRIVER=array` | the API is throttled to 120 requests/min per user; `artisan serve` boots the app per request, so the array store disables the throttle |
-| `RECAPTCHA_ENABLED=false` | no captcha on the login form |
-| `--no-reload` on `artisan serve` | passes the process environment (module flags) to the PHP server |
+| Setting                          | Why                                                                                                                                    |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `QUEUE_CONNECTION=sync`          | no queue worker: screenshot thumbnails and task-assignee jobs run inline                                                               |
+| `BROADCAST_DRIVER=log`           | no Reverb: the reverb broadcaster appends a 500 ("Unable to parse URI") to API responses                                               |
+| `CACHE_DRIVER=array`             | the API is throttled to 120 requests/min per user; `artisan serve` boots the app per request, so the array store disables the throttle |
+| `RECAPTCHA_ENABLED=false`        | no captcha on the login form                                                                                                           |
+| `--no-reload` on `artisan serve` | passes the process environment (module flags) to the PHP server                                                                        |
 
 Seed: `php artisan migrate --force && php tests/e2e/support/seed.php`. The script runs the regular
 `cattr:reset --force --seed` (InitialSeeder + AdminSeeder + DemoDataSeeder; login `admin@cattr.app` /
