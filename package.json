@@ -91,7 +91,7 @@
         "sass": "^1.70.0",
         "sass-loader": "^13.3.3",
         "sass-resources-loader": "^2.2.5",
-        "vue-eslint-parser": "^9.4.2",
+        "vue-eslint-parser": "^10.4.1",
         "vue-loader": "^15.11.1",
         "webpack": "^5.91.0",
         "workbox-webpack-plugin": "^7.4.1"
