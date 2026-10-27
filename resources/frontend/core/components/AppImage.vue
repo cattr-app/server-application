@@ -24,9 +24,9 @@
                             s10.22,2.32,13.6,6.38c1.65,1.97,4.7,2.42,6.87,0.63c2.07-1.73,2.34-4.8,0.63-6.87C155.85,94.35,148.17,90.76,140,90.76z"
                         />
                     </svg>
-                    <lazy-component v-else-if="lazy">
+                    <LazyBox v-else-if="lazy">
                         <img :src="url" alt="screenshot" @click="$emit('click', $event)" @error="handleError" />
-                    </lazy-component>
+                    </LazyBox>
                     <img v-else :src="url" alt="screenshot" @click="$emit('click', $event)" @error="handleError" />
                 </component>
             </template>
@@ -37,6 +37,47 @@
 <script>
     import Skeleton from '@/components/Skeleton';
     import { isUrlExpired } from '@/utils/screenshotUrl';
+
+    // Renders its content once the box comes near the viewport (within 1.3 of its size, as vue-lazyload did)
+    const LazyBox = {
+        name: 'LazyBox',
+        data() {
+            return {
+                show: false,
+            };
+        },
+        mounted() {
+            if (typeof IntersectionObserver === 'undefined') {
+                this.show = true;
+                return;
+            }
+
+            this.observer = new IntersectionObserver(
+                entries => {
+                    if (entries.some(entry => entry.isIntersecting)) {
+                        this.show = true;
+                        this.disconnect();
+                    }
+                },
+                { rootMargin: '0px 30% 30% 0px' },
+            );
+            this.observer.observe(this.$el);
+        },
+        beforeDestroy() {
+            this.disconnect();
+        },
+        methods: {
+            disconnect() {
+                if (this.observer) {
+                    this.observer.disconnect();
+                    this.observer = null;
+                }
+            },
+        },
+        render(h) {
+            return h('div', this.show ? this.$slots.default : null);
+        },
+    };
 
     export default {
         name: 'AppImage',
@@ -71,6 +112,7 @@
         },
         components: {
             Skeleton,
+            LazyBox,
         },
         methods: {
             async load() {
@@ -141,6 +183,7 @@
     }
 
     .fade-enter,
+    .fade-enter-from,
     .fade-leave-to {
         opacity: 0;
     }
