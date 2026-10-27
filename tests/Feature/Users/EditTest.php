@@ -6,7 +6,6 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
-use Faker\Factory as FakerFactory;
 
 class EditTest extends TestCase
 {
@@ -80,7 +79,7 @@ class EditTest extends TestCase
 
     public function test_edit_as_your_own_user(): void
     {
-        $faker = FakerFactory::create();
+        $faker = fake();
         $user = clone $this->user;
 
         $user->full_name = $faker->unique()->firstName;

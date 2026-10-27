@@ -6,7 +6,6 @@ use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\User;
 use Carbon\Carbon;
-use Faker\Factory as FakerFactory;
 use Tests\Facades\TaskFactory;
 use Tests\Facades\UserFactory;
 
@@ -26,7 +25,7 @@ class IntervalFactory extends Factory
 
     public function createRandomModelData(): array
     {
-        $randomDateTime = FakerFactory::create()->unique()->dateTimeThisYear();
+        $randomDateTime = fake()->unique()->dateTimeThisYear();
         $randomDateTime = Carbon::instance($randomDateTime);
 
         return [

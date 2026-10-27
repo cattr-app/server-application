@@ -5,7 +5,6 @@ namespace Tests\Factories;
 use App\Enums\ScreenshotsState;
 use App\Models\User;
 use Carbon\Carbon;
-use Faker\Factory as FakerFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class UserFactory extends Factory
@@ -52,7 +51,7 @@ class UserFactory extends Factory
 
     public function createRandomModelData(): array
     {
-        $faker = FakerFactory::create();
+        $faker = fake();
 
         $fullName = $faker->name;
 
@@ -80,7 +79,7 @@ class UserFactory extends Factory
 
     public function createRandomRegistrationModelData(): array
     {
-        $faker = FakerFactory::create();
+        $faker = fake();
 
         return [
             'full_name' => $faker->name,
