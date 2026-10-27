@@ -1,7 +1,11 @@
 <template>
     <div>
         <transition appear mode="out-in" name="fade">
-            <Skeleton v-if="!loaded" />
+            <!-- lazy mode: reserve the thumbnail box, so only images near the viewport get loaded -->
+            <div v-if="!loaded && lazy" class="app-image__placeholder">
+                <Skeleton height="100%" />
+            </div>
+            <Skeleton v-else-if="!loaded" />
             <template v-else>
                 <component :is="openable ? 'a' : 'div'" :href="url" target="_blank">
                     <svg
@@ -24,9 +28,9 @@
                             s10.22,2.32,13.6,6.38c1.65,1.97,4.7,2.42,6.87,0.63c2.07-1.73,2.34-4.8,0.63-6.87C155.85,94.35,148.17,90.76,140,90.76z"
                         />
                     </svg>
-                    <LazyBox v-else-if="lazy">
+                    <div v-else-if="lazy">
                         <img :src="url" alt="screenshot" @click="$emit('click', $event)" @error="handleError" />
-                    </LazyBox>
+                    </div>
                     <img v-else :src="url" alt="screenshot" @click="$emit('click', $event)" @error="handleError" />
                 </component>
             </template>
@@ -38,47 +42,6 @@
     import Skeleton from '@/components/Skeleton';
     import { isUrlExpired } from '@/utils/screenshotUrl';
 
-    // Renders its content once the box comes near the viewport (within 1.3 of its size, as vue-lazyload did)
-    const LazyBox = {
-        name: 'LazyBox',
-        data() {
-            return {
-                show: false,
-            };
-        },
-        mounted() {
-            if (typeof IntersectionObserver === 'undefined') {
-                this.show = true;
-                return;
-            }
-
-            this.observer = new IntersectionObserver(
-                entries => {
-                    if (entries.some(entry => entry.isIntersecting)) {
-                        this.show = true;
-                        this.disconnect();
-                    }
-                },
-                { rootMargin: '0px 30% 30% 0px' },
-            );
-            this.observer.observe(this.$el);
-        },
-        beforeDestroy() {
-            this.disconnect();
-        },
-        methods: {
-            disconnect() {
-                if (this.observer) {
-                    this.observer.disconnect();
-                    this.observer = null;
-                }
-            },
-        },
-        render(h) {
-            return h('div', this.show ? this.$slots.default : null);
-        },
-    };
-
     export default {
         name: 'AppImage',
         props: {
@@ -87,7 +50,8 @@
                 type: String,
                 default: null,
             },
-            // Async URL provider, used instead of src; called again once when a temporary URL has expired
+            // Async URL provider, used instead of src; called again once when a temporary URL has expired.
+            // With `lazy`, it is called only when the image comes near the viewport.
             resolver: {
                 type: Function,
                 default: null,
@@ -108,11 +72,12 @@
                 url: null,
                 retried: false,
                 loadId: 0,
+                // lazy mode: the image has come near the viewport
+                visible: false,
             };
         },
         components: {
             Skeleton,
-            LazyBox,
         },
         methods: {
             async load() {
@@ -143,7 +108,37 @@
             },
             reload() {
                 this.retried = false;
+                // lazy mode: the new source is loaded when the image becomes visible
+                if (this.lazy && !this.visible) {
+                    return;
+                }
                 this.load();
+            },
+            // Loads the image once it comes near the viewport (within 1.3 of its size, as vue-lazyload did)
+            observe() {
+                if (typeof IntersectionObserver === 'undefined') {
+                    this.visible = true;
+                    this.load();
+                    return;
+                }
+
+                this.observer = new IntersectionObserver(
+                    entries => {
+                        if (entries.some(entry => entry.isIntersecting)) {
+                            this.disconnect();
+                            this.visible = true;
+                            this.load();
+                        }
+                    },
+                    { rootMargin: '0px 30% 30% 0px' },
+                );
+                this.observer.observe(this.$el);
+            },
+            disconnect() {
+                if (this.observer) {
+                    this.observer.disconnect();
+                    this.observer = null;
+                }
             },
             handleError() {
                 // the page may stay open longer than the URL lifetime: get a fresh URL once
@@ -157,7 +152,14 @@
             },
         },
         mounted() {
-            this.load();
+            if (this.lazy) {
+                this.observe();
+            } else {
+                this.load();
+            }
+        },
+        beforeDestroy() {
+            this.disconnect();
         },
         watch: {
             src() {
@@ -171,6 +173,12 @@
 </script>
 
 <style lang="scss" scoped>
+    // Proportions of a screenshot thumbnail (280 px wide), as in the error placeholder below
+    .app-image__placeholder {
+        aspect-ratio: 280 / 162;
+        line-height: 0;
+    }
+
     img {
         width: 100%;
         object-fit: cover;
