@@ -1,3 +1,6 @@
+import en from './locales/en.json';
+import ru from './locales/ru.json';
+import prioritiesSection from './sections/priorities';
 export const ModuleConfig = {
     routerPrefix: 'settings',
     loadOrder: 10,
@@ -5,11 +8,11 @@ export const ModuleConfig = {
 };
 
 export function init(context, router) {
-    context.addCompanySection(require('./sections/priorities').default(context, router));
+    context.addCompanySection(prioritiesSection(context, router));
 
     context.addLocalizationData({
-        en: require('./locales/en'),
-        ru: require('./locales/ru'),
+        en,
+        ru,
     });
 
     return context;

@@ -192,6 +192,9 @@
 </template>
 
 <script>
+    import markdownItHighlightjs from 'markdown-it-highlightjs';
+    import markdownItSup from 'markdown-it-sup';
+    import markdownItSub from 'markdown-it-sub';
     import TeamAvatars from '@/components/TeamAvatars';
     import StatusService from '@/services/resource/status.service';
     import PriorityService from '@/services/resource/priority.service';
@@ -229,13 +232,13 @@
                     md => {
                         // Use a function to add the plugin
                         // Add the highlight.js plugin
-                        md.use(require('markdown-it-highlightjs'), {
+                        md.use(markdownItHighlightjs, {
                             auto: true,
                             code: true,
                             // inline: true
                         });
-                        md.use(require('markdown-it-sup'));
-                        md.use(require('markdown-it-sub'));
+                        md.use(markdownItSup);
+                        md.use(markdownItSub);
                     },
                 ],
                 statusService: new StatusService(),

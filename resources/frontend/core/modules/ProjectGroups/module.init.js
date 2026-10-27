@@ -2,6 +2,8 @@ import ProjectGroupsService from '@/services/resource/project-groups.service';
 import GroupSelect from '@/components/GroupSelect';
 import i18n from '@/i18n';
 import Vue from 'vue';
+import en from './locales/en.json';
+import ru from './locales/ru.json';
 
 export const ModuleConfig = {
     routerPrefix: 'project-groups',
@@ -124,8 +126,8 @@ export function init(context) {
     });
 
     context.addLocalizationData({
-        en: require('./locales/en'),
-        ru: require('./locales/ru'),
+        en,
+        ru,
     });
 
     return context;
