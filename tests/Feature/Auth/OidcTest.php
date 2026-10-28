@@ -336,7 +336,11 @@ class OidcTest extends OidcWebTestCase
         $key = $this->desktopKey($user->withAccessToken($source));
         $source->forceFill(['expires_at' => now()->addMinutes(5)])->save();
         $data = $this->desktopExchange($key)->getData(true)['data'];
-        $desktop = PersonalAccessToken::findToken($data['access_token']);
+        [$desktopId, $plainToken] = explode('|', $data['access_token'], 2);
+        $desktop = app(PersonalAccessToken::class)->newQuery()
+            ->whereKey((int) $desktopId)
+            ->where('token', hash('sha256', $plainToken))
+            ->first();
         $this->assertNotNull($desktop);
         $this->assertSame($user->id, $desktop->tokenable_id);
         $this->assertTrue($source->expires_at->equalTo($desktop->expires_at));
