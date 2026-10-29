@@ -2,6 +2,9 @@
 
 namespace Tests\Feature\Console;
 
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Response as GuzzleResponse;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
@@ -72,6 +75,26 @@ class RegisterInstanceTest extends TestCase
             ->assertExitCode(0);
 
         $this->assertSame('', Settings::scope('core')->get('instance'));
+    }
+
+    public function test_redirect_with_location_is_not_followed(): void
+    {
+        // Use Guzzle's redirect middleware: Http::fake() would bypass redirect handling.
+        $handler = new MockHandler([
+            new GuzzleResponse(302, [
+                'Location' => 'https://stats.example.test/redirected',
+                'Content-Type' => 'application/json',
+            ], '{"message":"Registration endpoint moved"}'),
+            new GuzzleResponse(200, ['Content-Type' => 'application/json'], '{"instanceId":"unexpected"}'),
+        ]);
+        Http::globalOptions(['handler' => HandlerStack::create($handler)]);
+
+        $this->artisan('cattr:register', ['adminEmail' => 'admin@example.test'])
+            ->expectsOutputToContain('Registration endpoint moved')
+            ->assertExitCode(0);
+
+        $this->assertSame('', Settings::scope('core')->get('instance'));
+        $this->assertCount(1, $handler);
     }
 
     public static function unusableErrorBodies(): array

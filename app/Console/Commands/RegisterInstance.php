@@ -42,6 +42,7 @@ class RegisterInstance extends Command
             $appVersion = config('app.version');
 
             $response = Http::acceptJson()
+                ->withoutRedirecting()
                 ->post(config('app.stats_collector_url') . '/v2/instance', [
                     'ownerEmail' => $this->argument('adminEmail'),
                     'version' => $appVersion,
