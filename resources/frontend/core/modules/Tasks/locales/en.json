@@ -62,7 +62,8 @@
       "type_to_search": "Start typing to search for a task",
       "select_task": "Select task",
       "type": "Relation type"
-    }
+    },
+    "add_time": "Add time"
   },
   "field": {
     "source": "Source",
@@ -85,7 +86,7 @@
     "is_processing": "Calculating hash",
     "upload_queue": "Upload queue",
     "create_tmp_url_for": "Create temporary url for:",
-    "tmp_url_created":  "Temporary url created",
+    "tmp_url_created": "Temporary url created",
     "copied_to_clipboard": "Copied to clipboard"
   },
   "control": {

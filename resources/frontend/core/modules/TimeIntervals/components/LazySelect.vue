@@ -3,11 +3,12 @@
         <v-select
             :key="userID"
             :options="options"
+            :value="selectedOption"
             :filterable="false"
             label="label"
             :placeholder="$t('time_intervals.task_select.placeholder')"
             :clearable="false"
-            @input="inputHandler($event.id)"
+            @input="onSelect"
             @open="onOpen"
             @close="onClose"
             @search="onSearch"
@@ -40,6 +41,8 @@
             </template>
         </v-select>
         <i class="icon icon-chevron-down at-select__arrow" />
+        <small v-if="selectionLoading">{{ $t('time_intervals.task_select.checking') }}</small>
+        <small v-else-if="selectionError" role="alert">{{ $t(selectionError) }}</small>
     </div>
 </template>
 
@@ -58,6 +61,10 @@
             },
             userID: {
                 type: Number,
+            },
+            preselectedId: {
+                type: [Number, String],
+                default: null,
             },
             service: {
                 type: Object,
@@ -79,17 +86,44 @@
                 isOpen: false,
                 observer: null,
                 requestId: 0,
+                selectedTask: null,
+                selectionLoading: false,
+                selectionError: null,
+                selectionRequestId: 0,
+                pendingTaskId: null,
             };
         },
         computed: {
+            selectedOption() {
+                if (!this.value) return null;
+                const id = Number(this.value);
+                if (this.selectedTask && Number(this.selectedTask.id) === id) return this.selectedTask;
+                return this.options.find(task => Number(task.id) === id) || null;
+            },
             hasNextPage() {
                 return !this.loadFailed && this.currentPage < this.totalPages;
             },
         },
         watch: {
-            userID() {
+            userID(userID) {
+                const oldTaskId = this.value || this.pendingTaskId;
+                this.selectionRequestId += 1;
+                this.pendingTaskId = null;
+                this.selectedTask = null;
+                this.selectionLoading = false;
+                this.selectionError = null;
                 this.inputHandler(null);
                 this.restartSearch();
+                if (oldTaskId && userID) this.hydrateTask(oldTaskId, userID, true);
+            },
+            preselectedId(taskId) {
+                this.selectionRequestId += 1;
+                this.pendingTaskId = null;
+                this.selectedTask = null;
+                this.selectionLoading = false;
+                this.selectionError = null;
+                this.inputHandler(null);
+                if (taskId !== null && taskId !== undefined) this.hydrateTask(taskId, this.userID);
             },
         },
         created() {
@@ -97,14 +131,77 @@
         },
         mounted() {
             this.observer = new IntersectionObserver(this.infiniteScroll);
+            if (this.preselectedId !== null && this.preselectedId !== undefined) {
+                this.hydrateTask(this.preselectedId, this.userID);
+            }
         },
         beforeDestroy() {
             this.debouncedSearch.cancel();
             this.requestId += 1;
+            this.selectionRequestId += 1;
             this.observer?.disconnect();
             this.observer = null;
         },
         methods: {
+            formatTask(task) {
+                return {
+                    ...task,
+                    label: task.project ? task.task_name + ' (' + task.project.name + ')' : task.task_name,
+                };
+            },
+            onSelect(task) {
+                this.selectionRequestId += 1;
+                this.pendingTaskId = null;
+                this.selectionLoading = false;
+                this.selectionError = null;
+                this.selectedTask = task || null;
+                this.inputHandler(task ? task.id : null);
+            },
+            async hydrateTask(rawId, userID, checkMembership = false) {
+                const id = Number(rawId);
+                if (!Number.isSafeInteger(id) || id <= 0 || String(rawId).trim() === '') {
+                    this.inputHandler(null);
+                    this.selectionError = 'time_intervals.task_select.invalid_id';
+                    return;
+                }
+                this.pendingTaskId = id;
+                if (!userID) return;
+                const requestId = ++this.selectionRequestId;
+                this.selectionLoading = true;
+                this.selectionError = null;
+                try {
+                    const { data } = await this.service.getItem(id, { with: ['project'] });
+                    const task = data && data.data;
+                    if (!task || Number(task.id) !== id) throw new Error('task_not_available');
+                    if (checkMembership) {
+                        const { data: allowed } = await this.service.getWithFilters({
+                            where: { id, 'users.id': userID },
+                            page: 1,
+                        });
+                        if (!allowed || !Array.isArray(allowed.data) ||
+                            !allowed.data.some(item => Number(item.id) === id)) {
+                            throw new Error('task_not_available');
+                        }
+                    }
+                    if (requestId !== this.selectionRequestId || userID !== this.userID) return;
+                    this.selectedTask = this.formatTask(task);
+                    this.inputHandler(id);
+                } catch (error) {
+                    if (requestId !== this.selectionRequestId || userID !== this.userID) return;
+                    this.selectedTask = null;
+                    this.inputHandler(null);
+                    this.selectionError =
+                        error.message === 'task_not_available' ||
+                        (error.response && [403, 404].includes(error.response.status))
+                            ? 'time_intervals.task_select.unavailable'
+                            : 'time_intervals.task_select.load_failed';
+                } finally {
+                    if (requestId === this.selectionRequestId) {
+                        this.pendingTaskId = null;
+                        this.selectionLoading = false;
+                    }
+                }
+            },
             onOpen() {
                 this.isOpen = true;
                 this.$nextTick(this.observeNextPage);
@@ -189,10 +286,7 @@
                     this.currentPage = data.pagination.currentPage;
                     this.totalPages = data.pagination.totalPages;
                     this.options.push(
-                        ...data.data.map(task => ({
-                            ...task,
-                            label: task.project ? `${task.task_name} (${task.project.name})` : task.task_name,
-                        })),
+                        ...data.data.map(task => this.formatTask(task)),
                     );
                 } catch (error) {
                     if (requestId === this.requestId) {

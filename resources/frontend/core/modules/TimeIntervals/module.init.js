@@ -17,14 +17,30 @@ export function init(context, router) {
     const crud = context.createCrud('time_intervals.crud_title', 'time-intervals', TimeIntervalService);
 
     crud.new.addToMetaProperties('permissions', 'time-intervals/create', crud.new.getRouterConfig());
-    crud.new.addToMetaProperties('afterSubmitCallback', () => router.go(-1), crud.new.getRouterConfig());
+    crud.new.addToMetaProperties('afterSubmitCallback', () => {
+        const { task_id, from_task } = router.currentRoute.query;
+        const id = Number(task_id);
+        if (from_task === '1' && Number.isSafeInteger(id) && id > 0) {
+            return router.push({ path: '/tasks/view/' + id });
+        }
+        return router.go(-1);
+    }, crud.new.getRouterConfig());
 
     const fieldsToFill = [
+        {
+            key: 'is_manual',
+            default: true,
+            displayable: false,
+        },
         {
             label: 'field.user',
             key: 'user_id',
             type: 'resource-select',
             service: new UsersService(),
+            default: store => {
+                const taskId = router.currentRoute.query.task_id;
+                return taskId === undefined ? undefined : store.getters['user/user'].id;
+            },
             required: true,
         },
         {
@@ -35,7 +51,9 @@ export function init(context, router) {
                     props: {
                         service: new TasksService(),
                         inputHandler: props.inputHandler,
+                        value: props.currentValue,
                         userID: props.values.user_id,
+                        preselectedId: router.currentRoute.query.task_id,
                     },
                 });
             },
