@@ -54,6 +54,7 @@
 <script>
     import { mapGetters, mapMutations } from 'vuex';
     import UniversalReportService from '../service/universal-report.service';
+    import { isHandledRequestError } from '@/utils/requestError';
 
     const service = new UniversalReportService();
 
@@ -81,9 +82,15 @@
         },
         async mounted() {
             this.clearStore();
-            const { data } = await service.getReports();
+            try {
+                const { data } = await service.getReports();
 
-            this.setReports(data.data);
+                this.setReports(data.data);
+            } catch (error) {
+                if (!isHandledRequestError(error)) {
+                    throw error;
+                }
+            }
         },
     };
 </script>

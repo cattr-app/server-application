@@ -141,19 +141,6 @@ export const KNOWN_VUE2 = [
         text: '[Vue warn]: Invalid prop: custom validator check failed for prop "status".\n\nfound in\n\n---> <AtProgress>\n       <StorageManagementTab> at resources/frontend/core/components/StorageManagementTab.vue\n         <AtTabPane>\n           <AtTabs>\n             <About> at resources/frontend/core/views/About.vue\n               <DefaultLayout> at resources/frontend/core/layouts/DefaultLayout.vue\n                 <App> at resources/frontend/core/App.vue\n                   <Root>',
         page: /\/about$/,
     },
-    {
-        // Leaving Dashboard -> Team while it loads: ExportDropdown's async created hook does not handle the
-        // canceled request (see BY_DESIGN 'request-canceled-on-navigation'). Timing-dependent.
-        id: 'vue2-warn-export-dropdown-canceled',
-        type: 'error',
-        text: /^\[Vue warn\]: Error in created hook \(Promise\/async\): "CanceledError: canceled"\n\nfound in\n\n---> <ExportDropdown> at resources\/frontend\/core\/components\/ExportDropdown\.vue\n/,
-    },
-    {
-        // ... and the same rejection is logged once more by the global error handler.
-        id: 'vue2-canceled-error-unhandled',
-        type: 'error',
-        text: /^CanceledError: canceled\n\s+at Object\.cancel \(/,
-    },
 ];
 
 export const RULES = [...STAND_RULES, ...BY_DESIGN, ...KNOWN_VUE2].filter(rule => rule.enabled !== false);

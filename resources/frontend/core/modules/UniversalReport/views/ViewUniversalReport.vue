@@ -27,6 +27,7 @@
     import List from './components/List';
     import { Skeleton } from 'vue-loading-skeleton';
     import moment from 'moment';
+    import { isHandledRequestError } from '@/utils/requestError';
 
     const service = new UniversalReportService();
 
@@ -52,23 +53,30 @@
         },
         async mounted() {
             this.isDataLoading = true;
-            const { data } = await service.generate(this.$route.params.id, {
-                start_at:
-                    sessionStorage?.getItem('amazingcat.session.storage.universalreport' + '.start') ??
-                    moment().format('YYYY-MM-DD'),
-                end_at:
-                    sessionStorage?.getItem('amazingcat.session.storage.universalreport' + '.end') ??
-                    moment().format('YYYY-MM-DD'),
-            });
+            try {
+                const { data } = await service.generate(this.$route.params.id, {
+                    start_at:
+                        sessionStorage?.getItem('amazingcat.session.storage.universalreport' + '.start') ??
+                        moment().format('YYYY-MM-DD'),
+                    end_at:
+                        sessionStorage?.getItem('amazingcat.session.storage.universalreport' + '.end') ??
+                        moment().format('YYYY-MM-DD'),
+                });
 
-            if (Array.isArray(data.data.reportCharts)) {
-                data.data.reportCharts = {};
+                if (Array.isArray(data.data.reportCharts)) {
+                    data.data.reportCharts = {};
+                }
+
+                this.reportName = data.data.reportName;
+                delete data.data.reportName;
+                this.data = data.data;
+            } catch (error) {
+                if (!isHandledRequestError(error)) {
+                    throw error;
+                }
+            } finally {
+                this.isDataLoading = false;
             }
-
-            this.reportName = data.data.reportName;
-            delete data.data.reportName;
-            this.data = data.data;
-            this.isDataLoading = false;
         },
     };
 </script>

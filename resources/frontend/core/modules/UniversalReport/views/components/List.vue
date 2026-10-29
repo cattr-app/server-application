@@ -29,6 +29,7 @@
     import User from './templates/User/User';
     import Task from './templates/Task/Task';
     import Project from './templates/Project/Project';
+    import { isHandledRequestError } from '@/utils/requestError';
 
     const service = new UniversalReportService();
 
@@ -61,20 +62,26 @@
             ...mapGetters('universalreport', ['selectedBase']),
         },
         async created() {
-            const { data } = await service.show(this.$route.params.id);
+            try {
+                const { data } = await service.show(this.$route.params.id);
 
-            this.setName(data.data.name);
-            this.setBase(data.data.base);
-            this.setSelectedFields(data.data.fields);
-            this.setCalendarData({
-                type: sessionStorage?.getItem('amazingcat.session.storage.universalreport' + '.type') ?? 'day',
-                end:
-                    sessionStorage?.getItem('amazingcat.session.storage.universalreport' + '.end') ??
-                    moment().format('YYYY-MM-DD'),
-                start:
-                    sessionStorage?.getItem('amazingcat.session.storage.universalreport' + '.start') ??
-                    moment().format('YYYY-MM-DD'),
-            });
+                this.setName(data.data.name);
+                this.setBase(data.data.base);
+                this.setSelectedFields(data.data.fields);
+                this.setCalendarData({
+                    type: sessionStorage?.getItem('amazingcat.session.storage.universalreport' + '.type') ?? 'day',
+                    end:
+                        sessionStorage?.getItem('amazingcat.session.storage.universalreport' + '.end') ??
+                        moment().format('YYYY-MM-DD'),
+                    start:
+                        sessionStorage?.getItem('amazingcat.session.storage.universalreport' + '.start') ??
+                        moment().format('YYYY-MM-DD'),
+                });
+            } catch (error) {
+                if (!isHandledRequestError(error)) {
+                    throw error;
+                }
+            }
         },
         methods: {
             ...mapMutations({

@@ -51,8 +51,9 @@ Local helper (not in git): `/home/caelan/cattr/.local/e2e/stand.sh`; names and p
 cd <worktree>
 export E2E_PREFIX=cattr-mig-p04 E2E_DB_PORT=3310 E2E_DB_NAME=cattr_p04 E2E_APP_PORT=8001
 pnpm install --frozen-lockfile
+pnpm prod                                          # build first: `up` waits for HTTP 200 on `/`, which needs the build
 /home/caelan/cattr/.local/e2e/stand.sh up          # MySQL container, .env, migrate + seed, artisan serve
-pnpm prod                                          # or `pnpm dev` for the [Vue warn] check
+# later rebuilds (e.g. `pnpm dev` for the [Vue warn] check) need no restart of the stand
 /home/caelan/cattr/.local/e2e/stand.sh run test:e2e
 /home/caelan/cattr/.local/e2e/stand.sh down        # removes the MySQL and backend containers
 ```
