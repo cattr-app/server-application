@@ -1,0 +1,246 @@
+diff --git a/resources/frontend/core/components/ProjectSelect.vue b/resources/frontend/core/components/ProjectSelect.vue
+--- a/resources/frontend/core/components/ProjectSelect.vue
++++ b/resources/frontend/core/components/ProjectSelect.vue
+@@ -47,9 +47,10 @@
+             };
+         },
+         methods: {
+-            emitSelection() {
++            emitSelection(defaultToAll = false) {
+                 const allSelected =
+                     this.selectedProjectIds.length === this.ids.length &&
++                    (this.ids.length > 0 || defaultToAll) &&
+                     this.ids.every(id => this.selectedProjectIds.includes(id));
+ 
+                 this.$emit('change', this.unfilteredWhenAllSelected && allSelected ? null : this.selectedProjectIds);
+@@ -61,7 +62,8 @@
+                 if (!localStorage.getItem(localStorageKey)) {
+                     this.selectedProjectIds = allProjectIds;
+                     localStorage.setItem(localStorageKey, JSON.stringify(this.selectedProjectIds));
+-                    this.emitSelection();
++                    // With no stored choice, even zero current projects means "all" (including history).
++                    this.emitSelection(true);
+                     this.$nextTick(() => this.$emit('loaded'));
+                     return;
+                 }
+diff --git a/resources/frontend/core/modules/ProjectReport/views/ProjectReport.vue b/resources/frontend/core/modules/ProjectReport/views/ProjectReport.vue
+--- a/resources/frontend/core/modules/ProjectReport/views/ProjectReport.vue
++++ b/resources/frontend/core/modules/ProjectReport/views/ProjectReport.vue
+@@ -88,6 +88,8 @@
+                 isDataLoading: false,
+                 projects: [],
+                 projectsList: null,
++                projectSelectionInitialized: false,
++                reportRequestId: 0,
+                 projectReportsList: {},
+                 datepickerDateStart: getStartDate(today),
+                 datepickerDateEnd: getEndDate(today),
+@@ -105,19 +107,28 @@
+         methods: {
+             onUsersSelect(uids) {
+                 this.userIds = uids;
++                this.reportRequestId += 1;
+                 this.fetchData();
+             },
+ 
+             onProjectsChange(projectIDs) {
+                 this.projectsList = projectIDs;
++                this.projectSelectionInitialized = true;
++                this.reportRequestId += 1;
+                 this.fetchData();
+             },
+             onCalendarChange({ start, end }) {
+                 this.datepickerDateStart = getStartDate(start);
+                 this.datepickerDateEnd = getStartDate(end);
++                this.reportRequestId += 1;
+                 this.fetchData();
+             },
+             fetchData: debounce(async function () {
++                if (!this.projectSelectionInitialized) {
++                    return;
++                }
++
++                const requestId = this.reportRequestId;
+                 this.isDataLoading = true;
+                 try {
+                     const { data } = await reportService.getReport(
+@@ -127,16 +138,24 @@
+                         this.projectsList,
+                     );
+ 
+-                    this.$set(this, 'projects', data.data);
++                    if (requestId === this.reportRequestId) {
++                        this.$set(this, 'projects', data.data);
++                    }
+                 } catch ({ response }) {
+                     if (process.env.NODE_ENV === 'development') {
+                         console.warn(response ? response : 'request to projects is canceled');
+                     }
+                 }
+ 
+-                this.isDataLoading = false;
++                if (requestId === this.reportRequestId) {
++                    this.isDataLoading = false;
++                }
+             }, 350),
+             async onExport(format) {
++                if (!this.projectSelectionInitialized) {
++                    return;
++                }
++
+                 try {
+                     const { data } = await reportService.downloadReport(
+                         getStartOfDayInTimezone(this.datepickerDateStart, this.companyData.timezone),
+diff --git a/resources/frontend/core/modules/Screenshots/views/Screenshots.vue b/resources/frontend/core/modules/Screenshots/views/Screenshots.vue
+--- a/resources/frontend/core/modules/Screenshots/views/Screenshots.vue
++++ b/resources/frontend/core/modules/Screenshots/views/Screenshots.vue
+@@ -10,7 +10,11 @@
+                 <UserSelect @change="onUsersChange" />
+             </div>
+             <div class="controls-row__item">
+-                <ProjectSelect :unfiltered-when-all-selected="user.role_id === 2" @change="onProjectsChange" />
++                <ProjectSelect
++                    :unfiltered-when-all-selected="user.role_id === 2"
++                    @change="onProjectsChange"
++                    @loaded="onProjectsLoaded"
++                />
+             </div>
+ 
+             <div class="controls-row__item">
+@@ -97,6 +101,8 @@
+                 intervals: [],
+                 userIDs: null,
+                 projectsList: null,
++                projectsLoaded: false,
++                screenshotsRequestId: 0,
+                 datepickerDateStart: '',
+                 datepickerDateEnd: '',
+                 projectService: new ProjectService(),
+@@ -194,19 +200,26 @@
+                     this.getScreenshots();
+                 }
+             },
++            onProjectsLoaded() {
++                this.projectsLoaded = true;
++                this.getScreenshots();
++            },
+             onCalendarChange({ start, end }) {
+                 this.datepickerDateStart = start;
+                 this.datepickerDateEnd = end;
+                 this.getScreenshots();
+             },
+             async getScreenshots() {
++                const requestId = ++this.screenshotsRequestId;
+                 if (
++                    !this.projectsLoaded ||
+                     this.userIDs === 'undefined' ||
+                     !this.datepickerDateStart ||
+                     !this.datepickerDateEnd ||
+                     !this.timezone ||
+                     !this.companyData.timezone
+                 ) {
++                    this.isDataLoading = false;
+                     return;
+                 }
+ 
+@@ -234,13 +247,17 @@
+                         page: this.page,
+                         with: ['task', 'task.project', 'user'],
+                     });
+-                    this.intervalsTotal = data.pagination.total;
+-                    this.intervals = data.data;
++                    if (requestId === this.screenshotsRequestId) {
++                        this.intervalsTotal = data.pagination.total;
++                        this.intervals = data.data;
++                    }
+                 } catch ({ response }) {
+                     return;
+-                }
+-
+-                this.isDataLoading = false;
++                } finally {
++                    if (requestId === this.screenshotsRequestId) {
++                        this.isDataLoading = false;
++                    }
++                }
+             },
+             async removeScreenshot(id) {
+                 try {
+diff --git a/tests/js/projectSelect.test.cjs b/tests/js/projectSelect.test.cjs
+new file mode 100644
+--- /dev/null
++++ b/tests/js/projectSelect.test.cjs
+@@ -0,0 +1,73 @@
++const assert = require('node:assert/strict');
++const fs = require('node:fs');
++const path = require('node:path');
++const test = require('node:test');
++const vm = require('node:vm');
++
++const storageKey = 'amazingcat.local.storage.project_select';
++
++function createSelector(storedSelection) {
++    const values = new Map();
++    if (storedSelection !== undefined) {
++        values.set(storageKey, JSON.stringify(storedSelection));
++    }
++
++    const localStorage = {
++        getItem: key => values.get(key) ?? null,
++        setItem: (key, value) => values.set(key, String(value)),
++    };
++
++    const source = fs.readFileSync(
++        path.join(__dirname, '../../resources/frontend/core/components/ProjectSelect.vue'),
++        'utf8',
++    );
++    const script = source
++        .match(/<script>([\s\S]*?)<\/script>/)[1]
++        .replace(/^\s*import .*;\s*$/gm, '')
++        .replace('export default {', 'const component = {');
++    const sandbox = { localStorage, MultiSelect: class {}, ProjectService: class {}, JSON };
++    vm.runInNewContext(`${script}\nthis.component = component;`, sandbox);
++
++    const events = [];
++    const instance = {
++        ...sandbox.component.data.call({ value: null }),
++        ...sandbox.component.methods,
++        unfilteredWhenAllSelected: true,
++        $emit: (event, value) => events.push({ event, value }),
++        $nextTick: callback => callback(),
++    };
++    return { instance, methods: sandbox.component.methods, events };
++}
++
++function loadOptions(selector, ids) {
++    selector.methods.onLoad.call(selector.instance, ids.map(id => ({ id })));
++    return selector.events.find(event => event.event === 'change').value;
++}
++
++test('initial default includes historical intervals even without current projects', () => {
++    const selector = createSelector();
++    assert.equal(loadOptions(selector, []), null);
++    assert.equal(selector.events.at(-1).event, 'loaded');
++});
++
++test('stored empty selection stays empty when there are no current projects', () => {
++    const selector = createSelector([]);
++    assert.deepEqual(Array.from(loadOptions(selector, [])), []);
++});
++
++test('stored subset remains explicit when more projects are available', () => {
++    const selector = createSelector([1]);
++    assert.deepEqual(Array.from(loadOptions(selector, [1, 2])), [1]);
++});
++
++test('the initial default and an explicit all-project selection are unfiltered', () => {
++    assert.equal(loadOptions(createSelector(), [1, 2]), null);
++    assert.equal(loadOptions(createSelector([1, 2]), [1, 2]), null);
++});
++
++test('clearing the selection emits an empty array, not an unrestricted filter', () => {
++    const selector = createSelector();
++    loadOptions(selector, []);
++    selector.methods.selectedProjects.call(selector.instance, []);
++    assert.deepEqual(Array.from(selector.events.at(-1).value), []);
++});

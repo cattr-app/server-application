@@ -9,7 +9,11 @@
                 <UserSelect @change="onUsersChange" />
             </div>
             <div class="controls-row__item">
-                <ProjectSelect :unfiltered-when-all-selected="user.role_id === 2" @change="onProjectsChange" />
+                <ProjectSelect
+                    :unfiltered-when-all-selected="user.role_id === 2"
+                    @change="onProjectsChange"
+                    @loaded="onProjectsLoaded"
+                />
             </div>
 
             <div class="controls-row__item">
@@ -97,6 +101,8 @@
                 intervals: [],
                 userIDs: null,
                 projectsList: null,
+                projectsLoaded: false,
+                screenshotsRequestId: 0,
                 datepickerDateStart: '',
                 datepickerDateEnd: '',
                 projectService: new ProjectService(),
@@ -194,19 +200,26 @@
                     this.getScreenshots();
                 }
             },
+            onProjectsLoaded() {
+                this.projectsLoaded = true;
+                this.getScreenshots();
+            },
             onCalendarChange({ start, end }) {
                 this.datepickerDateStart = start;
                 this.datepickerDateEnd = end;
                 this.getScreenshots();
             },
             async getScreenshots() {
+                const requestId = ++this.screenshotsRequestId;
                 if (
+                    !this.projectsLoaded ||
                     this.userIDs === 'undefined' ||
                     !this.datepickerDateStart ||
                     !this.datepickerDateEnd ||
                     !this.timezone ||
                     !this.companyData.timezone
                 ) {
+                    this.isDataLoading = false;
                     return;
                 }
 
@@ -234,13 +247,17 @@
                         page: this.page,
                         with: ['task', 'task.project', 'user'],
                     });
-                    this.intervalsTotal = data.pagination.total;
-                    this.intervals = data.data;
+                    if (requestId === this.screenshotsRequestId) {
+                        this.intervalsTotal = data.pagination.total;
+                        this.intervals = data.data;
+                    }
                 } catch ({ response }) {
                     return;
+                } finally {
+                    if (requestId === this.screenshotsRequestId) {
+                        this.isDataLoading = false;
+                    }
                 }
-
-                this.isDataLoading = false;
             },
             async removeScreenshot(id) {
                 try {

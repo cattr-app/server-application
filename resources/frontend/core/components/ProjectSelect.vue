@@ -47,9 +47,10 @@
             };
         },
         methods: {
-            emitSelection() {
+            emitSelection(defaultToAll = false) {
                 const allSelected =
                     this.selectedProjectIds.length === this.ids.length &&
+                    (this.ids.length > 0 || defaultToAll) &&
                     this.ids.every(id => this.selectedProjectIds.includes(id));
 
                 this.$emit('change', this.unfilteredWhenAllSelected && allSelected ? null : this.selectedProjectIds);
@@ -61,7 +62,8 @@
                 if (!localStorage.getItem(localStorageKey)) {
                     this.selectedProjectIds = allProjectIds;
                     localStorage.setItem(localStorageKey, JSON.stringify(this.selectedProjectIds));
-                    this.emitSelection();
+                    // With no stored choice, even zero current projects means "all" (including history).
+                    this.emitSelection(true);
                     this.$nextTick(() => this.$emit('loaded'));
                     return;
                 }
