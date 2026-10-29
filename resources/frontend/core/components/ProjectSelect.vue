@@ -50,6 +50,7 @@
         methods: {
             emitSelection(defaultToAll = false) {
                 const allSelected =
+                    localStorage.getItem(selectionModeKey) === 'all' &&
                     this.selectedProjectIds.length === this.ids.length &&
                     (this.ids.length > 0 || defaultToAll) &&
                     this.ids.every(id => this.selectedProjectIds.includes(id));
@@ -62,12 +63,10 @@
                 const storedMode = localStorage.getItem(selectionModeKey);
                 const storedSelection = localStorage.getItem(localStorageKey);
 
-                // The "all" choice must survive losing the last accessible project and page reloads.
-                // For legacy selections without a mode, also recover when every saved project disappeared.
-                const useAllProjects =
-                    storedMode === 'all' ||
-                    storedSelection === null ||
-                    (storedMode === null && this.selectedProjectIds.length > 0 && allProjectIds.length === 0);
+                // Legacy ID lists are ambiguous (all projects or a subset). Migrate them
+                // to "custom" and keep their historical IDs so formerly selected projects
+                // remain visible without expanding the filter to excluded projects.
+                const useAllProjects = storedMode === 'all' || (storedMode === null && storedSelection === null);
                 if (useAllProjects) {
                     this.selectedProjectIds = allProjectIds;
                     localStorage.setItem(localStorageKey, JSON.stringify(this.selectedProjectIds));
@@ -77,41 +76,36 @@
                     return;
                 }
 
-                // Remove options that no longer exists
-                const existingProjectIds = this.selectedProjectIds.filter(projectId =>
-                    allProjectIds.includes(projectId),
-                );
-
-                if (this.selectedProjectIds.length > existingProjectIds.length) {
-                    this.selectedProjectIds = existingProjectIds;
-                    localStorage.setItem(localStorageKey, JSON.stringify(this.selectedProjectIds));
+                if (storedMode === null) {
+                    localStorage.setItem(selectionModeKey, 'custom');
                 }
 
-                // Upgrade a legacy all-project selection without changing explicitly stored subsets.
-                if (
-                    storedMode === null &&
-                    allProjectIds.length > 0 &&
-                    this.selectedProjectIds.length === allProjectIds.length &&
-                    allProjectIds.every(id => this.selectedProjectIds.includes(id))
-                ) {
-                    localStorage.setItem(selectionModeKey, 'all');
+                // Preserve selected IDs even if their projects are no longer available.
+                // The backend authorizes historical intervals independently of membership.
+                if (!Array.isArray(this.selectedProjectIds)) {
+                    this.selectedProjectIds = [];
                 }
 
                 this.emitSelection();
                 this.$nextTick(() => this.$emit('loaded'));
             },
             selectedProjects(values) {
-                this.selectedProjectIds = values;
-                localStorage.setItem(localStorageKey, JSON.stringify(this.selectedProjectIds));
+                // MultiSelect also emits its initial model. Do not interpret that
+                // unchanged value as an explicit user request to switch modes.
+                const unchanged =
+                    this.selectedProjectIds !== null &&
+                    values.length === this.selectedProjectIds.length &&
+                    values.every(id => this.selectedProjectIds.includes(id));
 
-                const allSelected =
-                    this.ids.length > 0 &&
-                    values.length === this.ids.length &&
-                    this.ids.every(id => values.includes(id));
+                if (!unchanged) {
+                    this.selectedProjectIds = values;
+                    localStorage.setItem(localStorageKey, JSON.stringify(values));
 
-                // MultiSelect can re-emit its initial empty model with no available projects.
-                // That must not overwrite a persisted "all" default with an explicit empty choice.
-                if (this.ids.length > 0 || values.length > 0 || localStorage.getItem(selectionModeKey) !== 'all') {
+                    const allSelected =
+                        this.ids.length > 0 &&
+                        values.length === this.ids.length &&
+                        this.ids.every(id => values.includes(id));
+
                     localStorage.setItem(selectionModeKey, allSelected ? 'all' : 'custom');
                 }
 
