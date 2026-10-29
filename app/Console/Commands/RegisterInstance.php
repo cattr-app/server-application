@@ -30,8 +30,6 @@ class RegisterInstance extends Command
     /**
      * Execute the console command.
      *
-     * @param Client $client
-     *
      * @return int
      */
     public function handle(): int
@@ -53,6 +51,11 @@ class RegisterInstance extends Command
                 ])
                 ->throw()
                 ->json();
+
+            if (!is_array($responseBody)) {
+                $this->warn('Could not parse the registration response from the server.');
+                return 0;
+            }
 
             if (isset($responseBody['instanceId'])) {
                 Settings::scope('core')->set('instance', $responseBody['instanceId']);
@@ -79,11 +82,12 @@ class RegisterInstance extends Command
 
             return 0;
         } catch (RequestException $e) {
-            $this->warn($e->response->json('message') ?? $e->getMessage());
+            $message = $e->response->json('message');
+            $this->warn(is_string($message) && trim($message) !== '' ? $message : $e->getMessage());
 
             return 0;
         } catch (Exception) {
-            $this->warn('Сould not get a response from the server to check the relevance of your version.');
+            $this->warn('Could not get a response from the server to check the relevance of your version.');
 
             return 0;
         }
