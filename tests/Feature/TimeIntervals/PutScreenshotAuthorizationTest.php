@@ -24,6 +24,7 @@ class PutScreenshotAuthorizationTest extends TestCase
         parent::setUp();
 
         Storage::fake('local');
+        Storage::fake();
         Queue::fake();
     }
 
