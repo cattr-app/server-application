@@ -22,6 +22,7 @@
             for (const plugin of this.plugins ?? []) {
                 md.use(plugin);
             }
+            md.linkify.set({ fuzzyLink: true });
             return {
                 md,
             };
