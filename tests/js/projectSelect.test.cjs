@@ -6,8 +6,7 @@ const vm = require('node:vm');
 
 const storageKey = 'amazingcat.local.storage.project_select';
 
-function createSelector(storedSelection) {
-    const values = new Map();
+function createSelector(storedSelection, values = new Map()) {
     if (storedSelection !== undefined) {
         values.set(storageKey, JSON.stringify(storedSelection));
     }
@@ -43,7 +42,7 @@ function createSelector(storedSelection) {
         $emit: (event, value) => events.push({ event, value }),
         $nextTick: callback => callback(),
     };
-    return { instance, methods: sandbox.component.methods, events };
+    return { instance, methods: sandbox.component.methods, events, values };
 }
 
 function loadOptions(selector, ids) {
@@ -74,7 +73,50 @@ test('the initial default and an explicit all-project selection are unfiltered',
 
 test('clearing the selection emits an empty array, not an unrestricted filter', () => {
     const selector = createSelector();
-    loadOptions(selector, []);
+    loadOptions(selector, [1]);
     selector.methods.selectedProjects.call(selector.instance, []);
     assert.deepEqual(Array.from(selector.events.at(-1).value), []);
+    assert.deepEqual(Array.from(loadOptions(createSelector(undefined, selector.values), [])), []);
+});
+
+test('default all survives navigation with no current projects', () => {
+    const selector = createSelector();
+    assert.equal(loadOptions(selector, []), null);
+
+    // MultiSelect's programmatic initialization may re-emit an empty model.
+    selector.methods.selectedProjects.call(selector.instance, []);
+    assert.equal(selector.events.at(-1).value, null);
+
+    const reloaded = createSelector(undefined, selector.values);
+    assert.equal(loadOptions(reloaded, []), null);
+});
+
+test('default all survives removal of the last current project', () => {
+    const selector = createSelector();
+    assert.equal(loadOptions(selector, [1]), null);
+
+    const reloaded = createSelector(undefined, selector.values);
+    assert.equal(loadOptions(reloaded, []), null);
+    assert.equal(loadOptions(createSelector(undefined, reloaded.values), []), null);
+});
+
+test('legacy all-project selection recovers when its last project disappears', () => {
+    const selector = createSelector([1]);
+    assert.equal(loadOptions(selector, []), null);
+    assert.equal(loadOptions(createSelector(undefined, selector.values), []), null);
+});
+
+test('an explicitly cleared selection stays empty after reload', () => {
+    const selector = createSelector();
+    loadOptions(selector, [1, 2]);
+    selector.methods.selectedProjects.call(selector.instance, []);
+    assert.deepEqual(Array.from(loadOptions(createSelector(undefined, selector.values), [])), []);
+});
+
+test('an explicit subset remains restricted when its last project disappears', () => {
+    const selector = createSelector();
+    loadOptions(selector, [1, 2]);
+    selector.methods.selectedProjects.call(selector.instance, [1]);
+    const reloaded = createSelector(undefined, selector.values);
+    assert.deepEqual(Array.from(loadOptions(reloaded, [])), []);
 });
