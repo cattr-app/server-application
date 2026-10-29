@@ -17,14 +17,18 @@ export function init(context, router) {
     const crud = context.createCrud('time_intervals.crud_title', 'time-intervals', TimeIntervalService);
 
     crud.new.addToMetaProperties('permissions', 'time-intervals/create', crud.new.getRouterConfig());
-    crud.new.addToMetaProperties('afterSubmitCallback', () => {
-        const { task_id, from_task } = router.currentRoute.query;
-        const id = Number(task_id);
-        if (from_task === '1' && Number.isSafeInteger(id) && id > 0) {
-            return router.push({ path: '/tasks/view/' + id });
-        }
-        return router.go(-1);
-    }, crud.new.getRouterConfig());
+    crud.new.addToMetaProperties(
+        'afterSubmitCallback',
+        () => {
+            const { task_id, from_task } = router.currentRoute.query;
+            const id = Number(task_id);
+            if (from_task === '1' && Number.isSafeInteger(id) && id > 0) {
+                return router.push({ path: '/tasks/view/' + id });
+            }
+            return router.go(-1);
+        },
+        crud.new.getRouterConfig(),
+    );
 
     const fieldsToFill = [
         {

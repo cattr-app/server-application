@@ -178,8 +178,11 @@
                             where: { id, 'users.id': userID },
                             page: 1,
                         });
-                        if (!allowed || !Array.isArray(allowed.data) ||
-                            !allowed.data.some(item => Number(item.id) === id)) {
+                        if (
+                            !allowed ||
+                            !Array.isArray(allowed.data) ||
+                            !allowed.data.some(item => Number(item.id) === id)
+                        ) {
                             throw new Error('task_not_available');
                         }
                     }
@@ -285,9 +288,7 @@
 
                     this.currentPage = data.pagination.currentPage;
                     this.totalPages = data.pagination.totalPages;
-                    this.options.push(
-                        ...data.data.map(task => this.formatTask(task)),
-                    );
+                    this.options.push(...data.data.map(task => this.formatTask(task)));
                 } catch (error) {
                     if (requestId === this.requestId) {
                         this.loadFailed = true;

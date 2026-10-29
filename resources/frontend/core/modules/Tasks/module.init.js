@@ -1013,8 +1013,7 @@ export function init(context, router) {
                     query: { task_id: String(values.id), from_task: '1' },
                 });
             },
-            renderCondition: ({ $can, values }) =>
-                !!values.id && $can('viewManualTime', 'dashboard'),
+            renderCondition: ({ $can, values }) => !!values.id && $can('viewManualTime', 'dashboard'),
         },
         {
             label: 'tasks.relations.title',
