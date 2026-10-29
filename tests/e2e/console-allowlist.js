@@ -142,14 +142,6 @@ export const KNOWN_VUE2 = [
         page: /\/about$/,
     },
     {
-        // The rejected GET /api/report/universal-report (KNOWN_BACKEND) surfaces as an unhandled error
-        // of UniversalReport's async mounted hook: the view does not handle the failed request.
-        id: 'vue2-warn-universal-report-mounted-unhandled',
-        type: 'error',
-        text: /^\[Vue warn\]: Error in mounted hook \(Promise\/async\): "AxiosError: Request failed with status code 500"\n\nfound in\n\n---> <UniversalReport> at resources\/frontend\/core\/modules\/UniversalReport\/views\/UniversalReport\.vue\n/,
-        page: /\/report\/universal(\/create)?(\?|$)/,
-    },
-    {
         // Leaving Dashboard -> Team while it loads: ExportDropdown's async created hook does not handle the
         // canceled request (see BY_DESIGN 'request-canceled-on-navigation'). Timing-dependent.
         id: 'vue2-warn-export-dropdown-canceled',
@@ -164,30 +156,7 @@ export const KNOWN_VUE2 = [
     },
 ];
 
-/**
- * Known backend bugs reproduced by the smoke suite; not related to the frontend migration.
- */
-export const KNOWN_BACKEND = [
-    {
-        // GET /api/report/universal-report answers 500 for an admin: UniversalReportController::index()
-        // passes 4-element arrays to where() ("Named parameter $boolean overwrites previous argument").
-        id: 'backend-universal-report-index-500',
-        type: 'error',
-        text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)',
-        source: /^https?:\/\/127\.0\.0\.1:\d+\/api\/report\/universal-report$/,
-    },
-    {
-        // ... and the Universal report pages log the rejected request.
-        id: 'backend-universal-report-index-500-axios',
-        type: 'error',
-        text: /^AxiosError: Request failed with status code 500\n/,
-        page: /\/report\/universal(\/create)?(\?|$)/,
-    },
-];
-
-export const RULES = [...STAND_RULES, ...BY_DESIGN, ...KNOWN_VUE2, ...KNOWN_BACKEND].filter(
-    rule => rule.enabled !== false,
-);
+export const RULES = [...STAND_RULES, ...BY_DESIGN, ...KNOWN_VUE2].filter(rule => rule.enabled !== false);
 
 const matches = (pattern, value) =>
     pattern === undefined || (pattern instanceof RegExp ? pattern.test(value) : pattern === value);

@@ -31,33 +31,12 @@ Carbon::setTestNow(Carbon::parse(SEED_NOW, 'UTC'));
 CarbonImmutable::setTestNow(CarbonImmutable::parse(SEED_NOW, 'UTC'));
 $app->make(Faker\Generator::class)->seed(FAKER_SEED);
 
-// Workaround for a bug in the application on main@bfafed73 (not fixed here, see tests/e2e/README.md):
-// cattr:reset truncates `statuses`, then StatusSeeder inserts Open and Closed without `order`, and
-// both get order = 0 -> "Duplicate entry '0' for key 'statuses.statuses_order_unique'".
-// Give them the order the migration 2023_12_27_123901 assigns (order = id).
-App\Models\Status::creating(static function (App\Models\Status $status) {
-    if (!$status->order && $status->id) {
-        $status->order = $status->id;
-    }
-});
-
 // cattr:reset keeps the `jobs` table, and GenerateScreenshotThumbnail is ShouldBeUnique (lock in the
 // cache for an hour): drop jobs and locks of a previous seed, or the new thumbnails are never generated.
 DB::table('jobs')->delete();
 $kernel->call('cache:clear');
 
-try {
-    $status = $kernel->call('cattr:reset', ['--force' => true, '--seed' => true]);
-} catch (Symfony\Component\Console\Exception\CommandNotFoundException $e) {
-    // Second bug on main@bfafed73: ResetCommand imports Nwidart\Modules\Commands\SeedCommand, which
-    // nwidart/laravel-modules 13 moved to Commands\Database\SeedCommand. The module seed is the last
-    // step of cattr:reset and the stand has no backend modules, so only this exact failure is tolerated.
-    if ($e->getMessage() !== 'Command "Nwidart\Modules\Commands\SeedCommand" is not defined.') {
-        throw $e;
-    }
-    fwrite(STDERR, "warning: cattr:reset could not run the module seeder (known bug, ignored): {$e->getMessage()}\n");
-    $status = 0;
-}
+$status = $kernel->call('cattr:reset', ['--force' => true, '--seed' => true]);
 echo $kernel->output();
 if ($status !== 0) {
     exit($status);
