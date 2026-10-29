@@ -195,6 +195,19 @@
                     gap: 1em;
                 }
 
+                @media (max-width: 768px) {
+                    flex-wrap: wrap;
+                    gap: 0.5em;
+
+                    .control-items {
+                        display: flex;
+                        flex-wrap: wrap;
+                        justify-content: flex-start;
+                        min-width: 0;
+                        gap: 0.5em;
+                    }
+                }
+
                 .control-item {
                     &:last-child {
                         margin-right: 0;

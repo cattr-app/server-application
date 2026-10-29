@@ -55,7 +55,8 @@ export function init(context, router) {
                     props: {
                         service: new TasksService(),
                         inputHandler: props.inputHandler,
-                        value: props.currentValue,
+                        // RenderableField supplies an empty object for an unset field.
+                        value: typeof props.currentValue === 'number' ? props.currentValue : null,
                         userID: props.values.user_id,
                         preselectedId: router.currentRoute.query.task_id,
                     },
