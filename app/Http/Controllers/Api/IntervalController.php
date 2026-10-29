@@ -630,9 +630,10 @@ class IntervalController extends ItemController
         return responder()->success($this->screenshotService->getTemporaryUrls($interval))->respond();
     }
 
-    public function putScreenshot(PutScreenshotRequest $request, TimeInterval $interval): JsonResponse
+    public function putScreenshot(PutScreenshotRequest $request): JsonResponse
     {
         $data = $request->validated();
+        $interval = $request->timeInterval();
 
         abort_if(
             Storage::exists($this->screenshotService->getScreenshotPath($interval)),
