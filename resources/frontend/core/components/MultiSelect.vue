@@ -183,7 +183,11 @@
                 return this.model.length;
             },
             allOptionsSelected() {
-                return this.options.length > 0 && this.options.length === this.selectionAmount;
+                return (
+                    this.options.length > 0 &&
+                    this.options.length === this.selectionAmount &&
+                    this.options.every(({ id }) => this.model.includes(id))
+                );
             },
             placeholderText() {
                 const i18nKey = this.placeholder + (this.allOptionsSelected ? '_all' : '');

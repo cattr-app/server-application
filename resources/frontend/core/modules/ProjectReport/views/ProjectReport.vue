@@ -6,7 +6,11 @@
 
             <UserSelect class="controls-row__item" @change="onUsersSelect" />
 
-            <ProjectSelect class="controls-row__item" @change="onProjectsChange" />
+            <ProjectSelect
+                class="controls-row__item"
+                :unfiltered-when-all-selected="user.role_id === 2"
+                @change="onProjectsChange"
+            />
 
             <div class="controls-row__item controls-row__item--left-auto">
                 <small v-if="companyData.timezone">
@@ -83,7 +87,9 @@
             return {
                 isDataLoading: false,
                 projects: [],
-                projectsList: [],
+                projectsList: null,
+                projectSelectionInitialized: false,
+                reportRequestId: 0,
                 projectReportsList: {},
                 datepickerDateStart: getStartDate(today),
                 datepickerDateEnd: getEndDate(today),
@@ -93,7 +99,7 @@
             };
         },
         computed: {
-            ...mapGetters('user', ['companyData']),
+            ...mapGetters('user', ['user', 'companyData']),
             totalTime() {
                 return formatDurationString(this.projects.reduce((acc, cur) => acc + cur.time, 0));
             },
@@ -101,19 +107,28 @@
         methods: {
             onUsersSelect(uids) {
                 this.userIds = uids;
+                this.reportRequestId += 1;
                 this.fetchData();
             },
 
             onProjectsChange(projectIDs) {
                 this.projectsList = projectIDs;
+                this.projectSelectionInitialized = true;
+                this.reportRequestId += 1;
                 this.fetchData();
             },
             onCalendarChange({ start, end }) {
                 this.datepickerDateStart = getStartDate(start);
                 this.datepickerDateEnd = getStartDate(end);
+                this.reportRequestId += 1;
                 this.fetchData();
             },
             fetchData: debounce(async function () {
+                if (!this.projectSelectionInitialized) {
+                    return;
+                }
+
+                const requestId = this.reportRequestId;
                 this.isDataLoading = true;
                 try {
                     const { data } = await reportService.getReport(
@@ -123,16 +138,24 @@
                         this.projectsList,
                     );
 
-                    this.$set(this, 'projects', data.data);
+                    if (requestId === this.reportRequestId) {
+                        this.$set(this, 'projects', data.data);
+                    }
                 } catch ({ response }) {
                     if (process.env.NODE_ENV === 'development') {
                         console.warn(response ? response : 'request to projects is canceled');
                     }
                 }
 
-                this.isDataLoading = false;
+                if (requestId === this.reportRequestId) {
+                    this.isDataLoading = false;
+                }
             }, 350),
             async onExport(format) {
+                if (!this.projectSelectionInitialized) {
+                    return;
+                }
+
                 try {
                     const { data } = await reportService.downloadReport(
                         getStartOfDayInTimezone(this.datepickerDateStart, this.companyData.timezone),

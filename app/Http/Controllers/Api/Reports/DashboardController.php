@@ -7,7 +7,6 @@ use App\Enums\SortDirection;
 use App\Helpers\ReportHelper;
 use App\Http\Requests\Reports\DashboardRequest;
 use App\Jobs\GenerateAndSendReport;
-use App\Models\Project;
 use App\Models\User;
 use App\Reports\DashboardExport;
 use Carbon\Carbon;
@@ -109,7 +108,7 @@ class DashboardController
         return responder()->success(
             DashboardExport::init(
                 $request->input('users') ?? User::all()->pluck('id')->toArray(),
-                $request->input('projects') ?? Project::all()->pluck('id')->toArray(),
+                $request->input('projects'),
                 Carbon::parse($request->input('start_at'))->setTimezone($companyTimezone),
                 Carbon::parse($request->input('end_at'))->setTimezone($companyTimezone),
                 $companyTimezone,
@@ -174,7 +173,7 @@ class DashboardController
         $job = new GenerateAndSendReport(
             DashboardExport::init(
                 $request->input('users') ?? User::all()->pluck('id')->toArray(),
-                $request->input('projects') ?? Project::all()->pluck('id')->toArray(),
+                $request->input('projects'),
                 Carbon::parse($request->input('start_at'))->setTimezone($companyTimezone),
                 Carbon::parse($request->input('end_at'))->setTimezone($companyTimezone),
                 $companyTimezone,
