@@ -73,7 +73,7 @@
 <script>
     import { mapGetters } from 'vuex';
     import RenderableField from '@/components/RenderableField';
-    import { Skeleton } from 'vue-loading-skeleton';
+    import Skeleton from '@/components/Skeleton';
 
     export default {
         name: 'ItemView',

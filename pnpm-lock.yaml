@@ -190,6 +190,9 @@ importers:
       color-convert:
         specifier: ^3.1.3
         version: 3.1.3
+      dragula:
+        specifier: ^3.7.3
+        version: 3.7.3
       echarts:
         specifier: ^5.6.0
         version: 5.6.0
@@ -250,9 +253,6 @@ importers:
       vue:
         specifier: ^2.7.16
         version: 2.7.16
-      vue-avatar:
-        specifier: ^2.3.3
-        version: 2.3.3
       vue-chartjs:
         specifier: ^5.2.0
         version: 5.3.4(chart.js@4.6.1)(vue@2.7.16)
@@ -265,18 +265,6 @@ importers:
       vue-i18n:
         specifier: ^8.28.2
         version: 8.28.2(vue@2.7.16)
-      vue-kanban:
-        specifier: ^1.8.0
-        version: 1.8.0
-      vue-lazyload:
-        specifier: ^1.3.5
-        version: 1.3.5
-      vue-loading-skeleton:
-        specifier: ^1.1.9
-        version: 1.1.9(vue@2.7.16)
-      vue-recaptcha:
-        specifier: ^2.0.3
-        version: 2.0.3(vue@2.7.16)
       vue-router:
         specifier: ^3.6.5
         version: 3.6.5(vue@2.7.16)
@@ -4926,10 +4914,6 @@ packages:
   vm-browserify@1.1.2:
     resolution: {integrity: sha512-2ham8XPWTONajOR0ohOKOHXkm3+gaBmGut3SRuu75xLd/RRaY6vqgh8NBYYk7+RW3u5AtzPQZG8F10LHkl0lAQ==}
 
-  vue-avatar@2.3.3:
-    resolution: {integrity: sha512-Z57ILRTkFIAuCH9JiFBxX74C5zua5ub/jRDM/KZ+QKXNfscvmUOgWBs3kA2+wrpZMowIvfLHIT0gvQu1z+zpLg==}
-    engines: {node: '>= 4.0.0', npm: '>= 3.0.0'}
-
   vue-chartjs@5.3.4:
     resolution: {integrity: sha512-x3Fqob8RQvrTdssfi9ecsCzEkFOd8JPmNwSkSQzdfKj/uBsRJs/Y88cZcZIEcPsTVfMGwMo4MOoihoDG2DoE/g==}
     peerDependencies:
@@ -4997,13 +4981,6 @@ packages:
     peerDependencies:
       vue: ^2
 
-  vue-kanban@1.8.0:
-    resolution: {integrity: sha512-PfDBsfTLTZZyr1EhsM9MXsX9UC/j5slavXckaKyv6HKRkR1aFJttUE4j0hLa/No3mr/ctxDsr1VjhmkuvChXHg==}
-    engines: {node: '>= 4.0.0', npm: '>= 3.0.0'}
-
-  vue-lazyload@1.3.5:
-    resolution: {integrity: sha512-SCO/LWgCCbjaregHO4wg2buzITBdPBZRlIS104vERGpT88uxXsK26veuzZpgGAXMR8WpkaR+JDqz80OedpaLiA==}
-
   vue-loader@15.11.1:
     resolution: {integrity: sha512-0iw4VchYLePqJfJu9s62ACWUXeSqM30SQqlIftbYWM3C+jpPcEHKSPUZBLjSF9au4HTHQ/naF6OGnO3Q/qGR3Q==}
     peerDependencies:
@@ -5021,20 +4998,6 @@ packages:
       prettier:
         optional: true
       vue-template-compiler:
-        optional: true
-
-  vue-loading-skeleton@1.1.9:
-    resolution: {integrity: sha512-5gMrI9equv0PMVLD5EMa4NTUvqDM3Bq/wiO4NftbEaVNeoGomG/XslB4Ev8Ued+WiE2Y/9HsIx5YXhDXimyqZw==}
-    peerDependencies:
-      vue: ^2.6.11
-
-  vue-recaptcha@2.0.3:
-    resolution: {integrity: sha512-Rz0kLIETUgmOrp7CxFvaFE65DkhKdWu4pteWOTt2i+yTajTHPqtyOW6DqTg0BvALWTm+WUvWVV7k5XXFijQnBw==}
-    peerDependencies:
-      '@vue/composition-api': ^1.0.0-beta.1
-      vue: ^2.0.0 || ^3.0.0
-    peerDependenciesMeta:
-      '@vue/composition-api':
         optional: true
 
   vue-router@2.8.1:
@@ -5305,9 +5268,6 @@ packages:
   xml-name-validator@5.0.0:
     resolution: {integrity: sha512-EvGK8EJ3DhaHfbRlETOWAS5pO9MZITeauHKJyb8wyajUfQUenkIg2MvLDTZ4T/TgIcm3HU0TFBgWWboAZ30UHg==}
     engines: {node: '>=18'}
-
-  xstate@4.38.3:
-    resolution: {integrity: sha512-SH7nAaaPQx57dx6qvfcIgqKRXIh4L0A1iYEqim4s1u7c9VoCgzZc+63FY90AKU4ZzOC2cfJzTnpO4zK7fCUzzw==}
 
   xtend@4.0.2:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
@@ -10262,8 +10222,6 @@ snapshots:
 
   vm-browserify@1.1.2: {}
 
-  vue-avatar@2.3.3: {}
-
   vue-chartjs@5.3.4(chart.js@4.6.1)(vue@2.7.16):
     dependencies:
       chart.js: 4.6.1
@@ -10311,14 +10269,6 @@ snapshots:
   vue-i18n@8.28.2(vue@2.7.16):
     dependencies:
       vue: 2.7.16
-
-  vue-kanban@1.8.0:
-    dependencies:
-      dragula: 3.7.3
-      vue: 2.7.16
-      xstate: 4.38.3
-
-  vue-lazyload@1.3.5: {}
 
   vue-loader@15.11.1(css-loader@5.2.7(webpack@5.91.0))(ejs@3.1.10)(handlebars@4.7.10)(lodash@4.18.1)(prettier@3.9.10)(vue-template-compiler@2.7.16)(webpack@5.91.0):
     dependencies:
@@ -10386,16 +10336,6 @@ snapshots:
       - velocityjs
       - walrus
       - whiskers
-
-  vue-loading-skeleton@1.1.9(vue@2.7.16):
-    dependencies:
-      core-js: 2.6.12
-      vue: 2.7.16
-
-  vue-recaptcha@2.0.3(vue@2.7.16):
-    dependencies:
-      vue: 2.7.16
-      vue-demi: 0.13.11(vue@2.7.16)
 
   vue-router@2.8.1(vue@2.7.16):
     dependencies:
@@ -10831,8 +10771,6 @@ snapshots:
   ws@8.21.3: {}
 
   xml-name-validator@5.0.0: {}
-
-  xstate@4.38.3: {}
 
   xtend@4.0.2: {}
 

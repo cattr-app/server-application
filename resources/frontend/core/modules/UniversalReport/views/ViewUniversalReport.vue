@@ -25,7 +25,7 @@
     import { mapGetters } from 'vuex';
     import UniversalReportService from '../service/universal-report.service';
     import List from './components/List';
-    import { Skeleton } from 'vue-loading-skeleton';
+    import Skeleton from '@/components/Skeleton';
     import moment from 'moment';
     import { isHandledRequestError } from '@/utils/requestError';
 

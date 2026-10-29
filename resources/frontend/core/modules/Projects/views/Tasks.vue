@@ -33,74 +33,70 @@
                     :blocks="blocks"
                     @update-block="updateBlock"
                 >
-                    <div
-                        v-for="stage in stages"
-                        :slot="stage.name"
-                        :key="`stage_${stage.name}`"
-                        class="status"
-                        :style="getHeaderStyle(stage.name)"
-                    >
-                        <at-button
-                            v-if="stage.order !== 0"
-                            type="text"
-                            size="large"
-                            class="button-kanban"
-                            icon="icon-chevron-left"
-                            :style="getHeaderStyle(stage.name)"
-                            @click="changeOrder(stage.order, 'left')"
-                        >
-                        </at-button>
-                        <h3>{{ stage.name }}</h3>
-                        <at-button
-                            v-if="stage.order !== stages.length - 1"
-                            type="text"
-                            size="large"
-                            class="button-kanban"
-                            icon="icon-chevron-right"
-                            :style="getHeaderStyle(stage.name)"
-                            @click="changeOrder(stage.order, 'right')"
-                        >
-                        </at-button>
-                    </div>
-
-                    <div
-                        v-for="block in blocks"
-                        :slot="block.id"
-                        :key="`block_${block.id}`"
-                        :class="{ task: true, handle: isDesktop }"
-                        @click="loadTask(block.id)"
-                        @mousedown="onDownMouse"
-                        @touchstart="onDown"
-                        @pointerdown="task = null"
-                    >
-                        <h4 class="task-name">{{ getTask(block.id).task_name }}</h4>
-                        <at-tag class="tag-priority" :color="getTask(block.id).priority.color">{{
-                            getTask(block.id).priority.name
-                        }}</at-tag>
-                        <p class="task-description" v-html="getTask(block.id).description"></p>
-                        <div class="task-users">
-                            <div class="task__tags">
-                                <at-tag v-if="isOverDue(companyData.timezone, block)" color="error"
-                                    >{{ $t('tasks.due_date--overdue') }}
-                                </at-tag>
-                                <at-tag v-if="isOverTime(block)" color="warning"
-                                    >{{ $t('tasks.estimate--overtime') }}
-                                </at-tag>
-                            </div>
-                            <span class="total-time-row">
-                                <i class="icon icon-clock"></i>&nbsp; {{ block.estimate }} {{ $t(`control.of`) }}
-                                {{ block.total_spent_time }}
-                            </span>
-                            <team-avatars :users="getTask(block.id).users"></team-avatars>
+                    <template v-for="stage in stages" #[stage.name]>
+                        <div :key="`stage_${stage.name}`" class="status" :style="getHeaderStyle(stage.name)">
+                            <at-button
+                                v-if="stage.order !== 0"
+                                type="text"
+                                size="large"
+                                class="button-kanban"
+                                icon="icon-chevron-left"
+                                :style="getHeaderStyle(stage.name)"
+                                @click="changeOrder(stage.order, 'left')"
+                            >
+                            </at-button>
+                            <h3>{{ stage.name }}</h3>
+                            <at-button
+                                v-if="stage.order !== stages.length - 1"
+                                type="text"
+                                size="large"
+                                class="button-kanban"
+                                icon="icon-chevron-right"
+                                :style="getHeaderStyle(stage.name)"
+                                @click="changeOrder(stage.order, 'right')"
+                            >
+                            </at-button>
                         </div>
-                        <at-button
-                            type="primary"
-                            hollow
-                            circle
-                            :class="{ 'hide-on-mobile': isDesktop, 'move-task': !isDesktop, handle: !isDesktop }"
-                            @click.stop
-                        ></at-button>
-                    </div>
+                    </template>
+
+                    <template v-for="block in blocks" #[block.id]>
+                        <div
+                            :key="`block_${block.id}`"
+                            :class="{ task: true, handle: isDesktop }"
+                            @click="loadTask(block.id)"
+                            @mousedown="onDownMouse"
+                            @touchstart="onDown"
+                            @pointerdown="task = null"
+                        >
+                            <h4 class="task-name">{{ getTask(block.id).task_name }}</h4>
+                            <at-tag class="tag-priority" :color="getTask(block.id).priority.color">{{
+                                getTask(block.id).priority.name
+                            }}</at-tag>
+                            <p class="task-description" v-html="getTask(block.id).description"></p>
+                            <div class="task-users">
+                                <div class="task__tags">
+                                    <at-tag v-if="isOverDue(companyData.timezone, block)" color="error"
+                                        >{{ $t('tasks.due_date--overdue') }}
+                                    </at-tag>
+                                    <at-tag v-if="isOverTime(block)" color="warning"
+                                        >{{ $t('tasks.estimate--overtime') }}
+                                    </at-tag>
+                                </div>
+                                <span class="total-time-row">
+                                    <i class="icon icon-clock"></i>&nbsp; {{ block.estimate }} {{ $t(`control.of`) }}
+                                    {{ block.total_spent_time }}
+                                </span>
+                                <team-avatars :users="getTask(block.id).users"></team-avatars>
+                            </div>
+                            <at-button
+                                type="primary"
+                                hollow
+                                circle
+                                :class="{ 'hide-on-mobile': isDesktop, 'move-task': !isDesktop, handle: !isDesktop }"
+                                @click.stop
+                            ></at-button>
+                        </div>
+                    </template>
                 </kanban-board>
             </div>
         </div>
@@ -196,6 +192,7 @@
 
 <script>
     import moment from 'moment-timezone';
+    import KanbanBoard from '@/components/KanbanBoard';
     import TeamAvatars from '@/components/TeamAvatars';
     import ProjectService from '@/services/resource/project.service';
     import StatusService from '@/services/resource/status.service';
@@ -206,6 +203,7 @@
     import { throttle } from 'lodash';
     export default {
         components: {
+            KanbanBoard,
             TeamAvatars,
         },
         name: 'Tasks',
@@ -700,24 +698,24 @@
         overflow-y: hidden;
     }
 
-    .project-tasks_kanban ::v-deep {
-        .drag-container {
+    .project-tasks_kanban {
+        :deep(.drag-container) {
             overflow: hidden;
         }
-        ul.drag-list,
-        ul.drag-inner-list {
+        :deep(ul.drag-list),
+        :deep(ul.drag-inner-list) {
             list-style-type: none;
             margin: 0;
             padding: 0;
         }
 
-        .drag-list {
+        :deep(.drag-list) {
             display: flex;
             align-items: stretch;
             min-height: calc(100vh - 250px);
         }
 
-        .drag-column {
+        :deep(.drag-column) {
             flex: 1;
             flex-shrink: 0;
             flex-basis: 400px;
@@ -734,23 +732,23 @@
             }
         }
 
-        .drag-column:not(:last-child) {
+        :deep(.drag-column:not(:last-child)) {
             margin-right: 16px;
         }
 
-        .drag-column-header {
+        :deep(.drag-column-header) {
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
 
-        .drag-inner-list {
+        :deep(.drag-inner-list) {
             min-height: 50px;
             height: 100%;
             color: white;
         }
 
-        .drag-item {
+        :deep(.drag-item) {
             margin: 16px;
             border: 1px solid #c5d9e8;
             border-radius: 6px;
@@ -762,34 +760,34 @@
             }
         }
 
-        .drag-header-more {
+        :deep(.drag-header-more) {
             cursor: pointer;
         }
 
         /* Dragula CSS  */
 
-        .gu-mirror {
+        :deep(.gu-mirror) {
             position: fixed !important;
             margin: 0 !important;
             z-index: 9999 !important;
             opacity: 0.8;
             list-style-type: none;
         }
-        .gu-mirror.withoutoffset {
+        :deep(.gu-mirror.withoutoffset) {
             transform: translate(-50%, -50%);
         }
-        .gu-hide {
+        :deep(.gu-hide) {
             display: none !important;
         }
 
-        .gu-unselectable {
+        :deep(.gu-unselectable) {
             -webkit-user-select: none !important;
             -moz-user-select: none !important;
             -ms-user-select: none !important;
             user-select: none !important;
         }
 
-        .gu-transit {
+        :deep(.gu-transit) {
             opacity: 0.2;
         }
     }
@@ -809,6 +807,7 @@
         transition: transform 250ms ease;
     }
     .slide-enter,
+    .slide-enter-from,
     .slide-leave-to {
         transform: translate(100%, 0);
     }
@@ -824,19 +823,19 @@
         .crud {
             overflow: auto;
         }
-        .project-tasks_kanban ::v-deep .drag-item {
+        .project-tasks_kanban :deep(.drag-item) {
             margin: 6px;
         }
         .scrollbar-top {
             display: none;
         }
-        .project-tasks_kanban ::v-deep {
-            .drag-container {
+        .project-tasks_kanban {
+            :deep(.drag-container) {
                 overflow: auto;
             }
             scroll-snap-type: x mandatory;
         }
-        .task ::v-deep {
+        .task {
             padding: 8px;
         }
         .task-view {
@@ -856,7 +855,7 @@
             font-size: 10px;
         }
 
-        .project-tasks_kanban ::v-deep .drag-column {
+        .project-tasks_kanban :deep(.drag-column) {
             scroll-snap-align: center;
             flex-shrink: 0;
         }
@@ -865,19 +864,19 @@
         .crud {
             overflow: auto;
         }
-        .project-tasks_kanban ::v-deep .drag-item {
+        .project-tasks_kanban :deep(.drag-item) {
             margin: 4px;
         }
         .scrollbar-top {
             display: none;
         }
-        .project-tasks_kanban ::v-deep {
-            .drag-container {
+        .project-tasks_kanban {
+            :deep(.drag-container) {
                 overflow: auto;
             }
             scroll-snap-type: x mandatory;
         }
-        .task ::v-deep {
+        .task {
             padding: 8px;
         }
         .task-view {
@@ -897,7 +896,7 @@
         .total-time-row {
             font-size: 10px;
         }
-        .project-tasks_kanban ::v-deep .drag-column {
+        .project-tasks_kanban :deep(.drag-column) {
             scroll-snap-align: center;
             flex-shrink: 0;
         }
@@ -912,11 +911,11 @@
         .scrollbar-top {
             display: none;
         }
-        .project-tasks_kanban ::v-deep .drag-item {
+        .project-tasks_kanban :deep(.drag-item) {
             margin: 2px;
         }
-        .project-tasks_kanban ::v-deep {
-            .drag-container {
+        .project-tasks_kanban {
+            :deep(.drag-container) {
                 overflow: auto;
             }
             scroll-snap-type: x mandatory;
@@ -929,7 +928,7 @@
             margin: 0;
             border-radius: 0;
         }
-        .task ::v-deep {
+        .task {
             padding: 8px;
         }
         .task-name {
@@ -944,7 +943,7 @@
         .total-time-row {
             font-size: 7px;
         }
-        .project-tasks_kanban ::v-deep .drag-column {
+        .project-tasks_kanban :deep(.drag-column) {
             flex: 0 0 90%;
             margin-right: 10px;
             scroll-snap-align: center;

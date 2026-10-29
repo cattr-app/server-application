@@ -21,15 +21,14 @@
 
                         <component :is="config.authInput" @change="change" @submit="submit" />
 
-                        <vue-recaptcha
+                        <recaptcha
                             v-if="recaptchaKey"
                             ref="recaptcha"
-                            :loadRecaptchaScript="true"
                             :sitekey="recaptchaKey"
                             class="recaptcha"
                             @verify="onCaptchaVerify"
                             @expired="onCaptchaExpired"
-                        ></vue-recaptcha>
+                        ></recaptcha>
                     </div>
                     <at-button
                         class="login__btn"
@@ -51,7 +50,7 @@
 
 <script>
     import { ValidationObserver } from 'vee-validate';
-    import { VueRecaptcha } from 'vue-recaptcha';
+    import Recaptcha from '@/components/Recaptcha';
     import AuthInput from './AuthInput';
     import sloganGenerator from '@/helpers/sloganGenerator';
     import has from 'lodash/has';
@@ -63,7 +62,7 @@
 
         components: {
             ValidationObserver,
-            VueRecaptcha,
+            Recaptcha,
             AuthInput,
         },
 
@@ -125,7 +124,9 @@
                 const apiService = this.$store.getters['user/apiService'];
 
                 try {
-                    if ('grecaptcha' in window) {
+                    // The widget exists only while a recaptcha key is set; grecaptcha may stay loaded from an
+                    // earlier visit of this page in the same tab.
+                    if (this.$refs.recaptcha) {
                         this.$refs.recaptcha.reset();
                     }
 
@@ -256,7 +257,7 @@
             text-align: center;
         }
 
-        ::v-deep .input-group {
+        :deep(.input-group) {
             margin-bottom: 0.75rem;
         }
 

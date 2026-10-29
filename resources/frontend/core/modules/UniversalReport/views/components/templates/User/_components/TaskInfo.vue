@@ -75,7 +75,7 @@
 </template>
 
 <script>
-    import { Skeleton } from 'vue-loading-skeleton';
+    import Skeleton from '@/components/Skeleton';
 
     export default {
         methods: {
