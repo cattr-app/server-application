@@ -9,7 +9,7 @@
                 <UserSelect @change="onUsersChange" />
             </div>
             <div class="controls-row__item">
-                <ProjectSelect :unfiltered-when-all-selected="true" @change="onProjectsChange" />
+                <ProjectSelect :unfiltered-when-all-selected="user.role_id === 2" @change="onProjectsChange" />
             </div>
 
             <div class="controls-row__item">

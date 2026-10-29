@@ -52,10 +52,7 @@
                     this.selectedProjectIds.length === this.ids.length &&
                     this.ids.every(id => this.selectedProjectIds.includes(id));
 
-                this.$emit(
-                    'change',
-                    this.unfilteredWhenAllSelected && allSelected ? null : this.selectedProjectIds,
-                );
+                this.$emit('change', this.unfilteredWhenAllSelected && allSelected ? null : this.selectedProjectIds);
             },
             onLoad(allSelectOptions) {
                 const allProjectIds = allSelectOptions.map(option => option.id);

@@ -56,10 +56,8 @@ class HistoricalIntervalAccessTest extends TestCase
     {
         $this->actingAs($this->user);
 
-        // The project itself remains inaccessible, but the user's own interval does not.
-        $this->assertFalse(Project::whereKey($this->project->id)->exists());
-        $this->assertNotNull(TimeInterval::find($this->ownInterval->id));
-        $this->assertNull(TimeInterval::find($this->colleagueInterval->id));
+        // The HTTP request must still deny project access after membership removal.
+        $this->postJson('projects/show', ['id' => $this->project->id])->assertForbidden();
 
         $dashboard = $this->postJson('report/dashboard', $this->period + [
             'user_timezone' => 'UTC',
@@ -130,7 +128,7 @@ class HistoricalIntervalAccessTest extends TestCase
         $this->actingAs($this->user)->getJson("time-intervals/{$this->ownInterval->id}/screenshot-urls")
             ->assertOk();
         $this->actingAs($this->user)->getJson("time-intervals/{$this->colleagueInterval->id}/screenshot-urls")
-            ->assertNotFound();
+            ->assertNotFound('page_not_found');
     }
 
     public function test_project_managers_can_view_colleague_intervals_only_while_assigned(): void

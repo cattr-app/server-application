@@ -6,7 +6,7 @@
 
             <UserSelect class="controls-row__item" @change="onUsersSelect" />
 
-            <ProjectSelect class="controls-row__item" :unfiltered-when-all-selected="true" @change="onProjectsChange" />
+            <ProjectSelect class="controls-row__item" :unfiltered-when-all-selected="user.role_id === 2" @change="onProjectsChange" />
 
             <div class="controls-row__item controls-row__item--left-auto">
                 <small v-if="companyData.timezone">
@@ -93,7 +93,7 @@
             };
         },
         computed: {
-            ...mapGetters('user', ['companyData']),
+            ...mapGetters('user', ['user', 'companyData']),
             totalTime() {
                 return formatDurationString(this.projects.reduce((acc, cur) => acc + cur.time, 0));
             },

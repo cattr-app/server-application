@@ -10,7 +10,11 @@
 
                 <UserSelect class="controls-row__item" @change="onUsersChange" />
 
-                <ProjectSelect class="controls-row__item" :unfiltered-when-all-selected="true" @change="onProjectsChange" />
+                <ProjectSelect
+                    class="controls-row__item"
+                    :unfiltered-when-all-selected="user.role_id === 2"
+                    @change="onProjectsChange"
+                />
 
                 <TimezonePicker :value="timezone" class="controls-row__item" @onTimezoneChange="onTimezoneChange" />
             </div>
