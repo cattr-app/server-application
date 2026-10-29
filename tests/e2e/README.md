@@ -71,7 +71,7 @@ docker run --rm --network host --ipc=host --init --user "$(id -u):$(id -g)" -e H
   in that order, one worker (the projects share one database).
 - `--project=smoke` with a **development** build (`pnpm dev`): only that build prints `[Vue warn]`;
   pass `E2E_BUILD=dev` for clarity of the report. CI runs smoke on both builds.
-- Journeys that change data use their own entities (created through the API, removed in `finally`) or
+- Journeys that change data use their own entities (created through the API, removed in `finally` or `afterEach`) or
   restore what they change (language), so they do not depend on order and leave the seed intact.
   Logout runs in its own session, so the shared token stays valid.
 - Determinism: cookie `lang=en`, locale `en-US`, timezone `UTC`, `page.clock.install()` at the seed time

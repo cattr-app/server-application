@@ -100,17 +100,38 @@ async function waitForEditForm(page, name) {
 }
 
 // Universal report create -> list -> view -> edit -> view. The report is personal to the admin and is
-// removed through the API whatever happens; universal_reports is empty in the seed.
-test('universal report: create, view, edit', async ({ page }) => {
-    const name = `E2E universal report ${Date.now()}`;
-    let reportId;
+// removed through the API after the test; universal_reports is empty in the seed.
+test.describe('universal report', () => {
+    const prefix = 'E2E universal report ';
+    let api;
 
-    await openFromReportsMenu(page, 'Universal report', '/report/universal');
-    const api = await apiClient(page);
-    const personal = page.locator('.sidebar').filter({ hasText: 'Personal reports' });
-    await expect(personal.getByText('No personal reports.')).toBeVisible();
+    async function removeJourneyReports() {
+        const { data } = await api.get('report/universal-report');
+        for (const report of data.personal.filter(report => report.name.startsWith(prefix))) {
+            await api.post('report/universal-report/remove', { id: report.id });
+        }
+    }
 
-    try {
+    test.beforeEach(async ({ page }) => {
+        api = undefined;
+        await page.goto('/about');
+        api = await apiClient(page);
+        await removeJourneyReports();
+    });
+
+    test.afterEach(async () => {
+        if (api) {
+            await removeJourneyReports();
+        }
+    });
+
+    test('create, view, edit', async ({ page }) => {
+        const name = `${prefix}${Date.now()}`;
+
+        await openFromReportsMenu(page, 'Universal report', '/report/universal');
+        const personal = page.locator('.sidebar').filter({ hasText: 'Personal reports' });
+        await expect(personal.getByText('No personal reports.')).toBeVisible();
+
         // Create: a personal report on the seeded project with its name and the time worked per day.
         await page.getByRole('button', { name: 'Create a new report' }).click();
         await expect(page).toHaveURL(/\/report\/universal\/create(\?|$)/);
@@ -123,7 +144,7 @@ test('universal report: create, view, edit', async ({ page }) => {
         await page.getByRole('button', { name: 'Create personal' }).click();
 
         await expect(page).toHaveURL(/\/report\/universal\/edit\/\d+(\?|$)/);
-        reportId = Number(new URL(page.url()).pathname.split('/').pop());
+        const reportId = Number(new URL(page.url()).pathname.split('/').pop());
         await waitForEditForm(page, name);
         const { data: created } = await api.get(`report/universal-report/show?id=${reportId}`);
         expect(created).toMatchObject({
@@ -180,15 +201,8 @@ test('universal report: create, view, edit', async ({ page }) => {
         await waitForAppIdle(page);
         await expect(view.locator('.control-item.title')).toHaveText(`${name} (edited)`);
         await expect(item.locator('.base-info .members')).toContainText(SEED.user.name);
-    } finally {
-        if (!reportId) {
-            const { data } = await api.get('report/universal-report');
-            reportId = data.personal.find(report => report.name === name)?.id;
-        }
-        if (reportId) {
-            await api.post('report/universal-report/remove', { id: reportId });
-        }
-    }
+        await expect(item.locator('.base-info .members')).toContainText('25h 0m');
+    });
 });
 
 test('screenshots', async ({ page }) => {
