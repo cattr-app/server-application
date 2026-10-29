@@ -6,7 +6,7 @@
 
             <UserSelect class="controls-row__item" @change="onUsersSelect" />
 
-            <ProjectSelect class="controls-row__item" @change="onProjectsChange" />
+            <ProjectSelect class="controls-row__item" :unfiltered-when-all-selected="true" @change="onProjectsChange" />
 
             <div class="controls-row__item controls-row__item--left-auto">
                 <small v-if="companyData.timezone">
@@ -83,7 +83,7 @@
             return {
                 isDataLoading: false,
                 projects: [],
-                projectsList: [],
+                projectsList: null,
                 projectReportsList: {},
                 datepickerDateStart: getStartDate(today),
                 datepickerDateEnd: getEndDate(today),

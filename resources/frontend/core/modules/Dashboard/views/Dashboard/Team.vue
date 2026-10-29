@@ -10,7 +10,7 @@
 
                 <UserSelect class="controls-row__item" @change="onUsersChange" />
 
-                <ProjectSelect class="controls-row__item" @change="onProjectsChange" />
+                <ProjectSelect class="controls-row__item" :unfiltered-when-all-selected="true" @change="onProjectsChange" />
 
                 <TimezonePicker :value="timezone" class="controls-row__item" @onTimezoneChange="onTimezoneChange" />
             </div>
@@ -187,7 +187,7 @@
             }),
             load: throttle(async function (withLoadingIndicator = true) {
                 this.isDataLoading = withLoadingIndicator;
-                if (!this.userIDs.length || !this.projectIDs.length) {
+                if (!this.userIDs.length || (this.projectIDs !== null && !this.projectIDs.length)) {
                     this.isDataLoading = false;
 
                     return;
@@ -215,7 +215,7 @@
                 this.load();
             },
             onProjectsChange(projectIDs) {
-                this.projectIDs = [...projectIDs];
+                this.projectIDs = projectIDs === null ? null : [...projectIDs];
 
                 this.load();
             },

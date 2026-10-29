@@ -6,7 +6,6 @@ use App\Helpers\ReportHelper;
 use App\Http\Requests\Reports\ProjectReportRequest;
 use App\Jobs\GenerateAndSendReport;
 use App\Models\User;
-use App\Models\Project;
 use App\Reports\ProjectReportExport;
 use Carbon\Carbon;
 use Illuminate\Contracts\Bus\Dispatcher;
@@ -152,7 +151,7 @@ class ProjectReportController
         return responder()->success(
             ProjectReportExport::init(
                 $request->input('users', User::all()->pluck('id')->toArray()),
-                $request->input('projects', Project::all()->pluck('id')->toArray()),
+                $request->input('projects'),
                 Carbon::parse($request->input('start_at'))->setTimezone($companyTimezone),
                 Carbon::parse($request->input('end_at'))->setTimezone($companyTimezone),
                 $companyTimezone
@@ -211,7 +210,7 @@ class ProjectReportController
         $job = new GenerateAndSendReport(
             ProjectReportExport::init(
                 $request->input('users', User::all()->pluck('id')->toArray()),
-                $request->input('projects', Project::all()->pluck('id')->toArray()),
+                $request->input('projects'),
                 Carbon::parse($request->input('start_at'))->setTimezone($companyTimezone),
                 Carbon::parse($request->input('end_at'))->setTimezone($companyTimezone),
                 $companyTimezone

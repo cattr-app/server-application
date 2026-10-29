@@ -31,6 +31,10 @@
                 type: Array,
                 default: null,
             },
+            unfilteredWhenAllSelected: {
+                type: Boolean,
+                default: false,
+            },
         },
         data() {
             const selectedProjectIds =
@@ -43,6 +47,16 @@
             };
         },
         methods: {
+            emitSelection() {
+                const allSelected =
+                    this.selectedProjectIds.length === this.ids.length &&
+                    this.ids.every(id => this.selectedProjectIds.includes(id));
+
+                this.$emit(
+                    'change',
+                    this.unfilteredWhenAllSelected && allSelected ? null : this.selectedProjectIds,
+                );
+            },
             onLoad(allSelectOptions) {
                 const allProjectIds = allSelectOptions.map(option => option.id);
                 this.ids = allProjectIds;
@@ -50,7 +64,7 @@
                 if (!localStorage.getItem(localStorageKey)) {
                     this.selectedProjectIds = allProjectIds;
                     localStorage.setItem(localStorageKey, JSON.stringify(this.selectedProjectIds));
-                    this.$emit('change', this.selectedProjectIds);
+                    this.emitSelection();
                     this.$nextTick(() => this.$emit('loaded'));
                     return;
                 }
@@ -65,13 +79,13 @@
                     localStorage.setItem(localStorageKey, JSON.stringify(this.selectedProjectIds));
                 }
 
-                this.$emit('change', this.selectedProjectIds);
+                this.emitSelection();
                 this.$nextTick(() => this.$emit('loaded'));
             },
             selectedProjects(values) {
                 this.selectedProjectIds = values;
                 localStorage.setItem(localStorageKey, JSON.stringify(this.selectedProjectIds));
-                this.$emit('change', values);
+                this.emitSelection();
             },
         },
     };

@@ -154,7 +154,10 @@ class DashboardExport extends AppReport implements FromCollection, WithMapping, 
                 'time_intervals.is_manual',
                 'users.email as user_email',
             ]
-        )->whereIn('project_id', $this->projects);
+        );
+        if ($this->projects !== null) {
+            $query->whereIn('projects.id', $this->projects);
+        }
 
         if (!is_null($where)) {
             $query = $query->where($where);

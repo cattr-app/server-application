@@ -9,7 +9,7 @@
                 <UserSelect @change="onUsersChange" />
             </div>
             <div class="controls-row__item">
-                <ProjectSelect @change="onProjectsChange" />
+                <ProjectSelect :unfiltered-when-all-selected="true" @change="onProjectsChange" />
             </div>
 
             <div class="controls-row__item">
@@ -96,7 +96,7 @@
             return {
                 intervals: [],
                 userIDs: null,
-                projectsList: [],
+                projectsList: null,
                 datepickerDateStart: '',
                 datepickerDateEnd: '',
                 projectService: new ProjectService(),
@@ -228,7 +228,7 @@
                     const { data } = await this.intervalService.getAll({
                         where: {
                             user_id: ['in', this.userIDs],
-                            'task.project_id': ['in', this.projectsList],
+                            ...(this.projectsList === null ? {} : { 'task.project_id': ['in', this.projectsList] }),
                             start_at: ['between', [startAt, endAt]],
                         },
                         page: this.page,
