@@ -21,8 +21,15 @@ function createSelector(storedSelection) {
         path.join(__dirname, '../../resources/frontend/core/components/ProjectSelect.vue'),
         'utf8',
     );
+    const openTag = '<script>';
+    const closeTag = '</script>';
+    const start = source.indexOf(openTag);
+    const end = source.indexOf(closeTag, start + openTag.length);
+    if (start === -1 || end === -1) {
+        throw new Error('ProjectSelect.vue script block not found');
+    }
     const script = source
-        .match(/<script>([\s\S]*?)<\/script>/)[1]
+        .slice(start + openTag.length, end)
         .replace(/^\s*import .*;\s*$/gm, '')
         .replace('export default {', 'const component = {');
     const sandbox = { localStorage, MultiSelect: class {}, ProjectService: class {}, JSON };
