@@ -6,7 +6,11 @@
 
             <UserSelect class="controls-row__item" @change="onUsersSelect" />
 
-            <ProjectSelect class="controls-row__item" :unfiltered-when-all-selected="user.role_id === 2" @change="onProjectsChange" />
+            <ProjectSelect
+                class="controls-row__item"
+                :unfiltered-when-all-selected="user.role_id === 2"
+                @change="onProjectsChange"
+            />
 
             <div class="controls-row__item controls-row__item--left-auto">
                 <small v-if="companyData.timezone">
