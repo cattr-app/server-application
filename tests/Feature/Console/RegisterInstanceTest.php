@@ -35,8 +35,7 @@ class RegisterInstanceTest extends TestCase
         Http::assertSent(static fn (Request $request) =>
             $request->url() === 'https://stats.example.test/v2/instance'
             && $request['ownerEmail'] === 'admin@example.test'
-            && $request['version'] === config('app.version')
-        );
+            && $request['version'] === config('app.version'));
     }
 
     public function test_http_error_displays_json_message(): void
