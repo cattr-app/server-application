@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Helpers\ModuleHelper;
 use Illuminate\Console\Command;
-use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 use Exception;
 use Settings;
@@ -42,15 +41,23 @@ class RegisterInstance extends Command
         try {
             $appVersion = config('app.version');
 
-            $responseBody = Http::acceptJson()
+            $response = Http::acceptJson()
                 ->post(config('app.stats_collector_url') . '/v2/instance', [
                     'ownerEmail' => $this->argument('adminEmail'),
                     'version' => $appVersion,
                     'modules' => ModuleHelper::getModulesInfo(),
                     'image' => getenv('IMAGE_VERSION'),
-                ])
-                ->throw()
-                ->json();
+                ]);
+
+            if (!$response->successful()) {
+                $message = $response->json('message');
+                $fallback = $response->toException()?->getMessage()
+                    ?? "HTTP request returned status code {$response->status()}.";
+                $this->warn(is_string($message) && trim($message) !== '' ? $message : $fallback);
+                return 0;
+            }
+
+            $responseBody = $response->json();
 
             if (!is_array($responseBody)) {
                 $this->warn('Could not parse the registration response from the server.');
@@ -79,11 +86,6 @@ class RegisterInstance extends Command
 
                 $this->alert('You have a vulnerable version. Please update to the latest version.');
             }
-
-            return 0;
-        } catch (RequestException $e) {
-            $message = $e->response->json('message');
-            $this->warn(is_string($message) && trim($message) !== '' ? $message : $e->getMessage());
 
             return 0;
         } catch (Exception) {

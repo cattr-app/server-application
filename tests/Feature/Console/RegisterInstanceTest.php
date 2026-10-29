@@ -49,6 +49,31 @@ class RegisterInstanceTest extends TestCase
         $this->assertSame('', Settings::scope('core')->get('instance'));
     }
 
+    public function test_redirect_response_displays_json_message_without_registering(): void
+    {
+        Http::fake(['*' => Http::response([
+            'message' => 'Registration rejected',
+            'instanceId' => 'must-not-be-stored',
+        ], 302)]);
+
+        $this->artisan('cattr:register', ['adminEmail' => 'admin@example.test'])
+            ->expectsOutputToContain('Registration rejected')
+            ->assertExitCode(0);
+
+        $this->assertSame('', Settings::scope('core')->get('instance'));
+    }
+
+    public function test_redirect_without_json_message_uses_http_status(): void
+    {
+        Http::fake(['*' => Http::response('', 302)]);
+
+        $this->artisan('cattr:register', ['adminEmail' => 'admin@example.test'])
+            ->expectsOutputToContain('302')
+            ->assertExitCode(0);
+
+        $this->assertSame('', Settings::scope('core')->get('instance'));
+    }
+
     public static function unusableErrorBodies(): array
     {
         return [
