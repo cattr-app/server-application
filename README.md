@@ -86,6 +86,10 @@ Only the exact value `true` enables a module. The full rules and examples are in
 [docs/dev/module-activation-flags.md](docs/dev/module-activation-flags.md); installing
 modules for development is described in [CONTRIBUTING.md](CONTRIBUTING.md#module-system).
 
+The published Docker image contains no external modules, so the flags alone do nothing there;
+build a custom image as described in
+[Building an image with modules](CONTRIBUTING.md#building-an-image-with-modules).
+
 ## Documentation
 
 - [User Guide](https://docs.cattr.app)
