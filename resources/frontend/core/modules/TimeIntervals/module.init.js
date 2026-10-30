@@ -26,9 +26,12 @@ export const ModuleConfig = {
 
 class ManualTimeIntervalService extends TimeIntervalService {
     async save(data) {
+        const accountId = rootStore.getters['user/user']?.id;
         const response = await super.save(toIntervalPayload(data));
         // Only a saved interval counts as using the task; failed requests throw above.
-        rememberRecentTask(rootStore.getters['user/user']?.id, data.task_id);
+        if (rootStore.getters['user/user']?.id === accountId) {
+            rememberRecentTask(accountId, data.task_id);
+        }
         return response;
     }
 }

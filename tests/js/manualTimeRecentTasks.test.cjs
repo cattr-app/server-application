@@ -85,7 +85,7 @@ test('storage failures do not break reading or saving', () => {
     assert.deepEqual(toArray(recent.rememberRecentTask(1, 5, null)), [5]);
 });
 
-function loadManualService({ save, userId = 1 }) {
+function loadManualService({ save, userId = 1, store = { getters: { 'user/user': { id: userId } } } }) {
     const source = fs.readFileSync(path.join(moduleDir, 'module.init.js'), 'utf8');
     const match = source.match(/class ManualTimeIntervalService[\s\S]*?\n}\n/);
     assert.ok(match, 'ManualTimeIntervalService not found');
@@ -98,10 +98,10 @@ function loadManualService({ save, userId = 1 }) {
         },
         toIntervalPayload: data => ({ ...data, payload: true }),
         rememberRecentTask: (accountId, taskId) => remembered.push([accountId, taskId]),
-        rootStore: { getters: { 'user/user': { id: userId } } },
+        rootStore: store,
     };
     vm.runInNewContext(match[0] + '\nthis.Service = ManualTimeIntervalService;', sandbox);
-    return { service: new sandbox.Service(), remembered };
+    return { service: new sandbox.Service(), remembered, store };
 }
 
 test('history is updated only after time-intervals/create succeeds', async () => {
@@ -118,5 +118,18 @@ test('a rejected save leaves history unchanged', async () => {
         },
     });
     await assert.rejects(service.save({ task_id: 7 }));
+    assert.deepEqual(remembered, []);
+});
+
+test('a save that finishes after the account changed is not recorded for either account', async () => {
+    const store = { getters: { 'user/user': { id: 1 } } };
+    const { service, remembered } = loadManualService({
+        store,
+        save: async () => {
+            store.getters['user/user'] = { id: 2 };
+            return { data: {} };
+        },
+    });
+    await service.save({ task_id: 7 });
     assert.deepEqual(remembered, []);
 });
