@@ -35,7 +35,8 @@ export function validateDuration(value) {
         return 'invalid';
     }
 
-    if (minutes <= 0) {
+    // Anything below one second cannot produce a later end instant once stored.
+    if (minutes * 60 < 1) {
         return 'not_positive';
     }
 

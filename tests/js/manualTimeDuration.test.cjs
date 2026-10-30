@@ -97,6 +97,8 @@ test('invalid durations are rejected and never move the end time', () => {
         [0, 'not_positive'],
         ['0', 'not_positive'],
         [-5, 'not_positive'],
+        [0.000001, 'not_positive'],
+        ['0.01', 'not_positive'],
         ['-5', 'not_positive'],
         ['abc', 'invalid'],
         ['', 'invalid'],
@@ -116,6 +118,8 @@ test('invalid durations are rejected and never move the end time', () => {
         assert.deepEqual(writes, []);
     }
     assert.equal(duration.validateDuration(540), null);
+    assert.equal(duration.validateDuration(1 / 60), null);
+    assert.ok(Date.parse(duration.addDuration('2026-10-30T09:00:00.000Z', 1 / 60)) > Date.parse('2026-10-30T09:00:00.000Z'));
     assert.equal(duration.validateDuration(' 95 '), null);
 });
 
