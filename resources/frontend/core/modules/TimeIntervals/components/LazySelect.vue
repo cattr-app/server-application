@@ -227,8 +227,9 @@
             },
             onOpen() {
                 this.isOpen = true;
-                if (this.query === '' && !this.showingRecent && !this.isLoading) {
-                    this.loadRecent(this.requestId);
+                // Re-resolve recents on every opening so labels and access are never stale.
+                if (this.query === '') {
+                    this.restartSearch();
                 }
                 this.$nextTick(this.observeNextPage);
             },

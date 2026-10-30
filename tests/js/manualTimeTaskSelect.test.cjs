@@ -50,6 +50,7 @@ function createSelector({
     };
     // Search-restart tests opt into the real implementation.
     instance.realRestartSearch = component.methods.restartSearch;
+    if (getRecentTaskIds) instance.restartSearch = instance.realRestartSearch;
     instance.debouncedSearch = Object.assign(requestId => instance.loadNextPage(requestId), { cancel() {} });
     return { component, instance, events };
 }
@@ -340,4 +341,24 @@ test('a preselected task not among recents is still rendered as the selection', 
     await tick();
     assert.deepEqual(Array.from(instance.options, task => task.id), [1]);
     assert.equal(component.computed.selectedOption.call(instance).label, 'From task');
+});
+
+test('reopening the selector re-resolves recent tasks instead of reusing cached options', async () => {
+    let name = 'Old name';
+    let calls = 0;
+    const { instance } = createSelector({
+        getRecentTaskIds: () => [1],
+        search: async () => {
+            calls += 1;
+            return page([{ id: 1, task_name: name, project: null }]);
+        },
+    });
+    instance.onOpen();
+    await tick();
+    instance.onClose();
+    name = 'New name';
+    instance.onOpen();
+    await tick();
+    assert.equal(calls, 2);
+    assert.equal(instance.options[0].label, 'New name');
 });
