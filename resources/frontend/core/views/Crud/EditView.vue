@@ -77,6 +77,7 @@
                                                     "
                                                     :name="$t(field.label)"
                                                     :vid="field.key"
+                                                    :immediate="field.immediate === true"
                                                 >
                                                     <renderable-field
                                                         v-model="values[field.key]"
@@ -343,8 +344,11 @@
                 } else if (this.pageData.type === 'new') {
                     this.fields.forEach(field => {
                         if (field.default !== undefined) {
-                            this.values[field.key] =
-                                typeof field.default === 'function' ? field.default(this.$store) : field.default;
+                            this.$set(
+                                this.values,
+                                field.key,
+                                typeof field.default === 'function' ? field.default(this.$store) : field.default,
+                            );
                         }
                     });
                 }
