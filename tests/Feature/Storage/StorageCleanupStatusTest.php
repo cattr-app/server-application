@@ -325,6 +325,30 @@ class StorageCleanupStatusTest extends TestCase
         $this->assertSame(StorageCleanupStatus::COMPLETED, StorageCleanupStatus::get()['status']);
     }
 
+    /**
+     * The run lock stays held by another run (e.g. a replaced request checking it is not current, or a worker
+     * gone without releasing it) while the request is still the current one: it must not be dropped silently.
+     */
+    public function test_current_request_is_not_dropped_while_the_lock_is_held(): void
+    {
+        Queue::fake();
+        config(['cleaner.lock_wait' => 1]);
+
+        $runId = StorageCleanupStatus::queue();
+        $this->assertTrue(StorageCleanupStatus::runLock('other')->get());
+
+        try {
+            (new RotateScreenshots($runId))->handle();
+            $this->fail('The request is dropped');
+        } catch (RuntimeException $e) {
+            $this->assertStringContainsString('still held', $e->getMessage());
+        }
+
+        // The worker fails the job: the request is reported as failed and can be requested again
+        (new RotateScreenshots($runId))->failed();
+        $this->assertSame(StorageCleanupStatus::FAILED, StorageCleanupStatus::get()['status']);
+    }
+
     public function test_job_passes_its_run_to_the_command(): void
     {
         $this->needThinning(true);

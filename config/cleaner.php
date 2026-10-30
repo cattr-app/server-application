@@ -12,6 +12,8 @@ return [
     'page_size' => 10,
     // Seconds the queue worker lets a requested cleanup run, must stay below QUEUE_RETRY_AFTER
     'job_timeout' => (int)env('CLEANER_JOB_TIMEOUT', 900),
+    // Seconds a requested cleanup waits for the run lock held by another one before it is reported as failed
+    'lock_wait' => (int)env('CLEANER_LOCK_WAIT', 60),
     // A requested cleanup no worker has picked up within this time is reported as failed
     'queued_timeout' => (int)env('CLEANER_QUEUED_TIMEOUT', 3600),
     // A running cleanup without a heartbeat (one per removed page of screenshots) within this time is failed.

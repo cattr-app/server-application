@@ -3,9 +3,12 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Cache\Lock;
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Support\Str;
 use App\Helpers\StorageCleaner;
 use App\Helpers\StorageCleanupStatus;
+use RuntimeException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Throwable;
 
@@ -47,7 +50,12 @@ class RotateScreenshots extends Command
         $runId = $this->option('run') ?: (string)Str::uuid();
         $lock = StorageCleanupStatus::runLock($runId);
 
-        if (!$lock->get()) {
+        if (!$this->acquire($lock, $requested)) {
+            if ($requested && StorageCleanupStatus::isCurrent($runId)) {
+                // Reported as failed by the job, the admin can request it again
+                throw new RuntimeException('The run lock is still held by another thinning');
+            }
+
             // The run in progress records its own outcome
             $this->info('Another thinning is in progress');
             return;
@@ -86,6 +94,23 @@ class RotateScreenshots extends Command
             throw $e;
         } finally {
             $lock->release();
+        }
+    }
+
+    /**
+     * Takes the run lock. A requested run waits for it: the holder can be a replaced request that only checks
+     * it is not current and leaves, and giving up then would drop the current request.
+     */
+    private function acquire(Lock $lock, bool $requested): bool
+    {
+        if (!$requested) {
+            return (bool)$lock->get();
+        }
+
+        try {
+            return (bool)$lock->block(config('cleaner.lock_wait'));
+        } catch (LockTimeoutException) {
+            return false;
         }
     }
 }

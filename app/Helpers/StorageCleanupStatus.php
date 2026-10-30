@@ -109,6 +109,16 @@ class StorageCleanupStatus
     }
 
     /**
+     * Whether the requested run is the current one and has not started yet.
+     */
+    public static function isCurrent(string $runId): bool
+    {
+        $state = self::stored();
+
+        return $state['run_id'] === $runId && $state['status'] === self::QUEUED;
+    }
+
+    /**
      * Lock held for the whole run, owned by the run: only that run can release it.
      */
     public static function runLock(string $runId): Lock
