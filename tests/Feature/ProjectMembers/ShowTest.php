@@ -106,7 +106,7 @@ class ShowTest extends TestCase
 
     public function test_not_existing_project(): void
     {
-        $response = $this->actingAs($this->admin)->postJson(self::URI, ['project_id' => $this->faker->randomNumber()]);
+        $response = $this->actingAs($this->admin)->postJson(self::URI, ['project_id' => Project::withoutGlobalScopes()->max('id') + 1]);
 
         $response->assertValidationError();
     }

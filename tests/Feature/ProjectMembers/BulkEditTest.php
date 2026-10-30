@@ -107,7 +107,7 @@ class BulkEditTest extends TestCase
 
     public function test_not_existing_project(): void
     {
-        $this->project->id = $this->faker->randomNumber();
+        $this->project->id = Project::withoutGlobalScopes()->max('id') + 1;
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->generateRequest());
 
