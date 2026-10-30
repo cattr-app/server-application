@@ -12,7 +12,6 @@ use App\Http\Requests\TaskComment\UpdateTaskCommentRequest;
 use Filter;
 use App\Models\TaskComment;
 use Exception;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -202,20 +201,8 @@ class TaskCommentController extends ItemController
     {
         Filter::listen(
             Filter::getQueryFilterName(),
-            static function ($query) use ($request) {
-                if (!$request->user()->can('edit', TaskComment::class)) {
-                    $query = $query->whereHas(
-                        'task',
-                        static fn (Builder $taskQuery) => $taskQuery->where(
-                            'user_id',
-                            '=',
-                            $request->user()->id
-                        )
-                    );
-                }
-
-                return $query->with('user');
-            }
+            // Same rule as show(): only comments on tasks visible to the user
+            static fn($query) => $query->whereHas('task')->with('user')
         );
 
         return $this->_index($request);
@@ -236,7 +223,7 @@ class TaskCommentController extends ItemController
      */
     public function show(ShowTaskCommentRequestStatus $request): JsonResponse
     {
-        // Only comments on tasks visible to the user, the task's global access scope applies inside whereHas
+        // Only comments on tasks visible to the user: the task's global access scope applies inside whereHas
         Filter::listen(Filter::getQueryFilterName(), static fn($query) => $query->whereHas('task'));
 
         return $this->_show($request);
