@@ -57,6 +57,13 @@ class ShowTest extends TestCase
         $response->assertNotFound('page_not_found');
     }
 
+    public function test_non_integer_id(): void
+    {
+        $response = $this->actingAs($this->admin)->getJson(self::URI . "?id={$this->comment->id}x");
+
+        $response->assertValidationError();
+    }
+
     public function test_without_params(): void
     {
         $response = $this->actingAs($this->admin)->getJson(self::URI);

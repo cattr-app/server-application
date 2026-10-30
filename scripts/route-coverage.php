@@ -19,6 +19,7 @@ $root = dirname(__DIR__);
 
 $options = getopt('', ['log:']);
 $log = $options['log'] ?? null;
+$status = 0;
 
 if ($log === null) {
     $log = tempnam(sys_get_temp_dir(), 'route-coverage-');
@@ -65,3 +66,5 @@ $uncovered = $routes
 
 echo "Routes without a feature test: {$uncovered->count()} of {$routes->count()}" . PHP_EOL . PHP_EOL;
 echo $uncovered->implode(PHP_EOL) . PHP_EOL;
+
+exit($status);
