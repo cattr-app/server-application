@@ -357,7 +357,8 @@
                 this.onSelectFilterChange(key, data);
             },
             onSelectFilterChange(key, data) {
-                const value = Array.isArray(data) && data.length > 0 ? ['=', data] : '';
+                // Copy the ids: selects mutate their selection array in place (UserSelect.toggleUser).
+                const value = Array.isArray(data) && data.length > 0 ? ['=', [...data]] : '';
                 const changed = !isSameSelectFilter(this.queryParams.where[key], value);
                 this.filterFieldsModel[key] = value;
 

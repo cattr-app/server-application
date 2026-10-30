@@ -155,3 +155,23 @@ test('a user filter change on the first page does not push a duplicate route', a
     assert.deepEqual(pushes, []);
     assert.equal(grid.queryParams.where['users.id'], undefined);
 });
+
+test('a selection mutated in place still counts as a change', async () => {
+    const { grid, requests, pushes, runTimers } = createGrid({ page: '2' });
+    const userIDs = [3];
+    grid.onProjectsChange('project_id', [1, 2]);
+    grid.onFilterLoaded('project_id');
+    grid.onUserSelectChange('users.id', userIDs);
+    grid.onFilterLoaded('users.id');
+    grid.onStatusesChange('status.id', [4]);
+    grid.onFilterLoaded('status.id');
+    await flush();
+
+    userIDs.push(5);
+    grid.onUserSelectChange('users.id', userIDs);
+    await runTimers();
+
+    assert.deepEqual(requests, [2, 1]);
+    assert.equal(pushes.length, 1);
+    assert.equal(JSON.stringify(grid.queryParams.where['users.id']), '["=",[3,5]]');
+});
