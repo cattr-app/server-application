@@ -70,3 +70,15 @@ test('leaving the universal report form before its data objects load', async ({ 
     held.release();
     await waitForAppIdle(page);
 });
+
+test('leaving a task view before the task loads', async ({ page }) => {
+    const held = await holdRequest(page, '**/api/tasks/show?*');
+    const aborted = page.waitForEvent('requestfailed', request => request.url().includes('/api/tasks/show'));
+
+    await page.goto('/tasks/view/1');
+    await held.requested;
+    await navigateInApp(page, '/about');
+    await aborted;
+    held.release();
+    await waitForAppIdle(page);
+});

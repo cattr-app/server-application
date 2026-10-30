@@ -94,6 +94,7 @@ test('tasks grid: deep link, reload and history keep the page', async ({ page })
         .locator('.action-button', { has: page.locator('.icon-eye') })
         .click();
     await expect(page).toHaveURL(/\/tasks\/view\/\d+/);
+    await waitForAppIdle(page);
     request = taskRequest(page);
     await page.goBack();
     await expectTasksPage(page, 3, request);
