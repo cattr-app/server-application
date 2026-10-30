@@ -143,6 +143,8 @@
                     this.$Message.info(this.$t('about.storage.messages.queued'));
 
                     if (this.poller) {
+                        // A refresh sent before the request would report the state before it
+                        this.poller.invalidate();
                         this.poller.setActive(true);
                         this.poller.refresh();
                     }

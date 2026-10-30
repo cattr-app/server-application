@@ -180,6 +180,26 @@ test('a stale response does not overwrite a newer one', async () => {
     assert.equal(timers.pending.size, 1);
 });
 
+test('a response sent before invalidate is discarded', async () => {
+    const before = deferred();
+    const { poller, timers, updates } = setup([storage('idle'), before, storage('queued')]);
+
+    await poller.start();
+    timers.fire();
+
+    // The cleanup is requested while that refresh is in flight
+    poller.invalidate();
+    poller.setActive(true);
+    await poller.refresh();
+    assert.deepEqual(updates.map(cleanupStatus), ['idle', 'queued']);
+
+    before.resolve(storage('idle'));
+    await flush();
+    assert.deepEqual(updates.map(cleanupStatus), ['idle', 'queued']);
+    assert.equal(timers.pending.size, 1);
+    assert.equal([...timers.pending.values()][0].delay, 10);
+});
+
 test('nothing is applied or scheduled after stop', async () => {
     const pending = deferred();
     const { poller, timers, updates, errors } = setup([storage('running'), pending]);

@@ -125,6 +125,12 @@ export function createStoragePoller({
             timer = null;
         },
         refresh,
+        /**
+         * Discards the responses of requests already sent, e.g. sent before a cleanup was requested.
+         */
+        invalidate() {
+            applied = ++requested;
+        },
         setActive(value) {
             active = value;
             schedule();

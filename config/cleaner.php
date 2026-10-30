@@ -14,6 +14,10 @@ return [
     'job_timeout' => (int)env('CLEANER_JOB_TIMEOUT', 900),
     // A requested cleanup no worker has picked up within this time is reported as failed
     'queued_timeout' => (int)env('CLEANER_QUEUED_TIMEOUT', 3600),
-    // A running cleanup without a heartbeat (one per removed page of screenshots) within this time is failed
-    'running_timeout' => (int)env('CLEANER_RUNNING_TIMEOUT', 900),
+    // A running cleanup without a heartbeat (one per removed page of screenshots) within this time is failed.
+    // Kept above job_timeout: a run the worker has not killed yet must not be taken over by a new one.
+    'running_timeout' => max(
+        (int)env('CLEANER_RUNNING_TIMEOUT', 960),
+        (int)env('CLEANER_JOB_TIMEOUT', 900) + 60
+    ),
 ];

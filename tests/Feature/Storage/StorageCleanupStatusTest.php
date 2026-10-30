@@ -317,6 +317,8 @@ class StorageCleanupStatusTest extends TestCase
         $this->assertSame(1, $job->tries);
         $this->assertTrue($job->failOnTimeout);
         $this->assertLessThan(config('queue.connections.database.retry_after'), $job->timeout);
+        // A run the worker has not killed yet is never reported as dead
+        $this->assertGreaterThan($job->timeout, config('cleaner.running_timeout'));
     }
 
     /**
