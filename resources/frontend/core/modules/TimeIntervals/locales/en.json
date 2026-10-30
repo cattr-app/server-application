@@ -9,7 +9,9 @@
       "retry": "Retry",
       "checking": "Checking task access...",
       "invalid_id": "Invalid task ID. Select a task manually.",
-      "unavailable": "Task unavailable for this user. Select another task."
+      "unavailable": "Task unavailable for this user. Select another task.",
+      "type_to_search": "Type at least 3 characters to search tasks.",
+      "recent": "Recent tasks"
     },
     "duration": {
       "label": "Duration",
