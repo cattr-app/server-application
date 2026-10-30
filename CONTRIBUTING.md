@@ -81,6 +81,8 @@ New or significantly changed UI sections must include screenshots in the pull re
 
 For substantial new UI functionality, updating the client-facing documentation is strongly encouraged and may be required during review.
 
+Backend bug fixes must include a test of the matching type that fails without the fix (see [Test types](#test-types)).
+
 Database changes must include appropriate migrations.
 
 Public API or configuration changes must be documented.
@@ -582,6 +584,39 @@ vendor/bin/phpunit --testsuite Feature
 ```
 
 Coverage requires Xdebug with coverage mode enabled.
+
+### Test types
+
+Most application logic lives in controllers, policies, Eloquent queries and observers, so feature tests are the default. Unit tests are used narrowly.
+
+| Type                    | What it covers                                                                                                                                                  | How to recognise it                                                                  |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Feature, HTTP (default) | everything that goes through a route: authorization and policies, FormRequest validation, filters, response shape, database changes, dispatched events and jobs | the test calls an endpoint                                                           |
+| Feature, no HTTP        | artisan commands, seeders, queued jobs, listeners, observers                                                                                                    | needs the database or the application container, but there is no route               |
+| Unit                    | pure logic without the database: enums and their rules, duration and timezone calculations in reports, module flag parsing, helpers                             | extends `PHPUnit\Framework\TestCase`, touches neither the database nor the container |
+
+Rule of thumb: if a test needs the database or the application container, it is a feature test. If the logic can be checked by passing input and comparing the output, it is a unit test.
+
+Unit tests are worth it where logic has many input combinations that would be slow to cover through HTTP; a table-driven unit test covers them in milliseconds. Example: `ScreenshotsState` with global overrides, the viewer's role and the lock flag.
+
+Do not:
+
+- mock Eloquent or repositories to test a controller "in isolation": such tests check how the code calls the ORM, not what it does;
+- chase a coverage percentage with unit tests: endpoint coverage matters more.
+
+Every backend bug fix comes with a test of the matching type that reproduces the bug.
+
+### Endpoint coverage
+
+`tests/Feature/Routes/GetRoutesSmokeTest.php` calls every registered `GET` route as an admin on seeded data and fails if any of them returns a 5xx. A new `GET` route with a path parameter needs a seeded value in the test; a route that cannot be called this way goes to the test's exclusion list with a reason.
+
+The smoke test only catches crashes. To list the routes that no feature test calls, run:
+
+```bash
+php scripts/route-coverage.php
+```
+
+It runs the Feature suite with `ROUTE_COVERAGE_LOG` set, so that `tests/TestCase.php` records every matched route, and prints the remaining routes as a Markdown checklist. The smoke test does not count as coverage. Pass `--log=<file>` to report from the log of an earlier run.
 
 Run frontend validation with:
 
