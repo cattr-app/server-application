@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use App\Contracts\ScreenshotService;
 use App\Models\TimeInterval;
+use Carbon\CarbonInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Builder;
 use Storage;
@@ -60,9 +61,11 @@ class StorageCleaner
      * Not guarded against concurrent runs: cattr:screenshots:rotate holds StorageCleanupStatus::runLock().
      *
      * @param callable|null $heartbeat called while screenshots are looked up and after every removed page
+     * @param CarbonInterface|null $deadline no new page is looked up after it: the run lock expires and the job
+     *                                       is killed after a fixed time, the next run removes the rest
      * @throws BindingResolutionException
      */
-    public static function thin($force = false, ?callable $heartbeat = null): void
+    public static function thin($force = false, ?callable $heartbeat = null, ?CarbonInterface $deadline = null): void
     {
         if (!self::isSupported() || (!$force && !self::needThinning())) {
             return;
@@ -71,7 +74,11 @@ class StorageCleaner
         $service = app()->make(ScreenshotService::class);
 
         while (self::getUsedSpace() > self::getWaterlineBorder()) {
-            $availableScreenshots = self::getAvailableScreenshots($heartbeat);
+            if ($deadline?->isPast()) {
+                break;
+            }
+
+            $availableScreenshots = self::getAvailableScreenshots($heartbeat, $deadline);
 
             if (count($availableScreenshots) === 0) {
                 break;
@@ -90,10 +97,11 @@ class StorageCleaner
     /**
      * @param callable|null $heartbeat called every HEARTBEAT_INTERVALS scanned intervals: a page can take
      *                                 long to find when most intervals have no screenshot left
+     * @param CarbonInterface|null $until the lookup stops there with what it has found so far
      * @return array
      * @throws BindingResolutionException
      */
-    public static function getAvailableScreenshots(?callable $heartbeat = null): array
+    public static function getAvailableScreenshots(?callable $heartbeat = null, ?CarbonInterface $until = null): array
     {
         $service = app()->make(ScreenshotService::class);
 
@@ -104,8 +112,14 @@ class StorageCleaner
         $scanned = 0;
 
         foreach ($collection->cursor() as $interval) {
-            if ($heartbeat && ++$scanned % self::HEARTBEAT_INTERVALS === 0) {
-                $heartbeat();
+            if (++$scanned % self::HEARTBEAT_INTERVALS === 0) {
+                if ($until?->isPast()) {
+                    break;
+                }
+
+                if ($heartbeat) {
+                    $heartbeat();
+                }
             }
 
             if (Storage::exists($service->getScreenshotPath($interval))) {

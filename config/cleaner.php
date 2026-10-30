@@ -14,6 +14,12 @@ return [
     'job_timeout' => (int)env('CLEANER_JOB_TIMEOUT', 900),
     // Seconds a requested cleanup waits for the run lock held by another one before it is reported as failed
     'lock_wait' => (int)env('CLEANER_LOCK_WAIT', 60),
+    // A run stops looking for new pages after this time, whether queued or scheduled: the run lock outlives it and
+    // a requested run ends before the worker kills its job. The next run removes the rest.
+    'max_run_time' => max(
+        60,
+        (int)env('CLEANER_JOB_TIMEOUT', 900) - (int)env('CLEANER_LOCK_WAIT', 60) - 60
+    ),
     // A requested cleanup no worker has picked up within this time is reported as failed
     'queued_timeout' => (int)env('CLEANER_QUEUED_TIMEOUT', 3600),
     // A running cleanup without a heartbeat (one per removed page of screenshots) within this time is failed.

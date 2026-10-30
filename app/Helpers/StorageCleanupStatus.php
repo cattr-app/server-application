@@ -31,10 +31,11 @@ class StorageCleanupStatus
     private const RUN_LOCK = 'storage_cleanup:run';
 
     /**
-     * Lifetime of the run lock: released by the run itself or by the failed job,
-     * the TTL only frees it after the whole container is gone.
+     * Lifetime of the run lock beyond cleaner.max_run_time: covers the page in progress at the deadline.
+     * The lock is released by the run itself or by the failed job; the TTL only frees it after the whole
+     * container is gone, and must not expire while a run is still removing screenshots.
      */
-    private const RUN_LOCK_TTL = 3600;
+    private const RUN_LOCK_MARGIN = 600;
 
     /**
      * Current status with stale states resolved: a request that no worker picked up within
@@ -118,7 +119,15 @@ class StorageCleanupStatus
      */
     public static function runLock(string $runId): Lock
     {
-        return Cache::lock(self::RUN_LOCK, self::RUN_LOCK_TTL, $runId);
+        return Cache::lock(self::RUN_LOCK, self::runLockTtl(), $runId);
+    }
+
+    /**
+     * Seconds the run lock lives: longer than any run, which stops at cleaner.max_run_time.
+     */
+    public static function runLockTtl(): int
+    {
+        return config('cleaner.max_run_time') + self::RUN_LOCK_MARGIN;
     }
 
     /**

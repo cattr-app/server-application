@@ -394,6 +394,26 @@ class StorageCleanupStatusTest extends TestCase
         $this->assertNotNull(StorageCleanupStatus::get()['requested_at']);
     }
 
+    public function test_run_lock_outlives_every_run(): void
+    {
+        $this->assertGreaterThan(config('cleaner.max_run_time'), StorageCleanupStatus::runLockTtl());
+
+        // A requested run waits for the lock and then runs at most max_run_time, within the job timeout
+        $this->assertLessThan(
+            config('cleaner.job_timeout'),
+            config('cleaner.lock_wait') + config('cleaner.max_run_time')
+        );
+    }
+
+    public function test_cleanup_stops_at_the_deadline(): void
+    {
+        $this->needThinning(true);
+        $service = $this->mock(ScreenshotService::class);
+        $service->shouldNotReceive('destroyScreenshot');
+
+        StorageCleaner::thin(true, null, now()->subSecond());
+    }
+
     public function test_job_has_its_own_timeout_below_retry_after(): void
     {
         $job = new RotateScreenshots('run');

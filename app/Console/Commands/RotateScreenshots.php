@@ -78,7 +78,16 @@ class RotateScreenshots extends Command
 
             $this->info('Started thinning...');
 
-            StorageCleaner::thin(heartbeat: static fn () => StorageCleanupStatus::touch($runId));
+            $deadline = now()->addSeconds(config('cleaner.max_run_time'));
+
+            StorageCleaner::thin(
+                heartbeat: static fn () => StorageCleanupStatus::touch($runId),
+                deadline: $deadline,
+            );
+
+            if ($deadline->isPast()) {
+                $this->info('Stopped at the time limit, the next thinning removes the rest');
+            }
 
             StorageCleanupStatus::markCompleted($runId);
 
