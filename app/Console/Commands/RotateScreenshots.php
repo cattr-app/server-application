@@ -43,6 +43,7 @@ class RotateScreenshots extends Command
             return;
         }
 
+        $requested = (bool)$this->option('run');
         $runId = $this->option('run') ?: (string)Str::uuid();
         $lock = StorageCleanupStatus::runLock($runId);
 
@@ -53,13 +54,17 @@ class RotateScreenshots extends Command
         }
 
         try {
+            if (!StorageCleanupStatus::markRunning($runId, $requested)) {
+                // Its job runs on its own and records the outcome
+                $this->info('The request has been replaced by a newer one');
+                return;
+            }
+
             if (!StorageCleaner::needThinning()) {
                 StorageCleanupStatus::markSkipped();
                 $this->info('Time for thinning hasn\'t come');
                 return;
             }
-
-            StorageCleanupStatus::markRunning($runId);
 
             $this->info('For thinning available ' . StorageCleaner::countAvailableScreenshots() . ' screenshots');
 

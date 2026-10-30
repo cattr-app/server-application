@@ -299,6 +299,32 @@ class StorageCleanupStatusTest extends TestCase
         $this->assertNull(StorageCleanupStatus::queue());
     }
 
+    /**
+     * Request A was not picked up in time and was replaced by request B; A's job is picked up before B's.
+     */
+    public function test_job_of_a_replaced_request_does_not_take_over_the_new_one(): void
+    {
+        Queue::fake();
+        $this->needThinning(true);
+
+        $replaced = StorageCleanupStatus::queue();
+        $this->travel(config('cleaner.queued_timeout') + 1)->seconds();
+        $current = StorageCleanupStatus::queue();
+        $this->assertNotNull($current);
+
+        $this->artisan('cattr:screenshots:rotate', ['--run' => $replaced])
+            ->expectsOutputToContain('replaced by a newer one')
+            ->assertSuccessful();
+
+        $status = StorageCleanupStatus::get();
+        $this->assertSame(StorageCleanupStatus::QUEUED, $status['status']);
+        $this->assertNull(StorageCleanupStatus::last());
+
+        // The lock of the replaced run is released: the new request runs
+        (new RotateScreenshots($current))->handle();
+        $this->assertSame(StorageCleanupStatus::COMPLETED, StorageCleanupStatus::get()['status']);
+    }
+
     public function test_job_passes_its_run_to_the_command(): void
     {
         $this->needThinning(true);

@@ -113,20 +113,34 @@ class StorageCleanupStatus
         return Cache::lock(self::RUN_LOCK, self::RUN_LOCK_TTL, $runId);
     }
 
-    public static function markRunning(string $runId): void
+    /**
+     * Marks the run as running, called by the run holding the run lock.
+     *
+     * A requested run is started only while it is the current one: a request no worker picked up in time
+     * can be replaced by a new one, and its job, picked up late, must not take over the new request.
+     *
+     * @return bool false if the requested run has been replaced and must not start
+     */
+    public static function markRunning(string $runId, bool $requested = false): bool
     {
-        // A scheduled run was not requested: the request time of a previous run must not leak into it
-        $state = self::stored();
-        $requestedAt = $state['status'] === self::QUEUED && $state['run_id'] === $runId
-            ? $state['requested_at']
-            : null;
+        return Cache::lock(self::STATE_LOCK, 10)->block(5, static function () use ($runId, $requested) {
+            $state = self::stored();
+            $current = $state['run_id'] === $runId;
 
-        self::put(self::RUNNING, [
-            'run_id' => $runId,
-            'requested_at' => $requestedAt,
-            'started_at' => now()->toIso8601String(),
-            'finished_at' => null,
-        ]);
+            if ($requested && !$current) {
+                return false;
+            }
+
+            self::put(self::RUNNING, [
+                'run_id' => $runId,
+                // A scheduled run was not requested: the request time of a previous run must not leak into it
+                'requested_at' => $current ? $state['requested_at'] : null,
+                'started_at' => now()->toIso8601String(),
+                'finished_at' => null,
+            ]);
+
+            return true;
+        });
     }
 
     /**
