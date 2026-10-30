@@ -679,6 +679,8 @@ MODULE_FRONTEND_AMAZING_CAT_REDMINE_INTEGRATION_ENABLED=true
 MODULE_BACKEND_CATTR_REDMINE_INTEGRATION_ENABLED=true
 MODULE_FRONTEND_AMAZING_CAT_GITLAB_INTEGRATION_ENABLED=true
 MODULE_BACKEND_CATTR_GITLAB_INTEGRATION_ENABLED=true
+MODULE_FRONTEND_AMAZING_CAT_DEMO_MODULE_ENABLED=true
+MODULE_BACKEND_CATTR_DEMO_ENABLED=true
 ```
 
 Only the exact lowercase string `true` enables an external module. Missing variables,
@@ -758,6 +760,84 @@ pnpm link ../redmine-integration/frontend
 
 Then set `MODULE_FRONTEND_<FLAG_NAME>_ENABLED=true` and rebuild the assets (`pnpm prod` or
 `pnpm watch`).
+
+### Building an image with modules
+
+The official `Dockerfile` installs dependencies only from the repository's own `composer.json`,
+`package.json` and lockfiles, and bundles only the frontend packages registered in
+`resources/frontend/etc/modules.config.json`. The published `ghcr.io/cattr-app/server-application`
+image therefore contains exactly the modules declared there; for those, setting
+`MODULE_*_ENABLED=true` is enough. A module that is not declared in the repository is not in the
+image, and its flag has nothing to enable. To ship your own modules, build your own image from a
+checkout of the release you deploy.
+
+Copy the official `Dockerfile` (for example to `Dockerfile.modules`) and add one step to the
+builder stage, right after `COPY --chown=10000:10000 . /opt/cattr/app` and before the
+`composer install` step:
+
+```dockerfile
+# Space-separated lists; leave a list empty to skip that side.
+# Example: --build-arg COMPOSER_MODULES="acme/cattr-reports-module"
+ARG COMPOSER_MODULES=""
+# Entries are <ModuleConfig.moduleName>=<npm package>.
+# Example: --build-arg FRONTEND_MODULES="Acme_Reports=@acme/cattr-reports"
+ARG FRONTEND_MODULES=""
+
+RUN set -eux; \
+    if [ -n "${COMPOSER_MODULES}" ]; then \
+        composer require --no-interaction --no-install ${COMPOSER_MODULES}; \
+    fi; \
+    for entry in ${FRONTEND_MODULES}; do \
+        name="${entry%%=*}"; package="${entry#*=}"; \
+        pnpm add --lockfile-only "${package}"; \
+        node -e ' \
+            const fs = require("fs"); \
+            const file = "resources/frontend/etc/modules.config.json"; \
+            const config = JSON.parse(fs.readFileSync(file, "utf8")); \
+            config[process.argv[1]] = { type: "package", ref: process.argv[2] }; \
+            fs.writeFileSync(file, JSON.stringify(config, null, 4) + "\n"); \
+        ' "${name}" "${package}"; \
+    done
+```
+
+The step only changes the manifests, lockfiles and `modules.config.json`; the unchanged
+`composer install`, `pnpm install --frozen-lockfile` and `pnpm prod` steps that follow then
+install the modules and bundle each frontend module as its own lazy chunk:
+
+- `composer require --no-install` adds the backend package (a Composer package of type
+  `laravel-module`) to `composer.json` and `composer.lock` without installing it, so the
+  following `composer install` and optimized autoloader include it;
+- `pnpm add --lockfile-only` adds the frontend package to `package.json` and `pnpm-lock.yaml`,
+  so `pnpm install --frozen-lockfile` still passes;
+- the key written to `resources/frontend/etc/modules.config.json` must equal the package's
+  `ModuleConfig.moduleName`, otherwise the frontend derives a different flag name and never
+  loads the chunk.
+
+Build the image with your module lists:
+
+```bash
+podman build -f Dockerfile.modules \
+    --build-arg COMPOSER_MODULES="<vendor>/<module>" \
+    --build-arg FRONTEND_MODULES="<ModuleConfig.moduleName>=<npm package>" \
+    -t cattr-server-modules .
+```
+
+Then enable the modules in the container environment (for every role that runs the backend:
+application, queue, scheduler and migration) and recreate the containers:
+
+```text
+MODULE_BACKEND_<FLAG_NAME>_ENABLED=true
+MODULE_FRONTEND_<FLAG_NAME>_ENABLED=true
+```
+
+Module migrations run with the regular `migrate` role or start-up migration. To check the result:
+
+```bash
+podman run --rm --env-file .env cattr-server-modules exec php artisan module:list
+```
+
+The module must be listed as enabled; in the browser, its frontend chunk is requested after login
+when its frontend flag is `true`.
 
 ## Container architecture
 
