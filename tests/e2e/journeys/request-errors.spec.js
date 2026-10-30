@@ -82,3 +82,15 @@ test('leaving a task view before the task loads', async ({ page }) => {
     held.release();
     await waitForAppIdle(page);
 });
+
+test('leaving a task view before its history loads', async ({ page }) => {
+    const held = await holdRequest(page, '**/api/statuses/list*');
+    const aborted = page.waitForEvent('requestfailed', request => request.url().includes('/api/statuses/list'));
+
+    await page.goto('/tasks/view/1');
+    await held.requested;
+    await navigateInApp(page, '/about');
+    await aborted;
+    held.release();
+    await waitForAppIdle(page);
+});
