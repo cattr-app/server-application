@@ -88,8 +88,11 @@ test('tasks grid: deep link, reload and history keep the page', async ({ page })
     expect(await firstColumn(page).allTextContents()).toEqual(thirdPage);
 
     // Leave the grid for a task and come back with the browser Back button: the grid is remounted.
-    await rows(page).first().locator('.actions__toggle').click();
-    await page.locator('.actions__wrapper--active .action-button', { hasText: 'View' }).click();
+    // At the 1440px viewport row actions are inline icon buttons (the toggle exists only <= 1200px).
+    await rows(page)
+        .first()
+        .locator('.action-button', { has: page.locator('.icon-eye') })
+        .click();
     await expect(page).toHaveURL(/\/tasks\/view\/\d+/);
     request = taskRequest(page);
     await page.goBack();
