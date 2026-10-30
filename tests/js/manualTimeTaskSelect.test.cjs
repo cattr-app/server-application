@@ -4,7 +4,13 @@ const path = require('node:path');
 const test = require('node:test');
 const vm = require('node:vm');
 
-function createSelector({ taskId = null, userID = 1, tasks = new Map(), search = async () => ({ data: { data: [] } }) } = {}) {
+function createSelector({
+    taskId = null,
+    userID = 1,
+    currentUserId = 1,
+    tasks = new Map(),
+    search = async () => ({ data: { data: [] } }),
+} = {}) {
     const file = fs.readFileSync(path.join(__dirname, '../../resources/frontend/core/modules/TimeIntervals/components/LazySelect.vue'), 'utf8');
     const script = file.split('<script>')[1].split('</script>')[0]
         .replace(/^\s*import .*;\s*$/gm, '')
@@ -24,6 +30,9 @@ function createSelector({ taskId = null, userID = 1, tasks = new Map(), search =
         value: null,
         preselectedId: taskId,
         userID,
+        currentUserId,
+        $refs: {},
+        $nextTick: async () => {},
         service: {
             getItem: async id => {
                 if (!tasks.has(id)) throw { response: { status: 404 } };
@@ -64,17 +73,101 @@ test('invalid or deleted task cannot leave a selected value', async () => {
 
 test('reassignment clears selection when target user is not assigned', async () => {
     const task = { id: 9, task_name: 'Time', project: null };
-    const { instance } = createSelector({
+    const { component, instance } = createSelector({
         tasks: new Map([[9, task]]),
         search: async () => ({ data: { data: [] } }),
     });
     await instance.hydrateTask(9, 1);
     assert.equal(instance.value, 9);
     instance.userID = 2;
-    instance.inputHandler(null);
-    await instance.hydrateTask(9, 2, true);
+    component.watch.userID.call(instance, 2);
+    await new Promise(resolve => setImmediate(resolve));
     assert.equal(instance.value, null);
     assert.equal(instance.selectionError, 'time_intervals.task_select.unavailable');
+});
+
+test('self-entry preserves a project-visible task without explicit assignment', async () => {
+    const task = { id: 9, task_name: 'Project task', project: null };
+    const filters = [];
+    const { component, instance } = createSelector({
+        taskId: '9',
+        userID: null,
+        currentUserId: 1,
+        tasks: new Map([[9, task]]),
+        search: async filter => {
+            filters.push(filter);
+            return { data: { data: [], pagination: { currentPage: 1, totalPages: 1 } } };
+        },
+    });
+
+    // The parent form sets user_id after its child LazySelect has mounted.
+    await instance.hydrateTask(9, null);
+    assert.equal(instance.pendingTaskId, 9);
+    instance.userID = 1;
+    component.watch.userID.call(instance, 1);
+    await new Promise(resolve => setImmediate(resolve));
+
+    assert.equal(instance.value, 9);
+    assert.equal(instance.selectionError, null);
+    assert.equal(filters.length, 0);
+
+    // Searching as oneself must not hide tasks visible via project membership.
+    instance.query = 'Project';
+    await instance.loadNextPage(instance.requestId);
+    assert.equal(filters.length, 1);
+    assert.equal(Object.hasOwn(filters[0], 'where'), false);
+});
+
+test('assignment checks apply when entering time for another user', async () => {
+    const task = { id: 9, task_name: 'Assigned task', project: null };
+    const filters = [];
+    const { instance } = createSelector({
+        userID: 2,
+        currentUserId: 1,
+        tasks: new Map([[9, task]]),
+        search: async filter => {
+            filters.push(filter);
+            return { data: { data: [task] } };
+        },
+    });
+
+    await instance.hydrateTask(9, 2);
+    assert.equal(instance.value, 9);
+    assert.equal(filters.length, 1);
+    assert.equal(filters[0].where['users.id'], 2);
+});
+
+test('a stale assignment response cannot overwrite a newer user selection', async () => {
+    const task = { id: 9, task_name: 'Assigned task', project: null };
+    let resolveOldSearch;
+    const { component, instance } = createSelector({
+        userID: 2,
+        currentUserId: 1,
+        tasks: new Map([[9, task]]),
+        search: filter => {
+            if (filter.where['users.id'] === 2) {
+                return new Promise(resolve => {
+                    resolveOldSearch = resolve;
+                });
+            }
+            return Promise.resolve({ data: { data: [task] } });
+        },
+    });
+
+    const staleRequest = instance.hydrateTask(9, 2);
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(typeof resolveOldSearch, 'function');
+
+    instance.userID = 3;
+    component.watch.userID.call(instance, 3);
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(instance.value, 9);
+    assert.equal(instance.selectionError, null);
+
+    resolveOldSearch({ data: { data: [] } });
+    await staleRequest;
+    assert.equal(instance.value, 9);
+    assert.equal(instance.selectionError, null);
 });
 
 test('standalone selection does not require a preselected ID', () => {

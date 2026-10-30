@@ -62,6 +62,10 @@
             userID: {
                 type: Number,
             },
+            currentUserId: {
+                type: Number,
+                required: true,
+            },
             preselectedId: {
                 type: [Number, String],
                 default: null,
@@ -114,7 +118,7 @@
                 this.selectionError = null;
                 this.inputHandler(null);
                 this.restartSearch();
-                if (oldTaskId && userID) this.hydrateTask(oldTaskId, userID, true);
+                if (oldTaskId && userID) this.hydrateTask(oldTaskId, userID);
             },
             preselectedId(taskId) {
                 this.selectionRequestId += 1;
@@ -143,6 +147,9 @@
             this.observer = null;
         },
         methods: {
+            requiresAssignment(userID) {
+                return Number(userID) !== Number(this.currentUserId);
+            },
             formatTask(task) {
                 return {
                     ...task,
@@ -157,7 +164,7 @@
                 this.selectedTask = task || null;
                 this.inputHandler(task ? task.id : null);
             },
-            async hydrateTask(rawId, userID, checkMembership = false) {
+            async hydrateTask(rawId, userID) {
                 const id = Number(rawId);
                 if (!Number.isSafeInteger(id) || id <= 0 || String(rawId).trim() === '') {
                     this.inputHandler(null);
@@ -173,7 +180,7 @@
                     const { data } = await this.service.getItem(id, { with: ['project'] });
                     const task = data && data.data;
                     if (!task || Number(task.id) !== id) throw new Error('task_not_available');
-                    if (checkMembership) {
+                    if (this.requiresAssignment(userID)) {
                         const { data: allowed } = await this.service.getWithFilters({
                             where: { id, 'users.id': userID },
                             page: 1,
@@ -269,7 +276,7 @@
                     with: ['project'],
                     page: this.currentPage + 1,
                 };
-                if (this.userID) {
+                if (this.userID && this.requiresAssignment(this.userID)) {
                     filters.where = { 'users.id': this.userID };
                 }
 

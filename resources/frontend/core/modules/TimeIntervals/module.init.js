@@ -23,7 +23,7 @@ export function init(context, router) {
             const { task_id, from_task } = router.currentRoute.query;
             const id = Number(task_id);
             if (from_task === '1' && Number.isSafeInteger(id) && id > 0) {
-                return router.push({ path: '/tasks/view/' + id });
+                return router.replace({ path: '/tasks/view/' + id });
             }
             return router.go(-1);
         },
@@ -58,6 +58,7 @@ export function init(context, router) {
                         // RenderableField supplies an empty object for an unset field.
                         value: typeof props.currentValue === 'number' ? props.currentValue : null,
                         userID: props.values.user_id,
+                        currentUserId: rootStore.getters['user/user'].id,
                         preselectedId: router.currentRoute.query.task_id,
                     },
                 });
