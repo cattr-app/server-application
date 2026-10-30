@@ -288,11 +288,13 @@ class AboutController extends Controller
     */
     public function startStorageClean(ManageStorageRequest $request): JsonResponse
     {
-        if (StorageCleanupStatus::queue()) {
+        $runId = StorageCleanupStatus::queue();
+
+        if ($runId !== null) {
             try {
-                RotateScreenshots::dispatch();
+                RotateScreenshots::dispatch($runId);
             } catch (Throwable $e) {
-                StorageCleanupStatus::markFailed();
+                StorageCleanupStatus::failRun($runId);
 
                 throw $e;
             }

@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 use App\Helpers\StorageCleaner;
 use App\Helpers\StorageCleanupStatus;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -16,7 +17,8 @@ class RotateScreenshots extends Command
      *
      * @var string
      */
-    protected $signature = 'cattr:screenshots:rotate';
+    protected $signature = 'cattr:screenshots:rotate
+                            {--run= : Id of the run requested from the About page (a new one by default)}';
 
     /**
      * The console command description.
@@ -41,7 +43,8 @@ class RotateScreenshots extends Command
             return;
         }
 
-        $lock = StorageCleanupStatus::runLock();
+        $runId = $this->option('run') ?: (string)Str::uuid();
+        $lock = StorageCleanupStatus::runLock($runId);
 
         if (!$lock->get()) {
             // The run in progress records its own outcome
@@ -56,7 +59,7 @@ class RotateScreenshots extends Command
                 return;
             }
 
-            StorageCleanupStatus::markRunning();
+            StorageCleanupStatus::markRunning($runId);
 
             $this->info('For thinning available ' . StorageCleaner::countAvailableScreenshots() . ' screenshots');
 

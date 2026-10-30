@@ -5,6 +5,7 @@ namespace App\Helpers;
 use Cache;
 use Illuminate\Contracts\Cache\Lock;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 /**
  * Status of the screenshot cleanup, shared by the web container that queues it and the queue worker
@@ -71,48 +72,57 @@ class StorageCleanupStatus
     }
 
     /**
-     * Marks the cleanup as queued unless one is already queued or running.
+     * Marks a new run as queued unless one is already queued or running.
      *
-     * @return bool false if a cleanup is already queued or running and nothing has to be queued
+     * @return string|null id of the new run, null if a cleanup is already queued or running
      */
-    public static function queue(): bool
+    public static function queue(): ?string
     {
         return Cache::lock(self::STATE_LOCK, 10)->block(5, static function () {
             $state = self::stored();
 
             if (in_array($state['status'], self::ACTIVE, true)) {
                 if (!self::isStale($state)) {
-                    return false;
+                    return null;
                 }
 
                 // The worker that held the run lock is gone, otherwise the run would not be stale
                 if ($state['status'] === self::RUNNING) {
-                    self::runLock()->forceRelease();
+                    Cache::lock(self::RUN_LOCK)->forceRelease();
                 }
             }
 
+            $runId = (string)Str::uuid();
+
             self::put(self::QUEUED, [
+                'run_id' => $runId,
                 'requested_at' => now()->toIso8601String(),
                 'started_at' => null,
                 'finished_at' => null,
             ]);
 
-            return true;
+            return $runId;
         });
     }
 
-    public static function runLock(): Lock
+    /**
+     * Lock held for the whole run, owned by the run: only that run can release it.
+     */
+    public static function runLock(string $runId): Lock
     {
-        return Cache::lock(self::RUN_LOCK, self::RUN_LOCK_TTL);
+        return Cache::lock(self::RUN_LOCK, self::RUN_LOCK_TTL, $runId);
     }
 
-    public static function markRunning(): void
+    public static function markRunning(string $runId): void
     {
         // A scheduled run was not requested: the request time of a previous run must not leak into it
         $state = self::stored();
-        $requestedAt = $state['status'] === self::QUEUED ? $state['requested_at'] : null;
+        $requestedAt = $state['status'] === self::QUEUED && $state['run_id'] === $runId
+            ? $state['requested_at']
+            : null;
 
         self::put(self::RUNNING, [
+            'run_id' => $runId,
             'requested_at' => $requestedAt,
             'started_at' => now()->toIso8601String(),
             'finished_at' => null,
@@ -148,10 +158,30 @@ class StorageCleanupStatus
         self::put(self::FAILED, ['finished_at' => now()->toIso8601String()]);
     }
 
+    /**
+     * Fails a run that could not clean up after itself (killed on timeout, never started, not dispatched).
+     *
+     * Only touches the status and the lock of that run: a job of a lost run can fail long after a new run
+     * has been requested in its place (a crashed worker's reservation becomes available after retry_after).
+     */
+    public static function failRun(string $runId): void
+    {
+        Cache::lock(self::STATE_LOCK, 10)->block(5, static function () use ($runId) {
+            $state = self::stored();
+
+            if ($state['run_id'] === $runId && in_array($state['status'], self::ACTIVE, true)) {
+                self::markFailed();
+            }
+        });
+
+        Cache::restoreLock(self::RUN_LOCK, $runId)->release();
+    }
+
     private static function stored(): array
     {
         return array_merge([
             'status' => self::IDLE,
+            'run_id' => null,
             'requested_at' => null,
             'started_at' => null,
             'finished_at' => null,

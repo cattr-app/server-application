@@ -30,14 +30,14 @@ class RotateScreenshots implements ShouldQueue
 
     public int $timeout;
 
-    public function __construct()
+    public function __construct(public string $runId)
     {
         $this->timeout = config('cleaner.job_timeout');
     }
 
     public function handle(): void
     {
-        Artisan::call(RotateScreenshotsCommand::class);
+        Artisan::call(RotateScreenshotsCommand::class, ['--run' => $this->runId]);
     }
 
     /**
@@ -45,9 +45,6 @@ class RotateScreenshots implements ShouldQueue
      */
     public function failed(?Throwable $exception = null): void
     {
-        if (in_array(StorageCleanupStatus::get()['status'], StorageCleanupStatus::ACTIVE, true)) {
-            StorageCleanupStatus::markFailed();
-            StorageCleanupStatus::runLock()->forceRelease();
-        }
+        StorageCleanupStatus::failRun($this->runId);
     }
 }

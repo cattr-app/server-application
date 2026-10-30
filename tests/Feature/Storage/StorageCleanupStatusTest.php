@@ -102,7 +102,7 @@ class StorageCleanupStatusTest extends TestCase
         $this->actingAs($admin)->postJson(self::URI)->assertNoContent();
         $this->actingAs($admin)->postJson(self::URI)->assertNoContent();
 
-        StorageCleanupStatus::markRunning();
+        StorageCleanupStatus::markRunning('scheduled');
         $this->actingAs($admin)->postJson(self::URI)->assertNoContent();
 
         Queue::assertPushed(RotateScreenshots::class, 1);
@@ -125,10 +125,11 @@ class StorageCleanupStatusTest extends TestCase
 
         $this->assertNotNull($response->json('data.thinning.last'));
         $this->assertSame($response->json('data.thinning.last'), $response->json('data.thinning.finished_at'));
-        $this->assertNotNull($response->json('data.thinning.requested_at'));
+        // A run of the command itself (scheduler) is not the requested one
+        $this->assertNull($response->json('data.thinning.requested_at'));
 
         // The run lock is released: another cleanup can be requested and run
-        $this->assertTrue(StorageCleanupStatus::queue());
+        $this->assertNotNull(StorageCleanupStatus::queue());
     }
 
     public function test_cleanup_that_is_not_needed_is_skipped(): void
@@ -182,7 +183,7 @@ class StorageCleanupStatusTest extends TestCase
         $this->assertNotNull($status['finished_at']);
         $this->assertNull(StorageCleanupStatus::last());
 
-        $lock = StorageCleanupStatus::runLock();
+        $lock = StorageCleanupStatus::runLock('probe');
         $this->assertTrue($lock->get());
         $lock->release();
     }
@@ -190,9 +191,9 @@ class StorageCleanupStatusTest extends TestCase
     public function test_concurrent_run_does_not_start_while_the_lock_is_held(): void
     {
         $this->needThinning(true);
-        StorageCleanupStatus::markRunning();
+        StorageCleanupStatus::markRunning('other');
 
-        $lock = StorageCleanupStatus::runLock();
+        $lock = StorageCleanupStatus::runLock('other');
         $this->assertTrue($lock->get());
 
         $this->artisan('cattr:screenshots:rotate')
@@ -228,8 +229,8 @@ class StorageCleanupStatusTest extends TestCase
         $admin = $this->admin();
 
         // A worker that died during the run: status running, lock never released
-        StorageCleanupStatus::markRunning();
-        $this->assertTrue(StorageCleanupStatus::runLock()->get());
+        StorageCleanupStatus::markRunning('dead');
+        $this->assertTrue(StorageCleanupStatus::runLock('dead')->get());
 
         $this->travel(config('cleaner.running_timeout') + 1)->seconds();
 
@@ -240,14 +241,14 @@ class StorageCleanupStatusTest extends TestCase
         $this->actingAs($admin)->postJson(self::URI)->assertNoContent();
         Queue::assertPushed(RotateScreenshots::class, 1);
 
-        $lock = StorageCleanupStatus::runLock();
+        $lock = StorageCleanupStatus::runLock('probe');
         $this->assertTrue($lock->get());
         $lock->release();
     }
 
     public function test_heartbeat_keeps_a_long_run_alive(): void
     {
-        StorageCleanupStatus::markRunning();
+        StorageCleanupStatus::markRunning('long');
 
         $this->travel(config('cleaner.running_timeout') - 1)->seconds();
         StorageCleanupStatus::touch();
@@ -258,22 +259,60 @@ class StorageCleanupStatusTest extends TestCase
 
     public function test_failed_job_clears_the_active_status(): void
     {
-        StorageCleanupStatus::markRunning();
-        $this->assertTrue(StorageCleanupStatus::runLock()->get());
+        $runId = StorageCleanupStatus::queue();
+        StorageCleanupStatus::markRunning($runId);
+        $this->assertTrue(StorageCleanupStatus::runLock($runId)->get());
 
         // Called by the worker when it kills the job on timeout
-        (new RotateScreenshots())->failed(new RuntimeException('timeout'));
+        (new RotateScreenshots($runId))->failed(new RuntimeException('timeout'));
 
         $this->assertSame(StorageCleanupStatus::FAILED, StorageCleanupStatus::get()['status']);
 
-        $lock = StorageCleanupStatus::runLock();
+        $lock = StorageCleanupStatus::runLock('probe');
         $this->assertTrue($lock->get());
         $lock->release();
     }
 
+    /**
+     * A worker crashed during run A, run B was requested in its place; the reservation of A's job becomes
+     * available after retry_after and the next worker fails it (tries = 1) while B is still running.
+     */
+    public function test_failed_job_of_a_lost_run_does_not_touch_the_new_run(): void
+    {
+        Queue::fake();
+
+        $lost = StorageCleanupStatus::queue();
+        StorageCleanupStatus::markRunning($lost);
+        $this->assertTrue(StorageCleanupStatus::runLock($lost)->get());
+
+        $this->travel(config('cleaner.running_timeout') + 1)->seconds();
+
+        $current = StorageCleanupStatus::queue();
+        $this->assertNotNull($current);
+        StorageCleanupStatus::markRunning($current);
+        $this->assertTrue(StorageCleanupStatus::runLock($current)->get());
+
+        (new RotateScreenshots($lost))->failed(new RuntimeException('max attempts exceeded'));
+
+        $this->assertSame(StorageCleanupStatus::RUNNING, StorageCleanupStatus::get()['status']);
+        $this->assertFalse(StorageCleanupStatus::runLock('probe')->get());
+        $this->assertNull(StorageCleanupStatus::queue());
+    }
+
+    public function test_job_passes_its_run_to_the_command(): void
+    {
+        $this->needThinning(true);
+
+        $runId = StorageCleanupStatus::queue();
+        (new RotateScreenshots($runId))->handle();
+
+        $this->assertSame(StorageCleanupStatus::COMPLETED, StorageCleanupStatus::get()['status']);
+        $this->assertNotNull(StorageCleanupStatus::get()['requested_at']);
+    }
+
     public function test_job_has_its_own_timeout_below_retry_after(): void
     {
-        $job = new RotateScreenshots();
+        $job = new RotateScreenshots('run');
 
         $this->assertSame(1, $job->tries);
         $this->assertTrue($job->failOnTimeout);
