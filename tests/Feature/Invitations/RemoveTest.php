@@ -58,7 +58,7 @@ class RemoveTest extends TestCase
 
     public function test_not_existing(): void
     {
-        $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => $this->faker->randomNumber()]);
+        $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => Invitation::withoutGlobalScopes()->max('id') + 1]);
 
         $response->assertValidationError();
     }
