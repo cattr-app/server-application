@@ -158,6 +158,17 @@
 
     const widthLessThan500MediaQuery = matchMedia('(max-width: 500px)');
 
+    const pageFromQuery = query => Math.max(1, parseInt(query.page, 10) || 1);
+
+    // Select filters store their value as ['=', ids] (or '' when nothing is selected);
+    // compare them as unordered id lists.
+    const selectFilterIds = value => (Array.isArray(value) && Array.isArray(value[1]) ? value[1].map(String) : []);
+    const isSameSelectFilter = (a, b) => {
+        const idsA = selectFilterIds(a);
+        const idsB = new Set(selectFilterIds(b));
+        return idsA.length === idsB.size && idsA.every(id => idsB.has(id));
+    };
+
     export default {
         name: 'GridView',
         components: {
@@ -228,7 +239,7 @@
 
                 pageControls: this.$route.meta.pageControls || [],
 
-                page: +(this.$route.query.page || 1),
+                page: pageFromQuery(query),
                 totalItems: 0,
                 itemsPerPage: 15,
                 values: [],
@@ -238,7 +249,7 @@
                     where: whereParam,
                     withCount,
                     withSum,
-                    page: this.$route.query.page,
+                    page: pageFromQuery(query),
                     search: {
                         query: this.$route.query.search,
                         fields: gridData.filters.map(filter => filter.referenceKey),
@@ -319,11 +330,13 @@
                     }
                 });
             },
-            filterFieldsData() {
+            filterFieldsData({ resetPage = true } = {}) {
                 clearTimeout(this.filterFieldsTimeout);
 
                 this.updateQueryParams();
-                this.queryParams.page = 1;
+                if (resetPage) {
+                    this.queryParams.page = 1;
+                }
                 if (!this.filtersLoaded) {
                     return;
                 }
@@ -335,31 +348,30 @@
                 this.updateRoute();
             },
             onUserSelectChange(key, data) {
-                if (data.length > 0) {
-                    this.filterFieldsModel[key] = ['=', data];
-                } else {
-                    this.filterFieldsModel[key] = '';
-                }
-
-                this.filterFieldsData();
+                this.onSelectFilterChange(key, data);
             },
             onProjectsChange(key, data) {
-                if (data.length > 0) {
-                    this.filterFieldsModel[key] = ['=', data];
-                } else {
-                    this.filterFieldsModel[key] = '';
-                }
-
-                this.filterFieldsData();
+                this.onSelectFilterChange(key, data);
             },
             onStatusesChange(key, data) {
-                if (data.length > 0) {
-                    this.filterFieldsModel[key] = ['=', data];
-                } else {
-                    this.filterFieldsModel[key] = '';
+                this.onSelectFilterChange(key, data);
+            },
+            onSelectFilterChange(key, data) {
+                const value = Array.isArray(data) && data.length > 0 ? ['=', data] : '';
+                const changed = !isSameSelectFilter(this.queryParams.where[key], value);
+                this.filterFieldsModel[key] = value;
+
+                // Selects emit their initial (restored) selection before `loaded`, and may re-emit
+                // an unchanged selection later. Neither is a user change, so keep the requested page.
+                if (!this.loadedFilters[key] || !changed) {
+                    this.updateQueryParams();
+                    return;
                 }
 
                 this.filterFieldsData();
+                if (pageFromQuery(this.$route.query) !== this.queryParams.page) {
+                    this.updateRoute();
+                }
             },
             checkWithCtx(callback) {
                 return callback ? callback(this) : true;
@@ -761,8 +773,10 @@
         watch: {
             async $route(to) {
                 this.skipRouteUpdate = true;
+                // The route change triggers its own fetch, drop a pending debounced one.
+                clearTimeout(this.filterFieldsTimeout);
 
-                this.queryParams.page = to.query.page;
+                this.queryParams.page = pageFromQuery(to.query);
                 this.queryParams.search.query = to.query.search;
                 this.filterModel = to.query.search;
                 this.loadFilterFields();
