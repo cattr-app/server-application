@@ -236,6 +236,9 @@ class TaskCommentController extends ItemController
      */
     public function show(ShowTaskCommentRequestStatus $request): JsonResponse
     {
+        // Only comments on tasks visible to the user, the task's global access scope applies inside whereHas
+        Filter::listen(Filter::getQueryFilterName(), static fn($query) => $query->whereHas('task'));
+
         return $this->_show($request);
     }
 

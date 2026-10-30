@@ -13,6 +13,8 @@ class ShowTest extends TestCase
     private const URI = 'task-comment/show';
 
     private User $admin;
+    private User $assignee;
+    private User $outsider;
     private TaskComment $comment;
 
     protected function setUp(): void
@@ -20,7 +22,9 @@ class ShowTest extends TestCase
         parent::setUp();
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
-        $task = TaskFactory::forUser($this->admin)->create();
+        $this->assignee = UserFactory::refresh()->asUser()->withTokens()->create();
+        $this->outsider = UserFactory::refresh()->asUser()->withTokens()->create();
+        $task = TaskFactory::forUser($this->assignee)->create();
 
         $this->comment = TaskComment::create([
             'task_id' => $task->id,
@@ -36,6 +40,21 @@ class ShowTest extends TestCase
         $response->assertOk();
         $response->assertJsonPath('data.id', $this->comment->id);
         $response->assertJsonPath('data.content', 'Comment');
+    }
+
+    public function test_show_as_task_assignee(): void
+    {
+        $response = $this->actingAs($this->assignee)->getJson(self::URI . "?id={$this->comment->id}");
+
+        $response->assertOk();
+        $response->assertJsonPath('data.id', $this->comment->id);
+    }
+
+    public function test_show_comment_on_inaccessible_task(): void
+    {
+        $response = $this->actingAs($this->outsider)->getJson(self::URI . "?id={$this->comment->id}");
+
+        $response->assertNotFound('page_not_found');
     }
 
     public function test_without_params(): void
