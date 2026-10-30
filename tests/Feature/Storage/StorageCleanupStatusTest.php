@@ -241,9 +241,41 @@ class StorageCleanupStatusTest extends TestCase
         $this->actingAs($admin)->postJson(self::URI)->assertNoContent();
         Queue::assertPushed(RotateScreenshots::class, 1);
 
-        $lock = StorageCleanupStatus::runLock('probe');
-        $this->assertTrue($lock->get());
-        $lock->release();
+        // The lock is not taken from the run: the new one waits for it (released by the failed job or its TTL)
+        $this->assertFalse(StorageCleanupStatus::runLock('probe')->get());
+    }
+
+    /**
+     * A scheduled run (no queue timeout) takes longer than running_timeout between heartbeats and is replaced
+     * by a request while it is still alive.
+     */
+    public function test_live_replaced_run_neither_runs_next_to_nor_overwrites_the_new_request(): void
+    {
+        Queue::fake();
+        config(['cleaner.lock_wait' => 1]);
+
+        StorageCleanupStatus::markRunning('scheduled');
+        $this->assertTrue(StorageCleanupStatus::runLock('scheduled')->get());
+
+        $this->travel(config('cleaner.running_timeout') + 1)->seconds();
+        $requested = StorageCleanupStatus::queue();
+        $this->assertNotNull($requested);
+
+        // The replaced run goes on: its heartbeat and outcome do not overwrite the request
+        StorageCleanupStatus::touch('scheduled');
+        StorageCleanupStatus::markCompleted('scheduled');
+        $this->assertSame(StorageCleanupStatus::QUEUED, StorageCleanupStatus::get()['status']);
+        $this->assertNotNull(StorageCleanupStatus::last());
+
+        // The request does not run next to it (block() measures the wait with the real clock)
+        $this->travelBack();
+
+        try {
+            (new RotateScreenshots($requested))->handle();
+            $this->fail('The request runs next to a live run');
+        } catch (RuntimeException $e) {
+            $this->assertStringContainsString('still held', $e->getMessage());
+        }
     }
 
     public function test_heartbeat_keeps_a_long_run_alive(): void
@@ -251,7 +283,7 @@ class StorageCleanupStatusTest extends TestCase
         StorageCleanupStatus::markRunning('long');
 
         $this->travel(config('cleaner.running_timeout') - 1)->seconds();
-        StorageCleanupStatus::touch();
+        StorageCleanupStatus::touch('long');
         $this->travel(config('cleaner.running_timeout') - 1)->seconds();
 
         $this->assertTrue(StorageCleanupStatus::isRunning());
@@ -286,6 +318,8 @@ class StorageCleanupStatusTest extends TestCase
         $this->assertTrue(StorageCleanupStatus::runLock($lost)->get());
 
         $this->travel(config('cleaner.running_timeout') + 1)->seconds();
+        // The crashed worker's lock is gone (TTL), the new run takes it
+        StorageCleanupStatus::runLock($lost)->release();
 
         $current = StorageCleanupStatus::queue();
         $this->assertNotNull($current);

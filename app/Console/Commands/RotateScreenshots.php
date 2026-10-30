@@ -40,12 +40,6 @@ class RotateScreenshots extends Command
      */
     public function handle(): void
     {
-        if (!StorageCleaner::isSupported()) {
-            StorageCleanupStatus::markSkipped();
-            $this->info('Screenshots are on object storage: use bucket lifecycle rules instead of rotation');
-            return;
-        }
-
         $requested = (bool)$this->option('run');
         $runId = $this->option('run') ?: (string)Str::uuid();
         $lock = StorageCleanupStatus::runLock($runId);
@@ -68,28 +62,32 @@ class RotateScreenshots extends Command
                 return;
             }
 
-            if (!StorageCleaner::needThinning()) {
-                StorageCleanupStatus::markSkipped();
-                $this->info('Time for thinning hasn\'t come');
+            if (!StorageCleaner::isSupported()) {
+                StorageCleanupStatus::markSkipped($runId);
+                $this->info('Screenshots are on object storage: use bucket lifecycle rules instead of rotation');
                 return;
             }
 
-            $this->info('For thinning available ' . StorageCleaner::countAvailableScreenshots() . ' screenshots');
+            if (!StorageCleaner::needThinning()) {
+                StorageCleanupStatus::markSkipped($runId);
+                $this->info('Time for thinning hasn\'t come');
+                return;
+            }
 
             $spaceBefore = StorageCleaner::getUsedSpace();
 
             $this->info('Started thinning...');
 
-            StorageCleaner::thin(heartbeat: StorageCleanupStatus::touch(...));
+            StorageCleaner::thin(heartbeat: static fn () => StorageCleanupStatus::touch($runId));
 
-            StorageCleanupStatus::markCompleted();
+            StorageCleanupStatus::markCompleted($runId);
 
             $this->info('Totally freed ' . round(
                 ($spaceBefore - StorageCleaner::getUsedSpace()) / 1024 / 1024,
                 3
             ) . 'MB');
         } catch (Throwable $e) {
-            StorageCleanupStatus::markFailed();
+            StorageCleanupStatus::markFailed($runId);
 
             throw $e;
         } finally {

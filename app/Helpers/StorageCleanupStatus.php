@@ -84,15 +84,10 @@ class StorageCleanupStatus
         return Cache::lock(self::STATE_LOCK, 10)->block(5, static function () {
             $state = self::stored();
 
-            if (in_array($state['status'], self::ACTIVE, true)) {
-                if (!self::isStale($state)) {
-                    return null;
-                }
-
-                // The worker that held the run lock is gone, otherwise the run would not be stale
-                if ($state['status'] === self::RUNNING) {
-                    Cache::lock(self::RUN_LOCK)->forceRelease();
-                }
+            // A stale run is replaced, but its run lock is left alone: a run without a heartbeat is not
+            // necessarily dead, and the new run waits for the lock instead of running next to it
+            if (in_array($state['status'], self::ACTIVE, true) && !self::isStale($state)) {
+                return null;
             }
 
             $runId = (string)Str::uuid();
@@ -159,30 +154,33 @@ class StorageCleanupStatus
     /**
      * Heartbeat of a running cleanup: proves the run is still alive.
      */
-    public static function touch(): void
+    public static function touch(string $runId): void
     {
-        self::put(self::RUNNING);
+        self::putOwned($runId, self::RUNNING);
     }
 
-    public static function markCompleted(): void
+    /**
+     * The run has freed the space; the time of the last cleanup is updated even if the run has been replaced.
+     */
+    public static function markCompleted(string $runId): void
     {
         $now = now()->toIso8601String();
 
         Cache::forever(self::LAST_KEY, $now);
-        self::put(self::COMPLETED, ['finished_at' => $now]);
+        self::putOwned($runId, self::COMPLETED, ['finished_at' => $now]);
     }
 
     /**
      * The run was not needed: thinning threshold not reached or the storage does not support it.
      */
-    public static function markSkipped(): void
+    public static function markSkipped(string $runId): void
     {
-        self::put(self::SKIPPED, ['finished_at' => now()->toIso8601String()]);
+        self::putOwned($runId, self::SKIPPED, ['finished_at' => now()->toIso8601String()]);
     }
 
-    public static function markFailed(): void
+    public static function markFailed(string $runId): void
     {
-        self::put(self::FAILED, ['finished_at' => now()->toIso8601String()]);
+        self::putOwned($runId, self::FAILED, ['finished_at' => now()->toIso8601String()]);
     }
 
     /**
@@ -197,7 +195,7 @@ class StorageCleanupStatus
             $state = self::stored();
 
             if ($state['run_id'] === $runId && in_array($state['status'], self::ACTIVE, true)) {
-                self::markFailed();
+                self::put(self::FAILED, ['finished_at' => now()->toIso8601String()]);
             }
         });
 
@@ -228,6 +226,19 @@ class StorageCleanupStatus
             'status' => $status,
             'updated_at' => now()->toIso8601String(),
         ]));
+    }
+
+    /**
+     * Writes the status only while it belongs to the run: a replaced run that is still alive must not overwrite
+     * the status of the run that replaced it.
+     */
+    private static function putOwned(string $runId, string $status, array $attributes = []): void
+    {
+        Cache::lock(self::STATE_LOCK, 10)->block(5, static function () use ($runId, $status, $attributes) {
+            if (self::stored()['run_id'] === $runId) {
+                self::put($status, $attributes);
+            }
+        });
     }
 
     /**

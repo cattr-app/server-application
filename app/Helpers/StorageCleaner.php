@@ -16,6 +16,8 @@ use Storage;
  */
 class StorageCleaner
 {
+    private const HEARTBEAT_INTERVALS = 1000;
+
     public static function isSupported(): bool
     {
         return StorageHelper::isLocal();
@@ -57,7 +59,7 @@ class StorageCleaner
      *
      * Not guarded against concurrent runs: cattr:screenshots:rotate holds StorageCleanupStatus::runLock().
      *
-     * @param callable|null $heartbeat called after every removed page of screenshots
+     * @param callable|null $heartbeat called while screenshots are looked up and after every removed page
      * @throws BindingResolutionException
      */
     public static function thin($force = false, ?callable $heartbeat = null): void
@@ -69,7 +71,7 @@ class StorageCleaner
         $service = app()->make(ScreenshotService::class);
 
         while (self::getUsedSpace() > self::getWaterlineBorder()) {
-            $availableScreenshots = self::getAvailableScreenshots();
+            $availableScreenshots = self::getAvailableScreenshots($heartbeat);
 
             if (count($availableScreenshots) === 0) {
                 break;
@@ -86,10 +88,12 @@ class StorageCleaner
     }
 
     /**
+     * @param callable|null $heartbeat called every HEARTBEAT_INTERVALS scanned intervals: a page can take
+     *                                 long to find when most intervals have no screenshot left
      * @return array
      * @throws BindingResolutionException
      */
-    public static function getAvailableScreenshots(): array
+    public static function getAvailableScreenshots(?callable $heartbeat = null): array
     {
         $service = app()->make(ScreenshotService::class);
 
@@ -97,8 +101,13 @@ class StorageCleaner
 
         $result = [];
         $i = 0;
+        $scanned = 0;
 
         foreach ($collection->cursor() as $interval) {
+            if ($heartbeat && ++$scanned % self::HEARTBEAT_INTERVALS === 0) {
+                $heartbeat();
+            }
+
             if (Storage::exists($service->getScreenshotPath($interval))) {
                 $result[] = $interval->id;
                 $i++;
