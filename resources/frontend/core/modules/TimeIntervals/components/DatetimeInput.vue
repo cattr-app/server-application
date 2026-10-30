@@ -128,7 +128,7 @@
                 ? moment(this.value).tz(this.timezone).toISOString()
                 : moment().startOf('day').toISOString();
             this.inputHandler(dateTimeStr);
-            this.$emit('change', dateTimeStr);
+            this.$emit('change', dateTimeStr, { source: 'init' });
             this.$nextTick(async () => {
                 try {
                     const locale = await import(`vue2-datepicker/locale/${this.$i18n.locale}`);
@@ -173,21 +173,21 @@
                 const dateTimeStr = dateTime.toISOString();
 
                 this.inputHandler(dateTimeStr);
-                this.$emit('change', dateTimeStr);
+                this.$emit('change', dateTimeStr, { source: 'user' });
             },
             setHour(value) {
                 const dateTime = moment(this.value).hour(value);
                 const dateTimeStr = dateTime.toISOString();
 
                 this.inputHandler(dateTimeStr);
-                this.$emit('change', dateTimeStr);
+                this.$emit('change', dateTimeStr, { source: 'user' });
             },
             setMinute(value) {
                 const dateTime = moment(this.value).minute(value);
                 const dateTimeStr = dateTime.toISOString();
 
                 this.inputHandler(dateTimeStr);
-                this.$emit('change', dateTimeStr);
+                this.$emit('change', dateTimeStr, { source: 'user' });
             },
             disabledDate(date) {
                 // date = js Date object in user timezone
@@ -216,7 +216,7 @@
 
                 moment.tz.setDefault(this.timezone);
                 this.inputHandler(dateTimeStr);
-                this.$emit('change', dateTimeStr);
+                this.$emit('change', dateTimeStr, { source: 'timezone' });
             },
         },
     };

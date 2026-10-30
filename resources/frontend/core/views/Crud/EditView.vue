@@ -77,6 +77,7 @@
                                                     "
                                                     :name="$t(field.label)"
                                                     :vid="field.key"
+                                                    :immediate="field.immediate === true"
                                                 >
                                                     <renderable-field
                                                         v-model="values[field.key]"
