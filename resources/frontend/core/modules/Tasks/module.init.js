@@ -1005,6 +1005,17 @@ export function init(context, router) {
 
     crud.view.addPageControls([
         {
+            label: 'tasks.add_time',
+            icon: 'icon-clock',
+            onClick: ({ $router, values }) => {
+                $router.push({
+                    path: '/time-intervals/new',
+                    query: { task_id: String(values.id), from_task: '1' },
+                });
+            },
+            renderCondition: ({ $can, values }) => !!values.id && $can('viewManualTime', 'dashboard'),
+        },
+        {
             label: 'tasks.relations.title',
             icon: 'icon-corner-down-right',
             onClick: ({ $router }) => {

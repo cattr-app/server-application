@@ -37,7 +37,16 @@ class TimeIntervalPolicy
             }
 
             if ($user->id !== $userId) {
-                return $user->hasRole(Role::MANAGER) || $user->hasProjectRole(Role::MANAGER, $projectId);
+                // Managers may enter manual time for others only on tasks assigned to that user.
+                $assignedToUser = Task::withoutGlobalScopes()
+                    ->whereKey($taskId)
+                    ->whereHas('users', static fn ($query) => $query
+                        ->where('users.id', $userId)
+                        ->withoutGlobalScopes())
+                    ->exists();
+
+                return $assignedToUser
+                    && ($user->hasRole(Role::MANAGER) || $user->hasProjectRole(Role::MANAGER, $projectId));
             }
 
             return (

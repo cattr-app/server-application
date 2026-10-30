@@ -6,7 +6,10 @@
       "no_options": "Sorry, no matching options.",
       "loading": "Loading more tasks...",
       "load_failed": "Could not load tasks.",
-      "retry": "Retry"
+      "retry": "Retry",
+      "checking": "Checking task access...",
+      "invalid_id": "Invalid task ID. Select a task manually.",
+      "unavailable": "Task unavailable for this user. Select another task."
     }
   }
 }
