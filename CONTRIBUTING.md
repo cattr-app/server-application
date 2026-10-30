@@ -799,10 +799,12 @@ Then set `MODULE_FRONTEND_<FLAG_NAME>_ENABLED=true` and rebuild the assets (`pnp
 ### Building an image with modules
 
 The official `Dockerfile` installs dependencies only from the repository's own `composer.json`,
-`package.json` and lockfiles, so the published `ghcr.io/cattr-app/server-application` image
-contains **no external modules**. Setting `MODULE_*_ENABLED=true` on it has no effect: there is
-nothing to enable. To run modules in a container, build your own image from a checkout of the
-release you deploy.
+`package.json` and lockfiles, and bundles only the frontend packages registered in
+`resources/frontend/etc/modules.config.json`. The published `ghcr.io/cattr-app/server-application`
+image therefore contains exactly the modules declared there; for those, setting
+`MODULE_*_ENABLED=true` is enough. A module that is not declared in the repository is not in the
+image, and its flag has nothing to enable. To ship your own modules, build your own image from a
+checkout of the release you deploy.
 
 Copy the official `Dockerfile` (for example to `Dockerfile.modules`) and add one step to the
 builder stage, right after `COPY --chown=10000:10000 . /opt/cattr/app` and before the
@@ -810,9 +812,11 @@ builder stage, right after `COPY --chown=10000:10000 . /opt/cattr/app` and befor
 
 ```dockerfile
 # Space-separated lists; leave a list empty to skip that side.
-ARG COMPOSER_MODULES="cattr/redmine_integration-module"
+# Example: --build-arg COMPOSER_MODULES="acme/cattr-reports-module"
+ARG COMPOSER_MODULES=""
 # Entries are <ModuleConfig.moduleName>=<npm package>.
-ARG FRONTEND_MODULES="AmazingCat_RedmineIntegration=@amazingcat/cattr-redmine-integration"
+# Example: --build-arg FRONTEND_MODULES="Acme_Reports=@acme/cattr-reports"
+ARG FRONTEND_MODULES=""
 
 RUN set -eux; \
     if [ -n "${COMPOSER_MODULES}" ]; then \
@@ -844,12 +848,12 @@ install the modules and bundle each frontend module as its own lazy chunk:
   `ModuleConfig.moduleName`, otherwise the frontend derives a different flag name and never
   loads the chunk.
 
-Build the image and pass other module lists as build arguments if needed:
+Build the image with your module lists:
 
 ```bash
 podman build -f Dockerfile.modules \
-    --build-arg COMPOSER_MODULES="cattr/<module>" \
-    --build-arg FRONTEND_MODULES="<ModuleConfig.moduleName>=@amazingcat/<package>" \
+    --build-arg COMPOSER_MODULES="<vendor>/<module>" \
+    --build-arg FRONTEND_MODULES="<ModuleConfig.moduleName>=<npm package>" \
     -t cattr-server-modules .
 ```
 
