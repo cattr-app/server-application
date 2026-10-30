@@ -29,7 +29,7 @@ function loadComponent(timers) {
         UserSelect: {},
         setTimeout: callback => timers.push(callback),
         clearTimeout: () => timers.splice(0),
-        parseInt,
+        Number,
         Math,
         Set,
         String,
@@ -117,11 +117,13 @@ test('page from the query survives initial filter hydration', async () => {
     assert.equal(JSON.stringify(grid.queryParams.where['project_id']), '["=",[1,2]]');
 });
 
-test('an invalid page query falls back to the first page', async () => {
-    const { requests, hydrate } = createGrid({ page: 'abc' });
-    await hydrate();
-    assert.deepEqual(requests, [1]);
-});
+for (const page of ['abc', '2abc', '0', '-1', '2.5', '']) {
+    test(`an invalid page query (${JSON.stringify(page)}) falls back to the first page`, async () => {
+        const { requests, hydrate } = createGrid({ page });
+        await hydrate();
+        assert.deepEqual(requests, [1]);
+    });
+}
 
 test('re-emitting an unchanged selection keeps the page', async () => {
     const { grid, requests, pushes, hydrate, runTimers } = createGrid({ page: '3' });

@@ -158,7 +158,10 @@
 
     const widthLessThan500MediaQuery = matchMedia('(max-width: 500px)');
 
-    const pageFromQuery = query => Math.max(1, parseInt(query.page, 10) || 1);
+    const pageFromQuery = query => {
+        const page = Number(query.page);
+        return Number.isSafeInteger(page) && page > 0 ? page : 1;
+    };
 
     // Select filters store their value as ['=', ids] (or '' when nothing is selected);
     // compare them as unordered id lists.
@@ -370,7 +373,8 @@
                 }
 
                 this.filterFieldsData();
-                if (pageFromQuery(this.$route.query) !== this.queryParams.page) {
+                const savedToQuery = this.getFilterFieldKeys().includes(key);
+                if (savedToQuery || pageFromQuery(this.$route.query) !== this.queryParams.page) {
                     this.updateRoute();
                 }
             },

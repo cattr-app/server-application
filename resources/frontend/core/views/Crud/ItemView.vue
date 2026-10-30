@@ -176,9 +176,9 @@
                     if (error.response && error.response.data.error_type === 'query.item_not_found') {
                         this.$router.replace({ name: 'forbidden' });
                     }
+                } finally {
+                    this.isDataLoading = false;
                 }
-
-                this.isDataLoading = false;
             },
 
             handleClick(button) {
