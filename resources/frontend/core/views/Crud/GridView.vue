@@ -158,6 +158,12 @@
 
     const widthLessThan500MediaQuery = matchMedia('(max-width: 500px)');
 
+    /**
+     * Page number requested by the route query.
+     *
+     * @param {Object} query route query
+     * @returns {number} the `page` value when it is a positive integer, otherwise 1
+     */
     const pageFromQuery = query => {
         const page = Number(query.page);
         return Number.isSafeInteger(page) && page > 0 ? page : 1;
@@ -166,6 +172,14 @@
     // Select filters store their value as ['=', ids] (or '' when nothing is selected);
     // compare them as unordered id lists.
     const selectFilterIds = value => (Array.isArray(value) && Array.isArray(value[1]) ? value[1].map(String) : []);
+
+    /**
+     * Whether two select filter values contain the same ids, ignoring order.
+     *
+     * @param {Array|string|undefined} a
+     * @param {Array|string|undefined} b
+     * @returns {boolean}
+     */
     const isSameSelectFilter = (a, b) => {
         const idsA = selectFilterIds(a);
         const idsB = new Set(selectFilterIds(b));
@@ -359,6 +373,13 @@
             onStatusesChange(key, data) {
                 this.onSelectFilterChange(key, data);
             },
+            /**
+             * Applies a selection emitted by a user/project/status select filter.
+             * Only a real change of an already loaded filter resets the grid to the first page.
+             *
+             * @param {string} key filter field key
+             * @param {Array|null} data selected ids
+             */
             onSelectFilterChange(key, data) {
                 // Copy the ids: selects mutate their selection array in place (UserSelect.toggleUser).
                 const value = Array.isArray(data) && data.length > 0 ? ['=', [...data]] : '';

@@ -161,6 +161,10 @@
         },
 
         methods: {
+            /**
+             * Loads the item; a canceled request (the page was left) is ignored,
+             * a missing item redirects to the forbidden page.
+             */
             async load() {
                 this.isDataLoading = true;
                 const id = this.$route.params[this.service.getIdParam()];
