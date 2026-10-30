@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use App\Contracts\ScreenshotService;
 use App\Models\TimeInterval;
+use Cache;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Builder;
@@ -18,6 +19,11 @@ use Storage;
 class StorageCleaner
 {
     private const HEARTBEAT_INTERVALS = 1000;
+
+    /**
+     * Interval id the last lookup stopped at, shared by the runs like their status.
+     */
+    private const SCAN_POSITION_KEY = 'storage_cleanup:scan_position';
 
     public static function isSupported(): bool
     {
@@ -58,6 +64,10 @@ class StorageCleaner
     /**
      * Removes screenshots until the used space drops below the waterline.
      *
+     * The intervals are scanned in id order from where the previous lookup stopped, also across runs: a run
+     * stopped at its deadline in a long range of intervals without screenshots must not make the next run scan
+     * the same range again. At the end the scan wraps around once.
+     *
      * Not guarded against concurrent runs: cattr:screenshots:rotate holds StorageCleanupStatus::runLock().
      *
      * @param callable|null $heartbeat called while screenshots are looked up and after every removed page
@@ -73,24 +83,40 @@ class StorageCleaner
 
         $service = app()->make(ScreenshotService::class);
 
-        while (self::getUsedSpace() > self::getWaterlineBorder()) {
-            if ($deadline?->isPast()) {
-                break;
-            }
+        $position = (int)Cache::get(self::SCAN_POSITION_KEY, 0);
+        $wrapped = $position === 0;
 
-            $availableScreenshots = self::getAvailableScreenshots($heartbeat, $deadline);
+        try {
+            while (self::getUsedSpace() > self::getWaterlineBorder()) {
+                if ($deadline?->isPast()) {
+                    break;
+                }
 
-            if (count($availableScreenshots) === 0) {
-                break;
-            }
+                [$availableScreenshots, $position, $exhausted] = self::findPage($position, $heartbeat, $deadline);
 
-            foreach ($availableScreenshots as $screenshot) {
-                $service->destroyScreenshot($screenshot);
-            }
+                foreach ($availableScreenshots as $screenshot) {
+                    $service->destroyScreenshot($screenshot);
+                }
 
-            if ($heartbeat) {
-                $heartbeat();
+                if ($heartbeat) {
+                    $heartbeat();
+                }
+
+                if (!$exhausted) {
+                    continue;
+                }
+
+                // The end of the intervals: start over once, the beginning may not have been scanned in this run
+                $position = 0;
+
+                if ($wrapped) {
+                    break;
+                }
+
+                $wrapped = true;
             }
+        } finally {
+            Cache::forever(self::SCAN_POSITION_KEY, $position);
         }
     }
 
@@ -103,18 +129,30 @@ class StorageCleaner
      */
     public static function getAvailableScreenshots(?callable $heartbeat = null, ?CarbonInterface $until = null): array
     {
+        return self::findPage(0, $heartbeat, $until)[0];
+    }
+
+    /**
+     * Looks up the next page of intervals with a screenshot after the given interval id.
+     *
+     * @return array{0: int[], 1: int, 2: bool} the found ids, the last scanned id (where the next lookup
+     *                                          continues) and whether the scan has reached the last interval
+     * @throws BindingResolutionException
+     */
+    private static function findPage(int $afterId, ?callable $heartbeat, ?CarbonInterface $until): array
+    {
         $service = app()->make(ScreenshotService::class);
 
-        $collection = self::getScreenshotsCollection();
+        $collection = self::getScreenshotsCollection()->where('time_intervals.id', '>', $afterId);
 
         $result = [];
-        $i = 0;
         $scanned = 0;
+        $lastId = $afterId;
 
         foreach ($collection->cursor() as $interval) {
             if (++$scanned % self::HEARTBEAT_INTERVALS === 0) {
                 if ($until?->isPast()) {
-                    break;
+                    return [$result, $lastId, false];
                 }
 
                 if ($heartbeat) {
@@ -122,17 +160,18 @@ class StorageCleaner
                 }
             }
 
+            $lastId = $interval->id;
+
             if (Storage::exists($service->getScreenshotPath($interval))) {
                 $result[] = $interval->id;
-                $i++;
             }
 
-            if ($i >= config('cleaner.page_size')) {
-                break;
+            if (count($result) >= config('cleaner.page_size')) {
+                return [$result, $lastId, false];
             }
         }
 
-        return $result;
+        return [$result, $lastId, true];
     }
 
     /**

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
+use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
@@ -412,6 +413,60 @@ class StorageCleanupStatusTest extends TestCase
         $service->shouldNotReceive('destroyScreenshot');
 
         StorageCleaner::thin(true, null, now()->subSecond());
+    }
+
+    /**
+     * Intervals with a screenshot file, in id order.
+     *
+     * @return int[]
+     */
+    private function intervalsWithScreenshots(int $count): array
+    {
+        $service = app(ScreenshotService::class);
+
+        return array_map(static function () use ($service) {
+            $interval = IntervalFactory::create();
+            Storage::put($service->getScreenshotPath($interval), 'image');
+
+            return $interval->id;
+        }, range(1, $count));
+    }
+
+    public function test_cleanup_continues_from_where_the_previous_run_stopped(): void
+    {
+        $this->needThinning(true);
+        config(['cleaner.page_size' => 1]);
+        $service = app(ScreenshotService::class);
+
+        [$first, $second, $third] = $this->intervalsWithScreenshots(3);
+
+        // The previous run stopped after the second interval: the third is looked up first
+        Cache::forever('storage_cleanup:scan_position', $second);
+        $removed = [];
+        $this->mock(ScreenshotService::class, static function ($mock) use ($service, &$removed) {
+            $mock->shouldReceive('getScreenshotPath')->andReturnUsing(fn ($i) => $service->getScreenshotPath($i));
+            $mock->shouldReceive('destroyScreenshot')->andReturnUsing(static function ($id) use ($service, &$removed) {
+                $removed[] = $id;
+                Storage::delete($service->getScreenshotPath($id));
+            });
+        });
+
+        StorageCleaner::thin();
+
+        // Then the scan wraps around once to the intervals before the position
+        $ours = array_values(array_intersect($removed, [$first, $second, $third]));
+        $this->assertSame([$third, $first, $second], $ours);
+    }
+
+    public function test_scan_position_is_kept_when_the_run_stops_at_the_deadline(): void
+    {
+        $this->needThinning(true);
+        [$first] = $this->intervalsWithScreenshots(1);
+        Cache::forever('storage_cleanup:scan_position', $first);
+
+        StorageCleaner::thin(false, null, now()->subSecond());
+
+        $this->assertSame($first, Cache::get('storage_cleanup:scan_position'));
     }
 
     public function test_job_has_its_own_timeout_below_retry_after(): void
