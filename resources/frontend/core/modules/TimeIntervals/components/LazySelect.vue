@@ -111,11 +111,12 @@
         watch: {
             userID(userID) {
                 const oldTaskId = this.value || this.pendingTaskId;
+                const invalidId = this.selectionError === 'time_intervals.task_select.invalid_id';
                 this.selectionRequestId += 1;
                 this.pendingTaskId = null;
                 this.selectedTask = null;
                 this.selectionLoading = false;
-                this.selectionError = null;
+                this.selectionError = invalidId && !oldTaskId ? 'time_intervals.task_select.invalid_id' : null;
                 this.inputHandler(null);
                 this.restartSearch();
                 if (oldTaskId && userID) this.hydrateTask(oldTaskId, userID);

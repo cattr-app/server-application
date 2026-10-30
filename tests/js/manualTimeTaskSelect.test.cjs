@@ -71,6 +71,21 @@ test('invalid or deleted task cannot leave a selected value', async () => {
     assert.equal(instance.selectionError, 'time_intervals.task_select.unavailable');
 });
 
+test('invalid URL task ID remains visible when the default user initializes', async () => {
+    const { component, instance } = createSelector({ taskId: 'invalid', userID: null });
+    await instance.hydrateTask(instance.preselectedId, null);
+    assert.equal(instance.selectionError, 'time_intervals.task_select.invalid_id');
+
+    instance.userID = 1;
+    component.watch.userID.call(instance, 1);
+    assert.equal(instance.value, null);
+    assert.equal(instance.selectionError, 'time_intervals.task_select.invalid_id');
+
+    instance.onSelect({ id: 9, label: 'Selected task' });
+    assert.equal(instance.value, 9);
+    assert.equal(instance.selectionError, null);
+});
+
 test('reassignment clears selection when target user is not assigned', async () => {
     const task = { id: 9, task_name: 'Time', project: null };
     const { component, instance } = createSelector({
