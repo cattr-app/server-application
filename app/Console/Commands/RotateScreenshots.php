@@ -4,8 +4,9 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Helpers\StorageCleaner;
-use Illuminate\Contracts\Container\BindingResolutionException;
+use App\Helpers\StorageCleanupStatus;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Throwable;
 
 #[AsCommand(name: 'cattr:screenshots:rotate')]
 class RotateScreenshots extends Command
@@ -27,31 +28,56 @@ class RotateScreenshots extends Command
     /**
      * Execute the console command.
      *
-     * @throws BindingResolutionException
+     * Every outcome is recorded in StorageCleanupStatus, so the About page can follow a cleanup
+     * queued by the web container and run by the queue worker.
+     *
+     * @throws Throwable
      */
     public function handle(): void
     {
         if (!StorageCleaner::isSupported()) {
+            StorageCleanupStatus::markSkipped();
             $this->info('Screenshots are on object storage: use bucket lifecycle rules instead of rotation');
             return;
         }
 
-        if (!StorageCleaner::needThinning()) {
-            $this->info('Time for thinning hasn\'t come');
+        $lock = StorageCleanupStatus::runLock();
+
+        if (!$lock->get()) {
+            // The run in progress records its own outcome
+            $this->info('Another thinning is in progress');
             return;
         }
 
-        $this->info('For thinning available ' . StorageCleaner::countAvailableScreenshots() . ' screenshots');
+        try {
+            if (!StorageCleaner::needThinning()) {
+                StorageCleanupStatus::markSkipped();
+                $this->info('Time for thinning hasn\'t come');
+                return;
+            }
 
-        $spaceBefore = StorageCleaner::getUsedSpace();
+            StorageCleanupStatus::markRunning();
 
-        $this->info('Started thinning...');
+            $this->info('For thinning available ' . StorageCleaner::countAvailableScreenshots() . ' screenshots');
 
-        StorageCleaner::thin();
+            $spaceBefore = StorageCleaner::getUsedSpace();
 
-        $this->info('Totally freed ' . round(
-            ($spaceBefore - StorageCleaner::getUsedSpace()) / 1024 / 1024,
-            3
-        ) . 'MB');
+            $this->info('Started thinning...');
+
+            StorageCleaner::thin(heartbeat: StorageCleanupStatus::touch(...));
+
+            StorageCleanupStatus::markCompleted();
+
+            $this->info('Totally freed ' . round(
+                ($spaceBefore - StorageCleaner::getUsedSpace()) / 1024 / 1024,
+                3
+            ) . 'MB');
+        } catch (Throwable $e) {
+            StorageCleanupStatus::markFailed();
+
+            throw $e;
+        } finally {
+            $lock->release();
+        }
     }
 }

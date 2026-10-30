@@ -4,7 +4,6 @@ namespace App\Helpers;
 
 use App\Contracts\ScreenshotService;
 use App\Models\TimeInterval;
-use Cache;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Builder;
 use Storage;
@@ -54,18 +53,18 @@ class StorageCleaner
     }
 
     /**
+     * Removes screenshots until the used space drops below the waterline.
+     *
+     * Not guarded against concurrent runs: cattr:screenshots:rotate holds StorageCleanupStatus::runLock().
+     *
+     * @param callable|null $heartbeat called after every removed page of screenshots
      * @throws BindingResolutionException
      */
-    public static function thin($force = false): void
+    public static function thin($force = false, ?callable $heartbeat = null): void
     {
-        if (!self::isSupported()
-            || (!$force && !self::needThinning())
-            || Cache::store('octane')->get('thinning_now')
-        ) {
+        if (!self::isSupported() || (!$force && !self::needThinning())) {
             return;
         }
-
-        Cache::store('octane')->set('thinning_now', true);
 
         $service = app()->make(ScreenshotService::class);
 
@@ -79,10 +78,11 @@ class StorageCleaner
             foreach ($availableScreenshots as $screenshot) {
                 $service->destroyScreenshot($screenshot);
             }
-        }
 
-        Cache::store('octane')->set('thinning_now', false);
-        Cache::store('octane')->set('last_thin', now());
+            if ($heartbeat) {
+                $heartbeat();
+            }
+        }
     }
 
     /**

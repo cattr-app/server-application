@@ -1,0 +1,182 @@
+<?php
+
+namespace App\Helpers;
+
+use Cache;
+use Illuminate\Contracts\Cache\Lock;
+use Illuminate\Support\Carbon;
+
+/**
+ * Status of the screenshot cleanup, shared by the web container that queues it and the queue worker
+ * (or scheduler) that runs it.
+ *
+ * Kept in the default cache store, not in the per-process octane store: the default store is shared by the
+ * containers (file cache on the shared PVC in pvc mode, Redis in s3 mode), and also provides the locks.
+ */
+class StorageCleanupStatus
+{
+    public const IDLE = 'idle';
+    public const QUEUED = 'queued';
+    public const RUNNING = 'running';
+    public const COMPLETED = 'completed';
+    public const SKIPPED = 'skipped';
+    public const FAILED = 'failed';
+
+    public const ACTIVE = [self::QUEUED, self::RUNNING];
+
+    private const STATUS_KEY = 'storage_cleanup:status';
+    private const LAST_KEY = 'storage_cleanup:last';
+    private const STATE_LOCK = 'storage_cleanup:state';
+    private const RUN_LOCK = 'storage_cleanup:run';
+
+    /**
+     * Lifetime of the run lock: released by the run itself or by the failed job,
+     * the TTL only frees it after the whole container is gone.
+     */
+    private const RUN_LOCK_TTL = 3600;
+
+    /**
+     * Current status with stale states resolved: a request that no worker picked up within
+     * cleaner.queued_timeout, or a run without a heartbeat within cleaner.running_timeout, is reported as failed.
+     *
+     * @return array{status: string, requested_at: ?string, started_at: ?string, finished_at: ?string}
+     */
+    public static function get(): array
+    {
+        $state = self::stored();
+
+        if (self::isStale($state)) {
+            $state['status'] = self::FAILED;
+        }
+
+        return [
+            'status' => $state['status'],
+            'requested_at' => $state['requested_at'],
+            'started_at' => $state['started_at'],
+            'finished_at' => $state['finished_at'],
+        ];
+    }
+
+    /**
+     * Time of the last successful cleanup.
+     */
+    public static function last(): ?string
+    {
+        return Cache::get(self::LAST_KEY);
+    }
+
+    public static function isRunning(): bool
+    {
+        return self::get()['status'] === self::RUNNING;
+    }
+
+    /**
+     * Marks the cleanup as queued unless one is already queued or running.
+     *
+     * @return bool false if a cleanup is already queued or running and nothing has to be queued
+     */
+    public static function queue(): bool
+    {
+        return Cache::lock(self::STATE_LOCK, 10)->block(5, static function () {
+            $state = self::stored();
+
+            if (in_array($state['status'], self::ACTIVE, true)) {
+                if (!self::isStale($state)) {
+                    return false;
+                }
+
+                // The worker that held the run lock is gone, otherwise the run would not be stale
+                if ($state['status'] === self::RUNNING) {
+                    self::runLock()->forceRelease();
+                }
+            }
+
+            self::put(self::QUEUED, [
+                'requested_at' => now()->toIso8601String(),
+                'started_at' => null,
+                'finished_at' => null,
+            ]);
+
+            return true;
+        });
+    }
+
+    public static function runLock(): Lock
+    {
+        return Cache::lock(self::RUN_LOCK, self::RUN_LOCK_TTL);
+    }
+
+    public static function markRunning(): void
+    {
+        // A scheduled run was not requested: the request time of a previous run must not leak into it
+        $state = self::stored();
+        $requestedAt = $state['status'] === self::QUEUED ? $state['requested_at'] : null;
+
+        self::put(self::RUNNING, [
+            'requested_at' => $requestedAt,
+            'started_at' => now()->toIso8601String(),
+            'finished_at' => null,
+        ]);
+    }
+
+    /**
+     * Heartbeat of a running cleanup: proves the run is still alive.
+     */
+    public static function touch(): void
+    {
+        self::put(self::RUNNING);
+    }
+
+    public static function markCompleted(): void
+    {
+        $now = now()->toIso8601String();
+
+        Cache::forever(self::LAST_KEY, $now);
+        self::put(self::COMPLETED, ['finished_at' => $now]);
+    }
+
+    /**
+     * The run was not needed: thinning threshold not reached or the storage does not support it.
+     */
+    public static function markSkipped(): void
+    {
+        self::put(self::SKIPPED, ['finished_at' => now()->toIso8601String()]);
+    }
+
+    public static function markFailed(): void
+    {
+        self::put(self::FAILED, ['finished_at' => now()->toIso8601String()]);
+    }
+
+    private static function stored(): array
+    {
+        return array_merge([
+            'status' => self::IDLE,
+            'requested_at' => null,
+            'started_at' => null,
+            'finished_at' => null,
+            'updated_at' => null,
+        ], (array)Cache::get(self::STATUS_KEY, []));
+    }
+
+    private static function put(string $status, array $attributes = []): void
+    {
+        Cache::forever(self::STATUS_KEY, array_merge(self::stored(), $attributes, [
+            'status' => $status,
+            'updated_at' => now()->toIso8601String(),
+        ]));
+    }
+
+    private static function isStale(array $state): bool
+    {
+        $timeout = match ($state['status']) {
+            self::QUEUED => config('cleaner.queued_timeout'),
+            self::RUNNING => config('cleaner.running_timeout'),
+            default => null,
+        };
+
+        return $timeout !== null
+            && ($state['updated_at'] === null
+                || Carbon::parse($state['updated_at'])->addSeconds((int)$timeout)->isPast());
+    }
+}
