@@ -16,6 +16,7 @@ import {
     toIntervalPayload,
     validateDuration,
 } from './duration';
+import { readRecentTaskIds, rememberRecentTask } from './recentTasks';
 
 export const ModuleConfig = {
     routerPrefix: 'time-intervals',
@@ -24,8 +25,14 @@ export const ModuleConfig = {
 };
 
 class ManualTimeIntervalService extends TimeIntervalService {
-    save(data) {
-        return super.save(toIntervalPayload(data));
+    async save(data) {
+        const accountId = rootStore.getters['user/user']?.id;
+        const response = await super.save(toIntervalPayload(data));
+        // Only a saved interval counts as using the task; failed requests throw above.
+        if (rootStore.getters['user/user']?.id === accountId) {
+            rememberRecentTask(accountId, data.task_id);
+        }
+        return response;
     }
 }
 
@@ -87,6 +94,7 @@ export function init(context, router) {
                         userID: props.values.user_id,
                         currentUserId: rootStore.getters['user/user'].id,
                         preselectedId: router.currentRoute.query.task_id,
+                        getRecentTaskIds: () => readRecentTaskIds(rootStore.getters['user/user']?.id),
                     },
                 });
             },

@@ -23,8 +23,14 @@
                 <template v-else-if="isLoading || (query.length >= 3 && currentPage === 0)">
                     {{ $t('time_intervals.task_select.loading') }}
                 </template>
+                <template v-else-if="query.length < 3">{{ $t('time_intervals.task_select.type_to_search') }}</template>
                 <template v-else>{{ $t('time_intervals.task_select.no_options') }}</template>
             </div>
+            <template #list-header>
+                <li v-if="showingRecent && options.length" class="task-select__section">
+                    {{ $t('time_intervals.task_select.recent') }}
+                </li>
+            </template>
             <template #list-footer>
                 <li v-if="options.length && (hasNextPage || loadFailed)" ref="load" class="task-select__loader">
                     <template v-if="loadFailed">
@@ -78,6 +84,11 @@
                 type: Function,
                 required: true,
             },
+            // Returns recently used task IDs, most recent first. They are resolved through the service.
+            getRecentTaskIds: {
+                type: Function,
+                default: null,
+            },
         },
         data() {
             return {
@@ -87,6 +98,7 @@
                 totalPages: 0,
                 isLoading: false,
                 loadFailed: false,
+                showingRecent: false,
                 isOpen: false,
                 observer: null,
                 requestId: 0,
@@ -215,6 +227,10 @@
             },
             onOpen() {
                 this.isOpen = true;
+                // Re-resolve recents on every opening so labels and access are never stale.
+                if (this.query === '') {
+                    this.restartSearch();
+                }
                 this.$nextTick(this.observeNextPage);
             },
             onClose() {
@@ -234,9 +250,60 @@
                 this.totalPages = 0;
                 this.isLoading = false;
                 this.loadFailed = false;
+                this.showingRecent = false;
 
                 if (this.query.length >= 3) {
                     this.debouncedSearch(this.requestId);
+                } else if (this.query === '' && this.isOpen) {
+                    this.loadRecent(this.requestId);
+                }
+            },
+            async loadRecent(requestId) {
+                if (requestId !== this.requestId || this.query !== '' || this.isLoading || !this.getRecentTaskIds) {
+                    return;
+                }
+
+                let ids = [];
+                try {
+                    ids = this.getRecentTaskIds() || [];
+                } catch (error) {
+                    console.error('Failed to read recent tasks', error);
+                }
+                if (!ids.length) {
+                    return;
+                }
+
+                // Stored IDs are only hints: the task list API decides what this actor may see.
+                const filters = {
+                    where: { id: ['in', ids] },
+                    with: ['project'],
+                    page: 1,
+                };
+                if (this.userID && this.requiresAssignment(this.userID)) {
+                    filters.where['users.id'] = this.userID;
+                }
+
+                this.isLoading = true;
+                try {
+                    const { data } = await this.service.getWithFilters(filters);
+                    if (requestId !== this.requestId) {
+                        return;
+                    }
+
+                    const tasks = new Map(
+                        (Array.isArray(data?.data) ? data.data : []).map(task => [Number(task.id), task]),
+                    );
+                    this.options = ids.filter(id => tasks.has(id)).map(id => this.formatTask(tasks.get(id)));
+                    this.showingRecent = true;
+                } catch (error) {
+                    // Searching still works, so a failed history request just leaves the list empty.
+                    if (requestId === this.requestId) {
+                        console.error('Failed to load recent tasks', error);
+                    }
+                } finally {
+                    if (requestId === this.requestId) {
+                        this.isLoading = false;
+                    }
                 }
             },
             retryLoad() {
@@ -321,6 +388,12 @@
     .task-select__loader {
         padding: 8px;
         text-align: center;
+    }
+
+    .task-select__section {
+        padding: 4px 8px;
+        font-size: 12px;
+        opacity: 0.7;
     }
 
     .task-select__retry {
