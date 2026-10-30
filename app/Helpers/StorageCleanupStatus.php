@@ -66,6 +66,9 @@ class StorageCleanupStatus
         return Cache::get(self::LAST_KEY);
     }
 
+    /**
+     * Whether a cleanup is running now, stale runs excluded.
+     */
     public static function isRunning(): bool
     {
         return self::get()['status'] === self::RUNNING;
@@ -191,6 +194,9 @@ class StorageCleanupStatus
         Cache::restoreLock(self::RUN_LOCK, $runId)->release();
     }
 
+    /**
+     * Status as stored, stale states not resolved.
+     */
     private static function stored(): array
     {
         return array_merge([
@@ -203,6 +209,9 @@ class StorageCleanupStatus
         ], (array)Cache::get(self::STATUS_KEY, []));
     }
 
+    /**
+     * Writes the status, keeping the stored attributes not given; updated_at is the heartbeat for stale detection.
+     */
     private static function put(string $status, array $attributes = []): void
     {
         Cache::forever(self::STATUS_KEY, array_merge(self::stored(), $attributes, [
@@ -211,6 +220,9 @@ class StorageCleanupStatus
         ]));
     }
 
+    /**
+     * Whether a queued or running state has outlived its timeout without an update.
+     */
     private static function isStale(array $state): bool
     {
         $timeout = match ($state['status']) {

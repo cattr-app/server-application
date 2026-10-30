@@ -118,6 +118,9 @@
             },
         },
         methods: {
+            /**
+             * Requests a cleanup: shows it as queued after 204 and polls the outcome reported by the worker.
+             */
             async cleanStorage() {
                 if (this.cleanupBusy) {
                     return;
@@ -154,6 +157,9 @@
                     this.thinRequested = false;
                 }
             },
+            /**
+             * Applies a polled storage info and reports the outcome of a cleanup that has just finished.
+             */
             applyStorage(storage) {
                 const finished = finishedCleanupStatus(this.storage, storage);
 
@@ -168,6 +174,9 @@
                     this.$Message.error(this.$t('about.storage.messages.failed'));
                 }
             },
+            /**
+             * Shows a recoverable warning for a failed refresh, the poller retries it.
+             */
             onPollError(error) {
                 // Only a failed refresh of a loaded page is shown: the initial one falls back to "no storage"
                 this.pollFailed = Boolean(this.storage);

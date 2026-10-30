@@ -35,6 +35,9 @@ class RotateScreenshots implements ShouldQueue
         $this->timeout = config('cleaner.job_timeout');
     }
 
+    /**
+     * Runs the cleanup command as this run: it records the outcome and holds the run lock.
+     */
     public function handle(): void
     {
         Artisan::call(RotateScreenshotsCommand::class, ['--run' => $this->runId]);

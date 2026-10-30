@@ -21,6 +21,9 @@ export function cleanupStatus(storage) {
     return thinning.now ? 'running' : 'idle';
 }
 
+/**
+ * Whether a cleanup is queued or running.
+ */
 export function isCleanupActive(storage) {
     return ACTIVE_CLEANUP_STATUSES.includes(cleanupStatus(storage));
 }
@@ -62,6 +65,9 @@ export function createStoragePoller({
     let failed = false;
     let active = false;
 
+    /**
+     * Replaces the pending timer with the next poll, unless the poller is stopped.
+     */
     function schedule() {
         timers.clearTimeout(timer);
         timer = null;
@@ -73,6 +79,9 @@ export function createStoragePoller({
         timer = timers.setTimeout(tick, active || failed ? activeInterval : idleInterval);
     }
 
+    /**
+     * Timer callback: polls now, or postpones the poll while the page is hidden.
+     */
     function tick() {
         timer = null;
 
@@ -84,6 +93,9 @@ export function createStoragePoller({
         refresh();
     }
 
+    /**
+     * Fetches the storage info and applies it unless a later response has been applied or the poller is stopped.
+     */
     async function refresh() {
         const id = ++requested;
 
