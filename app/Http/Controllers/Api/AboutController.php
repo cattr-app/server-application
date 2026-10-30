@@ -257,6 +257,10 @@ class AboutController extends Controller
             'need_thinning' => StorageCleaner::needThinning(),
             // false on object storage (S3): no free space to measure, rotation is a no-op
             'rotation_supported' => StorageCleaner::isSupported(),
+            // Scans every eligible interval and checks its file on each request, also while the About page polls
+            // a running cleanup (every 10 s). A lightweight status endpoint for that polling, or a count cached
+            // between cleanups, may be needed on large local disks; measure first under which conditions
+            // (number of intervals, disk, poll rate next to a running cleanup) and cover the choice with tests.
             'screenshots_available' => StorageCleaner::countAvailableScreenshots(),
             'thinning' => [
                 'now' => $status['status'] === StorageCleanupStatus::RUNNING,
