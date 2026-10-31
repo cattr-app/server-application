@@ -39,6 +39,13 @@ class ListTest extends TestCase
             'user_id' => $this->admin->id,
             'content' => 'Comment',
         ]);
+
+        // A comment on another task of the same assignee, left out by the task_id filter
+        TaskComment::create([
+            'task_id' => TaskFactory::refresh()->forUser($this->assignee)->create()->id,
+            'user_id' => $this->admin->id,
+            'content' => 'Other comment',
+        ]);
     }
 
     private function commentIds(User $user): array
