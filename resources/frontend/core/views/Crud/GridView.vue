@@ -572,6 +572,12 @@
                 this.$router.push(data);
                 return true;
             },
+            /**
+             * Marks an async select filter as loaded; once all are, loads the grid
+             * (through a deferred route update if one is pending).
+             *
+             * @param {string} key filter field key
+             */
             onFilterLoaded(key) {
                 this.loadedFilters = { ...this.loadedFilters, [key]: true };
                 if (!this.filtersLoaded) {
@@ -818,6 +824,12 @@
             }
         },
         watch: {
+            /**
+             * Restores page, search and filters from the URL (history navigation, route pushes)
+             * and reloads the grid; a route update requested meanwhile is applied afterwards.
+             *
+             * @param {Object} to the new route
+             */
             async $route(to) {
                 this.skipRouteUpdate = true;
                 // The route change triggers its own fetch, drop a pending debounced one.
