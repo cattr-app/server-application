@@ -8,6 +8,7 @@
         name="statuses"
         :size="size"
         @onOptionsLoad="onLoad"
+        @onOptionsLoadError="$emit('load-failed')"
     >
         <template v-slot:before-options>
             <li class="at-select__option" @click="selectAllOpen">

@@ -7,6 +7,7 @@
         name="projects"
         :size="size"
         @onOptionsLoad="onLoad"
+        @onOptionsLoadError="$emit('load-failed')"
     >
     </multi-select>
 </template>

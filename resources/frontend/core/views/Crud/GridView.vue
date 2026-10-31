@@ -72,6 +72,7 @@
                                 size="small"
                                 class="crud__popup-filter"
                                 @loaded="onFilterLoaded(filter.key)"
+                                @load-failed="onFilterLoadFailed(filter.key)"
                                 @change="onProjectsChange(filter.key, $event)"
                             />
 
@@ -83,6 +84,7 @@
                                 size="small"
                                 class="crud__popup-filter"
                                 @loaded="onFilterLoaded(filter.key)"
+                                @load-failed="onFilterLoadFailed(filter.key)"
                                 @change="onStatusesChange(filter.key, $event)"
                             />
 
@@ -186,6 +188,15 @@
         return idsA.length === idsB.size && idsA.every(id => idsB.has(id));
     };
 
+    // Route queries compared as vue-router does: key order and value types do not matter.
+    const normalizeQuery = query =>
+        JSON.stringify(
+            Object.keys(query)
+                .filter(key => query[key] !== undefined && query[key] !== null)
+                .sort()
+                .map(key => [key, Array.isArray(query[key]) ? query[key].map(String) : String(query[key])]),
+        );
+
     export default {
         name: 'GridView',
         components: {
@@ -243,6 +254,7 @@
                 filters,
                 filterFields,
                 loadedFilters,
+                failedFilters: {},
                 tableData: [],
 
                 filterModel: this.$route.query.search,
@@ -544,13 +556,13 @@
             },
             /**
              * Pushes the grid state (page, search, query-saved filters) to the URL.
-             * Deferred while the route watcher restores state or while filters are still loading:
-             * any navigation cancels pending requests, which would abort filter hydration.
+             * Deferred while the route watcher restores state or while filters are still loading
+             * (loaded or failed): any navigation cancels pending requests, which would abort filter hydration.
              *
              * @returns {boolean} whether a navigation was started
              */
             updateRoute() {
-                if (this.skipRouteUpdate || !this.filtersLoaded) {
+                if (this.skipRouteUpdate || !this.filtersSettled) {
                     this.pendingRouteUpdate = true;
                     return false;
                 }
@@ -565,7 +577,11 @@
                     },
                 };
 
-                if (this.$router.resolve(data).route.fullPath === this.$route.fullPath) {
+                const target = this.$router.resolve(data).route;
+                if (
+                    target.path === this.$route.path &&
+                    normalizeQuery(target.query) === normalizeQuery(this.$route.query)
+                ) {
                     return false;
                 }
 
@@ -580,7 +596,23 @@
              */
             onFilterLoaded(key) {
                 this.loadedFilters = { ...this.loadedFilters, [key]: true };
-                if (!this.filtersLoaded) {
+                this.onFilterSettled();
+            },
+            /**
+             * A filter whose options failed to load: it stays not loaded, but no longer blocks route updates.
+             *
+             * @param {string} key filter field key
+             */
+            onFilterLoadFailed(key) {
+                this.failedFilters = { ...this.failedFilters, [key]: true };
+                this.onFilterSettled();
+            },
+            /**
+             * Once every filter has loaded or failed: applies a deferred route update
+             * (which fetches through the route watcher), otherwise loads the grid if all filters loaded.
+             */
+            onFilterSettled() {
+                if (!this.filtersSettled) {
                     return;
                 }
 
@@ -588,7 +620,9 @@
                 if (this.pendingRouteUpdate && this.updateRoute()) {
                     return;
                 }
-                this.fetchData();
+                if (this.filtersLoaded) {
+                    this.fetchData();
+                }
             },
         },
         updated() {
@@ -768,6 +802,9 @@
                 }
 
                 return keys.every(key => this.loadedFilters[key]);
+            },
+            filtersSettled() {
+                return Object.keys(this.loadedFilters).every(key => this.loadedFilters[key] || this.failedFilters[key]);
             },
             cssVarsForGridCols() {
                 const { gridData } = this.$route.meta;
