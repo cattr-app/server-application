@@ -147,8 +147,7 @@ class TaskCommentController extends ItemController
      * @apiSuccess {String}   created_at    Creation timestamp
      * @apiSuccess {String}   updated_at    Last update timestamp
      * @apiSuccess {String}   deleted_at  Deletion timestamp (if applicable, otherwise null)
-     * @apiSuccess {Object}   user          User who created the comment
-
+     * @apiSuccess {Object}   user          User who created the comment, null when the requester cannot see that user
      *
      * @apiSuccessExample {json} Response Example:
      *  HTTP/1.1 200 OK
