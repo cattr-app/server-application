@@ -21,6 +21,7 @@ use Carbon\Carbon;
 use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rules\Enum;
 use Settings;
 use Throwable;
 
@@ -64,8 +65,9 @@ class UniversalReportController
 
     public function getDataObjectsAndFields(Request $request)
     {
-        $base = UniversalReportBase::tryFrom($request->input('base', null));
-        // dd($base->dataObjects());
+        $validated = $request->validate(['base' => ['required', new Enum(UniversalReportBase::class)]]);
+        $base = UniversalReportBase::from($validated['base']);
+
         return responder()->success([
             'fields' => $base->fields(),
             'dataObjects' => $base->dataObjects(),
