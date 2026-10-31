@@ -74,6 +74,7 @@
     import { mapGetters } from 'vuex';
     import RenderableField from '@/components/RenderableField';
     import { Skeleton } from 'vue-loading-skeleton';
+    import { isHandledRequestError } from '@/utils/requestError';
 
     export default {
         name: 'ItemView',
@@ -122,6 +123,10 @@
 
         async mounted() {
             await this.load();
+            // Leaving the page before the item loads cancels the request and destroys the view.
+            if (this.isDestroyed) {
+                return;
+            }
 
             this.websocketEnterChannel = this.$route.meta.pageData.websocketEnterChannel;
             this.websocketLeaveChannel = this.$route.meta.pageData.websocketLeaveChannel;
@@ -149,12 +154,17 @@
         },
 
         beforeDestroy() {
+            this.isDestroyed = true;
             if (typeof this.websocketLeaveChannel !== 'undefined') {
                 this.websocketLeaveChannel(this.user.id);
             }
         },
 
         methods: {
+            /**
+             * Loads the item; a canceled request (the page was left) is ignored,
+             * a missing item redirects to the forbidden page.
+             */
             async load() {
                 this.isDataLoading = true;
                 const id = this.$route.params[this.service.getIdParam()];
@@ -162,13 +172,17 @@
                 try {
                     const { data } = (await this.service.getItem(id, this.filters)).data;
                     this.values = data;
-                } catch ({ response }) {
-                    if (response.data.error_type === 'query.item_not_found') {
+                } catch (error) {
+                    if (!isHandledRequestError(error)) {
+                        throw error;
+                    }
+
+                    if (error.response && error.response.data.error_type === 'query.item_not_found') {
                         this.$router.replace({ name: 'forbidden' });
                     }
+                } finally {
+                    this.isDataLoading = false;
                 }
-
-                this.isDataLoading = false;
             },
 
             handleClick(button) {

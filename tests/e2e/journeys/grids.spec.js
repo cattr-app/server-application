@@ -1,4 +1,4 @@
-// Grids (resources/frontend/core/views/Crud/GridView.vue): search filter, pagination, sorting.
+// Grids (resources/frontend/core/views/Crud/GridView.vue): search filter, pagination (incl. deep link, reload, history), sorting.
 import { test, expect } from '../support/test.js';
 import { waitForAppIdle } from '../support/app.js';
 
@@ -42,6 +42,63 @@ test('tasks grid: search filter and pagination', async ({ page }) => {
     await page.getByPlaceholder('Enter task name').fill('Odio dolores');
     await expect(rows(page)).toHaveCount(1);
     await expect(rows(page).first()).toContainText('Odio dolores aliquam ut.');
+});
+
+const taskRequest = page =>
+    page.waitForResponse(response => {
+        const url = new URL(response.url());
+        return url.pathname.endsWith('/tasks/list') && response.request().method() === 'POST';
+    });
+
+// The select filters of the tasks grid (projects, users, statuses) load asynchronously and emit their
+// restored selection on init; that must not override the page requested in the URL.
+async function expectTasksPage(page, number, request) {
+    const response = await request;
+    expect(response.request().postDataJSON().page).toBe(number);
+    await expect(page.locator('.at-pagination__item--active')).toHaveText(String(number));
+    await expect(page).toHaveURL(new RegExp(`page=${number}`));
+    await waitForAppIdle(page);
+}
+
+test('tasks grid: deep link, reload and history keep the page', async ({ page }) => {
+    let request = taskRequest(page);
+    await page.goto('/tasks?page=2');
+    await expectTasksPage(page, 2, request);
+    const secondPage = await firstColumn(page).allTextContents();
+    expect(secondPage).toHaveLength(15);
+
+    request = taskRequest(page);
+    await page.reload();
+    await expectTasksPage(page, 2, request);
+    expect(await firstColumn(page).allTextContents()).toEqual(secondPage);
+
+    request = taskRequest(page);
+    await page.locator('.at-pagination__item', { hasText: '3' }).click();
+    await expectTasksPage(page, 3, request);
+    const thirdPage = await firstColumn(page).allTextContents();
+
+    request = taskRequest(page);
+    await page.goBack();
+    await expectTasksPage(page, 2, request);
+    expect(await firstColumn(page).allTextContents()).toEqual(secondPage);
+
+    request = taskRequest(page);
+    await page.goForward();
+    await expectTasksPage(page, 3, request);
+    expect(await firstColumn(page).allTextContents()).toEqual(thirdPage);
+
+    // Leave the grid for a task and come back with the browser Back button: the grid is remounted.
+    // At the 1440px viewport row actions are inline icon buttons (the toggle exists only <= 1200px).
+    await rows(page)
+        .first()
+        .locator('.action-button', { has: page.locator('.icon-eye') })
+        .click();
+    await expect(page).toHaveURL(/\/tasks\/view\/\d+/);
+    await waitForAppIdle(page);
+    request = taskRequest(page);
+    await page.goBack();
+    await expectTasksPage(page, 3, request);
+    expect(await firstColumn(page).allTextContents()).toEqual(thirdPage);
 });
 
 test('users grid: sorting by column', async ({ page }) => {

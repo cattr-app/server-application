@@ -72,6 +72,7 @@
                                 size="small"
                                 class="crud__popup-filter"
                                 @loaded="onFilterLoaded(filter.key)"
+                                @load-failed="onFilterLoadFailed(filter.key)"
                                 @change="onProjectsChange(filter.key, $event)"
                             />
 
@@ -83,6 +84,7 @@
                                 size="small"
                                 class="crud__popup-filter"
                                 @loaded="onFilterLoaded(filter.key)"
+                                @load-failed="onFilterLoadFailed(filter.key)"
                                 @change="onStatusesChange(filter.key, $event)"
                             />
 
@@ -158,6 +160,43 @@
 
     const widthLessThan500MediaQuery = matchMedia('(max-width: 500px)');
 
+    /**
+     * Page number requested by the route query.
+     *
+     * @param {Object} query route query
+     * @returns {number} the `page` value when it is a positive integer, otherwise 1
+     */
+    const pageFromQuery = query => {
+        const page = Number(query.page);
+        return Number.isSafeInteger(page) && page > 0 ? page : 1;
+    };
+
+    // Select filters store their value as ['=', ids] (or '' when nothing is selected);
+    // compare them as unordered id lists.
+    const selectFilterIds = value => (Array.isArray(value) && Array.isArray(value[1]) ? value[1].map(String) : []);
+
+    /**
+     * Whether two select filter values contain the same ids, ignoring order.
+     *
+     * @param {Array|string|undefined} a
+     * @param {Array|string|undefined} b
+     * @returns {boolean}
+     */
+    const isSameSelectFilter = (a, b) => {
+        const idsA = selectFilterIds(a);
+        const idsB = new Set(selectFilterIds(b));
+        return idsA.length === idsB.size && idsA.every(id => idsB.has(id));
+    };
+
+    // Route queries compared as vue-router does: key order and value types do not matter.
+    const normalizeQuery = query =>
+        JSON.stringify(
+            Object.keys(query)
+                .filter(key => query[key] !== undefined && query[key] !== null)
+                .sort()
+                .map(key => [key, Array.isArray(query[key]) ? query[key].map(String) : String(query[key])]),
+        );
+
     export default {
         name: 'GridView',
         components: {
@@ -215,6 +254,7 @@
                 filters,
                 filterFields,
                 loadedFilters,
+                failedFilters: {},
                 tableData: [],
 
                 filterModel: this.$route.query.search,
@@ -228,7 +268,7 @@
 
                 pageControls: this.$route.meta.pageControls || [],
 
-                page: +(this.$route.query.page || 1),
+                page: pageFromQuery(query),
                 totalItems: 0,
                 itemsPerPage: 15,
                 values: [],
@@ -238,7 +278,7 @@
                     where: whereParam,
                     withCount,
                     withSum,
-                    page: this.$route.query.page,
+                    page: pageFromQuery(query),
                     search: {
                         query: this.$route.query.search,
                         fields: gridData.filters.map(filter => filter.referenceKey),
@@ -248,6 +288,7 @@
 
                 isDataLoading: false,
                 skipRouteUpdate: false,
+                pendingRouteUpdate: false,
 
                 openActionsFor: null,
                 hideColumns: widthLessThan500MediaQuery.matches,
@@ -319,11 +360,13 @@
                     }
                 });
             },
-            filterFieldsData() {
+            filterFieldsData({ resetPage = true } = {}) {
                 clearTimeout(this.filterFieldsTimeout);
 
                 this.updateQueryParams();
-                this.queryParams.page = 1;
+                if (resetPage) {
+                    this.queryParams.page = 1;
+                }
                 if (!this.filtersLoaded) {
                     return;
                 }
@@ -335,31 +378,39 @@
                 this.updateRoute();
             },
             onUserSelectChange(key, data) {
-                if (data.length > 0) {
-                    this.filterFieldsModel[key] = ['=', data];
-                } else {
-                    this.filterFieldsModel[key] = '';
-                }
-
-                this.filterFieldsData();
+                this.onSelectFilterChange(key, data);
             },
             onProjectsChange(key, data) {
-                if (data.length > 0) {
-                    this.filterFieldsModel[key] = ['=', data];
-                } else {
-                    this.filterFieldsModel[key] = '';
-                }
-
-                this.filterFieldsData();
+                this.onSelectFilterChange(key, data);
             },
             onStatusesChange(key, data) {
-                if (data.length > 0) {
-                    this.filterFieldsModel[key] = ['=', data];
-                } else {
-                    this.filterFieldsModel[key] = '';
+                this.onSelectFilterChange(key, data);
+            },
+            /**
+             * Applies a selection emitted by a user/project/status select filter.
+             * Only a real change of an already loaded filter resets the grid to the first page.
+             *
+             * @param {string} key filter field key
+             * @param {Array|null} data selected ids
+             */
+            onSelectFilterChange(key, data) {
+                // Copy the ids: selects mutate their selection array in place (UserSelect.toggleUser).
+                const value = Array.isArray(data) && data.length > 0 ? ['=', [...data]] : '';
+                const changed = !isSameSelectFilter(this.queryParams.where[key], value);
+                this.filterFieldsModel[key] = value;
+
+                // Selects emit their initial (restored) selection before `loaded`, and may re-emit
+                // an unchanged selection later. Neither is a user change, so keep the requested page.
+                if (!this.loadedFilters[key] || !changed) {
+                    this.updateQueryParams();
+                    return;
                 }
 
                 this.filterFieldsData();
+                const savedToQuery = this.getFilterFieldKeys().includes(key);
+                if (savedToQuery || pageFromQuery(this.$route.query) !== this.queryParams.page) {
+                    this.updateRoute();
+                }
             },
             checkWithCtx(callback) {
                 return callback ? callback(this) : true;
@@ -503,10 +554,19 @@
 
                 await this.fetchData();
             },
+            /**
+             * Pushes the grid state (page, search, query-saved filters) to the URL.
+             * Deferred while the route watcher restores state or while filters are still loading
+             * (loaded or failed): any navigation cancels pending requests, which would abort filter hydration.
+             *
+             * @returns {boolean} whether a navigation was started
+             */
             updateRoute() {
-                if (this.skipRouteUpdate) {
-                    return;
+                if (this.skipRouteUpdate || !this.filtersSettled) {
+                    this.pendingRouteUpdate = true;
+                    return false;
                 }
+                this.pendingRouteUpdate = false;
 
                 const data = {
                     name: this.$route.name,
@@ -517,10 +577,49 @@
                     },
                 };
 
+                const target = this.$router.resolve(data).route;
+                if (
+                    target.path === this.$route.path &&
+                    normalizeQuery(target.query) === normalizeQuery(this.$route.query)
+                ) {
+                    return false;
+                }
+
                 this.$router.push(data);
+                return true;
             },
+            /**
+             * Marks an async select filter as loaded; once all are, loads the grid
+             * (through a deferred route update if one is pending).
+             *
+             * @param {string} key filter field key
+             */
             onFilterLoaded(key) {
                 this.loadedFilters = { ...this.loadedFilters, [key]: true };
+                this.onFilterSettled();
+            },
+            /**
+             * A filter whose options failed to load: it stays not loaded, but no longer blocks route updates.
+             *
+             * @param {string} key filter field key
+             */
+            onFilterLoadFailed(key) {
+                this.failedFilters = { ...this.failedFilters, [key]: true };
+                this.onFilterSettled();
+            },
+            /**
+             * Once every filter has loaded or failed: applies a deferred route update
+             * (which fetches through the route watcher), otherwise loads the grid if all filters loaded.
+             */
+            onFilterSettled() {
+                if (!this.filtersSettled) {
+                    return;
+                }
+
+                // A deferred route update fetches through the route watcher.
+                if (this.pendingRouteUpdate && this.updateRoute()) {
+                    return;
+                }
                 if (this.filtersLoaded) {
                     this.fetchData();
                 }
@@ -704,6 +803,9 @@
 
                 return keys.every(key => this.loadedFilters[key]);
             },
+            filtersSettled() {
+                return Object.keys(this.loadedFilters).every(key => this.loadedFilters[key] || this.failedFilters[key]);
+            },
             cssVarsForGridCols() {
                 const { gridData } = this.$route.meta;
                 const numOfActions = gridData.actions.length;
@@ -759,10 +861,18 @@
             }
         },
         watch: {
+            /**
+             * Restores page, search and filters from the URL (history navigation, route pushes)
+             * and reloads the grid; a route update requested meanwhile is applied afterwards.
+             *
+             * @param {Object} to the new route
+             */
             async $route(to) {
                 this.skipRouteUpdate = true;
+                // The route change triggers its own fetch, drop a pending debounced one.
+                clearTimeout(this.filterFieldsTimeout);
 
-                this.queryParams.page = to.query.page;
+                this.queryParams.page = pageFromQuery(to.query);
                 this.queryParams.search.query = to.query.search;
                 this.filterModel = to.query.search;
                 this.loadFilterFields();
@@ -770,6 +880,10 @@
                 await this.fetchData();
 
                 this.skipRouteUpdate = false;
+                // Apply a change made while this navigation was being handled.
+                if (this.pendingRouteUpdate) {
+                    this.updateRoute();
+                }
             },
         },
         beforeDestroy() {

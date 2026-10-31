@@ -52,6 +52,7 @@
     import TaskActivityService from '@/services/resource/task-activity.service';
     import UsersService from '@/services/resource/user.service';
     import { formatDate } from '@/utils/time';
+    import { isHandledRequestError } from '@/utils/requestError';
 
     export default {
         components: {
@@ -162,7 +163,13 @@
             },
         },
         async created() {
-            this.users = (await this.userService.getAll()).data;
+            try {
+                this.users = (await this.userService.getAll()).data;
+            } catch (error) {
+                if (!isHandledRequestError(error)) {
+                    throw error;
+                }
+            }
         },
         mounted() {
             window.addEventListener('scroll', this.onScroll);

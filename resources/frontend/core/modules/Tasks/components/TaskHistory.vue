@@ -206,6 +206,7 @@
     import moment from 'moment-timezone';
     import { store as rootStore } from '@/store';
     import Attachments from './Attachments.vue';
+    import { isHandledRequestError } from '@/utils/requestError';
 
     export default {
         components: {
@@ -272,8 +273,14 @@
             };
         },
         async created() {
-            this.users = await this.userService.getAll();
             this.user = this.$store.state.user.user.data;
+            try {
+                this.users = await this.userService.getAll();
+            } catch (error) {
+                if (!isHandledRequestError(error)) {
+                    throw error;
+                }
+            }
         },
         async mounted() {
             this.observer = new IntersectionObserver(this.infiniteScroll, {
@@ -282,21 +289,34 @@
             });
             this.observer.observe(this.$refs.activitiesObservable);
 
-            this.statuses = await this.statusService.getAll({
-                headers: {
-                    'X-Paginate': 'false',
-                },
-            });
-            this.priorities = await this.priorityService.getAll({
-                headers: {
-                    'X-Paginate': 'false',
-                },
-            });
-            this.projects = await this.projectService.getAll({
-                headers: {
-                    'X-Paginate': 'false',
-                },
-            });
+            try {
+                this.statuses = await this.statusService.getAll({
+                    headers: {
+                        'X-Paginate': 'false',
+                    },
+                });
+                this.priorities = await this.priorityService.getAll({
+                    headers: {
+                        'X-Paginate': 'false',
+                    },
+                });
+                this.projects = await this.projectService.getAll({
+                    headers: {
+                        'X-Paginate': 'false',
+                    },
+                });
+            } catch (error) {
+                if (!isHandledRequestError(error)) {
+                    throw error;
+                }
+            }
+
+            // Leaving the task before these requests finish cancels them and destroys the component.
+            if (this.isDestroyed) {
+                return;
+            }
+
+            this.isChannelJoined = true;
             this.websocketEnterChannel(this.user.id, {
                 create: async data => {
                     if (data.model.task_id !== this.task.id) {
@@ -322,8 +342,11 @@
             });
         },
         beforeDestroy() {
+            this.isDestroyed = true;
             this.observer.disconnect();
-            this.websocketLeaveChannel(this.user.id);
+            if (this.isChannelJoined) {
+                this.websocketLeaveChannel(this.user.id);
+            }
         },
         computed: {
             visibleUsers() {

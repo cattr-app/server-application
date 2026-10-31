@@ -75,6 +75,7 @@
                 this.options.push(...all);
                 this.$emit('onOptionsLoad', this.options);
             } catch ({ response }) {
+                this.$emit('onOptionsLoadError');
                 if (process.env.NODE_ENV === 'development') {
                     console.warn(response ? response : 'request to projects is canceled');
                 }
