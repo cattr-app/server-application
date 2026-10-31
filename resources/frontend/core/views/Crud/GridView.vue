@@ -276,6 +276,7 @@
 
                 isDataLoading: false,
                 skipRouteUpdate: false,
+                pendingRouteUpdate: false,
 
                 openActionsFor: null,
                 hideColumns: widthLessThan500MediaQuery.matches,
@@ -541,10 +542,19 @@
 
                 await this.fetchData();
             },
+            /**
+             * Pushes the grid state (page, search, query-saved filters) to the URL.
+             * Deferred while the route watcher restores state or while filters are still loading:
+             * any navigation cancels pending requests, which would abort filter hydration.
+             *
+             * @returns {boolean} whether a navigation was started
+             */
             updateRoute() {
-                if (this.skipRouteUpdate) {
-                    return;
+                if (this.skipRouteUpdate || !this.filtersLoaded) {
+                    this.pendingRouteUpdate = true;
+                    return false;
                 }
+                this.pendingRouteUpdate = false;
 
                 const data = {
                     name: this.$route.name,
@@ -555,13 +565,24 @@
                     },
                 };
 
+                if (this.$router.resolve(data).route.fullPath === this.$route.fullPath) {
+                    return false;
+                }
+
                 this.$router.push(data);
+                return true;
             },
             onFilterLoaded(key) {
                 this.loadedFilters = { ...this.loadedFilters, [key]: true };
-                if (this.filtersLoaded) {
-                    this.fetchData();
+                if (!this.filtersLoaded) {
+                    return;
                 }
+
+                // A deferred route update fetches through the route watcher.
+                if (this.pendingRouteUpdate && this.updateRoute()) {
+                    return;
+                }
+                this.fetchData();
             },
         },
         updated() {
@@ -810,6 +831,10 @@
                 await this.fetchData();
 
                 this.skipRouteUpdate = false;
+                // Apply a change made while this navigation was being handled.
+                if (this.pendingRouteUpdate) {
+                    this.updateRoute();
+                }
             },
         },
         beforeDestroy() {

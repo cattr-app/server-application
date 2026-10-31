@@ -40,6 +40,14 @@ function loadComponent(timers) {
     return sandbox.component;
 }
 
+// Route identity as vue-router stringifies it: query values become strings, undefined ones are dropped.
+const fullPath = ({ name, query = {} }) =>
+    `${name}?${Object.keys(query)
+        .filter(key => query[key] !== undefined)
+        .sort()
+        .map(key => `${key}=${Array.isArray(query[key]) ? query[key].join(',') : String(query[key])}`)
+        .join('&')}`;
+
 // Tasks grid: three async select filters, see resources/frontend/core/modules/Tasks/module.init.js.
 function createGrid(query = {}) {
     const timers = [];
@@ -55,6 +63,9 @@ function createGrid(query = {}) {
         $route: {
             name: 'Tasks.crud.tasks',
             query,
+            get fullPath() {
+                return fullPath(this);
+            },
             params: {},
             meta: {
                 gridData: {
@@ -76,12 +87,16 @@ function createGrid(query = {}) {
             },
         },
         $t: key => key,
-        $router: { push: route => pushes.push(route) },
+        $router: {
+            push: route => pushes.push(route),
+            resolve: route => ({ route: { fullPath: fullPath(route) } }),
+        },
     };
     Object.assign(grid, component.data.call(grid));
     for (const [name, method] of Object.entries(component.methods)) {
         grid[name] = method.bind(grid);
     }
+    grid.watchRoute = component.watch.$route.bind(grid);
     Object.defineProperty(grid, 'filtersLoaded', { get: () => component.computed.filtersLoaded.call(grid) });
     Object.defineProperty(grid, 'visibleFilterFields', { get: () => filterFields });
 
@@ -176,4 +191,51 @@ test('a selection mutated in place still counts as a change', async () => {
     assert.deepEqual(requests, [2, 1]);
     assert.equal(pushes.length, 1);
     assert.equal(JSON.stringify(grid.queryParams.where['users.id']), '["=",[3,5]]');
+});
+
+test('a route update during filter hydration waits until all filters are loaded', async () => {
+    const { grid, requests, pushes } = createGrid({ page: '2' });
+    grid.onProjectsChange('project_id', [1, 2]);
+    grid.onFilterLoaded('project_id');
+
+    // The user changes a loaded filter while the others are still loading: navigating now would
+    // cancel their pending requests (router.beforeEach -> cancelPendingRequests).
+    grid.onProjectsChange('project_id', [1]);
+    assert.deepEqual(pushes, []);
+    assert.equal(grid.pendingRouteUpdate, true);
+
+    grid.onUserSelectChange('users.id', [3]);
+    grid.onFilterLoaded('users.id');
+    grid.onStatusesChange('status.id', [4]);
+    grid.onFilterLoaded('status.id');
+    await flush();
+
+    assert.equal(pushes.length, 1);
+    assert.equal(pushes[0].query.page, 1);
+    assert.equal(grid.pendingRouteUpdate, false);
+    // The pushed route fetches through the $route watcher, not directly.
+    assert.deepEqual(requests, []);
+});
+
+test('a filter change while the route watcher is fetching is applied afterwards', async () => {
+    const { grid, pushes, hydrate } = createGrid({ page: '2' });
+    await hydrate();
+
+    const to = { name: 'Tasks.crud.tasks', query: { page: '3' } };
+    grid.$route = { ...grid.$route, query: to.query };
+    const watching = grid.watchRoute(to);
+    grid.onStatusesChange('status.id', [4, 5]);
+    assert.deepEqual(pushes, []);
+
+    await watching;
+    assert.equal(pushes.length, 1);
+    assert.equal(pushes[0].query.page, 1);
+});
+
+test('a route update to the current URL does not navigate', async () => {
+    const { grid, pushes, hydrate } = createGrid({ page: '2' });
+    await hydrate();
+
+    assert.equal(grid.updateRoute(), false);
+    assert.deepEqual(pushes, []);
 });
