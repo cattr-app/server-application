@@ -34,9 +34,9 @@ class GetRoutesSmokeTest extends TestCase
     /** Routes that cannot be called with a plain authenticated GET, keyed by URI. */
     private const EXCLUDED = [
         'api/(.*)' => 'catch-all that answers unknown API paths with 404, not an endpoint',
-        'api/tmp-attachment-link/{attachment}' => 'file download behind a signed URL, covered by Attachments\TemporaryDownloadTest',
-        'api/time-intervals/{interval}/screenshot' => 'file download behind a signed URL, covered by TimeIntervals\ScreenshotTest',
-        'api/time-intervals/{interval}/thumb' => 'file download behind a signed URL, covered by TimeIntervals\ScreenshotTest',
+        'api/tmp-attachment-link/{attachment}' => 'signed URL download, see Attachments\TemporaryDownloadTest',
+        'api/time-intervals/{interval}/screenshot' => 'signed URL download, see TimeIntervals\ScreenshotTest',
+        'api/time-intervals/{interval}/thumb' => 'signed URL download, see TimeIntervals\ScreenshotTest',
         'broadcasting/auth' => 'websocket channel authorization, needs a broadcaster and a channel name',
     ];
 

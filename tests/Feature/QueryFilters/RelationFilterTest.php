@@ -27,7 +27,8 @@ class RelationFilterTest extends TestCase
         $task = TaskFactory::forUser($this->admin)->create();
         TaskFactory::refresh()->create();
 
-        $response = $this->actingAs($this->admin)->postJson('tasks/list', ['where' => ['users.id' => $this->admin->id]]);
+        $response = $this->actingAs($this->admin)
+            ->postJson('tasks/list', ['where' => ['users.id' => $this->admin->id]]);
 
         $response->assertOk();
         $this->assertSame([$task->id], collect($response->json('data'))->pluck('id')->all());
