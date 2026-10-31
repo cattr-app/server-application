@@ -63,9 +63,9 @@ export default class ApiService extends StoreService {
         return this.context.getters.loggedIn;
     }
 
-    attemptLogin(credentials) {
+    attemptLogin(credentials, endpoint = '/auth/login') {
         return axios
-            .post('/auth/login', credentials, { ignoreCancel: true })
+            .post(endpoint, credentials, { ignoreCancel: true })
             .then(({ data }) => {
                 this.setUserToken(data.data.access_token);
                 this.setUserData(data.data.user);

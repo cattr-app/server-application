@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Contracts\ScreenshotService;
 use Exception;
 use Illuminate\Console\Command;
 use DB;
@@ -55,7 +56,11 @@ class ResetCommand extends Command
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         if ($this->option('images')) {
-            Storage::deleteDirectory('uploads/screenshots');
+            // Files rather than the directory: keeps dotfiles such as the .gitignore of a source checkout
+            Storage::delete(array_filter(
+                Storage::allFiles(ScreenshotService::PARENT_FOLDER),
+                static fn (string $path) => !str_starts_with(basename($path), '.'),
+            ));
         }
 
         $this->call(SeedCommand::class, [
