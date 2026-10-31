@@ -40,16 +40,23 @@
                     }}</at-tag>
                 </span>
             </p>
+            <p v-if="cleanupStatusVisible" class="row">
+                <span v-t="'about.storage.cleanup_status'" class="col-6" />
+                <span class="col-4">
+                    <at-tag :color="cleanupStatusColor">{{ $t(`about.storage.status.${cleanupStatus}`) }}</at-tag>
+                </span>
+            </p>
+            <p v-if="pollFailed" v-t="'about.storage.status.unavailable'" class="row storage__warning" />
             <p class="row">
                 <at-button
-                    :disabled="thinRequested || !storage.screenshots_available || storage.thinning.now"
-                    :loading="thinRequested"
+                    :disabled="cleanupBusy || !storage.screenshots_available"
+                    :loading="cleanupBusy"
                     :title="cleanButtonTitle"
                     class="col-10"
                     hollow
                     @click="cleanStorage"
                 >
-                    {{ thinRequested ? '' : $t('about.storage.thin') }}
+                    {{ cleanupBusy ? '' : $t('about.storage.thin') }}
                 </at-button>
             </p>
         </template>
@@ -59,8 +66,17 @@
 <script>
     import moment from 'moment';
     import AboutService from '@/services/resource/about.service';
+    import { cleanupStatus, createStoragePoller, finishedCleanupStatus, isCleanupActive } from '@/utils/storageCleanup';
 
     const aboutService = new AboutService();
+
+    const statusColors = {
+        queued: 'info',
+        running: 'warning',
+        completed: 'success',
+        skipped: 'default',
+        failed: 'error',
+    };
 
     export default {
         name: 'StorageManagementTab',
@@ -68,6 +84,8 @@
             storageSpaceMaxUsed: process.env.VUE_APP_STORAGE_SPACE_MAX_USED,
             storage: null,
             thinRequested: false,
+            pollFailed: false,
+            poller: null,
         }),
         computed: {
             storageSpaceUsed() {
@@ -79,32 +97,92 @@
             storageCleanTime() {
                 return moment(this.storage.thinning.last).format('LLL');
             },
+            cleanupStatus() {
+                return cleanupStatus(this.storage);
+            },
+            cleanupStatusVisible() {
+                return this.cleanupStatus !== 'idle';
+            },
+            cleanupStatusColor() {
+                return statusColors[this.cleanupStatus] || 'default';
+            },
+            cleanupBusy() {
+                return this.thinRequested || isCleanupActive(this.storage);
+            },
             cleanButtonTitle() {
                 return this.$t(
-                    !this.storage.screenshots_available || this.storage.thinning.now
+                    !this.storage.screenshots_available || this.cleanupBusy
                         ? 'about.storage.thin_unavailable'
                         : 'about.storage.thin_available',
                 );
             },
         },
         methods: {
+            /**
+             * Requests a cleanup: shows it as queued after 204 and polls the outcome reported by the worker.
+             */
             async cleanStorage() {
+                if (this.cleanupBusy) {
+                    return;
+                }
+
                 this.thinRequested = true;
 
                 try {
                     const { status } = await aboutService.startCleanup();
 
-                    if (status === 204) {
-                        this.$Message.success('Thin has been queued!');
+                    if (status !== 204) {
+                        throw new Error(`Unexpected status ${status}`);
+                    }
 
-                        this.storage.thinning.now = true;
-                    } else {
-                        this.$Message.error('Error happened during thin queueing!');
+                    // Accepted into the queue, not started: the worker reports the progress via GET about/storage
+                    if (this.storage && !isCleanupActive(this.storage)) {
+                        this.storage = {
+                            ...this.storage,
+                            thinning: { ...this.storage.thinning, status: 'queued', now: false },
+                        };
+                    }
+
+                    this.$Message.info(this.$t('about.storage.messages.queued'));
+
+                    if (this.poller) {
+                        // A refresh sent before the request would report the state before it
+                        this.poller.invalidate();
+                        this.poller.setActive(true);
+                        this.poller.refresh();
                     }
                 } catch (e) {
-                    this.$Message.error('Error happened during thin queueing!');
+                    this.$Message.error(this.$t('about.storage.messages.queue_failed'));
                 } finally {
                     this.thinRequested = false;
+                }
+            },
+            /**
+             * Applies a polled storage info and reports the outcome of a cleanup that has just finished.
+             */
+            applyStorage(storage) {
+                const finished = finishedCleanupStatus(this.storage, storage);
+
+                this.storage = storage;
+                this.pollFailed = false;
+
+                if (finished === 'completed') {
+                    this.$Message.success(this.$t('about.storage.messages.completed'));
+                } else if (finished === 'skipped') {
+                    this.$Message.info(this.$t('about.storage.messages.skipped'));
+                } else if (finished === 'failed') {
+                    this.$Message.error(this.$t('about.storage.messages.failed'));
+                }
+            },
+            /**
+             * Shows a recoverable warning for a failed refresh, the poller retries it.
+             */
+            onPollError(error) {
+                // Only a failed refresh of a loaded page is shown: the initial one falls back to "no storage"
+                this.pollFailed = Boolean(this.storage);
+
+                if (process.env.NODE_ENV === 'development') {
+                    console.warn(error && error.response ? error.response : 'request to storage is canceled');
                 }
             },
             getSize(value) {
@@ -133,17 +211,19 @@
                 return `${Math.round(GB / 1024)} TB`;
             },
         },
-        async mounted() {
-            this.isLoading = true;
-            try {
-                this.storage = await aboutService.getStorageInfo();
-            } catch ({ response }) {
-                if (process.env.NODE_ENV === 'development') {
-                    console.warn(response ? response : 'request to storage is canceled');
-                }
-            }
+        mounted() {
+            this.poller = createStoragePoller({
+                fetch: () => aboutService.getStorageInfo(),
+                onUpdate: storage => this.applyStorage(storage),
+                onError: error => this.onPollError(error),
+                isHidden: () => document.hidden,
+            });
 
-            this.isLoading = false;
+            this.poller.start();
+        },
+        beforeDestroy() {
+            this.poller.stop();
+            this.poller = null;
         },
     };
 </script>
@@ -161,6 +241,10 @@
 
         .at-btn {
             margin-top: 15px;
+        }
+
+        &__warning {
+            color: $color-error;
         }
     }
 </style>

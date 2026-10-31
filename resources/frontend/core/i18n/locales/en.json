@@ -392,7 +392,23 @@
       "screenshots": "0 screenshots | {n} screenshot | {n} screenshots",
       "thin_unavailable": "Cleanup is unavailable at this moment",
       "thin_available": "Cleanup is available",
-      "thin": "Cleanup space"
+      "thin": "Cleanup space",
+      "cleanup_status": "Cleanup status",
+      "status": {
+        "queued": "Queued",
+        "running": "In progress",
+        "completed": "Completed",
+        "skipped": "Not needed",
+        "failed": "Failed",
+        "unavailable": "Cleanup status is unavailable, retrying"
+      },
+      "messages": {
+        "queued": "Cleanup has been queued",
+        "queue_failed": "Failed to queue the cleanup",
+        "completed": "Cleanup has been completed",
+        "skipped": "Cleanup is not needed: the storage usage is below the threshold",
+        "failed": "Cleanup has failed, you can request it again"
+      }
     }
   },
   "notification": {

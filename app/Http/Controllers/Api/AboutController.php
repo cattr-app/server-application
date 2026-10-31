@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Console\Commands\RotateScreenshots;
 use App\Http\Requests\About\ManageStorageRequest;
 use App\Helpers\ModuleHelper;
 use App\Helpers\ReportHelper;
 use App\Helpers\StorageCleaner;
+use App\Helpers\StorageCleanupStatus;
 use App\Helpers\Version;
-use Artisan;
-use Cache;
+use App\Jobs\RotateScreenshots;
 use Exception;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Client\PendingRequest;
@@ -17,6 +16,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Http;
 use Settings;
+use Throwable;
 
 class AboutController extends Controller
 {
@@ -209,7 +209,12 @@ class AboutController extends Controller
      *
      * @apiSuccess {Object}     thinning                       Information about the thinning process.
      * @apiSuccess {Boolean}    thinning.now                   Indicates if the thinning process is currently ongoing.
-     * @apiSuccess {String}     thinning.last                  Timestamp of the last thinning process.
+     * @apiSuccess {String}     thinning.last                  Timestamp of the last successful thinning process.
+     * @apiSuccess {String}     thinning.status                Status of the last requested or scheduled thinning:
+     *                                                         idle, queued, running, completed, skipped (not needed)
+     *                                                         or failed (including a request no worker picked up).
+     * @apiSuccess {String}     thinning.requested_at          Timestamp of the request from the About page.
+     * @apiSuccess {String}     thinning.finished_at           Timestamp the last thinning completed, skipped or failed.
      *
      * @apiSuccessExample {json} Success Response:
      *  HTTP/1.1 200 OK
@@ -224,8 +229,11 @@ class AboutController extends Controller
      *      "rotation_supported": true,
      *      "screenshots_available": 0,
      *      "thinning": {
-     *        "now": null,
-     *        "last": null
+     *        "now": false,
+     *        "last": "2026-10-30T12:00:00+00:00",
+     *        "status": "completed",
+     *        "requested_at": "2026-10-30T11:59:50+00:00",
+     *        "finished_at": "2026-10-30T12:00:00+00:00"
      *      }
      *  }
      *
@@ -237,6 +245,8 @@ class AboutController extends Controller
 
     public function storage(ManageStorageRequest $request): JsonResponse
     {
+        $status = StorageCleanupStatus::get();
+
         return responder()->success([
             'space' => [
                 'left' => StorageCleaner::getFreeSpace(),
@@ -247,19 +257,27 @@ class AboutController extends Controller
             'need_thinning' => StorageCleaner::needThinning(),
             // false on object storage (S3): no free space to measure, rotation is a no-op
             'rotation_supported' => StorageCleaner::isSupported(),
+            // Scans every eligible interval and checks its file on each request, also while the About page polls
+            // a running cleanup (every 10 s). A lightweight status endpoint for that polling, or a count cached
+            // between cleanups, may be needed on large local disks; measure first under which conditions
+            // (number of intervals, disk, poll rate next to a running cleanup) and cover the choice with tests.
             'screenshots_available' => StorageCleaner::countAvailableScreenshots(),
             'thinning' => [
-                'now' => Cache::store('octane')->get('thinning_now'),
-                'last' => Cache::store('octane')->get('last_thin'),
+                'now' => $status['status'] === StorageCleanupStatus::RUNNING,
+                'last' => StorageCleanupStatus::last(),
+                'status' => $status['status'],
+                'requested_at' => $status['requested_at'],
+                'finished_at' => $status['finished_at'],
             ]
         ])->respond();
     }
    /**
-    * @api             {get} /storage Get Storage Information
-    * @apiDescription  Retrieves information about the storage space, thinning status, and available screenshots.
+    * @api             {post} /storage Request Storage Cleanup
+    * @apiDescription  Queues the screenshot thinning. The request is accepted, not started: follow thinning.status
+    *                  of GET /storage. Nothing is queued while a thinning is already queued or running.
     *
-    * @apiVersion      4.0.0
-    * @apiName         GetStorageInfo
+    * @apiVersion      4.1.0
+    * @apiName         StartStorageClean
     * @apiGroup        Storage
     *
     * @apiSuccessExample {json} Response Example
@@ -274,7 +292,17 @@ class AboutController extends Controller
     */
     public function startStorageClean(ManageStorageRequest $request): JsonResponse
     {
-        Artisan::queue(RotateScreenshots::class);
+        $runId = StorageCleanupStatus::queue();
+
+        if ($runId !== null) {
+            try {
+                RotateScreenshots::dispatch($runId);
+            } catch (Throwable $e) {
+                StorageCleanupStatus::failRun($runId);
+
+                throw $e;
+            }
+        }
 
         return responder()->success()->respond(204);
     }
