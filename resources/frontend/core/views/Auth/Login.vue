@@ -56,7 +56,9 @@
     import sloganGenerator from '@/helpers/sloganGenerator';
     import has from 'lodash/has';
 
-    export const config = { authInput: AuthInput };
+    // authInput: component of the credentials form; loginEndpoint: API endpoint the credentials are posted to.
+    // A module can replace both, e.g. with a demo account selector and its own passwordless login endpoint.
+    export const config = { authInput: AuthInput, loginEndpoint: '/auth/login' };
 
     export default {
         name: 'Login',
@@ -129,7 +131,7 @@
                         this.$refs.recaptcha.reset();
                     }
 
-                    await apiService.attemptLogin(this.user);
+                    await apiService.attemptLogin(this.user, config.loginEndpoint);
                     await apiService.getCompanyData();
 
                     this.error = null;

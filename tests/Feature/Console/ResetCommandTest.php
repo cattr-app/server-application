@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\Console;
 
+use App\Contracts\ScreenshotService;
 use Illuminate\Database\Console\Seeds\SeedCommand;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -51,5 +53,21 @@ class ResetCommandTest extends TestCase
             ->assertSuccessful();
 
         $this->assertSame(['InitialSeeder'], $this->seedCommand->calls);
+    }
+
+    public function test_reset_with_images_deletes_screenshots(): void
+    {
+        Storage::fake();
+        Storage::put(ScreenshotService::PARENT_FOLDER . 'a.jpg', 'x');
+        Storage::put(ScreenshotService::PARENT_FOLDER . ScreenshotService::THUMBS_FOLDER . 'a.jpg', 'x');
+        Storage::put(ScreenshotService::PARENT_FOLDER . '.gitignore', '*');
+        Storage::put('attachments/b.txt', 'x');
+
+        $this->artisan('cattr:reset', ['--force' => true, '--images' => true])->assertSuccessful();
+
+        Storage::assertMissing(ScreenshotService::PARENT_FOLDER . 'a.jpg');
+        Storage::assertMissing(ScreenshotService::PARENT_FOLDER . ScreenshotService::THUMBS_FOLDER . 'a.jpg');
+        Storage::assertExists(ScreenshotService::PARENT_FOLDER . '.gitignore');
+        Storage::assertExists('attachments/b.txt');
     }
 }
