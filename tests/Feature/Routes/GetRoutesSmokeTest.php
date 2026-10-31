@@ -109,6 +109,7 @@ class GetRoutesSmokeTest extends TestCase
             'api/users/show' => ['id' => $user->id],
             'api/time-intervals/show' => ['id' => $interval->id],
             'api/report/universal-report/show' => ['id' => $report->id],
+            'api/report/universal-report/data-objects-and-fields' => ['base' => UniversalReportBase::PROJECT->value],
         ];
     }
 
