@@ -34,6 +34,9 @@ class ListTest extends TestCase
     {
         parent::setUp();
 
+        // These tests compare complete visible project lists, not a paginated page.
+        $this->withHeader('X-Paginate', 'false');
+
         $this->admin = UserFactory::refresh()->asAdmin()->withTokens()->create();
         $this->manager = UserFactory::refresh()->asManager()->withTokens()->create();
         $this->auditor = UserFactory::refresh()->asAuditor()->withTokens()->create();
