@@ -25,15 +25,24 @@ class BulkEditTimeIntervalRequest extends CattrFormRequest
 
         // Moving an interval to another task is the same as tracking time there,
         // so the target task must pass the same check as time-intervals/create.
-        foreach (request('intervals') as $interval) {
-            $timeInterval = TimeInterval::find($interval['id']);
+        // The result is reused within this request for identical user, task and manual flag.
+        $intervals = TimeInterval::whereIn('id', $timeIntervalIds)->get()->keyBy('id');
+        $checked = [];
 
-            if (!$this->user()->can('create', [
+        foreach (request('intervals') as $interval) {
+            $timeInterval = $intervals[$interval['id']];
+            $taskId = (int)$interval['task_id'];
+            $isManual = (bool)$timeInterval->is_manual;
+            $key = "$timeInterval->user_id:$taskId:" . (int)$isManual;
+
+            $checked[$key] ??= $this->user()->can('create', [
                 TimeInterval::class,
                 $timeInterval->user_id,
-                (int)$interval['task_id'],
-                (bool)$timeInterval->is_manual,
-            ])) {
+                $taskId,
+                $isManual,
+            ]);
+
+            if (!$checked[$key]) {
                 return false;
             }
         }
