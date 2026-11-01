@@ -13,7 +13,18 @@ class EditTaskRequest extends CattrFormRequest
 
     public function authorizeValidated(): bool
     {
-        return $this->user()->can('update', Task::find(request('id')));
+        $task = Task::find(request('id'));
+
+        if (!$this->user()->can('update', $task)) {
+            return false;
+        }
+
+        // Moving a task to another project requires the right to create tasks there.
+        if ($this->has('project_id') && (int)$this->input('project_id') !== (int)$task->project_id) {
+            return $this->user()->can('create', [Task::class, (int)$this->input('project_id')]);
+        }
+
+        return true;
     }
 
     public function _rules(): array
