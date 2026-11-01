@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Parsedown;
 use Staudenmeir\LaravelAdjacencyList\Eloquent\HasGraphRelationships;
 
@@ -162,6 +163,8 @@ class Task extends Model implements AttachmentAble
 
         static::updated(static function (Task $task) {
             if ($task->getOriginal('project_id') !== $task->project_id) {
+                // TimeIntervalPolicy caches the project of a task, drop it so the new project is used right away
+                Cache::store('octane')->forget("project_of_task_$task->id");
                 $task->parents()->detach();
                 $task->children()->detach();
             }

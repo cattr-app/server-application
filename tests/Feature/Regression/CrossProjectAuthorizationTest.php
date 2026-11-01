@@ -104,6 +104,19 @@ class CrossProjectAuthorizationTest extends TestCase
         $this->bulkEdit($this->admin, $this->foreignTask->id)->assertStatus(422);
     }
 
+    public function test_bulk_edit_uses_new_project_after_task_was_moved(): void
+    {
+        $other = TaskFactory::refresh()->forProject(Project::find($this->ownTask->project_id))->create();
+
+        // Warm the cached task project, then move the task to a project the member has no role in
+        $this->assertTrue($this->member->can('create', [TimeInterval::class, $this->member->id, $other->id, false]));
+        $other->update(['project_id' => $this->foreignTask->project_id]);
+
+        $this->bulkEdit($this->member, $other->id)->assertStatus(403);
+
+        $this->assertDatabaseHas('time_intervals', ['id' => $this->interval->id, 'task_id' => $this->ownTask->id]);
+    }
+
     public function test_bulk_edit_to_assigned_task_is_allowed(): void
     {
         $assigned = TaskFactory::refresh()->forUser($this->member)->create();
