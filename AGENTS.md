@@ -2,20 +2,17 @@
 
 ## Language
 
-Everything public is written in English: pull requests, issues, comments on them, changelogs, release notes, commit messages and documentation. This applies regardless of the language used in the conversation with the user.
+All public artifacts (pull requests, issues, comments, changelogs, release notes, commit messages, documentation) are written in English, regardless of the language of the conversation with the user.
 
 ## Issues
 
-When creating an issue:
+Every new issue gets exactly one of each:
 
-1. **Type.** Set exactly one of the organization's issue types:
-   - `Bug`: an unexpected problem or behavior.
-   - `Task`: a specific piece of work.
-   - `Feature`: a request, idea, or new functionality.
-2. **Priority.** Pick one of `P0`, `P1`, `P2`, `P3` (issue field "Priority": current importance assigned to the issue).
-3. **Effort.** Pick one of `XS`, `S`, `M`, `L`, `XL` (issue field "Effort": relative level of effort; `XL` means consider decomposition).
+- **Type:** `Bug` (unexpected problem or behavior), `Task` (a specific piece of work) or `Feature` (a request, idea, or new functionality).
+- **Priority:** `P0`–`P3`.
+- **Effort:** `XS`, `S`, `M`, `L`, `XL` (`XL` means consider decomposition).
 
-Set the type, priority and effort through the GitHub API (issue type and issue fields) rather than in the issue text. If the available API or token does not allow setting them, do not write them into the issue body or title; report the chosen type, priority and effort, with a one-line rationale, to the user who requested the issue.
+Set them through the GitHub API (issue type and issue fields), not in the issue text. If the API or token does not allow it, leave the issue text unchanged and report the choice, with a one-line rationale, to the user who requested the issue.
 
 ## Pull requests
 
