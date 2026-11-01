@@ -21,7 +21,6 @@
     "ext-pdo": "*",
     "ext-zip": "*",
     "cattr/demo-module": "^3.0",
-    "cattr/redmine_integration-module": "^5.2",
     "elhebert/laravel-sri": "^3.5",
     "erusev/parsedown": "^1.7",
     "fakerphp/faker": "^1.21",
