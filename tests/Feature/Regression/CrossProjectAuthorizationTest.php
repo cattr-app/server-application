@@ -117,6 +117,27 @@ class CrossProjectAuthorizationTest extends TestCase
         $this->assertDatabaseHas('time_intervals', ['id' => $this->interval->id, 'task_id' => $this->ownTask->id]);
     }
 
+    public function test_bulk_edit_of_several_intervals_to_one_task(): void
+    {
+        $second = IntervalFactory::refresh()->forUser($this->member)->forTask($this->ownTask)->create();
+        $other = TaskFactory::refresh()->forProject(Project::find($this->ownTask->project_id))->create();
+
+        $this->api($this->member, 'time-intervals/bulk-edit', ['intervals' => [
+            ['id' => $this->interval->id, 'task_id' => $other->id],
+            ['id' => $second->id, 'task_id' => $other->id],
+            ['id' => $second->id, 'task_id' => $this->foreignTask->id],
+        ]])->assertStatus(403);
+
+        $this->assertDatabaseHas('time_intervals', ['id' => $second->id, 'task_id' => $this->ownTask->id]);
+
+        $this->api($this->member, 'time-intervals/bulk-edit', ['intervals' => [
+            ['id' => $this->interval->id, 'task_id' => $other->id],
+            ['id' => $second->id, 'task_id' => $other->id],
+        ]])->assertStatus(204);
+
+        $this->assertDatabaseHas('time_intervals', ['id' => $second->id, 'task_id' => $other->id]);
+    }
+
     public function test_bulk_edit_to_assigned_task_is_allowed(): void
     {
         $assigned = TaskFactory::refresh()->forUser($this->member)->create();
