@@ -22,6 +22,7 @@
         "build:base": "node scripts/build-base-images.cjs"
     },
     "dependencies": {
+        "@amazingcat/cattr-demo-module": "^3.0.0",
         "@amazingcat/cattr-ui": "^1.3.14",
         "@svgdotjs/svg.js": "^3.2.8",
         "apidoc": "0.29.0",

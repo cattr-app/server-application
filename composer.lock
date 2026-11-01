@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "316b99775abe20c1f754573a3b691db0",
+    "content-hash": "c4015d4e8a71d987fa040a7833a1b0ce",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -346,6 +346,44 @@
                 }
             ],
             "time": "2026-09-06T14:11:38+00:00"
+        },
+        {
+            "name": "cattr/demo-module",
+            "version": "v3.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/cattr-app/demo-module.git",
+                "reference": "3494f85b56913a878a091c22c0448015d8eb68d2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/cattr-app/demo-module/zipball/3494f85b56913a878a091c22c0448015d8eb68d2",
+                "reference": "3494f85b56913a878a091c22c0448015d8eb68d2",
+                "shasum": ""
+            },
+            "type": "laravel-module",
+            "autoload": {
+                "psr-4": {
+                    "Modules\\Demo\\": "backend/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "SSPL-1.0"
+            ],
+            "authors": [
+                {
+                    "name": "Alex V",
+                    "email": "inbox@alexv-pro.ru",
+                    "role": "Maintainer"
+                }
+            ],
+            "description": "Demo Module for Cattr",
+            "support": {
+                "issues": "https://github.com/cattr-app/demo-module/issues",
+                "source": "https://github.com/cattr-app/demo-module/tree/v3.0.0"
+            },
+            "time": "2026-11-01T05:25:51+00:00"
         },
         {
             "name": "clue/redis-protocol",

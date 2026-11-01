@@ -1,3 +1,6 @@
 {
-
+  "AmazingCat_DemoModule": {
+    "type": "package",
+    "ref": "@amazingcat/cattr-demo-module"
+  }
 }
