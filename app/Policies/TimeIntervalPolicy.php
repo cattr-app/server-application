@@ -7,7 +7,6 @@ use App\Models\Project;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\User;
-use Cache;
 use Illuminate\Contracts\Database\Query\Builder;
 
 class TimeIntervalPolicy
@@ -114,15 +113,15 @@ class TimeIntervalPolicy
         return true;
     }
 
+    /**
+     * Not cached on purpose: a task can be moved to another project, and a stale value would
+     * authorize an interval against the old project.
+     */
     private static function getProjectIdByTaskId(int $taskId): int
     {
-        return Cache::store('octane')->remember(
-            "project_of_task_$taskId",
-            config('cache.role_caching_ttl'),
-            static fn() => Project::whereHas(
-                'tasks',
-                static fn(Builder $query) => $query->where('id', '=', $taskId)->withoutGlobalScopes()
-            )->withoutGlobalScopes()->firstOrFail()->id
-        );
+        return Project::whereHas(
+            'tasks',
+            static fn(Builder $query) => $query->where('id', '=', $taskId)->withoutGlobalScopes()
+        )->withoutGlobalScopes()->firstOrFail()->id;
     }
 }
