@@ -5,6 +5,7 @@ namespace App\Http\Requests\Interval;
 use App\Http\Requests\AuthorizesAfterValidation;
 use App\Http\Requests\CattrFormRequest;
 use App\Models\TimeInterval;
+use Illuminate\Validation\Rule;
 
 class BulkEditTimeIntervalRequest extends CattrFormRequest
 {
@@ -31,7 +32,7 @@ class BulkEditTimeIntervalRequest extends CattrFormRequest
                 TimeInterval::class,
                 $timeInterval->user_id,
                 (int)$interval['task_id'],
-                false,
+                (bool)$timeInterval->is_manual,
             ])) {
                 return false;
             }
@@ -44,7 +45,7 @@ class BulkEditTimeIntervalRequest extends CattrFormRequest
     {
         return [
             'intervals' => 'required|array',
-            'intervals.*.id' => 'required|int|exists:time_intervals,id',
+            'intervals.*.id' => ['required', 'int', Rule::exists('time_intervals', 'id')->whereNull('deleted_at')],
             'intervals.*.task_id' => 'required|int|exists:tasks,id'
         ];
     }

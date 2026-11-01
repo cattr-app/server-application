@@ -62,6 +62,35 @@ class CrossProjectAuthorizationTest extends TestCase
         $this->assertDatabaseHas('time_intervals', ['id' => $this->interval->id, 'task_id' => $other->id]);
     }
 
+    public function test_bulk_edit_of_manual_interval_without_manual_time_is_forbidden(): void
+    {
+        $other = TaskFactory::refresh()->forProject(Project::find($this->ownTask->project_id))->create();
+        TimeInterval::whereKey($this->interval->id)->update(['is_manual' => true]);
+        $this->member->forceFill(['manual_time' => false])->save();
+
+        $this->bulkEdit($this->member, $other->id)->assertForbidden();
+
+        $this->assertDatabaseHas('time_intervals', ['id' => $this->interval->id, 'task_id' => $this->ownTask->id]);
+    }
+
+    public function test_bulk_edit_of_manual_interval_with_manual_time_is_allowed(): void
+    {
+        $other = TaskFactory::refresh()->forProject(Project::find($this->ownTask->project_id))->create();
+        TimeInterval::whereKey($this->interval->id)->update(['is_manual' => true]);
+        $this->member->forceFill(['manual_time' => true])->save();
+
+        $this->bulkEdit($this->member, $other->id)->assertNoContent();
+
+        $this->assertDatabaseHas('time_intervals', ['id' => $this->interval->id, 'task_id' => $other->id]);
+    }
+
+    public function test_bulk_edit_of_deleted_interval_is_validation_error(): void
+    {
+        $this->interval->delete();
+
+        $this->bulkEdit($this->admin, $this->foreignTask->id)->assertStatus(422);
+    }
+
     public function test_bulk_edit_to_assigned_task_is_allowed(): void
     {
         $assigned = TaskFactory::refresh()->forUser($this->member)->create();
