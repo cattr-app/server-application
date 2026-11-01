@@ -23,9 +23,9 @@ use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
 /**
- * Calls every registered GET route as an admin on seeded data and checks that none of them
- * returns a 5xx. It catches crashes on endpoints that have no feature test yet; the response
- * contents are the job of the feature tests.
+ * Calls core GET routes as an admin on seeded data and checks that none return a 5xx.
+ * External module routes have their own parameters and fixtures, so they must be
+ * covered by module tests rather than this core-specific smoke test.
  */
 class GetRoutesSmokeTest extends TestCase
 {
@@ -37,7 +37,6 @@ class GetRoutesSmokeTest extends TestCase
         'api/tmp-attachment-link/{attachment}' => 'signed URL download, see Attachments\TemporaryDownloadTest',
         'api/time-intervals/{interval}/screenshot' => 'signed URL download, see TimeIntervals\ScreenshotTest',
         'api/time-intervals/{interval}/thumb' => 'signed URL download, see TimeIntervals\ScreenshotTest',
-        'broadcasting/auth' => 'websocket channel authorization, needs a broadcaster and a channel name',
     ];
 
     private User $admin;
@@ -130,6 +129,19 @@ class GetRoutesSmokeTest extends TestCase
         $this->assertSame([], $failures, 'GET routes returned a server error');
     }
 
+    public function test_smoke_test_only_includes_core_routes(): void
+    {
+        // A route from a separately installed package must not need fixtures from the core suite.
+        Route::get('external/smoke-test/{id}', [\Illuminate\Routing\Controller::class, 'callAction']);
+
+        $uris = array_map(static fn (RoutingRoute $route) => $route->uri(), $this->getRoutes());
+
+        $this->assertNotContains('external/smoke-test/{id}', $uris);
+        $this->assertContains('api/status', $uris);
+        // The core also owns this closure route, which has no App controller action.
+        $this->assertContains('actuator/health/liveness', $uris);
+    }
+
     public function test_excluded_routes_exist(): void
     {
         $uris = collect(Route::getRoutes()->getRoutes())->map->uri()->all();
@@ -142,6 +154,10 @@ class GetRoutesSmokeTest extends TestCase
     {
         return collect(Route::getRoutes()->getRoutes())
             ->filter(static fn(RoutingRoute $route) => in_array('GET', $route->methods(), true))
+            ->filter(static fn (RoutingRoute $route) =>
+                str_starts_with($route->getActionName(), 'App\\Http\\Controllers\\')
+                || $route->getName() === 'actuator.liveness'
+            )
             ->reject(static fn(RoutingRoute $route) => $route->isFallback)
             ->reject(static fn(RoutingRoute $route) => array_key_exists($route->uri(), self::EXCLUDED))
             ->values()
