@@ -5,16 +5,22 @@ on:
     paths:
       - '.github/workflows/release.yml'
       - '.github/workflows/release-check.yml'
+      - '.github/workflows/container.yml'
       - 'scripts/release-tags.sh'
       - 'tests/ci/release-tags.sh'
+      - 'scripts/base-image-meta.sh'
+      - 'tests/ci/base-images.sh'
   push:
     branches:
       - main
     paths:
       - '.github/workflows/release.yml'
       - '.github/workflows/release-check.yml'
+      - '.github/workflows/container.yml'
       - 'scripts/release-tags.sh'
       - 'tests/ci/release-tags.sh'
+      - 'scripts/base-image-meta.sh'
+      - 'tests/ci/base-images.sh'
 
 permissions:
   contents: read
@@ -30,3 +36,6 @@ jobs:
 
       - name: Test release tag classification
         run: bash tests/ci/release-tags.sh
+
+      - name: Test base image workflow consistency
+        run: bash tests/ci/base-images.sh
