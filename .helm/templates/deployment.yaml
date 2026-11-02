@@ -19,6 +19,8 @@ spec:
   revisionHistoryLimit: 5
   strategy:
     type: Recreate
+    # Chart 0.1.x used RollingUpdate; null clears the server-defaulted field on upgrade.
+    rollingUpdate: null
   selector:
     matchLabels:
       {{- include "cattr.selectorLabels" . | nindent 6 }}
