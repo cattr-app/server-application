@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\ScreenshotsState;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Settings;
 use Tests\Facades\IntervalFactory;
 use Tests\Facades\TaskFactory;
@@ -48,6 +49,9 @@ class HttpExceptionStatusTest extends TestCase
 
     public function test_abort_keeps_status_and_message(): void
     {
+        // Prevent old screenshots with reused interval IDs from changing the error being tested.
+        Storage::fake(config('filesystems.default'));
+
         // Global override: screenshots are forbidden for every project.
         Settings::scope('core')->set('screenshots_state', ScreenshotsState::FORBIDDEN->value);
         $task = TaskFactory::forUser($this->user)->create();
