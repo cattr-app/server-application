@@ -45,7 +45,7 @@ which MySQL 8.0 cannot open again (there is no in-place downgrade).
 Built-in MySQL:
 
 ```sh
-NS=cattr; REL=cattr; FULL=cattr-cattr-server   # legacy name, with nameOverride=cattr-server
+NS=cattr; REL=cattr; FULL=cattr-cattr-server   # legacy default name (nameOverride=cattr-server); use your release's own name if it set nameOverride/fullnameOverride
 kubectl -n $NS exec deploy/$FULL-mysql -- sh -c \
   'mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" --single-transaction --routines --triggers "$MYSQL_DATABASE"' \
   > cattr-backup.sql
@@ -93,11 +93,15 @@ kubectl -n $NS patch deployment $FULL --type=json \
 
 ## 5. Upgrade
 
-Write a new values file (do not use `--reuse-values`) and explicitly set
-`nameOverride: cattr-server` when upgrading an existing legacy release. APP_KEY and the DB
-credentials are read from the existing Secret when left empty:
+Write a new values file (do not use `--reuse-values`) that keeps the names of
+the existing release. APP_KEY and the DB credentials are read from the existing
+Secret when left empty:
 
 ```yaml
+# Names: `nameOverride: cattr-server` is for a release that used the 0.1.x default
+# names. If it set its own `nameOverride` or `fullnameOverride`, keep exactly those
+# values instead (and use the resulting name for $FULL in the steps above).
+nameOverride: cattr-server
 cattr:
   appUrl: https://cattr.example.com
   reverbAppSecret: "<openssl rand -hex 32>"   # new, required once
@@ -119,7 +123,7 @@ ingress:                  # if you used the 0.1.x Ingress
 ```
 
 ```sh
-helm upgrade $REL oci://ghcr.io/cattr-app/helm/server --version 0.2.0 -n $NS -f values-0.2.yaml --set nameOverride=cattr-server --wait --timeout 15m
+helm upgrade $REL oci://ghcr.io/cattr-app/helm/server --version 0.2.0 -n $NS -f values-0.2.yaml --wait --timeout 15m
 ```
 
 The `pre-upgrade` setup Job runs the migrations; then the Pod is recreated.

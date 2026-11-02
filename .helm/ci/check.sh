@@ -162,26 +162,43 @@ else
     helm show chart "$package" | yq -e '.name == "server"' >/dev/null || status=1
 fi
 
+# Prints one line per application container that does not carry the backend module
+# flag exactly once. Only the known recipients of the generated env are checked
+# (the `prepare` containers render no env); a missing env list counts as zero.
+backend_flag_errors() {
+    for kind in Deployment Job; do
+        for container in containers initContainers; do
+            lines="$(yq -r 'select(.kind == "'"${kind}"'") |
+              .spec.template.spec.'"$container"'[] |
+              select(.name == "web" or .name == "queue" or .name == "scheduler" or .name == "setup" or .name == "wait-for-migrations" or .name == "wait-for-database") |
+              .name + " " + (([.env[]? | select(.name == "MODULE_BACKEND_CATTR_REDMINE_INTEGRATION_ENABLED" and .value == "true")] | length) | tostring)' \
+              "$1" | grep -v '^---$' || true)"
+            if [ -z "$lines" ]; then
+                echo "$kind $container: no application container found"
+            else
+                printf '%s\n' "$lines" | grep -v ' 1$' | sed "s|^|$kind $container: backend flag count is not 1 for |" || true
+            fi
+        done
+    done
+}
+
 # Assert generated environment variables on every application role, in both PVC
 # and S3 modes. The same env is passed into the PHP initialization containers.
 for config in module-env-values.yaml module-env-s3-values.yaml; do
     rendered="$out/${config%.yaml}.yaml"
     helm template cattr "$chart" -f "$chart/ci/$config" > "$rendered" || { status=1; continue; }
 
-    for kind in Deployment Job; do
-        for container in containers initContainers; do
-            # One "<name> <count>" line per container that has an env list; every count must be 1.
-            counts="$(yq -r 'select(.kind == "'"${kind}"'") |
-              .spec.template.spec.'"$container"'[] |
-              select(.image != null and .env != null) |
-              .name + " " + (([.env[] | select(.name == "MODULE_BACKEND_CATTR_REDMINE_INTEGRATION_ENABLED" and .value == "true")] | length) | tostring)' \
-              "$rendered" | grep -v '^---$' || true)"
-            if [ -z "$counts" ] || printf '%s\n' "$counts" | grep -qv ' 1$'; then
-                echo "ERROR: $config: backend module flag missing in a $kind $container entry"
-                status=1
-            fi
-        done
-    done
+    errors="$(backend_flag_errors "$rendered")"
+    if [ -n "$errors" ]; then
+        printf 'ERROR: %s: %s\n' "$config" "$errors"
+        status=1
+    fi
+    # The check must notice an application container whose whole env list is gone.
+    mutated="$out/${config%.yaml}-no-env.yaml"
+    yq '(select(.kind == "Deployment") | .spec.template.spec.containers[] | select(.name == "web")) |= del(.env)' \
+        "$rendered" > "$mutated"
+    [ -n "$(backend_flag_errors "$mutated")" ] ||
+        { echo "ERROR: $config: backend flag check ignores a container without an env list"; status=1; }
     for var in MODULE_FRONTEND_AMAZING_CAT_REDMINE_INTEGRATION_ENABLED MODULE_BACKEND_CAT_V2_SYNC_ENABLED; do
         count="$(yq -r 'select(.kind == "Deployment") |
           .spec.template.spec.containers[].env[] |
