@@ -1,0 +1,42 @@
+name: Helm Kind smoke test
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  install:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        with:
+          version: v3.19.0
+
+      - uses: helm/kind-action@1544676c07bb3570fcb70166beaa07c4528fd4aa # v1.15.1
+
+      - name: Install demo chart without --wait (setup runs post-install)
+        run: |
+          set -euo pipefail
+          helm install cattr ./.helm --namespace cattr --create-namespace \
+            -f .helm/ci/demo-mysql-values.yaml --timeout 15m
+          kubectl -n cattr rollout status deployment/cattr-mysql --timeout=10m
+          kubectl -n cattr wait --for=condition=complete job/cattr-setup --timeout=10m
+          kubectl -n cattr rollout status deployment/cattr --timeout=10m
+          kubectl -n cattr get deployments,pods,jobs,services
+
+      - name: Inspect failure
+        if: failure()
+        run: |
+          kubectl -n cattr get pods,jobs,deployments -o wide || true
+          kubectl -n cattr describe pods || true
+          kubectl -n cattr logs job/cattr-setup --all-containers --tail=100 || true
+          kubectl -n cattr logs deployment/cattr-mysql --all-containers --tail=100 || true

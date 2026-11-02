@@ -104,4 +104,62 @@ else
     echo "ok: lint fails on a template fail (cattr.appUrl empty)"
 fi
 
+
+
+# Assert chart naming, application version, and image defaults (including overrides).
+chart_name="$(helm show chart "$chart" | yq '.name')"
+[ "$chart_name" = "server" ] || { echo "ERROR: expected chart name server, got $chart_name"; status=1; }
+chart_version="$(helm show chart "$chart" | yq '.version')"
+app_version="$(helm show chart "$chart" | yq '.appVersion | tostring')"
+[ -n "$chart_version" ] && [ -n "$app_version" ] || { echo "ERROR: missing chart/app version"; status=1; }
+
+names_default="$out/names-default.yaml"
+names_legacy="$out/names-legacy.yaml"
+names_fullname="$out/names-fullname.yaml"
+helm template cattr "$chart" -f "$chart/ci/default-values.yaml" > "$names_default" || status=1
+helm template cattr "$chart" -f "$chart/ci/default-values.yaml" --set nameOverride=cattr-server > "$names_legacy" || status=1
+helm template cattr "$chart" -f "$chart/ci/default-values.yaml" --set fullnameOverride=my-cattr > "$names_fullname" || status=1
+
+# Verify both object names and immutable selector labels, not just metadata labels.
+for entry in "default:$names_default:cattr:cattr" "legacy:$names_legacy:cattr-cattr-server:cattr-server" "fullname:$names_fullname:my-cattr:cattr"; do
+    label="${entry%%:*}"; rest="${entry#*:}"
+    file="${rest%%:*}"; rest="${rest#*:}"
+    expected="${rest%%:*}"; selector="${rest#*:}"
+    deployment="$(yq -r 'select(.kind == "Deployment") | .metadata.name' "$file")"
+    service="$(yq -r 'select(.kind == "Service") | .metadata.name' "$file")"
+    secret="$(yq -r 'select(.kind == "Secret" and .metadata.name == "'"${expected}"'") | .metadata.name' "$file")"
+    pvc="$(yq -r 'select(.kind == "PersistentVolumeClaim") | .metadata.name' "$file")"
+    match="$(yq -r 'select(.kind == "Deployment") | .spec.selector.matchLabels."app.kubernetes.io/name"' "$file")"
+    if [ "$deployment" != "$expected" ] || [ "$service" != "$expected" ] || [ "$secret" != "$expected" ] ||
+       [ "$pvc" != "$expected-storage" ] || [ "$match" != "$selector" ]; then
+        echo "ERROR: $label naming: deployment=$deployment service=$service secret=$secret pvc=$pvc selector=$match"
+        status=1
+    fi
+done
+
+default_image="$(yq -r 'select(.kind == "Deployment") | .spec.template.spec.containers[] | select(.name == "web") | .image' "$names_default")"
+[ "$default_image" = "ghcr.io/cattr-app/server:$app_version" ] || { echo "ERROR: unexpected default image: $default_image"; status=1; }
+helm template cattr "$chart" -f "$chart/ci/default-values.yaml" --set image.tag=custom-tag > "$out/image-override.yaml" || status=1
+override_image="$(yq -r 'select(.kind == "Deployment") | .spec.template.spec.containers[] | select(.name == "web") | .image' "$out/image-override.yaml")"
+[ "$override_image" = "ghcr.io/cattr-app/server:custom-tag" ] || { echo "ERROR: image.tag override ignored: $override_image"; status=1; }
+
+# Exercise packaging, and ensure CI fixtures are excluded from the published OCI chart.
+mkdir -p "$out/packages"
+helm package "$chart" --destination "$out/packages" || status=1
+package="$out/packages/server-$chart_version.tgz"
+if [ ! -f "$package" ]; then
+    echo "ERROR: expected chart archive $package"
+    status=1
+else
+    if tar tzf "$package" | grep -q '^server/ci/'; then
+        echo "ERROR: CI fixtures leaked into chart package"
+        status=1
+    fi
+    if ! tar tzf "$package" | grep -q '^server/Chart.yaml; then
+        echo "ERROR: chart metadata missing in archive"
+        status=1
+    fi
+    helm show chart "$package" | yq -e '.name == "server"' >/dev/null || status=1
+fi
+
 exit "$status"

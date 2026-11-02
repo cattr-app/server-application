@@ -1,0 +1,104 @@
+name: Helm OCI release
+
+on:
+  push:
+    tags:
+      - 'helm/v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: helm-release-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Validate and publish Helm chart
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    env:
+      OCI_REPOSITORY: ghcr.io/cattr-app/helm/server
+      OCI_NAMESPACE: oci://ghcr.io/cattr-app/helm
+    steps:
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        with:
+          version: v3.19.0
+
+      - uses: imjasonh/setup-crane@feee3b6bb0d4c68370f256a4502498c9227e5c6b # v0.7
+        with:
+          version: v0.22.1
+
+      - name: Validate tag, chart, image and branch
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          bash .helm/ci/release-metadata.sh "$RELEASE_TAG"
+          git fetch --no-tags origin main
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main || {
+            echo "::error::Helm releases must point to commits reachable from main"
+            exit 1
+          }
+          image_tag="$(helm show chart .helm | awk '/^appVersion:/ {gsub(/"/, "", $2); print $2}')"
+          crane manifest "ghcr.io/cattr-app/server:$image_tag" >/dev/null || {
+            echo "::error::Referenced application image is not available: $image_tag"
+            exit 1
+          }
+
+      - name: Lint and validate chart
+        uses: docker://alpine/k8s@sha256:d50424976a0a888d2531f13035dce45c004ec2b6f877f233005ba35c0d61be5d # 1.34.12
+        with:
+          entrypoint: sh
+          args: .helm/ci/check.sh
+
+      - name: Package chart
+        id: package
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          version="${RELEASE_TAG#helm/v}"
+          mkdir -p dist
+          helm package .helm --destination dist
+          test -f "dist/server-$version.tgz"
+          sha256sum "dist/server-$version.tgz" | tee dist/SHA256SUMS
+
+      - name: Authenticate to GHCR
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$GHCR_TOKEN" | helm registry login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          printf '%s' "$GHCR_TOKEN" | crane auth login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+
+      - name: Publish immutable OCI chart and verify pull
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          version="${RELEASE_TAG#helm/v}"
+          # helm pull is the canonical existence check for OCI Helm artifacts.
+          # No overwrite: previously published artifacts must remain immutable.
+          if helm show chart "oci://$OCI_REPOSITORY" --version "$version" >/dev/null 2>&1; then
+            echo "::error::Helm chart $version is already published; refusing overwrite"
+            exit 1
+          fi
+          helm push "dist/server-$version.tgz" "$OCI_NAMESPACE"
+          mkdir -p pulled
+          helm pull "oci://$OCI_REPOSITORY" --version "$version" --destination pulled
+          cmp "dist/server-$version.tgz" "pulled/server-$version.tgz"
+          helm show chart "oci://$OCI_REPOSITORY" --version "$version"
+          crane digest "$OCI_REPOSITORY:$version" | tee dist/OCI-DIGEST
