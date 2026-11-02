@@ -170,13 +170,14 @@ for config in module-env-values.yaml module-env-s3-values.yaml; do
 
     for kind in Deployment Job; do
         for container in containers initContainers; do
-            count="$(yq -r 'select(.kind == "'"${kind}"'") |
+            # One "<name> <count>" line per container that has an env list; every count must be 1.
+            counts="$(yq -r 'select(.kind == "'"${kind}"'") |
               .spec.template.spec.'"$container"'[] |
-              select(.image != null) |
-              [.env[]? | select(.name == "MODULE_BACKEND_CATTR_REDMINE_INTEGRATION_ENABLED" and .value == "true")] |
-              length' "$rendered" | grep -c '^1$' || true)"
-            if [ "$count" -eq 0 ]; then
-                echo "ERROR: $config: missing backend module flag in $kind $container"
+              select(.image != null and .env != null) |
+              .name + " " + (([.env[] | select(.name == "MODULE_BACKEND_CATTR_REDMINE_INTEGRATION_ENABLED" and .value == "true")] | length) | tostring)' \
+              "$rendered" | grep -v '^---$' || true)"
+            if [ -z "$counts" ] || printf '%s\n' "$counts" | grep -qv ' 1$'; then
+                echo "ERROR: $config: backend module flag missing in a $kind $container entry"
                 status=1
             fi
         done

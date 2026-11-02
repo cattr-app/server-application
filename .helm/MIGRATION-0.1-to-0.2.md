@@ -119,7 +119,7 @@ ingress:                  # if you used the 0.1.x Ingress
 ```
 
 ```sh
-helm upgrade $REL ./.helm -n $NS -f values-0.2.yaml --set nameOverride=cattr-server --wait --timeout 15m
+helm upgrade $REL oci://ghcr.io/cattr-app/helm/server --version 0.2.0 -n $NS -f values-0.2.yaml --set nameOverride=cattr-server --wait --timeout 15m
 ```
 
 The `pre-upgrade` setup Job runs the migrations; then the Pod is recreated.

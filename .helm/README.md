@@ -239,7 +239,7 @@ instead of repeating `MODULE_*_ENABLED` under `cattr.env`.
 
 Do not commit credentials to values files; reference Kubernetes Secrets.
 For exact module identifier normalization, see
-[Module activation flags](../docs/dev/module-activation-flags.md).
+[Module activation flags](https://github.com/cattr-app/server-application/blob/main/docs/dev/module-activation-flags.md).
 
 ## Database and Redis
 

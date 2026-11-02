@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: helm-release-${{ github.repository }}
+  group: helm-release-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -90,10 +90,14 @@ jobs:
         run: |
           set -euo pipefail
           version="${RELEASE_TAG#helm/v}"
-          # helm pull is the canonical existence check for OCI Helm artifacts.
           # No overwrite: previously published artifacts must remain immutable.
-          if helm show chart "oci://$OCI_REPOSITORY" --version "$version" >/dev/null 2>&1; then
+          # Fail closed: only an explicit "not found" from the registry allows the push;
+          # any other lookup failure (timeout, authorization) aborts the release.
+          if lookup="$(crane manifest "$OCI_REPOSITORY:$version" 2>&1)"; then
             echo "::error::Helm chart $version is already published; refusing overwrite"
+            exit 1
+          elif ! printf '%s' "$lookup" | grep -qE 'MANIFEST_UNKNOWN|NAME_UNKNOWN|404'; then
+            echo "::error::Cannot determine whether Helm chart $version exists: $lookup"
             exit 1
           fi
           helm push "dist/server-$version.tgz" "$OCI_NAMESPACE"
