@@ -39,7 +39,7 @@ fi
 latest=false
 
 if [[ "${stable}" == true ]]; then
-    existing_tags="${RELEASE_TAGS-$(git tag --list 'v*' 2>/dev/null || true)}"
+    existing_tags="${RELEASE_TAGS-$(git tag --list 'v*' 2>/dev/null)}"
     highest="$(
         printf '%s\n%s\n' "${tag}" "${existing_tags}" |
             grep -E '^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$' |
