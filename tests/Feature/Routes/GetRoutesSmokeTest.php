@@ -154,9 +154,9 @@ class GetRoutesSmokeTest extends TestCase
     {
         return collect(Route::getRoutes()->getRoutes())
             ->filter(static fn(RoutingRoute $route) => in_array('GET', $route->methods(), true))
-            ->filter(static fn (RoutingRoute $route) =>
-                str_starts_with($route->getActionName(), 'App\\Http\\Controllers\\')
-                || $route->getName() === 'actuator.liveness'
+            ->filter(
+                static fn(RoutingRoute $route) => str_starts_with($route->getActionName(), 'App\\Http\\Controllers\\')
+                    || $route->getName() === 'actuator.liveness'
             )
             ->reject(static fn(RoutingRoute $route) => $route->isFallback)
             ->reject(static fn(RoutingRoute $route) => array_key_exists($route->uri(), self::EXCLUDED))
