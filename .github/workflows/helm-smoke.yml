@@ -40,3 +40,5 @@ jobs:
           kubectl -n cattr describe pods || true
           kubectl -n cattr logs job/cattr-setup --all-containers --tail=100 || true
           kubectl -n cattr logs deployment/cattr-mysql --all-containers --tail=100 || true
+          kubectl -n cattr logs deployment/cattr-mysql --previous --tail=100 || true
+          kubectl -n cattr get events --sort-by=.lastTimestamp || true
