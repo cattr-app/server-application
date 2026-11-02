@@ -1,0 +1,37 @@
+# CI: module flags, literal env, Secret references, ConfigMap envFrom.
+cattr:
+  appUrl: https://cattr.example.com
+  appKey: base64:Y2ktZHVtbXktYXBwLWtleS0zMi1ieXRlcy1sb25nISE=
+  reverbAppSecret: ci-dummy-reverb-secret
+  env:
+    MAIL_PORT: "587"
+  extraEnv:
+    - name: MAIL_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: smtp-credentials
+          key: password
+  extraEnvFrom:
+    - configMapRef:
+        name: cattr-extra-config
+database:
+  host: mysql.db.svc.cluster.local
+  username: cattr
+  password: ci-dummy-db-password
+setup:
+  admin:
+    enabled: false
+modules:
+  backend:
+    CattrRedmineIntegration: true
+    CattrGitlabIntegration: false
+    CatV2Sync: true
+  frontend:
+    AmazingCat_RedmineIntegration: true
+storage:
+  type: s3
+  s3:
+    bucket: cattr
+redis:
+  enabled: true
+  host: redis.cache.svc.cluster.local

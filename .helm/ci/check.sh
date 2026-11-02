@@ -155,19 +155,71 @@ else
         echo "ERROR: CI fixtures leaked into chart package"
         status=1
     fi
-    if ! tar tzf "$package" | grep -q '^server/Chart.yaml
+    if ! tar tzf "$package" | grep -q '^server/Chart.yaml$'; then
         echo "ERROR: chart metadata missing in archive"
         status=1
     fi
     helm show chart "$package" | yq -e '.name == "server"' >/dev/null || status=1
 fi
 
-exit "$status"
-; then
-        echo "ERROR: chart metadata missing in archive"
+# Assert generated environment variables on every application role, in both PVC
+# and S3 modes. The same env is passed into the PHP initialization containers.
+for config in module-env-values.yaml module-env-s3-values.yaml; do
+    rendered="$out/${config%.yaml}.yaml"
+    helm template cattr "$chart" -f "$chart/ci/$config" > "$rendered" || { status=1; continue; }
+
+    for kind in Deployment Job; do
+        for container in containers initContainers; do
+            count="$(yq -r 'select(.kind == "'"${kind}"'") |
+              .spec.template.spec.'"$container"'[] |
+              select(.image != null) |
+              [.env[]? | select(.name == "MODULE_BACKEND_CATTR_REDMINE_INTEGRATION_ENABLED" and .value == "true")] |
+              length' "$rendered" | grep -c '^1$' || true)"
+            if [ "$count" -eq 0 ]; then
+                echo "ERROR: $config: missing backend module flag in $kind $container"
+                status=1
+            fi
+        done
+    done
+    for var in MODULE_FRONTEND_AMAZING_CAT_REDMINE_INTEGRATION_ENABLED MODULE_BACKEND_CAT_V2_SYNC_ENABLED; do
+        count="$(yq -r 'select(.kind == "Deployment") |
+          .spec.template.spec.containers[].env[] |
+          select(.name == "'"${var}"'" and .value == "true") | .name' "$rendered" | wc -l)"
+        [ "$count" -gt 0 ] || { echo "ERROR: $config missing $var"; status=1; }
+    done
+    disabled="$(yq -r 'select(.kind == "Deployment") | .spec.template.spec.containers[].env[] |
+      select(.name == "MODULE_BACKEND_CATTR_GITLAB_INTEGRATION_ENABLED") | .value' "$rendered" | sort -u)"
+    [ "$disabled" = "false" ] || { echo "ERROR: $config expected false for disabled module"; status=1; }
+    literal="$(yq -r 'select(.kind == "Deployment") | .spec.template.spec.containers[].env[] |
+      select(.name == "MAIL_PORT") | .value' "$rendered" | sort -u)"
+    [ "$literal" = "587" ] || { echo "ERROR: $config literal env was not preserved as string"; status=1; }
+    secret="$(yq -r 'select(.kind == "Deployment") | .spec.template.spec.containers[].env[] |
+      select(.name == "MAIL_PASSWORD") | .valueFrom.secretKeyRef.name' "$rendered" | sort -u)"
+    [ "$secret" = "smtp-credentials" ] || { echo "ERROR: $config missing valueFrom secret"; status=1; }
+    from="$(yq -r 'select(.kind == "Deployment") | .spec.template.spec.containers[] |
+      select(.name == "web") | .envFrom[].configMapRef.name' "$rendered" | sort -u)"
+    [ "$from" = "cattr-extra-config" ] || { echo "ERROR: $config missing envFrom configmap"; status=1; }
+done
+
+# Fail if identifiers normalize to the same flag, values are not strings or
+# booleans, or explicit env overrides collide with chart-managed variables.
+while IFS='|' read -r name expected overrides; do
+    [ -n "$name" ] || continue
+    # shellcheck disable=SC2086
+    if result="$(helm template cattr "$chart" -f "$chart/ci/default-values.yaml" $overrides 2>&1)"; then
+        echo "ERROR: $name unexpectedly rendered"
+        status=1
+    elif ! printf '%s' "$result" | grep -qF "$expected"; then
+        echo "ERROR: $name failed without '$expected'"
+        printf '%s\n' "$result" | tail -4
         status=1
     fi
-    helm show chart "$package" | yq -e '.name == "server"' >/dev/null || status=1
-fi
+done <<EOF
+duplicate module identifiers|generates duplicate environment variable|--set modules.backend.CattrRedmine=true --set modules.backend.Cattr_Redmine=true
+generated and direct env collision|duplicates an existing environment variable|--set modules.backend.CattrRedmine=true --set cattr.env.MODULE_BACKEND_CATTR_REDMINE_ENABLED=true
+reserved env collision|duplicates an existing environment variable|--set cattr.env.APP_KEY=dummy
+duplicate env list|duplicates an existing environment variable|--set cattr.env.FOO=bar --set cattr.extraEnv[0].name=FOO --set cattr.extraEnv[0].value=baz
+invalid module identifier|normalizes to invalid flag|--set modules.backend.123Demo=true
+EOF
 
 exit "$status"
