@@ -111,6 +111,12 @@
         ]
       }
     },
+    "moduleFlags": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "boolean"
+      }
+    },
     "workers": {
       "type": [
         "string",
@@ -224,11 +230,32 @@
             "restart"
           ]
         },
+        "env": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "extraEnv": {
           "$ref": "#/definitions/env"
         },
         "extraEnvFrom": {
           "type": "array"
+        }
+      },
+      "additionalProperties": false
+    },
+    "modules": {
+      "type": "object",
+      "properties": {
+        "backend": {
+          "$ref": "#/definitions/moduleFlags"
+        },
+        "frontend": {
+          "$ref": "#/definitions/moduleFlags"
         }
       },
       "additionalProperties": false

@@ -10,6 +10,61 @@ true
 {{- end }}
 
 {{/*
+Reject ambiguous or duplicate env declarations. Built-in variables cannot be
+redeclared through extension points; otherwise Kubernetes accepts duplicates
+with surprising precedence. Module identifiers are normalized as PHP/JS do.
+*/}}
+{{- define "cattr.validateEnv" -}}
+{{- $v := .Values -}}
+{{- $used := dict -}}
+{{- range $name := list "APP_ENV" "APP_DEBUG" "APP_URL" "LOG_CHANNEL" "CATTR_RESTART_POLICY" "DB_CONNECTION" "DB_HOST" "DB_PORT" "DB_DATABASE" "DB_USERNAME" "DB_PASSWORD" "APP_KEY" "REVERB_APP_SECRET" "CACHE_STORE" "CACHE_DRIVER" "REDIS_HOST" "REDIS_PORT" "REDIS_DB" "REDIS_CACHE_DB" "REDIS_USERNAME" "REDIS_PASSWORD" "FILESYSTEM_DISK" "AWS_BUCKET" "AWS_DEFAULT_REGION" "AWS_ENDPOINT" "AWS_URL" "AWS_USE_PATH_STYLE_ENDPOINT" "AWS_ACCESS_KEY_ID" "AWS_SECRET_ACCESS_KEY" "REVERB_HOST" "REVERB_PORT" "REVERB_SCHEME" "OCTANE_WORKERS" "OCTANE_TASK_WORKERS" "APP_ADMIN_EMAIL" "APP_ADMIN_NAME" "APP_ADMIN_PASSWORD" -}}
+{{- $_ := set $used $name "built-in" -}}
+{{- end -}}
+{{- range $side := list "backend" "frontend" -}}
+{{- range $id := keys (get $v.modules $side | default dict) | sortAlpha -}}
+{{- $suffix := include "cattr.moduleFlagName" $id -}}
+{{- if not (regexMatch "^[A-Z][A-Z0-9_]*$" $suffix) -}}
+{{- fail (printf "modules.%s identifier %q normalizes to invalid flag %q; use a module identifier starting with a letter" $side $id $suffix) -}}
+{{- end -}}
+{{- $flag := printf "MODULE_%s_%s_ENABLED" (upper $side) $suffix -}}
+{{- if hasKey $used $flag -}}
+{{- fail (printf "modules.%s identifier %q generates duplicate environment variable %s" $side $id $flag) -}}
+{{- end -}}
+{{- $_ := set $used $flag (printf "modules.%s" $side) -}}
+{{- end -}}
+{{- end -}}
+{{- range $name := keys $v.cattr.env | sortAlpha -}}
+{{- if hasKey $used $name -}}
+{{- fail (printf "cattr.env.%s duplicates an existing environment variable (%s)" $name (get $used $name)) -}}
+{{- end -}}
+{{- $_ := set $used $name "cattr.env" -}}
+{{- end -}}
+{{- range $item := $v.cattr.extraEnv -}}
+{{- $name := $item.name | default "" -}}
+{{- if not (regexMatch "^[A-Za-z_][A-Za-z0-9_]*$" $name) -}}
+{{- fail (printf "cattr.extraEnv contains invalid environment variable name %q" $name) -}}
+{{- end -}}
+{{- if hasKey $used $name -}}
+{{- fail (printf "cattr.extraEnv %s duplicates an existing environment variable (%s)" $name (get $used $name)) -}}
+{{- end -}}
+{{- $_ := set $used $name "cattr.extraEnv" -}}
+{{- end -}}
+{{- range $role := list "web" "queue" "scheduler" "setup" -}}
+{{- $roleNames := deepCopy $used -}}
+{{- range $item := get (get $v $role) "extraEnv" | default list -}}
+{{- $name := $item.name | default "" -}}
+{{- if not (regexMatch "^[A-Za-z_][A-Za-z0-9_]*$" $name) -}}
+{{- fail (printf "%s.extraEnv contains invalid environment variable name %q" $role $name) -}}
+{{- end -}}
+{{- if hasKey $roleNames $name -}}
+{{- fail (printf "%s.extraEnv %s duplicates an existing environment variable (%s)" $role $name (get $roleNames $name)) -}}
+{{- end -}}
+{{- $_ := set $roleNames $name (printf "%s.extraEnv" $role) -}}
+{{- end -}}
+{{- end -}}
+{{- end }}
+
+{{/*
 Render-time validation. Every message names the value to fix.
 */}}
 {{- define "cattr.validate" -}}
@@ -94,6 +149,9 @@ Render-time validation. Every message names the value to fix.
 {{- if and $v.httpRoute.enabled (not $v.httpRoute.parentRefs) -}}
 {{- fail "httpRoute.parentRefs is required when httpRoute.enabled=true" -}}
 {{- end -}}
+
+{{- /* Validate env overrides, module names, and duplicates. */ -}}
+{{- $_ := include "cattr.validateEnv" . -}}
 
 {{- /* Resolve every chart-managed secret once (fails on missing/invalid values). */ -}}
 {{- $_ := include "cattr.secretData" . -}}

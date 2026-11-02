@@ -186,6 +186,61 @@ value there rolls the Pods. A change in an existing Secret does not: run
 
 Back up `APP_KEY`: without it encrypted data cannot be read.
 
+## External modules and environment variables
+
+External modules are disabled by default. Modules must already be bundled in the
+application image: Helm values enable existing code, they do not install modules.
+The identifiers correspond to the backend `module.json` name and frontend
+`ModuleConfig.moduleName` (or the registration key for package modules).
+Backend and frontend are activated independently:
+
+```yaml
+modules:
+  backend:
+    CattrRedmineIntegration: true
+    CattrGitlabIntegration: false
+  frontend:
+    AmazingCat_RedmineIntegration: true
+
+cattr:
+  env:
+    MAIL_HOST: smtp.example.com
+    MAIL_FROM_NAME: "Cattr"
+  extraEnv:
+    - name: MAIL_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: smtp-credentials
+          key: password
+  extraEnvFrom:
+    - configMapRef:
+        name: cattr-extra-config
+```
+
+The chart normalizes identifiers using the **same** algorithm as the application.
+For example, `CattrRedmineIntegration` generates
+`MODULE_BACKEND_CATTR_REDMINE_INTEGRATION_ENABLED="true"` and
+`AmazingCat_RedmineIntegration` generates
+`MODULE_FRONTEND_AMAZING_CAT_REDMINE_INTEGRATION_ENABLED="true"`.
+An explicit `false` emits `"false"`; unspecified modules get no activation
+variable and stay disabled. Flags apply to web, queue, scheduler, setup and
+their application init containers, both in PVC and S3 modes. Restart or
+upgrade Pods for changes to take effect (Laravel caches module activation
+when the container starts).
+
+Use `cattr.env` for ordinary **string** values (quote booleans and numbers
+in YAML), `cattr.extraEnv` for Kubernetes `valueFrom` (Secret or
+ConfigMap keys), and `cattr.extraEnvFrom` to import full Secret/ConfigMap
+environments. `web.extraEnv`, `queue.extraEnv`, `scheduler.extraEnv` and
+`setup.extraEnv` also accept role-specific entries. The chart rejects
+duplicate explicit variables, including collisions with generated module
+flags or reserved application variables. For module activation, use `modules`
+instead of repeating `MODULE_*_ENABLED` under `cattr.env`.
+
+Do not commit credentials to values files; reference Kubernetes Secrets.
+For exact module identifier normalization, see
+[Module activation flags](../docs/dev/module-activation-flags.md).
+
 ## Database and Redis
 
 `database.host` (MySQL 8.x / MariaDB) is required. With binary logging
@@ -284,7 +339,9 @@ schema is in [values.schema.json](values.schema.json). Main groups:
 | `cattr.appUrl` | `""` (required) | public URL |
 | `cattr.appKey`, `cattr.reverbAppSecret`, `cattr.existingSecret` | `""` | see Secrets |
 | `cattr.restartPolicy` | `shutdown` | `CATTR_RESTART_POLICY` |
-| `cattr.extraEnv`, `cattr.extraEnvFrom` | `[]` | env for every Cattr container (e.g. mail) |
+| `modules.backend`, `modules.frontend` | `{}` | per-side module activation by module identifier |
+| `cattr.env` | `{}` | literal environment variables shared by Cattr containers |
+| `cattr.extraEnv`, `cattr.extraEnvFrom` | `[]` | Kubernetes EnvVar/valueFrom and Secret/ConfigMap envFrom |
 | `storage.type` | `pvc` | `pvc` or `s3` |
 | `storage.pvc.*` | 20Gi RWO | `existingClaim`, `storageClass`, `size`, `accessModes`, `annotations` |
 | `storage.s3.*` | | `bucket`, `region`, `endpoint`, `url`, `usePathStyleEndpoint`, credentials |

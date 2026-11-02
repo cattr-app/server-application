@@ -39,3 +39,23 @@ For a package module the flag is checked before its chunk is downloaded, so the 
 `ModuleConfig.moduleName` inside the package. Register packages under a key equal to their
 `moduleName` (for example `"AmazingCat_RedmineIntegration": { "type": "package", "ref": "@amazingcat/cattr-redmine-integration" }`),
 otherwise the flag name in the documentation of the module will not match.
+
+## Helm chart configuration
+
+The Helm chart exposes `modules.backend` and `modules.frontend` as maps of
+module identifiers to booleans. It generates the exact `MODULE_*_ENABLED`
+variables for application containers (web, queue, scheduler, setup, and
+their PHP init containers). For example:
+
+```yaml
+modules:
+  backend:
+    CattrRedmineIntegration: true
+  frontend:
+    AmazingCat_RedmineIntegration: true
+```
+
+Other variables can be supplied with `cattr.env` (string values),
+`cattr.extraEnv` (Kubernetes EnvVar entries, including `valueFrom`),
+or `cattr.extraEnvFrom` (Secrets/ConfigMaps). The chart fails on duplicate
+explicit names. Modules must already be bundled in the image.
