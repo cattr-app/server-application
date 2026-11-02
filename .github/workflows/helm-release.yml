@@ -64,8 +64,21 @@ jobs:
           entrypoint: sh
           args: .helm/ci/check.sh
 
+      # A re-run of a failed release reuses the archive packaged by the first attempt:
+      # a fresh `helm package` is not byte-identical (it records timestamps), so it could
+      # not be compared with what was already pushed.
+      - name: Restore archive from an earlier attempt
+        id: restore
+        if: github.run_attempt > 1
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: helm-chart-archive
+          path: dist
+
       - name: Package chart
         id: package
+        if: steps.restore.outcome != 'success'
         env:
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
@@ -75,6 +88,15 @@ jobs:
           helm package .helm --destination dist
           test -f "dist/server-$version.tgz"
           sha256sum "dist/server-$version.tgz" | tee dist/SHA256SUMS
+
+      - name: Preserve packaged archive
+        if: steps.package.outcome == 'success'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: helm-chart-archive
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Authenticate to GHCR
         env:
@@ -87,20 +109,29 @@ jobs:
       - name: Publish immutable OCI chart and verify pull
         env:
           RELEASE_TAG: ${{ github.ref_name }}
+          ARCHIVE_RESTORED: ${{ steps.restore.outcome == 'success' }}
         run: |
           set -euo pipefail
           version="${RELEASE_TAG#helm/v}"
+          sha256sum -c dist/SHA256SUMS
           # No overwrite: previously published artifacts must remain immutable.
           # Fail closed: only an explicit "not found" from the registry allows the push;
           # any other lookup failure (timeout, authorization) aborts the release.
+          # The one exception is a re-run that restored the archive pushed by an earlier
+          # attempt of this run: then nothing is pushed and the published chart is only
+          # verified against that archive.
           if lookup="$(crane manifest "$OCI_REPOSITORY:$version" 2>&1)"; then
-            echo "::error::Helm chart $version is already published; refusing overwrite"
-            exit 1
+            if [ "$ARCHIVE_RESTORED" != "true" ]; then
+              echo "::error::Helm chart $version is already published; refusing overwrite"
+              exit 1
+            fi
+            echo "Helm chart $version was pushed by an earlier attempt; verifying without pushing"
           elif ! printf '%s' "$lookup" | grep -qE 'MANIFEST_UNKNOWN|NAME_UNKNOWN|404'; then
             echo "::error::Cannot determine whether Helm chart $version exists: $lookup"
             exit 1
+          else
+            helm push "dist/server-$version.tgz" "$OCI_NAMESPACE"
           fi
-          helm push "dist/server-$version.tgz" "$OCI_NAMESPACE"
           mkdir -p pulled
           helm pull "oci://$OCI_REPOSITORY" --version "$version" --destination pulled
           cmp "dist/server-$version.tgz" "pulled/server-$version.tgz"
