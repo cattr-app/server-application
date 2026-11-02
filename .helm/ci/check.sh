@@ -155,7 +155,15 @@ else
         echo "ERROR: CI fixtures leaked into chart package"
         status=1
     fi
-    if ! tar tzf "$package" | grep -q '^server/Chart.yaml; then
+    if ! tar tzf "$package" | grep -q '^server/Chart.yaml
+        echo "ERROR: chart metadata missing in archive"
+        status=1
+    fi
+    helm show chart "$package" | yq -e '.name == "server"' >/dev/null || status=1
+fi
+
+exit "$status"
+; then
         echo "ERROR: chart metadata missing in archive"
         status=1
     fi
