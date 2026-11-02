@@ -188,16 +188,16 @@ for config in module-env-values.yaml module-env-s3-values.yaml; do
         [ "$count" -gt 0 ] || { echo "ERROR: $config missing $var"; status=1; }
     done
     disabled="$(yq -r 'select(.kind == "Deployment") | .spec.template.spec.containers[].env[] |
-      select(.name == "MODULE_BACKEND_CATTR_GITLAB_INTEGRATION_ENABLED") | .value' "$rendered" | sort -u)"
+      select(.name == "MODULE_BACKEND_CATTR_GITLAB_INTEGRATION_ENABLED") | .value' "$rendered" | grep -v "^---$" | sort -u)"
     [ "$disabled" = "false" ] || { echo "ERROR: $config expected false for disabled module"; status=1; }
     literal="$(yq -r 'select(.kind == "Deployment") | .spec.template.spec.containers[].env[] |
-      select(.name == "MAIL_PORT") | .value' "$rendered" | sort -u)"
+      select(.name == "MAIL_PORT") | .value' "$rendered" | grep -v "^---$" | sort -u)"
     [ "$literal" = "587" ] || { echo "ERROR: $config literal env was not preserved as string"; status=1; }
     secret="$(yq -r 'select(.kind == "Deployment") | .spec.template.spec.containers[].env[] |
-      select(.name == "MAIL_PASSWORD") | .valueFrom.secretKeyRef.name' "$rendered" | sort -u)"
+      select(.name == "MAIL_PASSWORD") | .valueFrom.secretKeyRef.name' "$rendered" | grep -v "^---$" | sort -u)"
     [ "$secret" = "smtp-credentials" ] || { echo "ERROR: $config missing valueFrom secret"; status=1; }
     from="$(yq -r 'select(.kind == "Deployment") | .spec.template.spec.containers[] |
-      select(.name == "web") | .envFrom[].configMapRef.name' "$rendered" | sort -u)"
+      select(.name == "web") | .envFrom[].configMapRef.name' "$rendered" | grep -v "^---$" | sort -u)"
     [ "$from" = "cattr-extra-config" ] || { echo "ERROR: $config missing envFrom configmap"; status=1; }
 done
 
@@ -216,7 +216,7 @@ while IFS='|' read -r name expected overrides; do
     fi
 done <<EOF
 duplicate module identifiers|generates duplicate environment variable|--set modules.backend.CattrRedmine=true --set modules.backend.Cattr_Redmine=true
-generated and direct env collision|duplicates an existing environment variable|--set modules.backend.CattrRedmine=true --set cattr.env.MODULE_BACKEND_CATTR_REDMINE_ENABLED=true
+generated and direct env collision|duplicates an existing environment variable|--set modules.backend.CattrRedmine=true --set-string cattr.env.MODULE_BACKEND_CATTR_REDMINE_ENABLED=true
 reserved env collision|duplicates an existing environment variable|--set cattr.env.APP_KEY=dummy
 duplicate env list|duplicates an existing environment variable|--set cattr.env.FOO=bar --set cattr.extraEnv[0].name=FOO --set cattr.extraEnv[0].value=baz
 invalid module identifier|normalizes to invalid flag|--set modules.backend.123Demo=true
