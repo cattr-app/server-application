@@ -55,6 +55,8 @@ check_valid v4.1.0 4.1.0 true true $'4.1.0\nlatest'
 # failed lookup stops before any output.
 sandbox="$(mktemp -d)"
 trap 'rm -rf "${sandbox}"' EXIT
+# Repository-local variables from a wrapper or Git hook would redirect Git to the outer repository.
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_COMMON_DIR GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES GIT_NAMESPACE
 export HOME="${sandbox}" GIT_CONFIG_NOSYSTEM=1 GIT_CEILING_DIRECTORIES="${sandbox}"
 
 git init -q "${sandbox}/repo"
