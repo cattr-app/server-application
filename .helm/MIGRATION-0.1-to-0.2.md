@@ -98,10 +98,16 @@ the existing release. APP_KEY and the DB credentials are read from the existing
 Secret when left empty:
 
 ```yaml
-# Names: `nameOverride: cattr-server` is for a release that used the 0.1.x default
-# names. If it set its own `nameOverride` or `fullnameOverride`, keep exactly those
-# values instead (and use the resulting name for $FULL in the steps above).
+# Names. The Deployment selector label `app.kubernetes.io/name` comes from
+# `nameOverride` (default: the chart name, which was `cattr-server` in 0.1.x and
+# is `server` now) and is immutable, so it must keep its old value:
+#  - default names in 0.1.x: `nameOverride: cattr-server`;
+#  - own `nameOverride`: keep that value;
+#  - own `fullnameOverride` only: keep it and ALSO set `nameOverride: cattr-server`.
+# $FULL in the steps above is the `fullnameOverride` if there is one, otherwise
+# the name the old release rendered.
 nameOverride: cattr-server
+# fullnameOverride: my-cattr   # only if the release had it
 cattr:
   appUrl: https://cattr.example.com
   reverbAppSecret: "<openssl rand -hex 32>"   # new, required once
