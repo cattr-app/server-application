@@ -33,14 +33,34 @@ if [[ "${version}" == *-* ]]; then
     done
 fi
 
+# The mutable `latest` aliases may only move to the highest stable version, so
+# publishing a patch of an older line does not downgrade them. RELEASE_TAGS
+# (newline-separated) overrides the tags read from the repository for tests.
+latest=false
+
+if [[ "${stable}" == true ]]; then
+    existing_tags="${RELEASE_TAGS-$(git tag --list 'v*' 2>/dev/null)}"
+    highest="$(
+        printf '%s\n%s\n' "${tag}" "${existing_tags}" |
+            grep -E '^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$' |
+            sort -V |
+            tail -n 1
+    )"
+
+    if [[ "${tag}" == "${highest}" ]]; then
+        latest=true
+    fi
+fi
+
 {
     printf 'version=%s\n' "${version}"
     printf 'stable=%s\n' "${stable}"
+    printf 'latest=%s\n' "${latest}"
     printf 'application_tags<<TAGS\n%s\n' "${version}"
-    if [[ "${stable}" == true ]]; then
+    if [[ "${latest}" == true ]]; then
         printf 'latest\n'
     fi
     printf 'TAGS\n'
 } >> "${GITHUB_OUTPUT:?GITHUB_OUTPUT must be set}"
 
-printf 'Release: %s (stable: %s)\n' "${version}" "${stable}"
+printf 'Release: %s (stable: %s, latest: %s)\n' "${version}" "${stable}" "${latest}"
