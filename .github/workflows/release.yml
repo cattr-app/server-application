@@ -48,11 +48,37 @@ env:
     Cattr server build image with PHP 8.2, Composer, Node.js and Corepack
 
 jobs:
+  release-metadata:
+    name: Validate release tag
+
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    permissions:
+      contents: read  # checkout only
+
+    outputs:
+      version: ${{ steps.classify.outputs.version }}
+      latest: ${{ steps.classify.outputs.latest }}
+      application_tags: ${{ steps.classify.outputs.application_tags }}
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+          # Needed to tell whether this tag is the highest stable version
+          fetch-tags: true
+
+      - name: Classify SemVer tag
+        id: classify
+        run: bash scripts/release-tags.sh
+
   runtime-images:
     name: Prepare runtime images
 
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    needs: release-metadata
 
     container:
       image: ghcr.io/wolfi-dev/sdk:latest
@@ -349,6 +375,7 @@ jobs:
           subject-version: ${{ steps.meta.outputs.builder_tag }}
 
       - name: Update runtime-latest
+        if: needs.release-metadata.outputs.latest == 'true'
         env:
           RUNTIME_TAG: ${{ steps.meta.outputs.runtime_tag }}
         run: |
@@ -359,6 +386,7 @@ jobs:
             runtime-latest
 
       - name: Update builder-latest
+        if: needs.release-metadata.outputs.latest == 'true'
         env:
           BUILDER_TAG: ${{ steps.meta.outputs.builder_tag }}
         run: |
@@ -375,6 +403,7 @@ jobs:
     timeout-minutes: 60
 
     needs:
+      - release-metadata
       - runtime-images
 
     steps:
@@ -382,24 +411,6 @@ jobs:
         uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
-
-      - name: Prepare release metadata
-        id: release
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          version="${GITHUB_REF_NAME#v}"
-
-          if [[ -z "${version}" ]]; then
-            echo "::error::Unable to determine application version"
-            exit 1
-          fi
-
-          echo "version=${version}" >> "${GITHUB_OUTPUT}"
-
-          echo "Release tag: ${GITHUB_REF_NAME}"
-          echo "Application version: ${version}"
 
       - name: Build Cattr server
         id: build
@@ -412,9 +423,7 @@ jobs:
 
           image: ${{ env.APP_IMAGE }}
 
-          tags: |
-            ${{ github.ref_name }}
-            latest
+          tags: ${{ needs.release-metadata.outputs.application_tags }}
 
           # Cattr images are intentionally linux/amd64 only.
           arch: amd64
@@ -423,7 +432,7 @@ jobs:
           oci: true
 
           build-args: |
-            APP_VERSION=${{ steps.release.outputs.version }}
+            APP_VERSION=${{ needs.release-metadata.outputs.version }}
             SENTRY_DSN=${{ secrets.SENTRY_DSN }}
 
             BUILDER_BASE_IMAGE=${{ needs.runtime-images.outputs.image }}
@@ -435,7 +444,7 @@ jobs:
           annotations: |
             org.opencontainers.image.source=${{ env.OCI_SOURCE }}
             org.opencontainers.image.revision=${{ github.sha }}
-            org.opencontainers.image.version=${{ steps.release.outputs.version }}
+            org.opencontainers.image.version=${{ needs.release-metadata.outputs.version }}
             org.opencontainers.image.vendor=${{ env.OCI_VENDOR }}
             org.opencontainers.image.description=${{ env.SERVER_DESCRIPTION }}
 
@@ -467,7 +476,7 @@ jobs:
         with:
           subject-name: ${{ env.REGISTRY_NAMESPACE }}/${{ env.APP_IMAGE }}
           subject-digest: ${{ steps.push.outputs.digest }}
-          subject-version: ${{ steps.release.outputs.version }}
+          subject-version: ${{ needs.release-metadata.outputs.version }}
 
       - name: Print published images
         shell: bash
