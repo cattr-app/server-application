@@ -59,7 +59,7 @@ jobs:
       contents: read  # checkout only
     outputs:
       version: ${{ steps.classify.outputs.version }}
-      stable: ${{ steps.classify.outputs.stable }}
+      latest: ${{ steps.classify.outputs.latest }}
       application_tags: ${{ steps.classify.outputs.application_tags }}
     steps:
       - name: Harden runner
@@ -70,6 +70,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
+          # Needed to tell whether this tag is the highest stable version
+          fetch-tags: true
 
       - name: Classify SemVer tag
         id: classify
@@ -495,7 +497,7 @@ jobs:
           subject-digest: ${{ steps.publish_builder.outputs.digest }}
 
       - name: Update runtime-latest
-        if: needs.release-metadata.outputs.stable == 'true'
+        if: needs.release-metadata.outputs.latest == 'true'
         env:
           RUNTIME_TAG: ${{ steps.meta.outputs.runtime_tag }}
         run: |
@@ -510,7 +512,7 @@ jobs:
           test "$(crane digest "${RUNTIME_IMAGE}:${RUNTIME_TAG}")" = "$(crane digest "${RUNTIME_IMAGE}:runtime-latest")"
 
       - name: Update builder-latest
-        if: needs.release-metadata.outputs.stable == 'true'
+        if: needs.release-metadata.outputs.latest == 'true'
         env:
           BUILDER_TAG: ${{ steps.meta.outputs.builder_tag }}
         run: |

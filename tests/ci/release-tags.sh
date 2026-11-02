@@ -6,10 +6,10 @@ script="${root}/scripts/release-tags.sh"
 workflow="${root}/.github/workflows/release.yml"
 
 check_valid() {
-    local tag="$1" expected_version="$2" expected_stable="$3" expected_tags="$4"
+    local tag="$1" expected_version="$2" expected_stable="$3" expected_tags="$4" existing_tags="${5-}"
     local output actual_version actual_stable actual_tags
     output="$(mktemp)"
-    GITHUB_REF_NAME="${tag}" GITHUB_OUTPUT="${output}" bash "${script}" > /dev/null
+    RELEASE_TAGS="${existing_tags}" GITHUB_REF_NAME="${tag}" GITHUB_OUTPUT="${output}" bash "${script}" > /dev/null
 
     actual_version="$(sed -n 's/^version=//p' "${output}")"
     actual_stable="$(sed -n 's/^stable=//p' "${output}")"
@@ -24,7 +24,7 @@ check_valid() {
 check_invalid() {
     local tag="$1" output
     output="$(mktemp)"
-    if GITHUB_REF_NAME="${tag}" GITHUB_OUTPUT="${output}" bash "${script}" >/dev/null 2>&1; then
+    if RELEASE_TAGS= GITHUB_REF_NAME="${tag}" GITHUB_OUTPUT="${output}" bash "${script}" >/dev/null 2>&1; then
         echo "Invalid tag accepted: ${tag}" >&2
         exit 1
     fi
@@ -38,6 +38,14 @@ check_valid v4.1.0-rc.1 4.1.0-rc.1 false '4.1.0-rc.1'
 check_valid v4.1.0-beta.2 4.1.0-beta.2 false '4.1.0-beta.2'
 check_valid v4.1.0-alpha.1 4.1.0-alpha.1 false '4.1.0-alpha.1'
 check_valid v4.1.0-1 4.1.0-1 false '4.1.0-1'
+
+# `latest` follows only the highest stable version: a patch of an older line must not
+# take it, a newer release and the first release must, and prereleases never count.
+check_valid v4.0.2 4.0.2 true '4.0.2' $'v4.0.1\nv4.0.2\nv4.1.0'
+check_valid v4.1.1 4.1.1 true $'4.1.1\nlatest' $'v4.0.2\nv4.1.0\nv4.1.1'
+check_valid v4.10.0 4.10.0 true $'4.10.0\nlatest' $'v4.9.0\nv4.10.0'
+check_valid v4.1.0 4.1.0 true $'4.1.0\nlatest' $'v4.1.0-rc.1\nv4.2.0-alpha.1\nv4.0.2'
+check_valid v4.1.0 4.1.0 true $'4.1.0\nlatest'
 
 # OCI image tags may contain at most 128 characters. Cover both release
 # classifications and verify overlong inputs produce no output metadata.
@@ -59,8 +67,9 @@ done
 
 # The integration contract: both mutable base aliases are gated, and the
 # application build consumes only the validated version/tag list.
-[[ "$(grep -Fc "if: needs.release-metadata.outputs.stable == 'true'" "${workflow}")" -eq 2 ]]
+[[ "$(grep -Fc "if: needs.release-metadata.outputs.latest == 'true'" "${workflow}")" -eq 2 ]]
 grep -Fq 'tags: ${{ needs.release-metadata.outputs.application_tags }}' "${workflow}"
 grep -Fq 'run: bash scripts/release-tags.sh' "${workflow}"
+grep -Fq 'fetch-tags: true' "${workflow}"
 
 echo 'Release tag classification checks passed.'
