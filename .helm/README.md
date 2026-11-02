@@ -372,6 +372,21 @@ Kubernetes resource prefix for an existing deployment, explicitly set
 `nameOverride: cattr-server`; changing the prefix alone does not migrate
 existing Secrets or PVCs.
 
+### Artifact Hub
+
+`Chart.yaml` carries the `artifacthub.io/*` annotations (license, scanned
+image, links). To list the chart on Artifact Hub, add
+`oci://ghcr.io/cattr-app/helm/server` as a Helm (OCI) repository there, then
+push its ownership file as an OCI artifact tagged `artifacthub.io` (needs the
+`repositoryID` Artifact Hub assigns):
+
+```sh
+echo 'repositoryID: <id>' > artifacthub-repo.yml
+oras push ghcr.io/cattr-app/helm/server:artifacthub.io \
+  --config /dev/null:application/vnd.cncf.artifacthub.config.v1+yaml \
+  artifacthub-repo.yml:application/vnd.cncf.artifacthub.repository-metadata.layer.v1.yaml
+```
+
 ## Development
 
 `sh .helm/ci/check.sh` (needs `helm` 3.14+/4 and `kubeconform`, e.g. in the

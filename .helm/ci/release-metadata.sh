@@ -18,4 +18,9 @@ app_version="$(sed -n 's/^appVersion:[[:space:]]*//p' .helm/Chart.yaml | tr -d '
   echo "::error::Invalid appVersion: $app_version" >&2
   exit 1
 }
+images_tag="$(sed -n 's|^[[:space:]]*image:[[:space:]]*ghcr.io/cattr-app/server:||p' .helm/Chart.yaml | head -1)"
+[[ "$images_tag" == "$app_version" ]] || {
+  echo "::error::artifacthub.io/images tag '$images_tag' does not match appVersion $app_version" >&2
+  exit 1
+}
 echo "Chart: $chart_name, version: $chart_version, application: $app_version"
