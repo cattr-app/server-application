@@ -99,8 +99,8 @@ Secret when left empty:
 
 ```yaml
 # Names. The Deployment selector label `app.kubernetes.io/name` comes from
-# `nameOverride` (default: the chart name, which was `cattr-server` in 0.1.x and
-# is `server` now) and is immutable, so it must keep its old value:
+# `nameOverride` (default: `cattr`; the chart-name fallback was `cattr-server` in
+# 0.1.x and is `server` now) and is immutable, so it must keep its old value:
 #  - default names in 0.1.x: `nameOverride: cattr-server`;
 #  - own `nameOverride`: keep that value;
 #  - own `fullnameOverride` only: keep it and ALSO set `nameOverride: cattr-server`.

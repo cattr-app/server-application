@@ -126,7 +126,7 @@ jobs:
               exit 1
             fi
             echo "Helm chart $version was pushed by an earlier attempt; verifying without pushing"
-          elif ! printf '%s' "$lookup" | grep -qE 'MANIFEST_UNKNOWN|NAME_UNKNOWN|404'; then
+          elif ! printf '%s' "$lookup" | grep -qE ': (GET|HEAD) [^ ]+: (MANIFEST_UNKNOWN|NAME_UNKNOWN): |: (GET|HEAD) [^ ]+: unexpected status code 404 Not Found'; then
             echo "::error::Cannot determine whether Helm chart $version exists: $lookup"
             exit 1
           else
