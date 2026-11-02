@@ -1,8 +1,8 @@
 # Cattr server chart values. See README.md for the full reference, storage
 # modes, Secret formats and the 0.1.x -> 0.2.x migration guide.
 
-## @param nameOverride Override the chart name used in resource names
-nameOverride: ""
+## @param nameOverride Kubernetes resource name (defaults to cattr; use cattr-server for legacy names)
+nameOverride: cattr
 ## @param fullnameOverride Override the full resource name prefix
 fullnameOverride: ""
 

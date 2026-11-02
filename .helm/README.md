@@ -1,12 +1,18 @@
-# cattr-server Helm chart
+# Cattr server Helm chart
 
 Chart `0.2.x` deploys the Cattr 4.1 runtime image (`ghcr.io/cattr-app/server`:
 Caddy + Laravel Octane + Reverb, supervised by Pebble) with explicit roles.
 The chart is versioned independently of the application; `appVersion` is the
 image tag used by default (`image.tag` overrides it, `image.digest` pins it).
 
-Upgrading from chart `0.1.x`: read [MIGRATION-0.1-to-0.2.md](MIGRATION-0.1-to-0.2.md)
-first. Files are not carried over automatically.
+This chart is published as `oci://ghcr.io/cattr-app/helm/server`. It uses `cattr` for
+Kubernetes resource names when the Helm release is named `cattr`; set
+`nameOverride: cattr-server` to request the previous naming convention.
+
+**Breaking change:** chart naming and default Kubernetes resource names change in
+0.2.0. In-place upgrades with the new defaults are not supported. See
+[MIGRATION-0.1-to-0.2.md](MIGRATION-0.1-to-0.2.md) before upgrading; existing
+Secrets and PVCs are not automatically migrated.
 
 ## Quick start
 
@@ -15,7 +21,7 @@ first. Files are not carried over automatically.
 APP_KEY="base64:$(openssl rand -base64 32)"
 REVERB_SECRET="$(openssl rand -hex 32)"
 
-helm install cattr ./.helm -n cattr --create-namespace \
+helm install cattr oci://ghcr.io/cattr-app/helm/server --version 0.2.0 -n cattr --create-namespace \
   --set cattr.appUrl=https://cattr.example.com \
   --set cattr.appKey="$APP_KEY" \
   --set cattr.reverbAppSecret="$REVERB_SECRET" \
@@ -32,7 +38,7 @@ operation and a first install on slow storage can exceed Helm's default 5m.
 
 Without Ingress/HTTPRoute the chart is reachable through Service
 `<fullname>` (port 80 -> Caddy 8080), e.g.
-`kubectl -n cattr port-forward svc/cattr-cattr-server 8080:80`.
+`kubectl -n cattr port-forward svc/cattr 8080:80`.
 
 ## Architecture
 
@@ -256,13 +262,15 @@ in `s3` mode with more than one replica.
 ## Install, upgrade, rollback, uninstall
 
 ```sh
-helm upgrade --install cattr ./.helm -n cattr -f my-values.yaml --wait --timeout 15m
+helm upgrade --install cattr oci://ghcr.io/cattr-app/helm/server --version 0.2.0 -n cattr -f my-values.yaml --wait --timeout 15m
 helm rollback cattr <revision> -n cattr --wait --timeout 15m   # schema stays migrated
 helm uninstall cattr -n cattr   # keeps Secret <fullname>, PVC <fullname>-storage, PVC <fullname>-mysql
 ```
 
 Use a values file rather than `--reuse-values`; `values.schema.json` rejects
-unknown keys (including chart 0.1.x keys). Reinstalling with the same release
+unknown keys (including chart 0.1.x keys). The default resource name is `cattr`
+for a release named `cattr`; `nameOverride: cattr-server` restores legacy names
+if you explicitly choose them. Reinstalling with the same release
 name reuses the kept Secret and PVCs. Delete them explicitly to drop the data.
 
 ## Values
@@ -292,6 +300,20 @@ schema is in [values.schema.json](values.schema.json). Main groups:
 | `terminationGracePeriodSeconds` | `45` | |
 | `nodeSelector`, `tolerations`, `affinity`, `topologySpreadConstraints`, `priorityClassName` | | scheduling of Cattr Pods |
 | `service.*`, `ingress.*`, `httpRoute.*`, `networkPolicy.*` | | see Networking |
+
+## Published releases
+
+Chart versions are independent of application versions. Push a Git tag such as
+`helm/v0.2.0` to publish chart `server:0.2.0` to
+`ghcr.io/cattr-app/helm/server` after passing validations. Application images
+continue to use the separate `v*` release tags. Never retag an existing chart
+version: bump `Chart.yaml.version` and create a new tag for each release.
+
+The GitHub Packages visibility must be configured as **public** after the first
+publication so anonymous Helm clients can install it. To preserve the previous
+Kubernetes resource prefix for an existing deployment, explicitly set
+`nameOverride: cattr-server`; changing the prefix alone does not migrate
+existing Secrets or PVCs.
 
 ## Development
 
