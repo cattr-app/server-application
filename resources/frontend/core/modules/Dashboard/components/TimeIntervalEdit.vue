@@ -264,7 +264,7 @@
         .divider {
             display: none;
         }
-        .modals ::v-deep .at-modal {
+        .modals :deep(.at-modal) {
             max-width: 100%;
         }
     }

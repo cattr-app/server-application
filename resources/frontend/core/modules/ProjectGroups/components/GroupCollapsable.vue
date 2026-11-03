@@ -7,41 +7,43 @@
                 :name="String(index)"
                 :disabled="group.projects_count === 0"
             >
-                <div slot="title">
-                    <div class="groups__header">
-                        <h5 :class="{ groups__disabled: group.projects_count === 0 }" class="groups__title">
-                            <span
-                                v-if="group.depth > 0 && group.breadCrumbs == null"
-                                :class="{ groups__disabled: group.projects_count === 0 }"
-                                class="groups__depth"
-                            >
-                                {{ group.depth | getSpaceByDepth }}
-                            </span>
-                            <span v-if="group.breadCrumbs" class="groups__bread-crumbs">
+                <template #title>
+                    <div>
+                        <div class="groups__header">
+                            <h5 :class="{ groups__disabled: group.projects_count === 0 }" class="groups__title">
                                 <span
-                                    v-for="(breadCrumb, index) in group.breadCrumbs"
-                                    :key="index"
-                                    class="groups__bread-crumbs__item"
-                                    @click.stop="$emit('getTargetClickGroupAndChildren', breadCrumb.id)"
+                                    v-if="group.depth > 0 && group.breadCrumbs == null"
+                                    :class="{ groups__disabled: group.projects_count === 0 }"
+                                    class="groups__depth"
                                 >
-                                    {{ breadCrumb.name }} /
+                                    {{ getSpaceByDepth(group.depth) }}
                                 </span>
+                                <span v-if="group.breadCrumbs" class="groups__bread-crumbs">
+                                    <span
+                                        v-for="(breadCrumb, index) in group.breadCrumbs"
+                                        :key="index"
+                                        class="groups__bread-crumbs__item"
+                                        @click.stop="$emit('getTargetClickGroupAndChildren', breadCrumb.id)"
+                                    >
+                                        {{ breadCrumb.name }} /
+                                    </span>
+                                </span>
+                                <span>{{ `${group.name} (${group.projects_count})` }}</span>
+                            </h5>
+                            <span @click.stop>
+                                <router-link
+                                    v-if="$can('update', 'projectGroup')"
+                                    class="groups__header__link"
+                                    :to="{ name: 'ProjectGroups.crud.groups.edit', params: { id: group.id } }"
+                                    target="_blank"
+                                    rel="opener"
+                                >
+                                    <i class="icon icon-external-link" />
+                                </router-link>
                             </span>
-                            <span>{{ `${group.name} (${group.projects_count})` }}</span>
-                        </h5>
-                        <span @click.stop>
-                            <router-link
-                                v-if="$can('update', 'projectGroup')"
-                                class="groups__header__link"
-                                :to="{ name: 'ProjectGroups.crud.groups.edit', params: { id: group.id } }"
-                                target="_blank"
-                                rel="opener"
-                            >
-                                <i class="icon icon-external-link" />
-                            </router-link>
-                        </span>
+                        </div>
                     </div>
-                </div>
+                </template>
                 <div v-if="group.projects_count > 0 && isOpen(index)" class="groups__projects-wrapper">
                     <GroupProjects :group-id="group.id" class="groups__projects" @reloadData="$emit('reloadData')" />
                 </div>
@@ -74,8 +76,6 @@
             reloadData() {
                 this.$emit('reloadData');
             },
-        },
-        filters: {
             getSpaceByDepth(value) {
                 return ''.padStart(value, '-');
             },
@@ -112,30 +112,26 @@
         &__bread-crumbs {
             color: #0075b2;
         }
-        &::v-deep {
-            .at-collapse {
-                &__item--active {
-                    background-color: #fff;
-                    .groups__title {
-                        color: $blue-2;
-                    }
+        & {
+            :deep(.at-collapse__item--active) {
+                background-color: #fff;
+                .groups__title {
+                    color: $blue-2;
                 }
-                &__header {
-                    display: flex;
-                    align-items: center;
-                    padding: 15px;
-                }
-
-                &__content {
-                    padding: 10px;
-                }
-
-                &__icon.icon-chevron-right {
-                    position: static;
-                    display: block;
-                    color: black;
-                    margin-right: 10px;
-                }
+            }
+            :deep(.at-collapse__header) {
+                display: flex;
+                align-items: center;
+                padding: 15px;
+            }
+            :deep(.at-collapse__content) {
+                padding: 10px;
+            }
+            :deep(.at-collapse__icon.icon-chevron-right) {
+                position: static;
+                display: block;
+                color: black;
+                margin-right: 10px;
             }
         }
     }

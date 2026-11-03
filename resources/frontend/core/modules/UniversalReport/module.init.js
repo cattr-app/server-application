@@ -1,4 +1,6 @@
 import storeModule from './storeModule';
+import en from './locales/en.json';
+import ru from './locales/ru.json';
 
 export const ModuleConfig = {
     routerPrefix: 'universal-report',
@@ -59,8 +61,8 @@ export function init(context) {
     });
 
     context.addLocalizationData({
-        en: require('./locales/en'),
-        ru: require('./locales/ru'),
+        en,
+        ru,
     });
 
     context.registerVuexModule(storeModule);

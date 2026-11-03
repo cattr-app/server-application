@@ -1,7 +1,7 @@
 <template>
     <div>
         <div v-for="(report, id) in formatedReports" :key="id" class="list__item">
-            <div slot="title" class="item-header">
+            <div class="item-header">
                 <div>
                     <div class="row flex-middle">
                         <div class="left">
@@ -100,7 +100,7 @@
     .right {
         flex: 1;
 
-        &::v-deep .at-progress__text {
+        & :deep(.at-progress__text) {
             display: none;
         }
     }

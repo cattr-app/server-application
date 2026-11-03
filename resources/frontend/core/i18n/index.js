@@ -5,6 +5,9 @@ import merge from 'lodash/merge';
 import veeValidateEn from 'vee-validate/dist/locale/en.json';
 import veeValidateRu from 'vee-validate/dist/locale/ru.json';
 import moment from 'moment';
+import en from './locales/en.json';
+import ru from './locales/ru.json';
+import defaultPluralizationRules from './pluralizationRules';
 
 export function getLangCookie() {
     const v = document.cookie.match('(^|;) ?lang=([^;]*)(;|$)');
@@ -27,8 +30,8 @@ export function getUserLang() {
 Vue.use(VueI18n);
 
 let messages = {
-    en: require('./locales/en'),
-    ru: require('./locales/ru'),
+    en,
+    ru,
 };
 
 let pluralizationRules = {};
@@ -54,7 +57,7 @@ merge(messages, {
     },
 });
 
-merge(pluralizationRules, require('./pluralizationRules'));
+merge(pluralizationRules, defaultPluralizationRules);
 
 const locale = getLangCookie() || getUserLang();
 
