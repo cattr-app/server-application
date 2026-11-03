@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c4015d4e8a71d987fa040a7833a1b0ce",
+    "content-hash": "2b3f3d2b5fb6a9fcb529063a4411449f",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -384,6 +384,62 @@
                 "source": "https://github.com/cattr-app/demo-module/tree/v3.0.0"
             },
             "time": "2026-11-01T05:25:51+00:00"
+        },
+        {
+            "name": "cattr/redmine_integration-module",
+            "version": "v5.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/cattr-app/redmine-integration.git",
+                "reference": "9d5e80b00f934ac307af2c3423836f0837ad711d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/cattr-app/redmine-integration/zipball/9d5e80b00f934ac307af2c3423836f0837ad711d",
+                "reference": "9d5e80b00f934ac307af2c3423836f0837ad711d",
+                "shasum": ""
+            },
+            "require": {
+                "ext-simplexml": "*",
+                "kbsali/redmine-api": "^2.0"
+            },
+            "require-dev": {
+                "roave/security-advisories": "dev-latest"
+            },
+            "type": "laravel-module",
+            "autoload": {
+                "psr-4": {
+                    "Modules\\RedmineIntegration\\": "backend/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "SSPL-1.0"
+            ],
+            "authors": [
+                {
+                    "name": "Alex V",
+                    "email": "inbox@alexv-pro.ru",
+                    "role": "Maintainer"
+                },
+                {
+                    "name": "Vitaliy Pavkin",
+                    "email": "vitaly@amazingcat.net",
+                    "role": "Maintainer"
+                },
+                {
+                    "name": "Alexander Yanchuk",
+                    "email": "alexander@amazingcat.net",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Redmine Integration for Cattr",
+            "homepage": "https://github.com/cattr-app/redmine-integration",
+            "support": {
+                "issues": "https://github.com/cattr-app/redmine-integration/issues",
+                "source": "https://github.com/cattr-app/redmine-integration"
+            },
+            "time": "2026-11-01T20:25:32+00:00"
         },
         {
             "name": "clue/redis-protocol",
@@ -2096,6 +2152,72 @@
                 "source": "https://github.com/lazychaser/laravel-nestedset/tree/v7.0.0"
             },
             "time": "2026-04-11T13:45:58+00:00"
+        },
+        {
+            "name": "kbsali/redmine-api",
+            "version": "v2.10.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/kbsali/php-redmine-api.git",
+                "reference": "28eba0ced1776bf009a72c4ce75d390f3bd19bd9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/kbsali/php-redmine-api/zipball/28eba0ced1776bf009a72c4ce75d390f3bd19bd9",
+                "reference": "28eba0ced1776bf009a72c4ce75d390f3bd19bd9",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "ext-simplexml": "*",
+                "php": "^7.4 || ^8.0",
+                "psr/http-client": "^1.0",
+                "psr/http-factory": "^1.0"
+            },
+            "require-dev": {
+                "art4/rector-bc-library": "^1.1",
+                "behat/behat": "^3.15",
+                "friendsofphp/php-cs-fixer": "^3.95",
+                "guzzlehttp/psr7": "^2.8 || ^3.0",
+                "php-mock/php-mock-phpunit": "^2.15",
+                "phpstan/phpstan": "^2.3",
+                "phpunit/phpunit": "^9.6 || ^10.5 || ^11.5 || ^12.5 || ^13.0",
+                "rector/rector": "^2.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Redmine\\": "src/Redmine/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kevin Saliou",
+                    "email": "kevin@saliou.name",
+                    "homepage": "http://kevin.saliou.name"
+                },
+                {
+                    "name": "Artur Weigandt",
+                    "email": "artur@wlabs.de",
+                    "homepage": "https://wlabs.de"
+                }
+            ],
+            "description": "Redmine API client",
+            "homepage": "https://github.com/kbsali/php-redmine-api",
+            "keywords": [
+                "api",
+                "redmine"
+            ],
+            "support": {
+                "issues": "https://github.com/kbsali/php-redmine-api/issues",
+                "source": "https://github.com/kbsali/php-redmine-api/tree/v2.10.0"
+            },
+            "time": "2026-10-26T15:22:16+00:00"
         },
         {
             "name": "laminas/laminas-diactoros",
