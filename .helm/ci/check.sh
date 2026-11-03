@@ -104,4 +104,140 @@ else
     echo "ok: lint fails on a template fail (cattr.appUrl empty)"
 fi
 
+
+
+# Assert chart naming, application version, and image defaults (including overrides).
+chart_name="$(helm show chart "$chart" | yq '.name')"
+[ "$chart_name" = "server" ] || { echo "ERROR: expected chart name server, got $chart_name"; status=1; }
+chart_version="$(helm show chart "$chart" | yq '.version')"
+app_version="$(helm show chart "$chart" | yq '.appVersion | tostring')"
+[ -n "$chart_version" ] && [ -n "$app_version" ] || { echo "ERROR: missing chart/app version"; status=1; }
+
+names_default="$out/names-default.yaml"
+names_legacy="$out/names-legacy.yaml"
+names_fullname="$out/names-fullname.yaml"
+helm template cattr "$chart" -f "$chart/ci/default-values.yaml" > "$names_default" || status=1
+helm template cattr "$chart" -f "$chart/ci/default-values.yaml" --set nameOverride=cattr-server > "$names_legacy" || status=1
+helm template cattr "$chart" -f "$chart/ci/default-values.yaml" --set fullnameOverride=my-cattr > "$names_fullname" || status=1
+
+# Verify both object names and immutable selector labels, not just metadata labels.
+for entry in "default:$names_default:cattr:cattr" "legacy:$names_legacy:cattr-cattr-server:cattr-server" "fullname:$names_fullname:my-cattr:cattr"; do
+    label="${entry%%:*}"; rest="${entry#*:}"
+    file="${rest%%:*}"; rest="${rest#*:}"
+    expected="${rest%%:*}"; selector="${rest#*:}"
+    deployment="$(yq -r 'select(.kind == "Deployment") | .metadata.name' "$file")"
+    service="$(yq -r 'select(.kind == "Service") | .metadata.name' "$file")"
+    secret="$(yq -r 'select(.kind == "Secret" and .metadata.name == "'"${expected}"'") | .metadata.name' "$file")"
+    pvc="$(yq -r 'select(.kind == "PersistentVolumeClaim") | .metadata.name' "$file")"
+    match="$(yq -r 'select(.kind == "Deployment") | .spec.selector.matchLabels."app.kubernetes.io/name"' "$file")"
+    if [ "$deployment" != "$expected" ] || [ "$service" != "$expected" ] || [ "$secret" != "$expected" ] ||
+       [ "$pvc" != "$expected-storage" ] || [ "$match" != "$selector" ]; then
+        echo "ERROR: $label naming: deployment=$deployment service=$service secret=$secret pvc=$pvc selector=$match"
+        status=1
+    fi
+done
+
+default_image="$(yq -r 'select(.kind == "Deployment") | .spec.template.spec.containers[] | select(.name == "web") | .image' "$names_default")"
+[ "$default_image" = "ghcr.io/cattr-app/server:$app_version" ] || { echo "ERROR: unexpected default image: $default_image"; status=1; }
+helm template cattr "$chart" -f "$chart/ci/default-values.yaml" --set image.tag=custom-tag > "$out/image-override.yaml" || status=1
+override_image="$(yq -r 'select(.kind == "Deployment") | .spec.template.spec.containers[] | select(.name == "web") | .image' "$out/image-override.yaml")"
+[ "$override_image" = "ghcr.io/cattr-app/server:custom-tag" ] || { echo "ERROR: image.tag override ignored: $override_image"; status=1; }
+
+# Exercise packaging, and ensure CI fixtures are excluded from the published OCI chart.
+mkdir -p "$out/packages"
+helm package "$chart" --destination "$out/packages" || status=1
+package="$out/packages/server-$chart_version.tgz"
+if [ ! -f "$package" ]; then
+    echo "ERROR: expected chart archive $package"
+    status=1
+else
+    if tar tzf "$package" | grep -q '^server/ci/'; then
+        echo "ERROR: CI fixtures leaked into chart package"
+        status=1
+    fi
+    if ! tar tzf "$package" | grep -q '^server/Chart.yaml$'; then
+        echo "ERROR: chart metadata missing in archive"
+        status=1
+    fi
+    helm show chart "$package" | yq -e '.name == "server"' >/dev/null || status=1
+fi
+
+# Prints one line per application container that does not carry the backend module
+# flag exactly once. Only the known recipients of the generated env are checked
+# (the `prepare` containers render no env); a missing env list counts as zero.
+backend_flag_errors() {
+    for kind in Deployment Job; do
+        for container in containers initContainers; do
+            lines="$(yq -r 'select(.kind == "'"${kind}"'") |
+              .spec.template.spec.'"$container"'[] |
+              select(.name == "web" or .name == "queue" or .name == "scheduler" or .name == "setup" or .name == "wait-for-migrations" or .name == "wait-for-database") |
+              .name + " " + (([.env[]? | select(.name == "MODULE_BACKEND_CATTR_REDMINE_INTEGRATION_ENABLED" and .value == "true")] | length) | tostring)' \
+              "$1" | grep -v '^---$' || true)"
+            if [ -z "$lines" ]; then
+                echo "$kind $container: no application container found"
+            else
+                printf '%s\n' "$lines" | grep -v ' 1$' | sed "s|^|$kind $container: backend flag count is not 1 for |" || true
+            fi
+        done
+    done
+}
+
+# Assert generated environment variables on every application role, in both PVC
+# and S3 modes. The same env is passed into the PHP initialization containers.
+for config in module-env-values.yaml module-env-s3-values.yaml; do
+    rendered="$out/${config%.yaml}.yaml"
+    helm template cattr "$chart" -f "$chart/ci/$config" > "$rendered" || { status=1; continue; }
+
+    errors="$(backend_flag_errors "$rendered")"
+    if [ -n "$errors" ]; then
+        printf 'ERROR: %s: %s\n' "$config" "$errors"
+        status=1
+    fi
+    # The check must notice an application container whose whole env list is gone.
+    mutated="$out/${config%.yaml}-no-env.yaml"
+    yq '(select(.kind == "Deployment") | .spec.template.spec.containers[] | select(.name == "web")) |= del(.env)' \
+        "$rendered" > "$mutated"
+    [ -n "$(backend_flag_errors "$mutated")" ] ||
+        { echo "ERROR: $config: backend flag check ignores a container without an env list"; status=1; }
+    for var in MODULE_FRONTEND_AMAZING_CAT_REDMINE_INTEGRATION_ENABLED MODULE_BACKEND_CAT_V2_SYNC_ENABLED; do
+        count="$(yq -r 'select(.kind == "Deployment") |
+          .spec.template.spec.containers[].env[] |
+          select(.name == "'"${var}"'" and .value == "true") | .name' "$rendered" | wc -l)"
+        [ "$count" -gt 0 ] || { echo "ERROR: $config missing $var"; status=1; }
+    done
+    disabled="$(yq -r 'select(.kind == "Deployment") | .spec.template.spec.containers[].env[] |
+      select(.name == "MODULE_BACKEND_CATTR_GITLAB_INTEGRATION_ENABLED") | .value' "$rendered" | grep -v "^---$" | sort -u)"
+    [ "$disabled" = "false" ] || { echo "ERROR: $config expected false for disabled module"; status=1; }
+    literal="$(yq -r 'select(.kind == "Deployment") | .spec.template.spec.containers[].env[] |
+      select(.name == "MAIL_PORT") | .value' "$rendered" | grep -v "^---$" | sort -u)"
+    [ "$literal" = "587" ] || { echo "ERROR: $config literal env was not preserved as string"; status=1; }
+    secret="$(yq -r 'select(.kind == "Deployment") | .spec.template.spec.containers[].env[] |
+      select(.name == "MAIL_PASSWORD") | .valueFrom.secretKeyRef.name' "$rendered" | grep -v "^---$" | sort -u)"
+    [ "$secret" = "smtp-credentials" ] || { echo "ERROR: $config missing valueFrom secret"; status=1; }
+    from="$(yq -r 'select(.kind == "Deployment") | .spec.template.spec.containers[] |
+      select(.name == "web") | .envFrom[].configMapRef.name' "$rendered" | grep -v "^---$" | sort -u)"
+    [ "$from" = "cattr-extra-config" ] || { echo "ERROR: $config missing envFrom configmap"; status=1; }
+done
+
+# Fail if identifiers normalize to the same flag, values are not strings or
+# booleans, or explicit env overrides collide with chart-managed variables.
+while IFS='|' read -r name expected overrides; do
+    [ -n "$name" ] || continue
+    # shellcheck disable=SC2086
+    if result="$(helm template cattr "$chart" -f "$chart/ci/default-values.yaml" $overrides 2>&1)"; then
+        echo "ERROR: $name unexpectedly rendered"
+        status=1
+    elif ! printf '%s' "$result" | grep -qF "$expected"; then
+        echo "ERROR: $name failed without '$expected'"
+        printf '%s\n' "$result" | tail -4
+        status=1
+    fi
+done <<EOF
+duplicate module identifiers|generates duplicate environment variable|--set modules.backend.CattrRedmine=true --set modules.backend.Cattr_Redmine=true
+generated and direct env collision|duplicates an existing environment variable|--set modules.backend.CattrRedmine=true --set-string cattr.env.MODULE_BACKEND_CATTR_REDMINE_ENABLED=true
+reserved env collision|duplicates an existing environment variable|--set cattr.env.APP_KEY=dummy
+duplicate env list|duplicates an existing environment variable|--set cattr.env.FOO=bar --set cattr.extraEnv[0].name=FOO --set cattr.extraEnv[0].value=baz
+invalid module identifier|normalizes to invalid flag|--set modules.backend.123Demo=true
+EOF
+
 exit "$status"

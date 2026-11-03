@@ -1,8 +1,15 @@
 # Migrating from chart 0.1.x to 0.2.x
 
-Chart 0.2 is a rewrite for the Cattr 4.1 runtime. An in-place `helm upgrade`
-of the same release works, but **files are not migrated automatically** and
-several values changed. Plan a short downtime.
+Chart 0.2 is a rewrite for the Cattr 4.1 runtime. **Default names have changed**:
+with release `cattr`, chart 0.2.0 now creates resources such as Deployment
+`cattr` and PVC `cattr-storage`, rather than `cattr-cattr-server` and
+`cattr-cattr-server-storage`. This is intentionally a breaking change.
+
+An in-place upgrade is **not supported with the new naming defaults**. The
+steps below use `nameOverride: cattr-server` explicitly to retain the legacy
+resource names for an existing release. Adopting the new names requires a
+separately planned migration of resources, Secrets, PVCs, and data. Uploaded
+files are **not migrated automatically**; plan downtime.
 
 ## What changes
 
@@ -38,7 +45,7 @@ which MySQL 8.0 cannot open again (there is no in-place downgrade).
 Built-in MySQL:
 
 ```sh
-NS=cattr; REL=cattr; FULL=cattr-cattr-server   # adjust: <release>-cattr-server
+NS=cattr; REL=cattr; FULL=cattr-cattr-server   # legacy default name (nameOverride=cattr-server); use your release's own name if it set nameOverride/fullnameOverride
 kubectl -n $NS exec deploy/$FULL-mysql -- sh -c \
   'mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" --single-transaction --routines --triggers "$MYSQL_DATABASE"' \
   > cattr-backup.sql
@@ -86,10 +93,21 @@ kubectl -n $NS patch deployment $FULL --type=json \
 
 ## 5. Upgrade
 
-Write a new values file (do not use `--reuse-values`). APP_KEY and the DB
-credentials are read from the existing Secret when left empty:
+Write a new values file (do not use `--reuse-values`) that keeps the names of
+the existing release. APP_KEY and the DB credentials are read from the existing
+Secret when left empty:
 
 ```yaml
+# Names. The Deployment selector label `app.kubernetes.io/name` comes from
+# `nameOverride` (default: `cattr`; the chart-name fallback was `cattr-server` in
+# 0.1.x and is `server` now) and is immutable, so it must keep its old value:
+#  - default names in 0.1.x: `nameOverride: cattr-server`;
+#  - own `nameOverride`: keep that value;
+#  - own `fullnameOverride` only: keep it and ALSO set `nameOverride: cattr-server`.
+# $FULL in the steps above is the `fullnameOverride` if there is one, otherwise
+# the name the old release rendered.
+nameOverride: cattr-server
+# fullnameOverride: my-cattr   # only if the release had it
 cattr:
   appUrl: https://cattr.example.com
   reverbAppSecret: "<openssl rand -hex 32>"   # new, required once
@@ -111,7 +129,7 @@ ingress:                  # if you used the 0.1.x Ingress
 ```
 
 ```sh
-helm upgrade $REL ./.helm -n $NS -f values-0.2.yaml --wait --timeout 15m
+helm upgrade $REL oci://ghcr.io/cattr-app/helm/server --version 0.2.0 -n $NS -f values-0.2.yaml --wait --timeout 15m
 ```
 
 The `pre-upgrade` setup Job runs the migrations; then the Pod is recreated.

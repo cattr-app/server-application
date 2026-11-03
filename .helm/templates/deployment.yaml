@@ -1,7 +1,7 @@
 {{- if eq .Values.storage.type "pvc" }}
 {{- /*
 pvc mode: web, queue and scheduler are containers of ONE Pod sharing the RWO
-volume. Name and selector are kept from chart 0.1.x (selectors are immutable).
+volume. The name and selectors follow nameOverride/fullnameOverride.
 */}}
 apiVersion: apps/v1
 kind: Deployment

@@ -1,8 +1,8 @@
 # Cattr server chart values. See README.md for the full reference, storage
 # modes, Secret formats and the 0.1.x -> 0.2.x migration guide.
 
-## @param nameOverride Override the chart name used in resource names
-nameOverride: ""
+## @param nameOverride Kubernetes resource name (defaults to cattr; use cattr-server for legacy names)
+nameOverride: cattr
 ## @param fullnameOverride Override the full resource name prefix
 fullnameOverride: ""
 
@@ -57,12 +57,35 @@ cattr:
   ## process (container exits), `restart` keeps Pebble restarting it in place. Images before 4.1.0
   ## final ignore this variable and always restart in place.
   restartPolicy: shutdown
-  ## @param cattr.extraEnv Extra environment variables for every Cattr container (including setup)
+  ## @param cattr.env Literal env vars for all Cattr containers, including setup.
+  ## All values must be strings; use extraEnv for Kubernetes valueFrom (Secret/ConfigMap).
+  env: {}
+  #  MAIL_HOST: smtp.example.com
+  #  FEATURE_FLAG: "true"
+  ## @param cattr.extraEnv Additional Kubernetes EnvVar entries (including valueFrom) for all Cattr containers.
   extraEnv: []
-  #  - name: MAIL_HOST
-  #    value: smtp.example.com
+  #  - name: MAIL_PASSWORD
+  #    valueFrom:
+  #      secretKeyRef:
+  #        name: mail-credentials
+  #        key: password
   ## @param cattr.extraEnvFrom Extra envFrom sources for every Cattr container (including setup)
   extraEnvFrom: []
+
+## @section External module activation
+## Modules must already be bundled in the application image. Only the literal
+## string "true" activates a module. Each side is controlled independently.
+## Keys are module identifiers (module.json name for backend, frontend moduleName
+## or modules.config.json key for frontend), not pre-normalized environment names.
+modules:
+  ## @param modules.backend Map of backend module identifiers to enabled booleans.
+  backend: {}
+  #  CattrRedmineIntegration: true
+  #  CattrGitlabIntegration: true
+  ## @param modules.frontend Map of frontend module identifiers to enabled booleans.
+  frontend: {}
+  #  AmazingCat_RedmineIntegration: true
+  #  AmazingCat_GitlabIntegration: true
 
 ## @section Storage
 storage:

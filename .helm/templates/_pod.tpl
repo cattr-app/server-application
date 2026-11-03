@@ -132,6 +132,11 @@ Usage: include "cattr.env" (dict "context" $ "role" "web" "chartSecret" $name)
 {{ include "cattr.secretEnv" (merge (dict "var" "APP_ADMIN_PASSWORD") $sec) }}
 {{- end }}
 {{- end }}
+{{- include "cattr.moduleEnv" $ctx }}
+{{- range $name := keys $v.cattr.env | sortAlpha }}
+- name: {{ $name }}
+  value: {{ get $v.cattr.env $name | quote }}
+{{- end }}
 {{- with $v.cattr.extraEnv }}
 {{ toYaml . }}
 {{- end }}

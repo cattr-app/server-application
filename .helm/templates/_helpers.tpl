@@ -42,7 +42,7 @@ app.kubernetes.io/part-of: cattr
 {{- end }}
 
 {{/*
-Common labels (component "app", as in chart 0.1.x).
+Common labels for the application component.
 */}}
 {{- define "cattr.labels" -}}
 {{ include "cattr.selectorLabels" . }}
@@ -51,7 +51,7 @@ Common labels (component "app", as in chart 0.1.x).
 
 {{/*
 Selector labels of the pvc-mode Deployment `<fullname>` and of its Service.
-Kept byte-identical to chart 0.1.x: Deployment selectors are immutable.
+Deployment selectors use the configured nameOverride and are immutable once created.
 */}}
 {{- define "cattr.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "cattr.name" . }}
@@ -122,7 +122,7 @@ app.kubernetes.io/part-of: cattr
 {{- end }}
 
 {{/*
-MySQL selector labels (byte-identical to chart 0.1.x).
+MySQL selector labels.
 */}}
 {{- define "cattr.mysql.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "cattr.name" . }}
@@ -131,7 +131,7 @@ app.kubernetes.io/component: mysql
 {{- end }}
 
 {{/*
-Name of the chart-managed Secret (kept from chart 0.1.x).
+Name of the chart-managed Secret.
 */}}
 {{- define "cattr.secretName" -}}
 {{- include "cattr.fullname" . }}

@@ -1,12 +1,18 @@
-# cattr-server Helm chart
+# Cattr server Helm chart
 
 Chart `0.2.x` deploys the Cattr 4.1 runtime image (`ghcr.io/cattr-app/server`:
 Caddy + Laravel Octane + Reverb, supervised by Pebble) with explicit roles.
 The chart is versioned independently of the application; `appVersion` is the
 image tag used by default (`image.tag` overrides it, `image.digest` pins it).
 
-Upgrading from chart `0.1.x`: read [MIGRATION-0.1-to-0.2.md](MIGRATION-0.1-to-0.2.md)
-first. Files are not carried over automatically.
+This chart is published as `oci://ghcr.io/cattr-app/helm/server`. It uses `cattr` for
+Kubernetes resource names when the Helm release is named `cattr`; set
+`nameOverride: cattr-server` to request the previous naming convention.
+
+**Breaking change:** chart naming and default Kubernetes resource names change in
+0.2.0. In-place upgrades with the new defaults are not supported. See
+[MIGRATION-0.1-to-0.2.md](MIGRATION-0.1-to-0.2.md) before upgrading; existing
+Secrets and PVCs are not automatically migrated.
 
 ## Quick start
 
@@ -15,7 +21,7 @@ first. Files are not carried over automatically.
 APP_KEY="base64:$(openssl rand -base64 32)"
 REVERB_SECRET="$(openssl rand -hex 32)"
 
-helm install cattr ./.helm -n cattr --create-namespace \
+helm install cattr oci://ghcr.io/cattr-app/helm/server --version 0.2.0 -n cattr --create-namespace \
   --set cattr.appUrl=https://cattr.example.com \
   --set cattr.appKey="$APP_KEY" \
   --set cattr.reverbAppSecret="$REVERB_SECRET" \
@@ -32,7 +38,7 @@ operation and a first install on slow storage can exceed Helm's default 5m.
 
 Without Ingress/HTTPRoute the chart is reachable through Service
 `<fullname>` (port 80 -> Caddy 8080), e.g.
-`kubectl -n cattr port-forward svc/cattr-cattr-server 8080:80`.
+`kubectl -n cattr port-forward svc/cattr 8080:80`.
 
 ## Architecture
 
@@ -180,6 +186,61 @@ value there rolls the Pods. A change in an existing Secret does not: run
 
 Back up `APP_KEY`: without it encrypted data cannot be read.
 
+## External modules and environment variables
+
+External modules are disabled by default. Modules must already be bundled in the
+application image: Helm values enable existing code, they do not install modules.
+The identifiers correspond to the backend `module.json` name and frontend
+`ModuleConfig.moduleName` (or the registration key for package modules).
+Backend and frontend are activated independently:
+
+```yaml
+modules:
+  backend:
+    CattrRedmineIntegration: true
+    CattrGitlabIntegration: false
+  frontend:
+    AmazingCat_RedmineIntegration: true
+
+cattr:
+  env:
+    MAIL_HOST: smtp.example.com
+    MAIL_FROM_NAME: "Cattr"
+  extraEnv:
+    - name: MAIL_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: smtp-credentials
+          key: password
+  extraEnvFrom:
+    - configMapRef:
+        name: cattr-extra-config
+```
+
+The chart normalizes identifiers using the **same** algorithm as the application.
+For example, `CattrRedmineIntegration` generates
+`MODULE_BACKEND_CATTR_REDMINE_INTEGRATION_ENABLED="true"` and
+`AmazingCat_RedmineIntegration` generates
+`MODULE_FRONTEND_AMAZING_CAT_REDMINE_INTEGRATION_ENABLED="true"`.
+An explicit `false` emits `"false"`; unspecified modules get no activation
+variable and stay disabled. Flags apply to web, queue, scheduler, setup and
+their application init containers, both in PVC and S3 modes. Restart or
+upgrade Pods for changes to take effect (Laravel caches module activation
+when the container starts).
+
+Use `cattr.env` for ordinary **string** values (quote booleans and numbers
+in YAML), `cattr.extraEnv` for Kubernetes `valueFrom` (Secret or
+ConfigMap keys), and `cattr.extraEnvFrom` to import full Secret/ConfigMap
+environments. `web.extraEnv`, `queue.extraEnv`, `scheduler.extraEnv` and
+`setup.extraEnv` also accept role-specific entries. The chart rejects
+duplicate explicit variables, including collisions with generated module
+flags or reserved application variables. For module activation, use `modules`
+instead of repeating `MODULE_*_ENABLED` under `cattr.env`.
+
+Do not commit credentials to values files; reference Kubernetes Secrets.
+For exact module identifier normalization, see
+[Module activation flags](https://github.com/cattr-app/server-application/blob/main/docs/dev/module-activation-flags.md).
+
 ## Database and Redis
 
 `database.host` (MySQL 8.x / MariaDB) is required. With binary logging
@@ -256,13 +317,15 @@ in `s3` mode with more than one replica.
 ## Install, upgrade, rollback, uninstall
 
 ```sh
-helm upgrade --install cattr ./.helm -n cattr -f my-values.yaml --wait --timeout 15m
+helm upgrade --install cattr oci://ghcr.io/cattr-app/helm/server --version 0.2.0 -n cattr -f my-values.yaml --wait --timeout 15m
 helm rollback cattr <revision> -n cattr --wait --timeout 15m   # schema stays migrated
 helm uninstall cattr -n cattr   # keeps Secret <fullname>, PVC <fullname>-storage, PVC <fullname>-mysql
 ```
 
 Use a values file rather than `--reuse-values`; `values.schema.json` rejects
-unknown keys (including chart 0.1.x keys). Reinstalling with the same release
+unknown keys (including chart 0.1.x keys). The default resource name is `cattr`
+for a release named `cattr`; `nameOverride: cattr-server` restores legacy names
+if you explicitly choose them. Reinstalling with the same release
 name reuses the kept Secret and PVCs. Delete them explicitly to drop the data.
 
 ## Values
@@ -276,7 +339,9 @@ schema is in [values.schema.json](values.schema.json). Main groups:
 | `cattr.appUrl` | `""` (required) | public URL |
 | `cattr.appKey`, `cattr.reverbAppSecret`, `cattr.existingSecret` | `""` | see Secrets |
 | `cattr.restartPolicy` | `shutdown` | `CATTR_RESTART_POLICY` |
-| `cattr.extraEnv`, `cattr.extraEnvFrom` | `[]` | env for every Cattr container (e.g. mail) |
+| `modules.backend`, `modules.frontend` | `{}` | per-side module activation by module identifier |
+| `cattr.env` | `{}` | literal environment variables shared by Cattr containers |
+| `cattr.extraEnv`, `cattr.extraEnvFrom` | `[]` | Kubernetes EnvVar/valueFrom and Secret/ConfigMap envFrom |
 | `storage.type` | `pvc` | `pvc` or `s3` |
 | `storage.pvc.*` | 20Gi RWO | `existingClaim`, `storageClass`, `size`, `accessModes`, `annotations` |
 | `storage.s3.*` | | `bucket`, `region`, `endpoint`, `url`, `usePathStyleEndpoint`, credentials |
@@ -292,6 +357,39 @@ schema is in [values.schema.json](values.schema.json). Main groups:
 | `terminationGracePeriodSeconds` | `45` | |
 | `nodeSelector`, `tolerations`, `affinity`, `topologySpreadConstraints`, `priorityClassName` | | scheduling of Cattr Pods |
 | `service.*`, `ingress.*`, `httpRoute.*`, `networkPolicy.*` | | see Networking |
+
+## Published releases
+
+Chart versions are independent of application versions. Push a Git tag such as
+`helm/v0.2.0` to publish chart `server:0.2.0` to
+`ghcr.io/cattr-app/helm/server` after passing validations. Application images
+continue to use the separate `v*` release tags. Never retag an existing chart
+version: bump `Chart.yaml.version` and create a new tag for each release.
+
+The GitHub Packages visibility must be configured as **public** after the first
+publication so anonymous Helm clients can install it. To preserve the previous
+Kubernetes resource prefix, set `nameOverride: cattr-server` only when the
+release used the 0.1.x default name. If the release used a custom
+`nameOverride`, retain that value. If it previously set only
+`fullnameOverride`, keep that value and also set `nameOverride: cattr-server`:
+`fullnameOverride` preserves the resource prefix, while `nameOverride` preserves
+the immutable Deployment selector. Changing the prefix alone does not migrate
+existing Secrets or PVCs.
+
+### Artifact Hub
+
+`Chart.yaml` carries the `artifacthub.io/*` annotations (license, scanned
+image, links). To list the chart on Artifact Hub, add
+`oci://ghcr.io/cattr-app/helm/server` as a Helm (OCI) repository there, then
+push its ownership file as an OCI artifact tagged `artifacthub.io` (needs the
+`repositoryID` Artifact Hub assigns):
+
+```sh
+echo 'repositoryID: <id>' > artifacthub-repo.yml
+oras push ghcr.io/cattr-app/helm/server:artifacthub.io \
+  --config /dev/null:application/vnd.cncf.artifacthub.config.v1+yaml \
+  artifacthub-repo.yml:application/vnd.cncf.artifacthub.repository-metadata.layer.v1.yaml
+```
 
 ## Development
 
