@@ -368,8 +368,9 @@ version: bump `Chart.yaml.version` and create a new tag for each release.
 
 The GitHub Packages visibility must be configured as **public** after the first
 publication so anonymous Helm clients can install it. To preserve the previous
-Kubernetes resource prefix for an existing deployment, explicitly set
-`nameOverride: cattr-server`. If the release previously set only
+Kubernetes resource prefix, set `nameOverride: cattr-server` only when the
+release used the 0.1.x default name. If the release used a custom
+`nameOverride`, retain that value. If it previously set only
 `fullnameOverride`, keep that value and also set `nameOverride: cattr-server`:
 `fullnameOverride` preserves the resource prefix, while `nameOverride` preserves
 the immutable Deployment selector. Changing the prefix alone does not migrate
