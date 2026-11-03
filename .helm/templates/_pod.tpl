@@ -280,6 +280,10 @@ missing or the database is unreachable.
     - name: {{ .role }}-runtime
       mountPath: /tmp
       subPath: tmp
+    # artisan boots the providers and writes its manifests here; the image directory is read-only
+    - name: {{ .role }}-runtime
+      mountPath: /opt/cattr/app/bootstrap/cache
+      subPath: bootstrap-cache
 {{- end }}
 
 {{/*
