@@ -312,8 +312,8 @@ importers:
         specifier: 1.64.1
         version: 1.64.1
       autoprefixer:
-        specifier: ^10.6.1
-        version: 10.6.1(postcss@8.5.32)
+        specifier: ^10.6.2
+        version: 10.6.2(postcss@8.5.32)
       clean-webpack-plugin:
         specifier: ^4.0.0
         version: 4.0.0(webpack@5.91.0)
@@ -1643,8 +1643,8 @@ packages:
   atoa@1.0.0:
     resolution: {integrity: sha512-VVE1H6cc4ai+ZXo/CRWoJiHXrA1qfA31DPnx6D20+kSI547hQN5Greh51LQ1baMRMfxO5K5M4ImMtZbZt2DODQ==}
 
-  autoprefixer@10.6.1:
-    resolution: {integrity: sha512-cL1Qz6ADZhcEbny/8HPfe99J6HhNoYtpX2LFLIbhgGE7Q1hlQVkYFdetDN7Id3KiQxhDrHwzlHr/YQCnZ8+xSA==}
+  autoprefixer@10.6.2:
+    resolution: {integrity: sha512-VOw9/yGTGwPPgzFcODtcv6zhEPIeIWkRSe10L2ri2f5vZ7ID7lCt6jZzRF5/ubgOZ+szYydmEF5AYsA5jxX1tA==}
     engines: {node: ^10 || ^12 || >=14}
     hasBin: true
     peerDependencies:
@@ -6838,7 +6838,7 @@ snapshots:
 
   atoa@1.0.0: {}
 
-  autoprefixer@10.6.1(postcss@8.5.32):
+  autoprefixer@10.6.2(postcss@8.5.32):
     dependencies:
       browserslist: 4.29.0
       caniuse-lite: 1.0.30001810
@@ -8663,7 +8663,7 @@ snapshots:
       '@types/imagemin-mozjpeg': 8.0.4
       '@types/imagemin-optipng': 5.2.4
       '@types/imagemin-svgo': 8.0.1
-      autoprefixer: 10.6.1(postcss@8.5.32)
+      autoprefixer: 10.6.2(postcss@8.5.32)
       babel-loader: 8.4.1(@babel/core@7.29.7(supports-color@5.5.0))(webpack@5.91.0)
       chalk: 4.1.2
       chokidar: 3.6.0
