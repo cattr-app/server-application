@@ -32,6 +32,7 @@
     log {
         output stdout
         format filter {
+            request>headers>X-Xsrf-Token delete
             request>headers>Sec-Websocket-Key delete
             resp_headers>Sec-Websocket-Accept delete
 
