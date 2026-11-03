@@ -2,10 +2,11 @@ apiVersion: v2
 name: server
 description: Cattr is an open-source time-tracking solution for teams
 type: application
-# The chart is versioned independently of the application. Chart 0.2.x targets
-# the Cattr 4.1 runtime image (Caddy + Octane + Reverb + Pebble, explicit roles).
-version: 0.2.0
-appVersion: "4.1.1"
+# Placeholders: the helm-release workflow sets the real values at package time.
+# version comes from the helm/vX.Y.Z tag, appVersion is the highest stable
+# application release (see ci/release-metadata.sh).
+version: 0.0.0
+appVersion: "0.0.0"
 kubeVersion: ">=1.27.0-0"
 keywords:
   - cattr
@@ -24,10 +25,10 @@ sources:
   - https://github.com/cattr-app/server-application
 annotations:
   artifacthub.io/license: SSPL-1.0
-  # Keep the image tag equal to appVersion (checked by ci/release-metadata.sh).
+  # The tag is replaced with appVersion when the chart is packaged.
   artifacthub.io/images: |
     - name: cattr
-      image: ghcr.io/cattr-app/server:4.1.1
+      image: ghcr.io/cattr-app/server:0.0.0
   artifacthub.io/links: |
     - name: Documentation
       url: https://cattr.app/manual
