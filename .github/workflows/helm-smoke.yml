@@ -23,11 +23,21 @@ jobs:
 
       - uses: helm/kind-action@1544676c07bb3570fcb70166beaa07c4528fd4aa # v1.15.1
 
+      # Chart.yaml carries the appVersion placeholder 0.0.0 (no such image), so
+      # run the demo against the highest stable release, as a published chart would.
+      - name: Resolve application image tag
+        id: app
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash .helm/ci/release-metadata.sh helm/v0.0.0
+
       - name: Install demo chart without --wait (setup runs post-install)
+        env:
+          APP_VERSION: ${{ steps.app.outputs.app_version }}
         run: |
           set -euo pipefail
           helm install cattr ./.helm --namespace cattr --create-namespace \
-            -f .helm/ci/demo-mysql-values.yaml --timeout 15m
+            -f .helm/ci/demo-mysql-values.yaml --set-string image.tag="$APP_VERSION" --timeout 15m
           kubectl -n cattr rollout status deployment/cattr-mysql --timeout=10m
           kubectl -n cattr wait --for=condition=complete job/cattr-setup --timeout=10m
           kubectl -n cattr rollout status deployment/cattr --timeout=10m
