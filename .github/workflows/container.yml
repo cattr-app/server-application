@@ -2,12 +2,11 @@ name: Container
 
 # Advisory: builds the application image the same way release.yml does
 # (same Dockerfile, buildah, linux/amd64, OCI) without pushing, then scans it
-# with Trivy. Only the application layer is verified: the build uses the
-# published builder-latest / runtime-latest base images (the Dockerfile
-# defaults), so changes to build/base/** and build/packages/** are not
-# covered here. Until release.yml has published the Wolfi base images and
-# moved builder-latest / runtime-latest to them, those tags still point at the
-# legacy Alpine/nginx images and this build is expected to fail.
+# with Trivy. The build uses the runtime/builder base images whose content hash
+# matches the checked-out revision, calculated by the same script as in
+# release.yml. If a revision changes build/base/** or build/packages/** and the
+# matching images are not published yet, the build warns and falls back to the
+# builder-latest / runtime-latest base images, so those changes are not covered.
 
 on:
   pull_request:
@@ -17,13 +16,128 @@ on:
 
 permissions: {}
 
+env:
+  # Keep in sync with release.yml, they feed the base image content hash
+  # (tests/ci/base-images.sh checks it).
+  RUNTIME_IMAGE: ghcr.io/cattr-app/server-runtime
+
+  RUNTIME_CONFIG: build/base/runtime/apko.yaml
+  BUILDER_CONFIG: build/base/builder/apko.yaml
+  PHP_CONFIG: build/packages/php83.yaml
+  CADDY_CONFIG: build/packages/caddy.yaml
+  NODEJS_CONFIG: build/packages/nodejs-24.yaml
+  PEBBLE_CONFIG: build/packages/pebble.yaml
+  COMPOSER_CONFIG: build/packages/composer.yaml
+  COREPACK_CONFIG: build/packages/corepack.yaml
+
+  IMAGE_BUILD_REVISION: '7'
+
+  OCI_SOURCE: https://github.com/cattr-app/server-application
+  OCI_VENDOR: Cattr
+
+  RUNTIME_DESCRIPTION: >-
+    Cattr server runtime image with PHP 8.3, Nginx and Pebble on Wolfi
+
+  BUILDER_DESCRIPTION: >-
+    Cattr server build image with PHP 8.3, Composer, Node.js and Corepack on Wolfi
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  base-images:
+    name: Resolve base images
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+
+    # The same Wolfi SDK as release.yml: the apko and melange versions it
+    # reports are part of the base image hash.
+    container:
+      image: ghcr.io/wolfi-dev/sdk@sha256:74863718530747316d12ce3dc116108143a3bac483db0b3a985b25babfdb1a19
+
+    defaults:
+      run:
+        shell: bash
+
+    outputs:
+      runtime_tag: ${{ steps.resolve.outputs.runtime_tag }}
+      builder_tag: ${{ steps.resolve.outputs.builder_tag }}
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+          # The base image revisions are taken from the git history
+          fetch-depth: 0
+
+      - name: Configure Git safe directory
+        run: |
+          git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+
+      - name: Setup crane
+        uses: imjasonh/setup-crane@feee3b6bb0d4c68370f256a4502498c9227e5c6b  # v0.7
+        with:
+          version: v0.22.1
+
+      - name: Calculate base image tags
+        id: meta
+        env:
+          RUNTIME_FILES_HASH: ${{ hashFiles(
+            'build/base/runtime/**',
+            'build/packages/php83.yaml',
+            'build/packages/caddy.yaml',
+            'build/packages/pebble.yaml',
+            'build/base/rebuild'
+            ) }}
+          BUILDER_FILES_HASH: ${{ hashFiles(
+            'build/base/builder/**',
+            'build/packages/php83.yaml',
+            'build/packages/nodejs-24.yaml',
+            'build/packages/pebble.yaml',
+            'build/packages/composer.yaml',
+            'build/packages/corepack.yaml',
+            'build/base/rebuild'
+            ) }}
+        run: bash scripts/base-image-meta.sh
+
+      # Public images, no registry login is needed to read them.
+      - name: Resolve published base images
+        id: resolve
+        env:
+          RUNTIME_TAG: ${{ steps.meta.outputs.runtime_tag }}
+          BUILDER_TAG: ${{ steps.meta.outputs.builder_tag }}
+        run: |
+          set -euo pipefail
+
+          # Sets the variable named by $3 to the tag if the image is published,
+          # otherwise to the floating <kind>-latest tag.
+          resolve() {
+            local kind="$1" tag="$2" var="$3"
+
+            if crane manifest --platform linux/amd64 "${RUNTIME_IMAGE}:${tag}" >/dev/null 2>&1 &&
+               crane validate --platform linux/amd64 --remote "${RUNTIME_IMAGE}:${tag}" >/dev/null 2>&1; then
+              echo "Using ${RUNTIME_IMAGE}:${tag}"
+              printf -v "${var}" '%s' "${tag}"
+            else
+              echo "::warning::${RUNTIME_IMAGE}:${tag} is not published; falling back to ${kind}-latest, so changes to the ${kind} base image are not covered"
+              printf -v "${var}" '%s' "${kind}-latest"
+            fi
+          }
+
+          resolve runtime "${RUNTIME_TAG}" runtime_effective
+          resolve builder "${BUILDER_TAG}" builder_effective
+
+          {
+            echo "runtime_tag=${runtime_effective}"
+            echo "builder_tag=${builder_effective}"
+          } >> "${GITHUB_OUTPUT}"
+
   build:
     name: Container build
+    needs: base-images
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     permissions:
@@ -52,6 +166,8 @@ jobs:
           oci: true
           build-args: |
             APP_VERSION=0.0.0-ci
+            BUILDER_BASE_IMAGE_TAG=${{ needs.base-images.outputs.builder_tag }}
+            RUNTIME_BASE_IMAGE_TAG=${{ needs.base-images.outputs.runtime_tag }}
           layers: true
 
       - name: Export image
