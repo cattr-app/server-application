@@ -34,9 +34,9 @@ done
 
 hash_inputs() {
     awk -v key="$2" '
-        $0 ~ key ": \\$\\{\\{ hashFiles\\(" { found = 1; next }
-        found && /\) \}\}/ { exit }
+        $0 ~ key ": \\$\\{\\{ hashFiles\\(" { found = 1 }
         found { print }
+        found && /\) \}\}/ { exit }
     ' "$1"
 }
 
