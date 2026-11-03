@@ -41,7 +41,7 @@ jobs:
         with:
           version: v0.22.1
 
-      - name: Resolve versions, validate image and branch
+      - name: Resolve versions and validate branch
         id: meta
         env:
           RELEASE_TAG: ${{ github.ref_name }}
@@ -52,11 +52,6 @@ jobs:
           git fetch --no-tags origin main
           git merge-base --is-ancestor "$GITHUB_SHA" origin/main || {
             echo "::error::Helm releases must point to commits reachable from main"
-            exit 1
-          }
-          image_tag="$(grep '^app_version=' "$GITHUB_OUTPUT" | cut -d= -f2)"
-          crane manifest "ghcr.io/cattr-app/server:$image_tag" >/dev/null || {
-            echo "::error::Referenced application image is not available: $image_tag"
             exit 1
           }
 
@@ -77,6 +72,25 @@ jobs:
         with:
           name: helm-chart-archive
           path: dist
+
+      # Validate the image the release will actually reference: on a re-run that is
+      # the appVersion of the restored archive, not a newer release that appeared since.
+      - name: Validate application image
+        env:
+          VERSION: ${{ steps.meta.outputs.chart_version }}
+          APP_VERSION: ${{ steps.meta.outputs.app_version }}
+          ARCHIVE_RESTORED: ${{ steps.restore.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          image_tag="$APP_VERSION"
+          if [ "$ARCHIVE_RESTORED" = "true" ]; then
+            image_tag="$(helm show chart "dist/server-$VERSION.tgz" | awk '/^appVersion:/ {gsub(/["\047]/, "", $2); print $2}')"
+          fi
+          [ -n "$image_tag" ] || { echo "::error::Cannot determine the application version"; exit 1; }
+          crane manifest "ghcr.io/cattr-app/server:$image_tag" >/dev/null || {
+            echo "::error::Referenced application image is not available: $image_tag"
+            exit 1
+          }
 
       - name: Package chart
         id: package
