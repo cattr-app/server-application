@@ -41,20 +41,17 @@ jobs:
         with:
           version: v0.22.1
 
-      - name: Validate tag, chart, image and branch
+      - name: Resolve versions and validate branch
+        id: meta
         env:
           RELEASE_TAG: ${{ github.ref_name }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           bash .helm/ci/release-metadata.sh "$RELEASE_TAG"
           git fetch --no-tags origin main
           git merge-base --is-ancestor "$GITHUB_SHA" origin/main || {
             echo "::error::Helm releases must point to commits reachable from main"
-            exit 1
-          }
-          image_tag="$(helm show chart .helm | awk '/^appVersion:/ {gsub(/"/, "", $2); print $2}')"
-          crane manifest "ghcr.io/cattr-app/server:$image_tag" >/dev/null || {
-            echo "::error::Referenced application image is not available: $image_tag"
             exit 1
           }
 
@@ -76,16 +73,38 @@ jobs:
           name: helm-chart-archive
           path: dist
 
+      # Validate the image the release will actually reference: on a re-run that is
+      # the appVersion of the restored archive, not a newer release that appeared since.
+      - name: Validate application image
+        env:
+          VERSION: ${{ steps.meta.outputs.chart_version }}
+          APP_VERSION: ${{ steps.meta.outputs.app_version }}
+          ARCHIVE_RESTORED: ${{ steps.restore.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          image_tag="$APP_VERSION"
+          if [ "$ARCHIVE_RESTORED" = "true" ]; then
+            image_tag="$(helm show chart "dist/server-$VERSION.tgz" | awk '/^appVersion:/ {gsub(/["\047]/, "", $2); print $2}')"
+          fi
+          [ -n "$image_tag" ] || { echo "::error::Cannot determine the application version"; exit 1; }
+          crane manifest "ghcr.io/cattr-app/server:$image_tag" >/dev/null || {
+            echo "::error::Referenced application image is not available: $image_tag"
+            exit 1
+          }
+
       - name: Package chart
         id: package
         if: steps.restore.outcome != 'success'
         env:
-          RELEASE_TAG: ${{ github.ref_name }}
+          VERSION: ${{ steps.meta.outputs.chart_version }}
+          APP_VERSION: ${{ steps.meta.outputs.app_version }}
         run: |
           set -euo pipefail
-          version="${RELEASE_TAG#helm/v}"
+          version="$VERSION"
+          # Chart.yaml holds the 0.0.0 placeholder; keep the Artifact Hub image tag in sync.
+          sed -i "s|ghcr.io/cattr-app/server:0.0.0|ghcr.io/cattr-app/server:$APP_VERSION|" .helm/Chart.yaml
           mkdir -p dist
-          helm package .helm --destination dist
+          helm package .helm --version "$version" --app-version "$APP_VERSION" --destination dist
           test -f "dist/server-$version.tgz"
           sha256sum "dist/server-$version.tgz" | tee dist/SHA256SUMS
 
@@ -108,11 +127,13 @@ jobs:
 
       - name: Publish immutable OCI chart and verify pull
         env:
-          RELEASE_TAG: ${{ github.ref_name }}
+          VERSION: ${{ steps.meta.outputs.chart_version }}
           ARCHIVE_RESTORED: ${{ steps.restore.outcome == 'success' }}
         run: |
           set -euo pipefail
-          version="${RELEASE_TAG#helm/v}"
+          version="$VERSION"
+          # OCI tags cannot contain "+"; helm stores SemVer build metadata with "_".
+          oci_tag="${version//+/_}"
           sha256sum -c dist/SHA256SUMS
           # No overwrite: previously published artifacts must remain immutable.
           # Fail closed: only an explicit "not found" from the registry allows the push;
@@ -120,7 +141,7 @@ jobs:
           # The one exception is a re-run that restored the archive pushed by an earlier
           # attempt of this run: then nothing is pushed and the published chart is only
           # verified against that archive.
-          if lookup="$(crane manifest "$OCI_REPOSITORY:$version" 2>&1)"; then
+          if lookup="$(crane manifest "$OCI_REPOSITORY:$oci_tag" 2>&1)"; then
             if [ "$ARCHIVE_RESTORED" != "true" ]; then
               echo "::error::Helm chart $version is already published; refusing overwrite"
               exit 1
@@ -136,4 +157,4 @@ jobs:
           helm pull "oci://$OCI_REPOSITORY" --version "$version" --destination pulled
           cmp "dist/server-$version.tgz" "pulled/server-$version.tgz"
           helm show chart "oci://$OCI_REPOSITORY" --version "$version"
-          crane digest "$OCI_REPOSITORY:$version" | tee dist/OCI-DIGEST
+          crane digest "$OCI_REPOSITORY:$oci_tag" | tee dist/OCI-DIGEST

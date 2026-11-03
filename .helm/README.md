@@ -3,7 +3,7 @@
 Chart `0.2.x` deploys the Cattr 4.1 runtime image (`ghcr.io/cattr-app/server`:
 Caddy + Laravel Octane + Reverb, supervised by Pebble) with explicit roles.
 The chart is versioned independently of the application; `appVersion` is the
-image tag used by default (`image.tag` overrides it, `image.digest` pins it).
+highest stable Cattr release at publish time and the image tag used by default (`image.tag` overrides it, `image.digest` pins it).
 
 This chart is published as `oci://ghcr.io/cattr-app/helm/server`. It uses `cattr` for
 Kubernetes resource names when the Helm release is named `cattr`; set
@@ -364,7 +364,14 @@ Chart versions are independent of application versions. Push a Git tag such as
 `helm/v0.2.0` to publish chart `server:0.2.0` to
 `ghcr.io/cattr-app/helm/server` after passing validations. Application images
 continue to use the separate `v*` release tags. Never retag an existing chart
-version: bump `Chart.yaml.version` and create a new tag for each release.
+version: create a new tag for each release.
+
+`Chart.yaml` in git keeps the placeholders `version: 0.0.0` and
+`appVersion: "0.0.0"`. The release workflow sets the chart version from the tag
+and `appVersion` to the highest stable SemVer among the GitHub releases
+(drafts, GitHub pre-releases and any alpha/beta/rc or other suffixed tags are ignored), so a chart published later picks up newer
+application releases without any commit. Installing straight from a checkout
+therefore uses image tag `0.0.0`; set `image.tag` for that.
 
 The GitHub Packages visibility must be configured as **public** after the first
 publication so anonymous Helm clients can install it. To preserve the previous
