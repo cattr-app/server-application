@@ -971,6 +971,9 @@ class TaskController extends ItemController
      * Downloads all projects and tasks associated with a specific user.
      *
      * Required permission (any of): `users_download_projects_tasks`, `users_full_access`
+     *
+     * The response is not JSON: it is the file `ProjectsAndTasks.cattr`, a MessagePack document with the `id`
+     * of the user and the `projects` and `tasks` assigned to them.
      */
     public function downloadProjectsAndTasks(User $user): Response
     {

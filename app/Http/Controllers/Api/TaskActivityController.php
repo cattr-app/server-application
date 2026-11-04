@@ -120,6 +120,23 @@ class TaskActivityController extends ItemController
     }
 
     /**
+     * Task activity
+     *
+     * Returns a page (up to 30 records) of the activity of the task `task_id`: the comments (`type` is `comments`),
+     * the history of changes (`history`) or both merged into one stream sorted by creation time (`all`); the
+     * pagination describes that stream. Comments come with their attachments.
+     *
+     * Allowed to the users who can view the task.
+     *
+     * @response array{status: int, success: true, data: list<\App\Models\TaskComment|\App\Models\TaskHistory>, pagination: array{
+     *     count: int,
+     *     total: int,
+     *     perPage: int,
+     *     currentPage: int,
+     *     totalPages: int,
+     *     links: array<string, string>|list<mixed>,
+     * }}
+     *
      * @param ShowTaskActivityRequest $request
      * @return JsonResponse
      * @throws Exception

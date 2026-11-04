@@ -59,6 +59,16 @@ class AuthController extends BaseController
      * Login
      *
      * Get user Token
+     *
+     * `data.user` is the authenticated user, `data.expires_in` is `null`.
+     * After failed attempts a reCAPTCHA token (`recaptcha`) may be required, see the `429` response.
+     *
+     * @response array{status: int, success: true, data: array{
+     *     access_token: string,
+     *     token_type: string,
+     *     expires_in: string|null,
+     *     user: \App\Models\User,
+     * }}
      */
     public function login(LoginRequest $request): JsonResponse
     {
@@ -260,6 +270,17 @@ class AuthController extends BaseController
      *
      * Issues key for desktop auth
      *
+     * `data.access_token` is a desktop key (not a bearer token) that is bound to the IP address of the
+     * request and expires at `data.expires_in`. Exchange it with `PUT /auth/desktop-key`.
+     * `frontend_uri` is the configured address of the web application (may be `null`).
+     *
+     * @response array{status: int, success: true, data: array{
+     *     access_token: string,
+     *     token_type: string,
+     *     expires_in: string,
+     *     user: \App\Models\User,
+     * }, frontend_uri: string|null}
+     *
      * @param Request $request
      *
      * @return JsonResponse
@@ -301,6 +322,16 @@ class AuthController extends BaseController
      * Key auth
      *
      * Exchange desktop key to JWT
+     *
+     * Send the key from `GET /auth/desktop-key` as `Authorization: desktop <key>` from the same IP address.
+     * Returns a bearer token of the key's user.
+     *
+     * @response array{status: int, success: true, data: array{
+     *     access_token: string,
+     *     token_type: string,
+     *     expires_in: string|null,
+     *     user: \App\Models\User,
+     * }}
      *
      * @param Request $request
      *
@@ -356,8 +387,8 @@ class AuthController extends BaseController
      *
      * Refreshes JWT
      *
-     * @deprecated Exists only for compatibility with old Cattr client
-     * @return JsonResponse
+     * Always fails with `400` (`error.code` is `deprecation.api`), tokens are not refreshed anymore.
+     *
      * @deprecated Exists only for compatibility with old Cattr client
      */
     public function refresh(): JsonResponse

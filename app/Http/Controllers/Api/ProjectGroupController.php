@@ -24,6 +24,17 @@ class ProjectGroupController extends ItemController
     /**
      * Display a listing of the resource.
      *
+     * Paginated unless the `X-Paginate: false` header is sent; `pagination` is absent in that case.
+     *
+     * @response array{status: int, success: true, data: list<\App\Models\ProjectGroup>, pagination?: array{
+     *     count: int,
+     *     total: int,
+     *     perPage: int,
+     *     currentPage: int,
+     *     totalPages: int,
+     *     links: array<string, string>|list<mixed>,
+     * }}
+     *
      * @param ListProjectGroupRequest $request
      * @return JsonResponse
      * @throws Exception
@@ -146,6 +157,12 @@ class ProjectGroupController extends ItemController
     }
 
     /**
+     * Count
+     *
+     * Returns the number of project groups that match the optional filters.
+     *
+     * Any authenticated user may call it.
+     *
      * @throws Exception
      */
     public function count(ListProjectGroupRequest $request): JsonResponse

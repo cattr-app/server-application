@@ -19,6 +19,9 @@ use Dedoc\Scramble\Support\Generator\Types\StringType;
  */
 class ErrorEnvelopeTransformer implements DocumentTransformer
 {
+    /** Response attribute: the description was set deliberately and is kept. */
+    public const KEEP_DESCRIPTION = 'keepDescription';
+
     /** Default `error.code` and wording per status; see tests/TestResponse.php for the codes. */
     private const DESCRIPTIONS = [
         401 => 'Unauthenticated, `error.code` is `authorization.unauthorized`',
@@ -53,7 +56,7 @@ class ErrorEnvelopeTransformer implements DocumentTransformer
 
         $response->setContent('application/json', Schema::fromType($error));
 
-        if (isset(self::DESCRIPTIONS[(int) $response->code])) {
+        if (isset(self::DESCRIPTIONS[(int) $response->code]) && !$response->getAttribute(self::KEEP_DESCRIPTION)) {
             $response->setDescription(self::DESCRIPTIONS[(int) $response->code]);
         }
     }
