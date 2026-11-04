@@ -5,6 +5,7 @@ namespace Tests\Feature\Tasks;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Arr;
 use Tests\Facades\TaskFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
@@ -80,6 +81,33 @@ class EditTest extends TestCase
         $response->assertSuccess();
         $response->assertJsonPath('data.id', $this->task->id);
         $this->assertDatabaseHas('tasks', ['id' => $this->task->id]);
+    }
+
+    public function test_edit_without_users_field_keeps_assignees(): void
+    {
+        $assignee = UserFactory::create();
+        $this->task->users()->attach($assignee->id);
+
+        $request = Arr::except($this->taskRequest, 'users');
+        $request['task_name'] = $this->faker->unique()->text(20);
+
+        $response = $this->actingAs($this->admin)->postJson(self::URI, $request);
+
+        $response->assertOk();
+        $this->assertDatabaseHas('tasks', ['id' => $this->task->id, 'task_name' => $request['task_name']]);
+        $this->assertDatabaseHas('tasks_users', ['task_id' => $this->task->id, 'user_id' => $assignee->id]);
+    }
+
+    public function test_edit_with_empty_users_unassigns_everyone(): void
+    {
+        $this->task->users()->attach(UserFactory::create()->id);
+
+        $request = array_merge($this->taskRequest, ['users' => []]);
+
+        $response = $this->actingAs($this->admin)->postJson(self::URI, $request);
+
+        $response->assertOk();
+        $this->assertDatabaseMissing('tasks_users', ['task_id' => $this->task->id]);
     }
 
     public function test_edit_as_admin(): void

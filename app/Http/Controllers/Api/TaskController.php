@@ -350,21 +350,24 @@ class TaskController extends ItemController
         });
 
         CatEvent::listen(Filter::getAfterActionEventName(), static function (Task $data) use (&$taskBeforeChanges, $request) {
-            $oldUsers = $taskBeforeChanges['_old_users'];
-            $changes = $data->users()->sync($request->get('users'));
-            if (!empty($changes['attached']) || !empty($changes['detached']) || !empty($changes['updated'])) {
-                SaveTaskEditHistory::dispatch(
-                    $data,
-                    $request->user(),
-                    [
-                        'users' => User::withoutGlobalScopes()
-                            ->whereIn('id', $request->get('users'))
-                            ->select(['id', 'full_name'])->get()->map(fn($item)=>$item->full_name)->join(', ')
-                    ],
-                    [
-                        'users' => $oldUsers,
-                    ]
-                );
+            if ($request->has('users')) {
+                $oldUsers = $taskBeforeChanges['_old_users'];
+                $userIds = $request->input('users');
+                $changes = $data->users()->sync($userIds);
+                if (!empty($changes['attached']) || !empty($changes['detached']) || !empty($changes['updated'])) {
+                    SaveTaskEditHistory::dispatch(
+                        $data,
+                        $request->user(),
+                        [
+                            'users' => User::withoutGlobalScopes()
+                                ->whereIn('id', $userIds)
+                                ->select(['id', 'full_name'])->get()->map(fn($item)=>$item->full_name)->join(', ')
+                        ],
+                        [
+                            'users' => $oldUsers,
+                        ]
+                    );
+                }
             }
             SaveTaskEditHistory::dispatch($data, request()->user(), null, $taskBeforeChanges);
         });
