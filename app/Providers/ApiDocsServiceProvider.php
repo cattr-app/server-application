@@ -38,6 +38,9 @@ class ApiDocsServiceProvider extends ServiceProvider
             OperationFixes::class,
         ]);
 
+        // Documented base URL (Scramble's default would be the local APP_URL).
+        config(['scramble.servers' => ['Demo' => 'https://demo.cattr.app/api']]);
+
         // Bearer security on routes behind auth middleware only (login, status etc. stay public).
         config(['scramble.security_strategy' => [
             MiddlewareAuthSecurityStrategy::class,
@@ -67,7 +70,7 @@ class ApiDocsServiceProvider extends ServiceProvider
                     - [Developer documentation](https://github.com/cattr-app/server-application/blob/main/docs/developer/README.md)
                     MD;
                 $openApi->info->setExtensionProperty('logo', [
-                    'url' => 'https://cattr.app/logo.svg',
+                    'url' => 'logo.svg', // resolved next to the published page and openapi.json
                     'altText' => 'Cattr',
                 ]);
                 $openApi->info->setContact(new Contact('Cattr', 'https://cattr.app', 'hi@cattr.app'));
