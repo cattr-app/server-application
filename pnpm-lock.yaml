@@ -302,6 +302,9 @@ importers:
       '@playwright/test':
         specifier: 1.64.1
         version: 1.64.1
+      '@redocly/cli':
+        specifier: 2.66.0
+        version: 2.66.0
       autoprefixer:
         specifier: ^10.6.2
         version: 10.6.2(postcss@8.5.32)
@@ -1084,6 +1087,11 @@ packages:
   '@playwright/test@1.64.1':
     resolution: {integrity: sha512-IaYGml/nSOiZWROfPtuIL7neuu9qDOZ3TNvNljUIrhDMxiGTgPjzj/g9p9RxpS2tSepPDRY+UwAaEeiKtUvIAg==}
     engines: {node: '>=20'}
+    hasBin: true
+
+  '@redocly/cli@2.66.0':
+    resolution: {integrity: sha512-23U8W/2g1zRxsp7p3Wo2lzzlrZYMOA4qEGqF7sO5WyohEWwzdwvZG0L6wUNjC6G7f9LgxnxIWJ3qVgQW0925xg==}
+    engines: {node: '>=22.12.0 || >=20.19.0 <21.0.0', npm: '>=10'}
     hasBin: true
 
   '@rollup/plugin-babel@6.1.0':
@@ -6181,6 +6189,8 @@ snapshots:
   '@playwright/test@1.64.1':
     dependencies:
       playwright: 1.64.1
+
+  '@redocly/cli@2.66.0': {}
 
   '@rollup/plugin-babel@6.1.0(@babel/core@7.29.7(supports-color@5.5.0))(@types/babel__core@7.20.5)(rollup@4.64.12)(supports-color@5.5.0)':
     dependencies:

@@ -1,0 +1,16 @@
+# Redocly CLI configuration for the API reference (`pnpm build:pages`, .github/workflows/pages.yml).
+extends:
+  - recommended
+
+rules:
+  # Known gap: operations that never had an apiDoc summary still have no summary.
+  operation-summary: warn
+
+# Redoc options. They must live under the top-level `openapi:` key (`theme.openapi` is ignored by CLI 2.x).
+openapi:
+  hideDownloadButton: false
+  theme:
+    logo:
+      maxHeight: 48px
+      maxWidth: 48px
+      gutter: 12px
