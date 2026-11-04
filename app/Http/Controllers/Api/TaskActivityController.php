@@ -17,6 +17,11 @@ use App\Helpers\QueryHelper;
 
 class TaskActivityController extends ItemController
 {
+    private static function getSortDirection(array $requestData): string
+    {
+        return SortDirection::tryFrom($requestData['orderBy'][1] ?? '')?->value ?? 'asc';
+    }
+
     private function getQueryBuilder(array $filter, string $model): Builder
     {
         $model = new $model;
@@ -35,7 +40,7 @@ class TaskActivityController extends ItemController
         }
 
         QueryHelper::apply($query, $model, $filter);
-        $sortDirection = SortDirection::tryFrom($filter['orderBy'][1])?->value ?? 'asc';
+        $sortDirection = self::getSortDirection($filter);
         $query->orderBy('id', $sortDirection);
 
         return Filter::process(
@@ -83,7 +88,7 @@ class TaskActivityController extends ItemController
             $total = $taskComments->total() + $taskHistory->total();
             $perPage = $taskComments->perPage() + $taskHistory->perPage();
 
-            $sortDirection = SortDirection::tryFrom($requestData['orderBy'][1])?->value ?? 'asc';
+            $sortDirection = self::getSortDirection($requestData);
             $items = collect(array_merge($taskComments->items(), $taskHistory->items()))->sortBy([
                 fn ($a, $b) => $sortDirection === 'asc'
                     ? strtotime($a['created_at']) <=> strtotime($b['created_at'])
