@@ -44,6 +44,11 @@ class RegistrationController extends Controller
      * @apiUse          400Error
      *
      */
+    /**
+     * Get Form
+     *
+     * Returns invitation form data by a invitation token
+     */
     public function getForm($key): JsonResponse
     {
         $invitation = Invitation::where('key', $key)

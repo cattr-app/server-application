@@ -157,6 +157,10 @@ class ProjectMemberController extends Controller
      * @apiUse         UnauthorizedError
      */
     /**
+     * List Project Members
+     *
+     * Get list of project members
+     *
      *
      * @param ShowProjectMemberRequest $request
      * @return JsonResponse
@@ -213,6 +217,10 @@ class ProjectMemberController extends Controller
      * @apiUse         UnauthorizedError
      */
     /**
+     * Bulk Edit Project Members
+     *
+     * Edit roles of multiple project members
+     *
      * @param BulkEditProjectMemberRequest $request
      * @return JsonResponse
      */

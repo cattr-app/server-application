@@ -11,9 +11,24 @@ function pnpm(args) {
     if (result.status !== 0) process.exit(result.status || 1);
 }
 
+// The OpenAPI document is exported by Laravel (dedoc/scramble, needs the dev dependencies and a migrated
+// database). Locally: php artisan scramble:export --path=storage/app/tmp/openapi.json
+const spec = path.resolve(root, process.env.OPENAPI_SPEC || 'storage/app/tmp/openapi.json');
+if (!fs.existsSync(spec)) {
+    process.stderr.write(
+        'OpenAPI spec not found at ' + spec + '.\n' +
+            'Export it first: php artisan scramble:export --path=storage/app/tmp/openapi.json (or set OPENAPI_SPEC).\n',
+    );
+    process.exit(1);
+}
+
 fs.rmSync(output, { force: true, recursive: true });
 fs.mkdirSync(path.join(output, 'api'), { recursive: true });
-pnpm(['exec', 'apidoc', '-i', 'app', '-t', 'resources/template-apidoc', '-o', path.join(output, 'api')]);
+// Structural errors fail the build; warnings (see redocly.yaml) do not.
+pnpm(['exec', 'redocly', 'lint', spec]);
+pnpm(['exec', 'redocly', 'build-docs', spec, '--output', path.join(output, 'api', 'index.html'), '--title', 'Cattr API', '--disableGoogleFont']);
+fs.copyFileSync(spec, path.join(output, 'api', 'openapi.json'));
+fs.copyFileSync(path.join(root, 'docs', 'api', 'logo.svg'), path.join(output, 'api', 'logo.svg'));
 
 // The previous Docsify sites are no longer published. Keep only their
 // small hash-aware browser redirects for existing external links.

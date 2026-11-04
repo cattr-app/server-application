@@ -55,6 +55,11 @@ class AuthController extends BaseController
      * @apiUse         CaptchaError
      * @apiUse         LimiterError
      */
+    /**
+     * Login
+     *
+     * Get user Token
+     */
     public function login(LoginRequest $request): JsonResponse
     {
         $credentials = $request->only(['email', 'password', 'recaptcha']);
@@ -109,6 +114,11 @@ class AuthController extends BaseController
      * @apiUse         400Error
      * @apiUse         UnauthorizedError
      */
+    /**
+     * Logout
+     *
+     * Invalidate current token
+     */
     public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();
@@ -131,6 +141,11 @@ class AuthController extends BaseController
      *
      * @apiUse         400Error
      * @apiUse         UnauthorizedError
+     */
+    /**
+     * Logout from all
+     *
+     * Invalidate all user tokens
      */
     public function logoutFromAll(Request $request): JsonResponse
     {
@@ -218,6 +233,11 @@ class AuthController extends BaseController
      * @apiUse 400Error
      * @apiUse UnauthorizedError
      */
+    /**
+     * Me
+     *
+     * Get authenticated User Entity
+     */
     public function me(Request $request): JsonResponse
     {
         return responder()->success($request->user())->respond();
@@ -236,6 +256,10 @@ class AuthController extends BaseController
      * @apiUse         UnauthorizedError
      */
     /**
+     * Issue key
+     *
+     * Issues key for desktop auth
+     *
      * @param Request $request
      *
      * @return JsonResponse
@@ -274,6 +298,10 @@ class AuthController extends BaseController
      * @apiUse         UnauthorizedError
      */
     /**
+     * Key auth
+     *
+     * Exchange desktop key to JWT
+     *
      * @param Request $request
      *
      * @return JsonResponse
@@ -324,6 +352,11 @@ class AuthController extends BaseController
      */
 
     /**
+     * Refresh
+     *
+     * Refreshes JWT
+     *
+     * @deprecated Exists only for compatibility with old Cattr client
      * @return JsonResponse
      * @deprecated Exists only for compatibility with old Cattr client
      */

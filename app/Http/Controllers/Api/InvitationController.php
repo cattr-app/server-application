@@ -57,6 +57,11 @@ class InvitationController extends ItemController
      * @apiUse          UnauthorizedError
      *
      */
+    /**
+     * Show
+     *
+     * Show invitation.
+     */
     public function show(ShowInvitationRequest $request): JsonResponse
     {
         return $this->_show($request);
@@ -93,6 +98,11 @@ class InvitationController extends ItemController
      * @apiUse          400Error
      * @apiUse          UnauthorizedError
      *
+     */
+    /**
+     * List
+     *
+     * Get list of invitations.
      */
     public function index(ListInvitationRequest $request): JsonResponse
     {
@@ -171,6 +181,11 @@ class InvitationController extends ItemController
      * @apiUse          400Error
      * @apiUse          UnauthorizedError
      */
+    /**
+     * Create
+     *
+     * Creates a unique invitation token and sends an email to the users
+     */
     public function create(CreateInvitationRequest $request): JsonResponse
     {
         $requestData = Filter::process(Filter::getRequestFilterName(), $request->validated());
@@ -237,6 +252,11 @@ class InvitationController extends ItemController
      * @apiUse          UnauthorizedError
      *
      */
+    /**
+     * Resend
+     *
+     * Updates the token expiration date and sends an email to the user's email address.
+     */
     public function resend(UpdateInvitationRequest $request): JsonResponse
     {
         $requestData = Filter::process(Filter::getRequestFilterName(), $request->validated());
@@ -277,6 +297,11 @@ class InvitationController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
+    /**
+     * Destroy
+     *
+     * Destroy User
+     */
     public function destroy(DestroyInvitationRequest $request): JsonResponse
     {
         return $this->_destroy($request);
@@ -298,6 +323,11 @@ class InvitationController extends ItemController
      * @apiUse TotalSuccess
      * @apiUse 400Error
      * @apiUse UnauthorizedError
+     */
+    /**
+     * Count Invitations
+     *
+     * Returns the total count of invitations
      */
     public function count(ListInvitationRequest $request): JsonResponse
     {

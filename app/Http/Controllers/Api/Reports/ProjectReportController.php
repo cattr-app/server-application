@@ -144,6 +144,13 @@ class ProjectReportController
      * @apiUse          UnauthorizedError
      * @apiUse          ForbiddenError
      */
+    /**
+     * Project Report
+     *
+     * Retrieve detailed project report data including user tasks and time intervals.
+     *
+     * Required permission (any of): `report_view`, `report_full_access`
+     */
     public function __invoke(ProjectReportRequest $request): JsonResponse
     {
         $companyTimezone = Settings::scope('core')->get('timezone', 'UTC');
@@ -201,6 +208,10 @@ class ProjectReportController
      * @apiUse ForbiddenError
      */
     /**
+     * Download Dashboard Report
+     *
+     * Downloads a dashboard report in the specified file format.
+     *
      * @throws Throwable
      */
     public function download(ProjectReportRequest $request): JsonResponse

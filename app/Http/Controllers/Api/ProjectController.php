@@ -85,6 +85,12 @@ class ProjectController extends ItemController
      * @apiUse          ForbiddenError
      */
     /**
+     * List
+     *
+     * Get list of Projects
+     *
+     * Required permission (any of): `projects_list`, `projects_full_access`
+     *
      * @param ListProjectRequest $request
      * @return JsonResponse
      * @throws Exception
@@ -149,6 +155,10 @@ class ProjectController extends ItemController
      * @apiUse         UnauthorizedError
      */
     /**
+     * Gantt Data
+     *
+     * Получение данных для диаграммы Ганта по проекту
+     *
      * @param GanttDataRequest $request
      * @return JsonResponse
      * @throws Exception
@@ -214,6 +224,10 @@ class ProjectController extends ItemController
      */
 
     /**
+     * Project Phases
+     *
+     * Retrieve project phases along with the number of tasks in each phase.
+     *
      * @param PhasesRequest $request
      * @return JsonResponse
      * @throws Exception
@@ -245,6 +259,11 @@ class ProjectController extends ItemController
      * @apiUse          ProjectObject
      * @apiUse          400Error
      * @apiUse          UnauthorizedError
+     */
+    /**
+     * Project Show
+     *
+     * Retrieve project show along with the number of tasks in each phase.
      */
     public function show(ShowProjectRequest $request): JsonResponse
     {
@@ -320,6 +339,11 @@ class ProjectController extends ItemController
      * @apiUse         ValidationError
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
+     */
+    /**
+     * Create Project
+     *
+     * Creates a new project
      */
     public function create(CreateProjectRequest $request): JsonResponse
     {
@@ -410,6 +434,13 @@ class ProjectController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ItemNotFoundError
      */
+    /**
+     * Edit
+     *
+     * Edit Project
+     *
+     * Required permission (any of): `projects_edit`, `projects_full_access`
+     */
     public function edit(EditProjectRequest $request): JsonResponse
     {
         Filter::listen(Filter::getRequestFilterName(), static function ($requestData) {
@@ -483,6 +514,13 @@ class ProjectController extends ItemController
      * @apiUse          UnauthorizedError
      * @apiUse          ItemNotFoundError
      */
+    /**
+     * Destroy
+     *
+     * Destroy Project
+     *
+     * Required permission (any of): `projects_remove`, `projects_full_access`
+     */
     public function destroy(DestroyProjectRequest $request): JsonResponse
     {
         return $this->_destroy($request);
@@ -513,6 +551,13 @@ class ProjectController extends ItemController
      * @apiUse          400Error
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
+     */
+    /**
+     * Count
+     *
+     * Count Projects
+     *
+     * Required permission (any of): `projects_count`, `projects_full_access`
      */
     public function count(ListProjectRequest $request): JsonResponse
     {
