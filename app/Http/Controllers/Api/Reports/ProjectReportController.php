@@ -150,6 +150,52 @@ class ProjectReportController
      * Retrieve detailed project report data including user tasks and time intervals.
      *
      * Required permission (any of): `report_view`, `report_full_access`
+     *
+     * Without `users` all users are included, without `projects` all projects.
+     * Times are in seconds. `items` of a day are the intervals grouped by hour, each hour is reduced to a few
+     * sample intervals.
+     *
+     * @response array{status: int, success: true, data: list<array{
+     *     id: int,
+     *     name: string,
+     *     time: int,
+     *     users: list<array{
+     *         id: int,
+     *         full_name: string,
+     *         email: string,
+     *         time: int,
+     *         tasks: list<array{
+     *             id: int,
+     *             task_name: string,
+     *             time: int,
+     *             intervals: list<array{
+     *                 date: string,
+     *                 time: int,
+     *                 items: list<list<array{
+     *                     start_at: string,
+     *                     activity_fill: int,
+     *                     mouse_fill: int,
+     *                     keyboard_fill: int,
+     *                     end_at: string,
+     *                     user_email: string,
+     *                     id: int,
+     *                     project_id: int,
+     *                     project_name: string,
+     *                     task_id: int,
+     *                     task_name: string,
+     *                     user_id: int,
+     *                     full_name: string,
+     *                     hour: int,
+     *                     day: string,
+     *                     minute: int|float,
+     *                     duration: int,
+     *                     durationByDay: array<string, int>,
+     *                     durationAtSelectedPeriod: int,
+     *                 }>>,
+     *             }>,
+     *         }>,
+     *     }>,
+     * }>}
      */
     public function __invoke(ProjectReportRequest $request): JsonResponse
     {
@@ -208,9 +254,9 @@ class ProjectReportController
      * @apiUse ForbiddenError
      */
     /**
-     * Download Dashboard Report
+     * Download Project Report
      *
-     * Downloads a dashboard report in the specified file format.
+     * Downloads a project report in the specified file format.
      *
      * @throws Throwable
      */

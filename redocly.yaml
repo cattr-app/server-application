@@ -3,8 +3,10 @@ extends:
   - recommended
 
 rules:
-  # Known gap: operations that never had an apiDoc summary still have no summary.
-  operation-summary: warn
+  # The public status-style endpoints (`GET /status`, `POST /roles/list`) have no endpoint-specific 4xx response.
+  operation-4xx-response: off
+  # The deprecated `POST /auth/refresh` always fails with 400 and has no successful response (the only such operation).
+  operation-2xx-response: off
 
 # Redoc options. They must live under the top-level `openapi:` key (`theme.openapi` is ignored by CLI 2.x).
 openapi:

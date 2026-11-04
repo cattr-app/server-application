@@ -698,6 +698,18 @@ class IntervalController extends ItemController
         return responder()->success($this->screenshotService->getTemporaryUrls($interval))->respond();
     }
 
+    /**
+     * Upload a screenshot of an interval
+     *
+     * Saves the image from the `screenshot` field (`multipart/form-data`) as the screenshot of an existing time
+     * interval. The image is stored as JPEG and its thumbnail is generated in the background.
+     *
+     * Allowed to the users who may create the interval: administrators, the interval owner (with the user or manager
+     * role in the project, or assigned to the task) and managers for the intervals of other users.
+     *
+     * Responds with 409 if the interval already has a screenshot or if screenshots are not allowed for it: they are
+     * disabled for the project of the interval, or optional for the project and not required for the user.
+     */
     public function putScreenshot(PutScreenshotRequest $request): JsonResponse
     {
         $data = $request->validated();
@@ -726,6 +738,27 @@ class IntervalController extends ItemController
         return responder()->success()->respond(204);
     }
 
+    /**
+     * Upload offline intervals
+     *
+     * Imports the intervals recorded while the desktop application was offline. The `file` field
+     * (`multipart/form-data`) is a ZIP archive named `*.cattr`, up to 12 MB, with two entries: `Intervals`
+     * (MessagePack list of intervals) and `EncryptedDigest` (SHA-256 digest of `Intervals`, encrypted with the key
+     * from `GET /offline-sync/public-key`).
+     *
+     * An archive that cannot be opened or read, with a digest mismatch, without intervals or for an unknown user is
+     * rejected with 400. Otherwise the response is 200 and reports each interval separately: an interval is added only
+     * if it passes the same validation as `POST /time-intervals/create` and the current user may create it,
+     * for the rest `message` explains why (a text or validation messages per field).
+     *
+     * Any authenticated user may call it.
+     *
+     * @response array{status: int, success: true, data: list<array{
+     *     interval: array<string, mixed>,
+     *     message: string|array<string, list<string>>,
+     *     success: bool,
+     * }>}
+     */
     public function uploadOfflineIntervals(UploadOfflineIntervalsRequest $request): JsonResponse
     {
         /**
@@ -866,6 +899,29 @@ class IntervalController extends ItemController
         return responder()->success($creationResult)->respond();
     }
 
+    /**
+     * Upload offline screenshots
+     *
+     * Attaches the screenshots recorded while the desktop application was offline to their intervals. The `file`
+     * field (`multipart/form-data`) is a ZIP archive named `*.cattr` with a flat list of files named
+     * `<user_id>_<screenshot_id>` (the screenshot ID is a UUID). An archive that exceeds the configured number of
+     * files or unpacked size, or contains directories, is rejected with 422; an archive that cannot be read, or
+     * a file with another name, with 400.
+     *
+     * Each file is attached to the interval of that user with that `screenshot_id`, if the current user may create such
+     * an interval. The response is 200 and reports each file separately: `interval` is `null` if no suitable interval
+     * was found.
+     *
+     * Any authenticated user may call it.
+     *
+     * @response array{status: int, success: true, data: list<array{
+     *     interval: \App\Models\TimeInterval|null,
+     *     user_id: int,
+     *     screenshot_id: string,
+     *     message: string,
+     *     success: bool,
+     * }>}
+     */
     public function uploadOfflineScreenshots(UploadOfflineScreenshotsRequest $request): JsonResponse
     {
         /**

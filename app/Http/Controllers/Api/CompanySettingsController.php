@@ -95,6 +95,21 @@ class CompanySettingsController extends Controller
      * List
      *
      * Returns all company settings.
+     *
+     * Modules can add their own keys to the settings object.
+     *
+     * @response array{status: int, success: true, data: array{
+     *     timezone: string|null,
+     *     language: string|null,
+     *     work_time: int,
+     *     color: list<mixed>,
+     *     internal_priorities: list<\App\Models\Priority>,
+     *     heartbeat_period: int,
+     *     auto_thinning: bool,
+     *     screenshots_state: int,
+     *     env_screenshots_state: int,
+     *     default_priority_id: int,
+     * }}
      */
     public function index(): JsonResponse
     {
@@ -236,6 +251,10 @@ class CompanySettingsController extends Controller
      * Retrieves the public key for offline synchronization.
      *
      * Required permission (any of): `offline_sync_view`, `offline_sync_full_access`
+     *
+     * `key` is `null` if no key is stored.
+     *
+     * @response array{status: int, success: true, data: array{key: string|null}}
      */
     public function getOfflineSyncPublicKey(): JsonResponse
     {

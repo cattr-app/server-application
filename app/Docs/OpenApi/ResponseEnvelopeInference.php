@@ -17,7 +17,9 @@ use Dedoc\Scramble\Support\Type\Literal\LiteralBooleanType;
 use Dedoc\Scramble\Support\Type\Literal\LiteralIntegerType;
 use Dedoc\Scramble\Support\Type\NullType;
 use Dedoc\Scramble\Support\Type\ObjectType;
+use Dedoc\Scramble\Support\Type\StringType;
 use Dedoc\Scramble\Support\Type\Type;
+use Dedoc\Scramble\Support\Type\Union;
 use Dedoc\Scramble\Support\Type\UnknownType;
 use Flugg\Responder\Contracts\Responder;
 use Flugg\Responder\Http\Responses\SuccessResponseBuilder;
@@ -117,7 +119,11 @@ class ResponseEnvelopeInference implements FunctionReturnTypeExtension, MethodRe
                 new ArrayItemType_('perPage', new IntegerType),
                 new ArrayItemType_('currentPage', new IntegerType),
                 new ArrayItemType_('totalPages', new IntegerType),
-                new ArrayItemType_('links', new ArrayType),
+                // Previous/next page URLs by name, an empty list when there is only one page.
+                new ArrayItemType_('links', new Union([
+                    new ArrayType(value: new StringType, key: new StringType),
+                    new ArrayType,
+                ])),
             ]), isOptional: true);
         }
 
