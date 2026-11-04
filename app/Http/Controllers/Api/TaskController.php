@@ -99,6 +99,12 @@ class TaskController extends ItemController
      * @apiUse         ForbiddenError
      */
     /**
+     * List
+     *
+     * Get list of Tasks
+     *
+     * Required permission (any of): `tasks_list`, `tasks_full_access`
+     *
      * @param ListTaskRequest $request
      * @return JsonResponse
      * @throws Exception
@@ -248,6 +254,13 @@ class TaskController extends ItemController
      * @apiUse         ValidationError
      * @apiUse         UnauthorizedError
      * @apiUse         ItemNotFoundError
+     */
+    /**
+     * Edit
+     *
+     * Edit Task
+     *
+     * Required permission (any of): `tasks_edit`, `tasks_full_access`
      */
     public function edit(EditTaskRequest $request): JsonResponse
     {
@@ -453,6 +466,13 @@ class TaskController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
      */
+    /**
+     * Create
+     *
+     * Create Task
+     *
+     * Required permission (any of): `tasks_create`, `tasks_full_access`
+     */
     public function create(CreateTaskRequest $request): JsonResponse
     {
         CatEvent::listen(
@@ -530,6 +550,13 @@ class TaskController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
+    /**
+     * Destroy
+     *
+     * Destroy Task
+     *
+     * Required permission (any of): `tasks_remove`, `tasks_full_access`
+     */
     public function destroy(DestroyTaskRequest $request): JsonResponse
     {
         return $this->_destroy($request);
@@ -560,6 +587,13 @@ class TaskController extends ItemController
      * @apiUse          400Error
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
+     */
+    /**
+     * Count
+     *
+     * Count Tasks
+     *
+     * Required permission (any of): `tasks_count`, `tasks_full_access`
      */
     public function count(ListTaskRequest $request): JsonResponse
     {
@@ -659,6 +693,13 @@ class TaskController extends ItemController
      * @apiUse         ItemNotFoundError
      * @apiUse         ForbiddenError
      * @apiUse         ValidationError
+     */
+    /**
+     * Show
+     *
+     * Show Task
+     *
+     * Required permission (any of): `tasks_show`, `tasks_full_access`
      */
     public function show(ShowTaskRequest $request): JsonResponse
     {
@@ -760,6 +801,13 @@ class TaskController extends ItemController
      * @apiUse         ItemNotFoundError
      * @apiUse         ForbiddenError
      * @apiUse         ValidationError
+     */
+    /**
+     * Create Relation
+     *
+     * Creates a relation between two tasks, ensuring they belong to the same project and no cyclic dependencies exist.
+     *
+     * Required permission (any of): `tasks_create_relation`, `tasks_full_access`
      */
     public function createRelation(CreateRelationRequest $request): JsonResponse
     {
@@ -867,6 +915,13 @@ class TaskController extends ItemController
      * @apiUse         ForbiddenError
      * @apiUse         ValidationError
      */
+    /**
+     * Destroy Relation
+     *
+     * Removes a relation between two tasks.
+     *
+     * Required permission (any of): `tasks_destroy_relation`, `tasks_full_access`
+     */
     public function destroyRelation(DestroyRelationRequest $request): JsonResponse
     {
         $requestData = $request->validated();
@@ -909,6 +964,13 @@ class TaskController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ItemNotFoundError
      * @apiUse         ForbiddenError
+     */
+    /**
+     * Download Projects and Tasks
+     *
+     * Downloads all projects and tasks associated with a specific user.
+     *
+     * Required permission (any of): `users_download_projects_tasks`, `users_full_access`
      */
     public function downloadProjectsAndTasks(User $user): Response
     {
@@ -1026,6 +1088,11 @@ class TaskController extends ItemController
      * @apiUse         ValidationError
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
+     */
+    /**
+     * Calendar
+     *
+     * Get calendar report data
      */
     public function calendar(CalendarRequest $request): JsonResponse
     {

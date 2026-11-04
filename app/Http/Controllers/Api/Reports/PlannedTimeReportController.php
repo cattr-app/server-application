@@ -95,6 +95,13 @@ class PlannedTimeReportController
      * @apiUse          ForbiddenError
      * @apiUse          ItemNotFoundError
      */
+    /**
+     * Planned Time Report
+     *
+     * Generate a report on planned tasks and associated time for a given project
+     *
+     * Required permission (any of): `report_generate`, `report_full_access`
+     */
     public function __invoke(PlannedTimeReportRequest $request): JsonResponse
     {
         return responder()->success(
@@ -140,6 +147,12 @@ class PlannedTimeReportController
      * @apiUse          ForbiddenError
      */
     /**
+     * Download Planned Time Report
+     *
+     * Generate and download a report on planned time for specific projects.
+     *
+     * Required permission (any of): `report_generate`, `report_full_access`
+     *
      * @throws Throwable
      */
     public function download(PlannedTimeReportRequest $request): JsonResponse

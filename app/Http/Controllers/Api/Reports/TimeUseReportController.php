@@ -81,6 +81,11 @@ class TimeUseReportController
      * @apiUse UnauthorizedError
      * @apiUse ForbiddenError
      */
+    /**
+     * Get User Time Report
+     *
+     * Retrieves the time report for specified users within a given time range.
+     */
 
     public function __invoke(TimeUseReportRequest $request): JsonResponse
     {

@@ -42,6 +42,11 @@ class StatusController extends ItemController
      * @apiUse          UnauthorizedError
      *
      */
+    /**
+     * Show
+     *
+     * Show status.
+     */
     public function show(ShowStatusRequestStatus $request): JsonResponse
     {
         return $this->_show($request);
@@ -65,6 +70,11 @@ class StatusController extends ItemController
      * @apiUse          400Error
      * @apiUse          UnauthorizedError
      *
+     */
+    /**
+     * List
+     *
+     * Get list of statuses.
      */
     public function index(ListStatusRequest $request): JsonResponse
     {
@@ -113,6 +123,11 @@ class StatusController extends ItemController
      * @apiUse          400Error
      * @apiUse          UnauthorizedError
      */
+    /**
+     * Create
+     *
+     * Creates status
+     */
     public function create(CreateStatusRequest $request): JsonResponse
     {
         Filter::listen(Filter::getRequestFilterName(), static function ($item) {
@@ -154,6 +169,11 @@ class StatusController extends ItemController
      * @apiUse         ValidationError
      * @apiUse         UnauthorizedError
      * @apiUse         ItemNotFoundError
+     */
+    /**
+     * Edit
+     *
+     * Edit Status
      */
     public function edit(UpdateStatusRequest $request): JsonResponse
     {
@@ -214,6 +234,11 @@ class StatusController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
+    /**
+     * Destroy
+     *
+     * Destroy User
+     */
     public function destroy(DestroyStatusRequest $request): JsonResponse
     {
         return $this->_destroy($request);
@@ -242,6 +267,11 @@ class StatusController extends ItemController
      * @apiUse TotalSuccess
      * @apiUse 400Error
      * @apiUse UnauthorizedError
+     */
+    /**
+     * Count Invitations
+     *
+     * Get the count of invitations
      */
     public function count(ListStatusRequest $request): JsonResponse
     {

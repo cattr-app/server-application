@@ -91,6 +91,11 @@ class CompanySettingsController extends Controller
      * @apiUse          400Error
      * @apiUse          UnauthorizedError
      */
+    /**
+     * List
+     *
+     * Returns all company settings.
+     */
     public function index(): JsonResponse
     {
         return responder()->success(
@@ -183,6 +188,11 @@ class CompanySettingsController extends Controller
      * @apiUse          UnauthorizedError
      *
      */
+    /**
+     * Update
+     *
+     * Updates the specified company settings.
+     */
     public function update(UpdateCompanySettingsRequest $request): JsonResponse
     {
         Settings::scope('core')->set($request->validated());
@@ -219,6 +229,13 @@ class CompanySettingsController extends Controller
      * @apiUse         UnauthorizedError
      * @apiUse         ItemNotFoundError
      * @apiUse         ForbiddenError
+     */
+    /**
+     * Get Offline Sync Public Key
+     *
+     * Retrieves the public key for offline synchronization.
+     *
+     * Required permission (any of): `offline_sync_view`, `offline_sync_full_access`
      */
     public function getOfflineSyncPublicKey(): JsonResponse
     {

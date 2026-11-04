@@ -60,6 +60,11 @@ class AboutController extends Controller
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
      */
+    /**
+     * Get Available Report Formats
+     *
+     * Retrieves the list of available report formats and their corresponding MIME types.
+     */
 
     public function reports(): JsonResponse
     {
@@ -126,6 +131,11 @@ class AboutController extends Controller
      * @apiUse         ValidationError
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
+     */
+    /**
+     * Get Application and Module Information
+     *
+     * Retrieves information about the application instance, modules, and image version details.
      */
 
     public function __invoke(ManageStorageRequest $request): JsonResponse
@@ -265,6 +275,11 @@ class AboutController extends Controller
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
      */
+    /**
+     * Get Storage Information
+     *
+     * Retrieves information about the storage space, thinning status, and available screenshots.
+     */
 
     public function storage(ManageStorageRequest $request): JsonResponse
     {
@@ -313,6 +328,12 @@ class AboutController extends Controller
     * @apiUse          ForbiddenError
     *
     */
+    /**
+     * Request Storage Cleanup
+     *
+     * Queues the screenshot thinning. The request is accepted, not started: follow thinning.status
+     * of GET /storage. Nothing is queued while a thinning is already queued or running.
+     */
     public function startStorageClean(ManageStorageRequest $request): JsonResponse
     {
         $runId = StorageCleanupStatus::queue();

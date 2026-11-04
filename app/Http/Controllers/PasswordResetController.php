@@ -50,6 +50,10 @@ class PasswordResetController extends BaseController
      * @apiUse         InvalidPasswordResetDataError
      */
     /**
+     * Validate
+     *
+     * Validates password reset token
+     *
      * @param Request $request
      * @return JsonResponse
      * @throws AuthorizationException
@@ -110,6 +114,10 @@ class PasswordResetController extends BaseController
      * @apiUse         LimiterError
      */
     /**
+     * Request
+     *
+     * Sends email to user with reset link
+     *
      * @param Request $request
      * @return JsonResponse
      * @throws AuthorizationException
@@ -187,6 +195,10 @@ class PasswordResetController extends BaseController
      * @apiUse         UnauthorizedError
      */
     /**
+     * Process
+     *
+     * Resets user password
+     *
      * @param Request $request
      * @return JsonResponse
      * @throws AuthorizationException

@@ -156,6 +156,13 @@ class UserController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
      */
+    /**
+     * List
+     *
+     * Get list of Users with any params
+     *
+     * Required permission (any of): `users_list`, `users_full_access`
+     */
     public function index(ListUsersRequest $request): JsonResponse
     {
         return $this->_index($request);
@@ -258,6 +265,12 @@ class UserController extends ItemController
      * @apiUse         ForbiddenError
      */
     /**
+     * Create
+     *
+     * Create User Entity
+     *
+     * Required permission (any of): `users_create`, `users_full_access`
+     *
      * @param CreateUserRequest $request
      * @return JsonResponse
      * @throws Throwable
@@ -352,6 +365,12 @@ class UserController extends ItemController
      * @apiUse         ItemNotFoundError
      */
     /**
+     * Edit
+     *
+     * Edit User
+     *
+     * Required permission (any of): `users_edit`, `users_full_access`
+     *
      * @param EditUserRequest $request
      * @return JsonResponse
      * @throws Throwable
@@ -404,6 +423,12 @@ class UserController extends ItemController
      */
 
     /**
+     * Show User
+     *
+     * Retrieves detailed information about a specific user.
+     *
+     * Required permission (any of): `users_show`, `users_full_access`
+     *
      * @param ShowUserRequest $request
      * @return JsonResponse
      * @throws Exception
@@ -447,6 +472,13 @@ class UserController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
+    /**
+     * Destroy
+     *
+     * Destroy User
+     *
+     * Required permission (any of): `users_remove`, `users_full_access`
+     */
     public function destroy(DestroyUserRequest $request): JsonResponse
     {
         return $this->_destroy($request);
@@ -476,6 +508,13 @@ class UserController extends ItemController
      * @apiUse          400Error
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
+     */
+    /**
+     * Count
+     *
+     * Count Users
+     *
+     * Required permission (any of): `users_count`, `users_full_access`
      */
     public function count(ListUsersRequest $request): JsonResponse
     {
@@ -514,6 +553,13 @@ class UserController extends ItemController
      * @apiUse          400Error
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
+     */
+    /**
+     * Send User Invitation
+     *
+     * Sends an invitation to a user by generating a password, marking the invitation as sent, and dispatching relevant events.
+     *
+     * Required permission: `users_invite`
      */
     public function sendInvite(SendInviteUserRequest $request): JsonResponse
     {
@@ -557,6 +603,11 @@ class UserController extends ItemController
      *  }
      *
      * @apiUse          UnauthorizedError
+     */
+    /**
+     * Activity
+     *
+     * Updates the time of the user's last activity
      */
     public function updateActivity(): JsonResponse
     {
