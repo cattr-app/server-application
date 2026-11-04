@@ -48,6 +48,7 @@
   },
   "require-dev": {
     "barryvdh/laravel-ide-helper": "^3.7",
+    "dedoc/scramble": "^0.13.53",
     "itsgoingd/clockwork": "^5.1",
     "laravel/tinker": "^3.0",
     "mockery/mockery": "^1.6",
