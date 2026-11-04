@@ -3,60 +3,65 @@
 namespace App\Docs\OpenApi;
 
 use Illuminate\Routing\Route;
-use Illuminate\Support\Str;
-use ReflectionClass;
 
 /**
  * Picks the one HTTP method to document for `Route::any()` routes (Scramble would take the first one, GET).
  *
- * The method comes from the `@api {method} /path` line of the controller's apiDoc block while those exist.
- * Without one (or for `{any}`) the fallback is POST for write-like route names and GET otherwise.
- * Routes with an explicit method list are left as they are.
+ * The method comes from the explicit route name => method table below. Read-only endpoints that take
+ * a large filter in the request body (`list`, `show`) are documented as POST, the rest as GET.
+ * A new `Route::any()` route must be added here: tests/Unit/AnyRouteMethodTest.php fails until it is.
+ * Unmapped routes are documented as GET. Routes with an explicit method list are left as they are.
  */
 class AnyRouteMethod
 {
-    private const WRITE_SUFFIXES = ['create', 'edit', 'remove', 'destroy', 'store', 'update', 'delete', 'resend', 'save'];
+    /** Route name => documented HTTP method for every `Route::any()` route. */
+    public const METHODS = [
+        'intervals.count' => 'get',
+        'intervals.list' => 'post',
+        'intervals.show' => 'post',
+        'invitations.list' => 'get',
+        'priorities.list' => 'get',
+        'priorities.show' => 'post',
+        'project_groups.count' => 'get',
+        'project_groups.list' => 'get',
+        'project_groups.show' => 'get',
+        'projects.count' => 'get',
+        'projects.list' => 'get',
+        'projects.show' => 'get',
+        'projects_members.list' => 'post',
+        'roles.list' => 'post',
+        'statuses.list' => 'get',
+        'statuses.show' => 'post',
+        'task_comments.list' => 'get',
+        'task_comments.show' => 'post',
+        'tasks.count' => 'get',
+        'tasks.list' => 'post',
+        'tasks.show' => 'post',
+        'time.tasks' => 'get',
+        'time.total' => 'get',
+        'users.count' => 'get',
+        'users.list' => 'get',
+        'users.show' => 'get',
+    ];
 
-    /** @var array<string, string> controller file => contents */
-    private array $sources = [];
+    public const DEFAULT_METHOD = 'get';
 
     public function __invoke(Route $route): string
     {
         $methods = array_map('strtolower', $route->methods());
 
-        if (!in_array('post', $methods, true) || !in_array('get', $methods, true) || !in_array('put', $methods, true)) {
+        if (!self::isAny($route)) {
             return $methods[0];
         }
 
-        return $this->fromApiDoc($route) ?? $this->fallback($route);
+        return self::METHODS[$route->getName()] ?? self::DEFAULT_METHOD;
     }
 
-    private function fromApiDoc(Route $route): ?string
+    /** Whether the route was registered with `Route::any()`. */
+    public static function isAny(Route $route): bool
     {
-        $controller = $route->getControllerClass();
-        $file = $controller && class_exists($controller) ? (new ReflectionClass($controller))->getFileName() : null;
-        if (!$file) {
-            return null;
-        }
+        $methods = $route->methods();
 
-        $this->sources[$file] ??= (string) file_get_contents($file);
-        $uri = preg_quote(Str::after($route->uri, 'api/'), '#');
-
-        if (!preg_match('#@api\s+\{([^}]+)\}\s+/(?:api/)?'.$uri.'(?:\s|$)#', $this->sources[$file], $match)) {
-            return null;
-        }
-
-        foreach (preg_split('/\s*,\s*/', strtolower(trim($match[1]))) as $method) {
-            if (in_array($method, ['get', 'post', 'put', 'patch', 'delete'], true)) {
-                return $method;
-            }
-        }
-
-        return null;
-    }
-
-    private function fallback(Route $route): string
-    {
-        return Str::endsWith((string) $route->getName(), self::WRITE_SUFFIXES) ? 'post' : 'get';
+        return in_array('POST', $methods, true) && in_array('GET', $methods, true) && in_array('PUT', $methods, true);
     }
 }
