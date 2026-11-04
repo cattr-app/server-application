@@ -49,8 +49,7 @@ class OperationFixes extends OperationExtension
         }
 
         foreach ($operation->parameters as $parameter) {
-            if (
-                $parameter instanceof Parameter
+            if ($parameter instanceof Parameter
                 && $parameter->in === 'path'
                 && in_array($parameter->name, self::INTEGER_PATH_PARAMETERS, true)
             ) {
