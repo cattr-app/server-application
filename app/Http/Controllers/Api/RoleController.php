@@ -56,6 +56,11 @@ class RoleController extends ItemController
      * @apiUse UnauthorizedError
      * @apiUse ForbiddenError
      */
+    /**
+     * Get Roles List
+     *
+     * Retrieves the list of roles available in the system.
+     */
     public function index(): JsonResponse
     {
         CatEvent::dispatch(Filter::getBeforeActionEventName());

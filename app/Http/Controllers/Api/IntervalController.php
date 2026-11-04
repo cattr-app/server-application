@@ -82,6 +82,13 @@ class IntervalController extends ItemController
      * @apiUse          UnauthorizedError
      * @apiUse          ForbiddenError
      */
+    /**
+     * List
+     *
+     * Get list of Time Intervals
+     *
+     * Required permission (any of): `time_intervals_list`, `time_intervals_full_access`
+     */
 
     public function index(ListIntervalRequest $request): JsonResponse
     {
@@ -136,6 +143,13 @@ class IntervalController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          ValidationError
      */
+    /**
+     * Show
+     *
+     * Show Time Interval
+     *
+     * Required permission (any of): `time_intervals_show`, `time_intervals_full_access`
+     */
     public function show(ShowIntervalRequest $request): JsonResponse
     {
         Filter::listen(
@@ -179,6 +193,13 @@ class IntervalController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
+    /**
+     * Count
+     *
+     * Count Time Intervals
+     *
+     * @deprecated since 1.0.0
+     */
     public function count(ListIntervalRequest $request): JsonResponse
     {
         return $this->_count($request);
@@ -218,6 +239,13 @@ class IntervalController extends ItemController
      * @apiUse          ValidationError
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
+     */
+    /**
+     * Destroy
+     *
+     * Destroy Time Interval
+     *
+     * Required permission (any of): `time_intervals_remove`, `time_intervals_full_access`
      */
     public function destroy(DestroyTimeIntervalRequest $request): JsonResponse
     {
@@ -280,6 +308,11 @@ class IntervalController extends ItemController
      * @apiUse          ValidationError
      * @apiUse          UnauthorizedError
      * @apiUse          ForbiddenError
+     */
+    /**
+     * Bulk Edit
+     *
+     * Multiple Edit TimeInterval to assign tasks to them
      */
     public function bulkEdit(BulkEditTimeIntervalRequest $request): JsonResponse
     {
@@ -359,6 +392,13 @@ class IntervalController extends ItemController
      * @apiUse          UnauthorizedError
      *
      */
+    /**
+     * Bulk Destroy
+     *
+     * Multiple Destroy TimeInterval
+     *
+     * Required permission (any of): `time_intervals_bulk_remove`, `time_intervals_full_access`
+     */
     public function bulkDestroy(BulkDestroyTimeIntervalRequest $request): JsonResponse
     {
         $intervalIds = Filter::process(Filter::getRequestFilterName(), $request->validated())['intervals'];
@@ -413,6 +453,9 @@ class IntervalController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      *
+     */
+    /**
+     * Adds the current user’s ID
      */
     public function trackApp(TrackAppRequest $request): JsonResponse
     {
@@ -489,6 +532,13 @@ class IntervalController extends ItemController
      * @apiUse          UnauthorizedError
      * @apiUse          ForbiddenError
      */
+    /**
+     * Create
+     *
+     * Create Time Interval
+     *
+     * Required permission (any of): `time_intervals_create`, `time_intervals_full_access`
+     */
     public function create(CreateTimeIntervalRequest $request): JsonResponse
     {
         Filter::listen(
@@ -555,6 +605,13 @@ class IntervalController extends ItemController
      * @apiError (403) InvalidSignature Missing, invalid or expired signature
      * @apiUse          ItemNotFoundError
      */
+    /**
+     * Screenshot
+     *
+     * Stream the screenshot of an interval. Not authenticated: access is granted by the
+     * temporary signature (10 min) of the URL from `screenshot_url` or `screenshot-urls`.
+     * Used only with the local disk; on S3 the URLs point to the bucket directly.
+     */
     public function showScreenshot(Request $request, int $interval): StreamedResponse
     {
         return $this->streamScreenshot($request, $this->screenshotService->getScreenshotPath($interval));
@@ -574,6 +631,11 @@ class IntervalController extends ItemController
      * @apiSuccess {File}   thumbnail  JPEG image
      * @apiError (403) InvalidSignature Missing, invalid or expired signature
      * @apiUse          ItemNotFoundError
+     */
+    /**
+     * Thumbnail
+     *
+     * Stream the screenshot thumbnail of an interval, see Screenshot.
      */
     public function showThumbnail(Request $request, int $interval): StreamedResponse
     {
@@ -624,6 +686,12 @@ class IntervalController extends ItemController
      * @apiUse          UnauthorizedError
      * @apiUse          ForbiddenError
      * @apiUse          ItemNotFoundError
+     */
+    /**
+     * Screenshot URLs
+     *
+     * Fresh temporary URLs of the interval screenshot and thumbnail
+     * (for pages open longer than the URL lifetime and for report payloads without URLs)
      */
     public function screenshotUrls(ScreenshotRequest $request, TimeInterval $interval): JsonResponse
     {
@@ -1063,6 +1131,11 @@ class IntervalController extends ItemController
      * @apiUse          UnauthorizedError
      *
      */
+    /**
+     * Calculate total time interval
+     *
+     * Calculate the total time spent within the specified start and end intervals for a given user.
+     */
 
     public function total(IntervalTotalRequest $request): JsonResponse
     {
@@ -1148,6 +1221,11 @@ class IntervalController extends ItemController
     * @apiUse          UnauthorizedError
     *
     */
+    /**
+     * Calculate total time interval
+     *
+     * Calculate the total time spent within the specified start and end intervals for a given user.
+     */
 
     public function tasks(IntervalTasksRequest $request): JsonResponse
     {

@@ -52,6 +52,11 @@ class PriorityController extends ItemController
      * @apiUse          UnauthorizedError
      *
      */
+    /**
+     * Show
+     *
+     * Show priority.
+     */
     public function show(ShowPriorityRequest $request): JsonResponse
     {
         return $this->_show($request);
@@ -86,6 +91,11 @@ class PriorityController extends ItemController
      * @apiUse          UnauthorizedError
      *
      */
+    /**
+     * List
+     *
+     * Get list of priorities.
+     */
     public function index(ListPriorityRequest $request): JsonResponse
     {
         return $this->_index($request);
@@ -118,6 +128,11 @@ class PriorityController extends ItemController
      * @apiUse          PriorityObject
      * @apiUse          400Error
      * @apiUse          UnauthorizedError
+     */
+    /**
+     * Create
+     *
+     * Creates priority
      */
     public function create(CreatePriorityRequest $request): JsonResponse
     {
@@ -153,6 +168,11 @@ class PriorityController extends ItemController
      * @apiUse         ValidationError
      * @apiUse         UnauthorizedError
      * @apiUse         ItemNotFoundError
+     */
+    /**
+     * Edit
+     *
+     * Edit Priority
      */
     public function edit(UpdatePriorityRequest $request): JsonResponse
     {
@@ -190,6 +210,11 @@ class PriorityController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
+    /**
+     * Destroy
+     *
+     * Destroy User
+     */
     public function destroy(DestroyPriorityRequest $request): JsonResponse
     {
         return $this->_destroy($request);
@@ -209,6 +234,10 @@ class PriorityController extends ItemController
      * @apiUse UnauthorizedError
      */
     /**
+     * Count Priorities
+     *
+     * Returns the total count of priorities
+     *
      * @param ListPriorityRequest $request
      * @return JsonResponse
      * @throws Exception

@@ -30,6 +30,10 @@ class StatusController extends Controller
      *  }
      */
     /**
+     * Status
+     *
+     * Check API status
+     *
      * @return JsonResponse
      * @throws Exception
      */

@@ -101,6 +101,11 @@ class DashboardController
      * @apiUse          ValidationError
      * @apiUse          UnauthorizedError
      */
+    /**
+     * Dashboard Data
+     *
+     * Retrieve dashboard data based on provided parameters.
+     */
     public function __invoke(DashboardRequest $request): JsonResponse
     {
         $companyTimezone = Settings::scope('core')->get('timezone', 'UTC');
@@ -165,6 +170,13 @@ class DashboardController
      * @apiUse          UnauthorizedError
      * @apiUse          ForbiddenError
      * @apiUse          ItemNotFoundError
+     */
+    /**
+     * Download Dashboard Report
+     *
+     * Generate and download a dashboard report
+     *
+     * Required permission (any of): `report_generate`, `report_full_access`
      */
     public function download(DashboardRequest $request): JsonResponse
     {
