@@ -19,30 +19,6 @@ class StatusController extends ItemController
     protected const MODEL = Status::class;
 
     /**
-     * @throws Throwable
-     * @api             {post} /statuses/show Show
-     * @apiDescription  Show status.
-     *
-     * @apiVersion      4.0.0
-     * @apiName         Show Status
-     * @apiGroup        Status
-     *
-     * @apiUse          AuthHeader
-     *
-     * @apiParam {Integer} id  Status ID
-     *
-     * @apiParamExample {json} Request Example
-     * {
-     *   "id": 1
-     * }
-     *
-     * @apiUse StatusObject
-     *
-     * @apiUse          400Error
-     * @apiUse          UnauthorizedError
-     *
-     */
-    /**
      * Show
      *
      * Show status.
@@ -53,25 +29,6 @@ class StatusController extends ItemController
     }
 
     /**
-     * @throws Throwable
-     * @api             {get} /statuses/list List
-     * @apiDescription  Get list of statuses.
-     *
-     * @apiVersion      4.0.0
-     * @apiName         Status List
-     * @apiGroup        Status
-     *
-     * @apiUse          AuthHeader
-     *
-     * @apiSuccess {Object}   res      Status
-     *
-     * @apiUse StatusObject
-     *
-     * @apiUse          400Error
-     * @apiUse          UnauthorizedError
-     *
-     */
-    /**
      * List
      *
      * Get list of statuses.
@@ -81,48 +38,6 @@ class StatusController extends ItemController
         return $this->_index($request);
     }
 
-    /**
-     * @param CreateStatusRequest $request
-     * @return JsonResponse
-     * @throws Throwable
-     * @api             {post} /statuses/create Create
-     * @apiDescription  Creates status
-     *
-     * @apiVersion      4.0.0
-     * @apiName         Create Status
-     * @apiGroup        Status
-     *
-     * @apiUse          AuthHeader
-     *
-     * @apiParam {String}  name   Status name
-     * @apiParam {String}  active Status active
-     *
-     * @apiParamExample {json} Request Example
-     *  {
-     *    "name": "Normal",
-     *    "active": false
-     *  }
-     *
-     * @apiSuccess {Object}   res      Status
-     *
-     * @apiSuccess {Number}   id             The ID of the status.
-     * @apiSuccess {String}   name           The name of the status.
-     * @apiSuccess {Boolean}  active         Indicates if the status is active.\
-     * @apiSuccess {String}   created_at     The creation timestamp.
-     * @apiSuccess {String}   updated_at     The last update timestamp.
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *   "id": 10,
-     *   "name": "Normal",
-     *   "active": false,
-     *   "created_at": "2024-08-15T14:04:03.000000Z",
-     *   "updated_at": "2024-08-15T14:04:03.000000Z"
-     * }
-     *
-     * @apiUse          400Error
-     * @apiUse          UnauthorizedError
-     */
     /**
      * Create
      *
@@ -139,37 +54,6 @@ class StatusController extends ItemController
         return $this->_create($request);
     }
 
-    /**
-     * @throws Throwable
-     * @api             {post} /statuses/edit Edit
-     * @apiDescription  Edit Status
-     *
-     * @apiVersion      4.0.0
-     * @apiName         Edit
-     * @apiGroup        Status
-     *
-     * @apiUse          AuthHeader
-     *
-     * @apiParam {Integer}  id           ID
-     * @apiParam {String}   name    Status name
-     * @apiParam {String}   active  Status active
-     *
-     * @apiParamExample {json} Simple Request Example
-     *  {
-     *    "id": 1,
-     *    "name": "Normal",
-     *    "active": false
-     *  }
-     *
-     * @apiSuccess {Object}   res      Status
-     *
-     * @apiUse         StatusObject
-     *
-     * @apiUse         400Error
-     * @apiUse         ValidationError
-     * @apiUse         UnauthorizedError
-     * @apiUse         ItemNotFoundError
-     */
     /**
      * Edit
      *
@@ -210,31 +94,6 @@ class StatusController extends ItemController
 
 
     /**
-     * @throws Throwable
-     * @api             {post} /statuses/remove Destroy
-     * @apiDescription  Destroy User
-     *
-     * @apiVersion      4.0.0
-     * @apiName         Destroy Status
-     * @apiGroup        Status
-     *
-     * @apiUse          AuthHeader
-     *
-     * @apiParam {Integer}  id  ID of the target status
-     *
-     * @apiParamExample {json} Request Example
-     * {
-     *   "id": 1
-     * }
-     *
-     * @apiSuccess (204) No Content  Indicates that the status was successfully removed or deactivated.
-     *
-     * @apiUse          400Error
-     * @apiUse          ValidationError
-     * @apiUse          ForbiddenError
-     * @apiUse          UnauthorizedError
-     */
-    /**
      * Destroy
      *
      * Destroy User
@@ -244,30 +103,6 @@ class StatusController extends ItemController
         return $this->_destroy($request);
     }
 
-    /**
-     * @param ListStatusRequest $request
-     * @return JsonResponse
-     * @throws Exception
-     */
-    /**
-     * @api            {get} /invitations/count Count Invitations
-     * @apiDescription Get the count of invitations
-     *
-     * @apiVersion     4.0.0
-     * @apiName        CountInvitations
-     * @apiGroup       Invitations
-     *
-     * @apiSuccess {Integer} total The total count of pending invitations.
-     *
-     * @apiSuccessExample {json} Success Response:
-     * {
-     *     "total": 0
-     * }
-     *
-     * @apiUse TotalSuccess
-     * @apiUse 400Error
-     * @apiUse UnauthorizedError
-     */
     /**
      * Count Invitations
      *

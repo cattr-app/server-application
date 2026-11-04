@@ -3,8 +3,6 @@
 /public/js
 /public/storage
 /public/images
-/apidoc/*
-/public/apidoc
 /storage/*.key
 /storage/app/backups/*
 /vendor
@@ -52,7 +50,6 @@ composer.phar
 
 /public/dist
 /resources/frontend/app/generated
-/resources/template-apidoc
 
 /public/mix-manifest.json
 /public/mix-sri.json

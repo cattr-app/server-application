@@ -3,8 +3,6 @@
 /public/js
 /public/storage
 /public/images
-/apidoc/*
-/public/apidoc
 /storage/*.key
 /storage/app/backups/*
 /vendor
@@ -68,7 +66,6 @@ composer.phar
 
 erd.svg
 
-apidoc
 .cattr-base-*
 
 .local
