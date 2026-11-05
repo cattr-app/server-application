@@ -32,9 +32,9 @@ class TaskCommentPolicy
     }
 
 
-    public function update(): bool
+    public function update(User $user, TaskComment $comment): bool
     {
-        return true;
+        return $comment->user_id === $user->id;
     }
 
 
