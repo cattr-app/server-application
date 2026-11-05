@@ -9,7 +9,6 @@ use App\Http\Requests\Attachment\DownloadAttachmentRequest;
 use App\Models\Attachment;
 use Filter;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 use URL;
@@ -37,12 +36,8 @@ class AttachmentController extends ItemController
         return $this->_create($request);
     }
 
-    public function tmpDownload(Request $request, Attachment $attachment): ?StreamedResponse
+    public function tmpDownload(Attachment $attachment): ?StreamedResponse
     {
-        if (! $request->hasValidSignature()) {
-            abort(401);
-        }
-
         return $this->streamDownloadLogic($attachment);
     }
 
