@@ -15,10 +15,16 @@ reviews:
   poem: false
   collapse_walkthrough: true
 
+  auto_approvals:
+    enabled: true
+    allow_author_approval: false
+
   auto_review:
     enabled: true
     drafts: false
     auto_incremental_review: true
+    base_branches:
+      - "^release/.*$"
 
 chat:
   auto_reply: true
