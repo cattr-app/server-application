@@ -209,7 +209,9 @@ class QueryHelper
         return [
             'limit' => 'sometimes|int',
             'offset' => 'sometimes|int',
-            'orderBy' => 'sometimes|array',
+            'orderBy' => 'sometimes|array|list|min:1|max:2',
+            'orderBy.0' => 'required_with:orderBy|string',
+            'orderBy.1' => ['sometimes', 'string', 'regex:/^(asc|desc)$/i'],
             'with.*' => 'sometimes|string',
             'withCount.*' => 'sometimes|string',
             'withSum.*.*' => 'sometimes|string',
