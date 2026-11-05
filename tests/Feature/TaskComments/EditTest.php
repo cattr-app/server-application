@@ -61,6 +61,7 @@ class EditTest extends TestCase
         $this->edit($this->admin)->assertOk();
 
         $this->assertDatabaseHas('task_comment', ['id' => $this->comment->id, 'content' => 'edited']);
+        $this->assertDatabaseHas('task_comment', ['id' => $this->comment->id, 'user_id' => $this->author->id]);
     }
 
     public function test_project_colleague_cannot_edit_foreign_comment(): void
@@ -89,6 +90,17 @@ class EditTest extends TestCase
     public function test_unknown_comment_is_not_found(): void
     {
         $this->edit($this->author, 999999)->assertNotFound('page_not_found');
+    }
+
+    public function test_non_integer_id_is_rejected_by_validation(): void
+    {
+        foreach ([[$this->comment->id], (string)$this->comment->id, 'abc'] as $id) {
+            $this->actingAs($this->admin)
+                ->postJson(self::URI, ['id' => $id, 'content' => 'edited'])
+                ->assertValidationError();
+        }
+
+        $this->assertDatabaseHas('task_comment', ['id' => $this->comment->id, 'content' => 'original']);
     }
 
     public function test_edit_keeps_the_author(): void
