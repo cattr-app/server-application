@@ -7,7 +7,6 @@ use App\Helpers\ModuleHelper;
 use App\Helpers\ReportHelper;
 use App\Helpers\StorageCleaner;
 use App\Helpers\StorageCleanupStatus;
-use App\Helpers\Version;
 use App\Jobs\RotateScreenshots;
 use Exception;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -166,15 +165,31 @@ class AboutController extends Controller
 
     private function requestModulesInfo(): array
     {
-        try {
-            return array_map(static function ($el) {
-                $el['version'] = (string)(new Version($el['name']));
+        $local = ModuleHelper::getModulesInfo();
 
-                return $el;
-            }, $this->statsClient()->post('modules', ModuleHelper::getModulesInfo())->throw()->json('modules'));
+        try {
+            $remote = $this->statsClient()->post('modules', $local)->throw()->json('modules');
         } catch (Exception) {
-            return ModuleHelper::getModulesInfo();
+            return $local;
         }
+
+        if (!is_array($remote)) {
+            return $local;
+        }
+
+        // The local registry is the source of truth for which modules are installed:
+        // the collector only enriches the modules it knows about and must not hide the rest.
+        $known = [];
+        foreach ($remote as $module) {
+            if (is_array($module) && isset($module['name']) && is_string($module['name'])) {
+                $known[mb_strtolower($module['name'])] = $module;
+            }
+        }
+
+        return array_map(
+            static fn (array $module) => array_merge($known[mb_strtolower($module['name'])] ?? [], $module),
+            $local
+        );
     }
 
     private function requestImageInfo(string $imageVersion): ?object
