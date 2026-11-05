@@ -19,7 +19,7 @@ class TaskActivityController extends ItemController
 {
     private static function getSortDirection(array $requestData): string
     {
-        return SortDirection::tryFrom($requestData['orderBy'][1] ?? '')?->value ?? 'asc';
+        return SortDirection::tryFrom(strtolower($requestData['orderBy'][1] ?? ''))?->value ?? 'asc';
     }
 
     private function getQueryBuilder(array $filter, string $model): Builder

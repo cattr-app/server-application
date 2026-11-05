@@ -75,6 +75,7 @@ class ActivityTest extends TestCase
             'unknown direction' => [['id', 'invalid']],
             'too many items' => [['id', 'asc', 'extra']],
             'no column' => [[1 => 'asc']],
+            'sparse' => [[0 => 'id', 2 => 'desc']],
         ];
     }
 
@@ -84,13 +85,22 @@ class ActivityTest extends TestCase
         $this->request('comments', ['orderBy' => $orderBy])->assertUnprocessable();
     }
 
+    public function test_direction_is_case_insensitive(): void
+    {
+        $desc = $this->idsOf($this->request('comments', ['orderBy' => ['id', 'DESC']])->json('data'));
+
+        $this->assertSame(array_reverse($this->commentIds), $desc);
+    }
+
     public function test_default_direction_is_ascending(): void
     {
         $default = $this->idsOf($this->request('comments')->json('data'));
+        $idOnly = $this->idsOf($this->request('comments', ['orderBy' => ['id']])->json('data'));
         $asc = $this->idsOf($this->request('comments', ['orderBy' => ['id', 'asc']])->json('data'));
         $desc = $this->idsOf($this->request('comments', ['orderBy' => ['id', 'desc']])->json('data'));
 
         $this->assertSame($this->commentIds, $default);
+        $this->assertSame($this->commentIds, $idOnly);
         $this->assertSame($this->commentIds, $asc);
         $this->assertSame(array_reverse($this->commentIds), $desc);
     }
