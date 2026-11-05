@@ -68,6 +68,22 @@ class ActivityTest extends TestCase
         $this->request($type, ['orderBy' => ['id']])->assertOk();
     }
 
+    public static function invalidOrderBy(): array
+    {
+        return [
+            'empty' => [[]],
+            'unknown direction' => [['id', 'invalid']],
+            'too many items' => [['id', 'asc', 'extra']],
+            'no column' => [[1 => 'asc']],
+        ];
+    }
+
+    #[DataProvider('invalidOrderBy')]
+    public function test_malformed_order_by_is_rejected(array $orderBy): void
+    {
+        $this->request('comments', ['orderBy' => $orderBy])->assertUnprocessable();
+    }
+
     public function test_default_direction_is_ascending(): void
     {
         $default = $this->idsOf($this->request('comments')->json('data'));
