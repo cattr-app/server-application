@@ -114,19 +114,10 @@ class UniversalReportController
 
     public function edit(UniversalReportEditRequest $request)
     {
-        if ($request->input('type') === UniversalReportType::COMPANY->value) {
-            if ($request->user()->isAdmin()) {
-                UniversalReport::where('id', $request->id)->update([
-                    'name' => $request->name,
-                    'type' => $request->type,
-                    'base' => $request->base,
-                    'data_objects' => $request->dataObjects,
-                    'fields' => $request->fields,
-                    'charts' => $request->charts,
-                ]);
-            } else {
-                return throw new NotEnoughRightsException('User rights do not allow saving the report for the company');
-            }
+        $isCompany = $request->input('type') === UniversalReportType::COMPANY->value;
+
+        if ($isCompany && !$request->user()->isAdmin()) {
+            return throw new NotEnoughRightsException('User rights do not allow saving the report for the company');
         }
 
         UniversalReport::where('id', $request->id)->update([
