@@ -942,8 +942,8 @@ class TaskController extends ItemController
         $packed = MessagePack::pack($projectsAndTasks);
 
         return response()->make($packed, 200, [
-            'Content-type: application/octet-stream',
-            'Content-Disposition: attachment; filename=ProjectsAndTasks.cattr'
+            'Content-Type' => 'application/octet-stream',
+            'Content-Disposition' => 'attachment; filename=ProjectsAndTasks.cattr'
         ]);
     }
 
