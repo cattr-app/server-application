@@ -28,7 +28,11 @@ interface AttachmentService
 
     public function deleteAttachment(Attachment $attachment): void;
 
-    public function deleteAttachments(array $attachmentsIds): void;
+    /**
+     * Deletes the listed attachments that belong to the parent, or that the user has uploaded and not attached yet.
+     * Any other id is ignored.
+     */
+    public function deleteAttachments(array $attachmentsIds, AttachmentAble $parent, int $userId): void;
 
     public function handleParentDeletion(AttachmentAble $parent): void;
 
