@@ -18,6 +18,9 @@ class ActivityTest extends TestCase
     private User $admin;
     private Task $task;
 
+    /** @var int[] comment ids in creation (ascending) order */
+    private array $commentIds = [];
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -26,11 +29,11 @@ class ActivityTest extends TestCase
         $this->task = TaskFactory::create();
 
         foreach (['First', 'Second'] as $content) {
-            TaskComment::create([
+            $this->commentIds[] = TaskComment::create([
                 'task_id' => $this->task->id,
                 'user_id' => $this->admin->id,
                 'content' => $content,
-            ]);
+            ])->id;
         }
     }
 
@@ -43,7 +46,7 @@ class ActivityTest extends TestCase
         ] + $extra);
     }
 
-    private function commentIds(array $items): array
+    private function idsOf(array $items): array
     {
         return collect($items)->where('content', '!=', null)->pluck('id')->all();
     }
@@ -67,12 +70,12 @@ class ActivityTest extends TestCase
 
     public function test_default_direction_is_ascending(): void
     {
-        $default = $this->commentIds($this->request('comments')->json('data'));
-        $asc = $this->commentIds($this->request('comments', ['orderBy' => ['id', 'asc']])->json('data'));
-        $desc = $this->commentIds($this->request('comments', ['orderBy' => ['id', 'desc']])->json('data'));
+        $default = $this->idsOf($this->request('comments')->json('data'));
+        $asc = $this->idsOf($this->request('comments', ['orderBy' => ['id', 'asc']])->json('data'));
+        $desc = $this->idsOf($this->request('comments', ['orderBy' => ['id', 'desc']])->json('data'));
 
-        $this->assertCount(2, $default);
-        $this->assertSame($asc, $default);
-        $this->assertSame(array_reverse($asc), $desc);
+        $this->assertSame($this->commentIds, $default);
+        $this->assertSame($this->commentIds, $asc);
+        $this->assertSame(array_reverse($this->commentIds), $desc);
     }
 }
