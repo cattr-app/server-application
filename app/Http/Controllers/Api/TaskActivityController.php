@@ -40,6 +40,8 @@ class TaskActivityController extends ItemController
         }
 
         QueryHelper::apply($query, $model, $filter);
+        // The request is authorized for this task only, whatever the client-supplied `where` says
+        $query->where($model->getTable() . '.task_id', $filter['task_id']);
         $sortDirection = self::getSortDirection($filter);
         $query->orderBy('id', $sortDirection);
 
