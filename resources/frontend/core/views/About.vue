@@ -71,7 +71,7 @@
     import AboutService from '@/services/resource/about.service';
     import { hasRole } from '@/utils/user';
     import semverGt from 'semver/functions/gt';
-    import { Skeleton } from 'vue-loading-skeleton';
+    import Skeleton from '@/components/Skeleton';
 
     const aboutService = new AboutService();
 

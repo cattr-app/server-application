@@ -40,3 +40,94 @@ test('login and logout', async ({ page }) => {
     await page.goto('/projects');
     await expect(page).toHaveURL(/\/auth\/login/);
 });
+
+test('login is sent after leaving the page with a captcha and coming back', async ({ page, consoleGuard }) => {
+    // The first login attempt is answered with 429, so the captcha appears; Chrome logs the failed resource.
+    consoleGuard.expect(/^Failed to load resource: the server responded with a status of 429 \(Too Many Requests\)$/);
+
+    // The callback name must match ONLOAD_CALLBACK in Recaptcha.vue.
+    // Stand-in for the Google script (no network on the stand): the same global API, loaded once per tab.
+    await page.route('https://www.google.com/recaptcha/api.js*', route =>
+        route.fulfill({
+            contentType: 'text/javascript',
+            body: "window.grecaptcha = { render: () => 0, reset: () => {}, getResponse: () => '' }; window.vueRecaptchaApiLoaded();",
+        }),
+    );
+    let throttled = false;
+    await page.route('**/api/auth/login', route => {
+        if (throttled) {
+            return route.continue();
+        }
+        throttled = true;
+        return route.fulfill({
+            status: 429,
+            json: { error: { message: 'Too many login attempts' }, info: { site_key: 'e2e-site-key' } },
+        });
+    });
+
+    const fillAndSubmit = async () => {
+        await page.getByPlaceholder('E-Mail').fill('admin@cattr.app');
+        await page.getByPlaceholder('Password').fill('password');
+        await page.getByRole('button', { name: 'Login' }).click();
+    };
+    // Client-side navigation; the pushed route object is not returned (it is not serializable).
+    const router = to =>
+        page.evaluate(path => {
+            document.querySelector('#app').__vue__.$router.push(path);
+        }, to);
+
+    await page.goto('/auth/login');
+    await fillAndSubmit();
+    await expect(page.locator('.login__form .recaptcha')).toBeAttached();
+
+    // Leave and come back without a reload: grecaptcha stays loaded, the new form has no captcha.
+    await router('/auth/password/reset');
+    await expect(page).toHaveURL(/\/auth\/password\/reset/);
+    await router('/auth/login');
+    await expect(page.locator('.login__form')).toBeVisible();
+    await expect(page.locator('.login__form .recaptcha')).toHaveCount(0);
+
+    const loginRequest = page.waitForRequest(request => request.url().endsWith('/api/auth/login'));
+    await fillAndSubmit();
+    await loginRequest;
+    await expect(page).toHaveURL(/\/dashboard/);
+});
+
+test('login sends the solved captcha response', async ({ page, consoleGuard }) => {
+    consoleGuard.expect(/^Failed to load resource: the server responded with a status of 429 \(Too Many Requests\)$/);
+
+    // Stand-in for the Google script that lets the test solve the captcha (the callback name must match
+    // ONLOAD_CALLBACK in Recaptcha.vue).
+    await page.route('https://www.google.com/recaptcha/api.js*', route =>
+        route.fulfill({
+            contentType: 'text/javascript',
+            body: "window.grecaptcha = { render: (el, options) => { window.__solveCaptcha = options.callback; return 0; }, reset: () => {}, getResponse: () => '' }; window.vueRecaptchaApiLoaded();",
+        }),
+    );
+    let throttled = false;
+    let sentToken = null;
+    await page.route('**/api/auth/login', route => {
+        if (!throttled) {
+            throttled = true;
+            return route.fulfill({
+                status: 429,
+                json: { error: { message: 'Too many login attempts' }, info: { site_key: 'e2e-site-key' } },
+            });
+        }
+        sentToken = route.request().postDataJSON().recaptcha;
+        return route.continue();
+    });
+
+    await page.goto('/auth/login');
+    await page.getByPlaceholder('E-Mail').fill('admin@cattr.app');
+    await page.getByPlaceholder('Password').fill('password');
+    await page.getByRole('button', { name: 'Login' }).click();
+    await expect(page.locator('.login__form .recaptcha')).toBeAttached();
+    await page.waitForFunction(() => typeof window.__solveCaptcha === 'function');
+
+    await page.evaluate(() => window.__solveCaptcha('e2e-solved-token'));
+    await page.getByRole('button', { name: 'Login' }).click();
+
+    await expect(page).toHaveURL(/\/dashboard/);
+    expect(sentToken).toBe('e2e-solved-token');
+});

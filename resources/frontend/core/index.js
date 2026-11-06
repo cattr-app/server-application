@@ -10,11 +10,9 @@ import { store, init as routerInit } from '@/store';
 import AtComponents from '@amazingcat/cattr-ui';
 import DatePicker from 'vue2-datepicker';
 import i18n from '@/i18n';
-import VueLazyload from 'vue-lazyload';
 import '@/plugins/vee-validate';
 import '@/policies';
 import Gate from '@/plugins/gate';
-import vueKanban from 'vue-kanban';
 import { Workbox } from 'workbox-window';
 
 //Global components
@@ -24,11 +22,7 @@ Vue.config.productionTip = false;
 
 Vue.use(AtComponents);
 Vue.use(DatePicker);
-Vue.use(VueLazyload, {
-    lazyComponent: true,
-});
 Vue.use(Gate);
-Vue.use(vueKanban);
 
 installGlobalComponents(Vue);
 

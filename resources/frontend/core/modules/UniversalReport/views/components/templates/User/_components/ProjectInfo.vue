@@ -63,7 +63,7 @@
 </template>
 
 <script>
-    import { Skeleton } from 'vue-loading-skeleton';
+    import Skeleton from '@/components/Skeleton';
     import TaskInfo from './TaskInfo';
 
     export default {

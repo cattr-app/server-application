@@ -64,7 +64,7 @@
 <script>
     import { mapGetters } from 'vuex';
     import { formatDurationString } from '@/utils/time';
-    import { Skeleton } from 'vue-loading-skeleton';
+    import Skeleton from '@/components/Skeleton';
     import ProjectInfo from './ProjectInfo';
     import Charts from '../../../Charts';
 

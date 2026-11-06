@@ -76,7 +76,7 @@
 <script>
     import { mapGetters } from 'vuex';
     import { formatDurationString } from '@/utils/time';
-    import { Skeleton } from 'vue-loading-skeleton';
+    import Skeleton from '@/components/Skeleton';
 
     export default {
         name: 'TimelineSidebar',
