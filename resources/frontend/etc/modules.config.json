@@ -6,5 +6,9 @@
   "AmazingCat_RedmineIntegration": {
     "type": "package",
     "ref": "@amazingcat/cattr-redmine-integration"
+  },
+  "AmazingCat_GitlabIntegration": {
+    "type": "package",
+    "ref": "@amazingcat/cattr-gitlab-integration"
   }
 }
