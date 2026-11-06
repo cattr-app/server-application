@@ -128,7 +128,10 @@ class ActivityTest extends TestCase
         $second = $this->request('all', ['page' => 2]);
         $third = $this->request('all', ['page' => 3]);
 
-        $first->assertOk()->assertJsonPath('pagination.total', 60)->assertJsonPath('pagination.perPage', 30)->assertJsonPath('pagination.totalPages', 2);
+        $first->assertOk()
+            ->assertJsonPath('pagination.total', 60)
+            ->assertJsonPath('pagination.perPage', 30)
+            ->assertJsonPath('pagination.totalPages', 2);
         $this->assertCount(30, $first->json('data'));
         $this->assertCount(30, $second->json('data'));
         $this->assertCount(0, $third->json('data'));
@@ -142,7 +145,9 @@ class ActivityTest extends TestCase
         $total = count($this->commentIds) + TaskHistory::query()->where('task_id', $this->task->id)->count();
         $ids = [];
         foreach ([1, 2] as $page) {
-            $response = $this->request('all', ['page' => $page])->assertOk()->assertJsonPath('pagination.total', $total);
+            $response = $this->request('all', ['page' => $page])
+                ->assertOk()
+                ->assertJsonPath('pagination.total', $total);
             foreach ($response->json('data') as $item) {
                 $ids[] = (isset($item['content']) ? 'c' : 'h') . $item['id'];
             }
@@ -177,5 +182,55 @@ class ActivityTest extends TestCase
         }
 
         $this->assertCount(60, array_unique($ids));
+    }
+
+    public static function mergedDirections(): array
+    {
+        return [
+            // The comment goes first among entries created at the same time
+            'asc' => ['asc', ['c:A', 'c:C', 'h:B', 'h:D']],
+            'desc' => ['desc', ['h:D', 'h:B', 'c:C', 'c:A']],
+        ];
+    }
+
+    #[DataProvider('mergedDirections')]
+    public function test_all_orders_sources_by_creation_time(string $direction, array $expected): void
+    {
+        TaskComment::query()->where('task_id', $this->task->id)->delete();
+        TaskHistory::query()->where('task_id', $this->task->id)->delete();
+
+        $entries = [
+            'c:A' => [TaskComment::class, '2026-01-01 10:00:00'],
+            'h:B' => [TaskHistory::class, '2026-01-01 11:00:00'],
+            'c:C' => [TaskComment::class, '2026-01-01 11:00:00'],
+            'h:D' => [TaskHistory::class, '2026-01-01 12:00:00'],
+        ];
+        $keys = [];
+        foreach ($entries as $key => [$model, $createdAt]) {
+            $row = $model === TaskComment::class
+                ? ['content' => $key]
+                : ['field' => 'task_name', 'old_value' => 'old', 'new_value' => $key];
+            $created = $model::create(['task_id' => $this->task->id, 'user_id' => $this->admin->id] + $row);
+            $model::query()->whereKey($created->id)->update(['created_at' => $createdAt]);
+            $keys[($model === TaskComment::class ? 'c' : 'h') . $created->id] = $key;
+        }
+
+        $actual = [];
+        foreach ([1, 2] as $page) {
+            $response = $this->request('all', ['page' => $page, 'orderBy' => ['id', $direction]])->assertOk();
+            foreach ($response->json('data') as $item) {
+                $actual[] = $keys[(isset($item['content']) ? 'c' : 'h') . $item['id']];
+            }
+        }
+
+        $this->assertSame($expected, $actual);
+    }
+
+    public function test_all_past_the_last_page_is_empty(): void
+    {
+        $response = $this->request('all', ['page' => 99])->assertOk();
+
+        $this->assertSame([], $response->json('data'));
+        $response->assertJsonPath('pagination.total', count($this->commentIds));
     }
 }
