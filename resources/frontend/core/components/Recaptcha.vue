@@ -20,17 +20,27 @@
                 return;
             }
 
-            window[ONLOAD_CALLBACK] = () => resolve(window.grecaptcha);
+            window[ONLOAD_CALLBACK] = () => {
+                if (window.grecaptcha && window.grecaptcha.render) {
+                    resolve(window.grecaptcha);
+                } else {
+                    apiReady = null;
+                    reject(new Error('reCAPTCHA API is not available'));
+                }
+            };
 
-            let script = document.getElementById(SCRIPT_ID);
-            if (!script) {
-                script = document.createElement('script');
-                script.id = SCRIPT_ID;
-                script.src = `https://www.google.com/recaptcha/api.js?onload=${ONLOAD_CALLBACK}&render=explicit&hl=`;
-                script.async = true;
-                script.defer = true;
-                document.head.appendChild(script);
+            // A leftover script has already finished without our callback and would never call it again
+            const stale = document.getElementById(SCRIPT_ID);
+            if (stale) {
+                stale.remove();
             }
+
+            const script = document.createElement('script');
+            script.id = SCRIPT_ID;
+            script.src = `https://www.google.com/recaptcha/api.js?onload=${ONLOAD_CALLBACK}&render=explicit&hl=`;
+            script.async = true;
+            script.defer = true;
+            document.head.appendChild(script);
 
             // do not cache a failed load: the next mount creates a fresh script and retries
             script.addEventListener(
