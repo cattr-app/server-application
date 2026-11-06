@@ -235,6 +235,7 @@ class UniversalReportServiceProject
             ];
 
             TimeInterval::whereIn('user_id', $usersId)
+                ->whereIn('task_id', $tasksId)
                 ->where('start_at', '>=', $this->startAt->format('Y-m-d H:i:s'))
                 ->where('end_at', '<=', $endAt->format('Y-m-d H:i:s'))
                 ->select('user_id', 'task_id')
