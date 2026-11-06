@@ -17,6 +17,8 @@ use App\Helpers\QueryHelper;
 
 class TaskActivityController extends ItemController
 {
+    private const PER_PAGE = 30;
+
     private static function getSortDirection(array $requestData): string
     {
         return SortDirection::tryFrom(strtolower($requestData['orderBy'][1] ?? ''))?->value ?? 'asc';
@@ -51,16 +53,19 @@ class TaskActivityController extends ItemController
         );
     }
 
-    private function getCollectionFromModel(array $requestData, string $model): LengthAwarePaginator
+    private function getActivityQuery(array $requestData, string $model): Builder
     {
         if ($model === TaskComment::class) {
             $requestData['with'][] = 'attachmentsRelation';
             $requestData['with'][] = 'attachmentsRelation.user:id,full_name';
         }
 
-        $itemsQuery = $this->getQueryBuilder($requestData, $model);
+        return $this->getQueryBuilder($requestData, $model);
+    }
 
-        $items = $itemsQuery->paginate(30);
+    private function getCollectionFromModel(array $requestData, string $model): LengthAwarePaginator
+    {
+        $items = $this->getActivityQuery($requestData, $model)->paginate(self::PER_PAGE);
 
         Filter::process(
             Filter::getActionFilterName(),
@@ -68,6 +73,41 @@ class TaskActivityController extends ItemController
         );
 
         return $items;
+    }
+
+    /**
+     * Merges comments and history into a single stream and paginates that stream,
+     * so the items and the pagination metadata describe the same sequence.
+     */
+    private function getMergedCollection(array $requestData): LengthAwarePaginator
+    {
+        $page = max(1, (int)$requestData['page']);
+        $sortDirection = self::getSortDirection($requestData);
+        $merged = collect();
+        $total = 0;
+
+        // The page can start anywhere in either source, so each one has to supply every row up to the page end
+        foreach ([TaskComment::class, TaskHistory::class] as $model) {
+            $query = $this->getActivityQuery($requestData, $model);
+            $total += $query->toBase()->getCountForPagination();
+            $merged = $merged->concat($query->forPage(1, $page * self::PER_PAGE)->get());
+        }
+
+        $direction = $sortDirection === 'asc' ? 1 : -1;
+        $items = $merged
+            ->sort(fn ($a, $b) => $direction * (
+                strtotime($a['created_at']) <=> strtotime($b['created_at'])
+                ?: ($a instanceof TaskComment ? 0 : 1) <=> ($b instanceof TaskComment ? 0 : 1)
+                ?: $a['id'] <=> $b['id']
+            ))
+            ->slice(($page - 1) * self::PER_PAGE, self::PER_PAGE)
+            ->values();
+
+        $paginator = new LengthAwarePaginator($items, $total, self::PER_PAGE, $page);
+
+        Filter::process(Filter::getActionFilterName(), $paginator);
+
+        return $paginator;
     }
 
     /**
@@ -81,35 +121,15 @@ class TaskActivityController extends ItemController
         $requestedActivity = ActivityType::from($requestData['type']);
         CatEvent::dispatch(Filter::getBeforeActionEventName(), $requestData);
 
-        $items = [];
-        $total = 0;
-        $perPage = 0;
-        if ($requestedActivity === ActivityType::ALL) {
-            $taskComments = $this->getCollectionFromModel($requestData, TaskComment::class);
-            $taskHistory = $this->getCollectionFromModel($requestData, TaskHistory::class);
-            $total = $taskComments->total() + $taskHistory->total();
-            $perPage = $taskComments->perPage() + $taskHistory->perPage();
-
-            $sortDirection = self::getSortDirection($requestData);
-            $items = collect(array_merge($taskComments->items(), $taskHistory->items()))->sortBy([
-                fn ($a, $b) => $sortDirection === 'asc'
-                    ? strtotime($a['created_at']) <=> strtotime($b['created_at'])
-                    : strtotime($b['created_at']) <=> strtotime($a['created_at']),
-            ], SORT_REGULAR, $sortDirection === 'desc');
-        } elseif ($requestedActivity === ActivityType::HISTORY) {
-            $taskHistory = $this->getCollectionFromModel($requestData, TaskHistory::class);
-            $total = $taskHistory->total();
-            $perPage = $taskHistory->perPage();
-            $items = $taskHistory->items();
-        } elseif ($requestedActivity === ActivityType::COMMENTS) {
-            $taskComments = $this->getCollectionFromModel($requestData, TaskComment::class);
-            $total = $taskComments->total();
-            $perPage = $taskComments->perPage();
-            $items = $taskComments->items();
-        }
+        $activity = match ($requestedActivity) {
+            ActivityType::ALL => $this->getMergedCollection($requestData),
+            ActivityType::HISTORY => $this->getCollectionFromModel($requestData, TaskHistory::class),
+            ActivityType::COMMENTS => $this->getCollectionFromModel($requestData, TaskComment::class),
+        };
+        $items = $activity->items();
 
         CatEvent::dispatch(Filter::getAfterActionEventName(), [$items, $requestData]);
 
-        return responder()->success(new LengthAwarePaginator($items, $total, $perPage))->respond();
+        return responder()->success($activity)->respond();
     }
 }
