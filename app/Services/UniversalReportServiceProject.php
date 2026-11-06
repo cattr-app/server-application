@@ -175,6 +175,8 @@ class UniversalReportServiceProject
             ->whereIn('id', $this->report->data_objects)->get();
         $usersId = [];
         $tasksId = [];
+        $projectsName = [];
+        $userNames = [];
         foreach ($projects as $project) {
             $projectsName = $project->pluck('name', 'id');
             $usersId[] = $project->users->pluck('id');

@@ -2,6 +2,7 @@
 
 namespace Tests\Facades;
 
+use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Support\Collection;
@@ -12,6 +13,7 @@ use Tests\Factories\TaskFactory as BaseTaskFactory;
  * @method static Task create(array $attributes = [])
  * @method static Collection createMany(int $amount = 1)
  * @method static BaseTaskFactory forUser(User $user)
+ * @method static BaseTaskFactory forProject(Project $project)
  * @method static array createRandomModelData()
  * @method static BaseTaskFactory withIntervals(int $quantity = 1)
  */
