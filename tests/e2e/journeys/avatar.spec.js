@@ -27,4 +27,6 @@ test('avatar shows the Gravatar image when it exists', async ({ page }) => {
     await expect(avatar).toBeVisible();
     await expect(avatar).toHaveCSS('background-image', /gravatar\.com\/avatar\//);
     await expect(avatar.locator('span')).toBeHidden();
+    // the style is set before the hidden <img> finishes loading: wait for the image itself
+    await expect.poll(() => avatar.locator('img').evaluate(img => img.complete && img.naturalWidth)).toBeGreaterThan(0);
 });
