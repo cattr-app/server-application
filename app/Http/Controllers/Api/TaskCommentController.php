@@ -120,6 +120,9 @@ class TaskCommentController extends ItemController
      */
     public function edit(UpdateTaskCommentRequest $request): JsonResponse
     {
+        // Same rule as show(): only comments on tasks visible to the user
+        Filter::listen(Filter::getQueryFilterName(), static fn($query) => $query->whereHas('task'));
+
         return $this->_edit($request);
     }
     /**
