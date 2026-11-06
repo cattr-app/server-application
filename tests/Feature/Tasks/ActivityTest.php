@@ -151,4 +151,31 @@ class ActivityTest extends TestCase
         $this->assertCount($total, $ids);
         $this->assertCount($total, array_unique($ids));
     }
+
+    public function test_all_ignores_a_requested_column_order_when_merging(): void
+    {
+        TaskComment::query()->where('task_id', $this->task->id)->delete();
+        $other = UserFactory::refresh()->asUser()->create();
+        $this->assertGreaterThan($this->admin->id, $other->id);
+
+        // The older half belongs to the user with the greater id, so ordering by user_id contradicts created_at
+        foreach ([[$other, '2026-01-01 00:00:00'], [$this->admin, '2026-02-01 00:00:00']] as [$user, $createdAt]) {
+            for ($i = 0; $i < 30; $i++) {
+                $comment = TaskComment::create([
+                    'task_id' => $this->task->id,
+                    'user_id' => $user->id,
+                    'content' => "Comment $i",
+                ]);
+                $comment->forceFill(['created_at' => $createdAt])->saveQuietly();
+            }
+        }
+
+        $ids = [];
+        foreach ([1, 2] as $page) {
+            $response = $this->request('all', ['page' => $page, 'orderBy' => ['user_id', 'asc']])->assertOk();
+            $ids = array_merge($ids, collect($response->json('data'))->pluck('id')->all());
+        }
+
+        $this->assertCount(60, array_unique($ids));
+    }
 }

@@ -88,7 +88,10 @@ class TaskActivityController extends ItemController
 
         // The page can start anywhere in either source, so each one has to supply every row up to the page end
         foreach ([TaskComment::class, TaskHistory::class] as $model) {
-            $query = $this->getActivityQuery($requestData, $model);
+            // Every source must be ordered like the merged stream, otherwise a prefix of it is not a prefix of the page
+            $query = $this->getActivityQuery($requestData, $model)
+                ->reorder($model::make()->getTable() . '.created_at', $sortDirection)
+                ->orderBy('id', $sortDirection);
             $total += $query->toBase()->getCountForPagination();
             $merged = $merged->concat($query->forPage(1, $page * self::PER_PAGE)->get());
         }
