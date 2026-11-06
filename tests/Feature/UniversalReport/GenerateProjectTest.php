@@ -97,4 +97,26 @@ class GenerateProjectTest extends TestCase
         $this->assertSame($project->name, $userDataset['projectLabel']);
         $this->assertEquals(3600, $userDataset['data'][$date]);
     }
+
+    public function test_user_chart_ignores_projects_outside_the_selection(): void
+    {
+        $user = UserFactory::refresh()->create();
+        $selected = ProjectFactory::forUsers([$user])->create();
+        $other = ProjectFactory::forUsers([$user])->create();
+        $day = now()->subDay()->startOfDay()->addHours(10);
+
+        foreach ([$selected, $other] as $project) {
+            $task = TaskFactory::forProject($project)->forUser($user)->create();
+            IntervalFactory::forUser($user)->forTask($task)->create()->forceFill([
+                'start_at' => $day,
+                'end_at' => $day->copy()->addHour(),
+            ])->save();
+        }
+
+        $response = $this->generate($this->createReport([$selected->id]));
+
+        $response->assertOk();
+        $datasets = $response->json('data.reportCharts.total_spent_time_day_and_users_separately.datasets');
+        $this->assertSame([$selected->id], array_keys($datasets));
+    }
 }
