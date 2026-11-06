@@ -15,20 +15,14 @@ class ModulesTest extends TestCase
 {
     private const URI = 'about';
 
+    private bool $modulesInstalled = false;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         Cache::forget('app.modules');
 
-        $module = Mockery::mock(ModuleInstance::class)->shouldIgnoreMissing();
-        $module->shouldReceive('isStatus')->andReturn(false);
-        $module->shouldReceive('isEnabled')->andReturn(false);
-        $module->shouldReceive('getPath')->andReturn('/nonexistent/module');
-
-        $repository = Module::partialMock();
-        $repository->shouldReceive('all')->andReturn(['CattrDemo' => $module]);
-        $repository->shouldReceive('toCollection')->andReturn(new ModuleCollection(['CattrDemo' => $module]));
     }
 
     protected function tearDown(): void
@@ -38,8 +32,30 @@ class ModulesTest extends TestCase
         parent::tearDown();
     }
 
+    private function installModules(array $names): void
+    {
+        $this->modulesInstalled = true;
+
+        $installed = [];
+        foreach ($names as $name) {
+            $module = Mockery::mock(ModuleInstance::class)->shouldIgnoreMissing();
+            $module->shouldReceive('isStatus')->andReturn(false);
+            $module->shouldReceive('isEnabled')->andReturn(false);
+            $module->shouldReceive('getPath')->andReturn('/nonexistent/module');
+            $installed[$name] = $module;
+        }
+
+        $repository = Module::partialMock();
+        $repository->shouldReceive('all')->andReturn($installed);
+        $repository->shouldReceive('toCollection')->andReturn(new ModuleCollection($installed));
+    }
+
     private function modules(): array
     {
+        if (!$this->modulesInstalled) {
+            $this->installModules(['CattrDemo']);
+        }
+
         $admin = UserFactory::refresh()->asAdmin()->withTokens()->create();
 
         return $this->actingAs($admin)->getJson(self::URI)->assertOk()->json('data.modules');
@@ -72,11 +88,51 @@ class ModulesTest extends TestCase
     public function test_collector_data_enriches_known_modules(): void
     {
         Http::fake(['*/modules' => Http::response(['modules' => [
-            ['name' => 'cattrdemo', 'version' => '9.9.9', 'enabled' => false, 'vulnerable' => true, 'last_version' => '4.0.0'],
+            [
+                'name' => 'cattrdemo',
+                'version' => '9.9.9',
+                'enabled' => false,
+                'vulnerable' => true,
+                'last_version' => '4.0.0',
+            ],
         ]])]);
 
         $this->assertSame(
-            [['name' => 'CattrDemo', 'version' => 'dev', 'enabled' => false, 'vulnerable' => true, 'last_version' => '4.0.0']],
+            [[
+                'name' => 'CattrDemo',
+                'version' => 'dev',
+                'enabled' => false,
+                'vulnerable' => true,
+                'last_version' => '4.0.0',
+            ]],
+            $this->modules()
+        );
+    }
+
+    public function test_modules_missing_from_a_partial_collector_response_are_kept_unchanged(): void
+    {
+        $this->installModules(['CattrDemo', 'CattrOther']);
+        Http::fake(['*/modules' => Http::response(['modules' => [
+            [
+                'name' => 'cattrdemo',
+                'version' => '9.9.9',
+                'enabled' => false,
+                'vulnerable' => true,
+                'last_version' => '4.0.0',
+            ],
+        ]])]);
+
+        $this->assertSame(
+            [
+                [
+                    'name' => 'CattrDemo',
+                    'version' => 'dev',
+                    'enabled' => false,
+                    'vulnerable' => true,
+                    'last_version' => '4.0.0',
+                ],
+                ['name' => 'CattrOther', 'version' => 'dev', 'enabled' => false],
+            ],
             $this->modules()
         );
     }
