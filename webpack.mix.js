@@ -55,6 +55,10 @@ mix.before(() => {
     .webpackConfig({
         output: {
             publicPath: '/',
+            // Lazy chunks are requested by the webpack runtime without the ?id= suffix of mix-manifest.json,
+            // so a CDN or browser could pair a cached chunk of an older build with a newer app.js.
+            // A content hash in the file name makes every build request its own chunk URLs.
+            chunkFilename: 'dist/app/[name].[contenthash:8].js',
         },
         resolve: {
             fallback: {
