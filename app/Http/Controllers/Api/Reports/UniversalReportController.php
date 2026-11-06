@@ -48,14 +48,26 @@ class UniversalReportController
             return responder()->success($items)->respond();
         }
 
-        UniversalReport::select('id', 'name', 'data_objects', 'base', 'type')->get()->each(function ($item) use (&$items) {
-            if ($item->base->checkAccess($item->data_objects)) {
-                unset($item->data_objects, $item->base);
-                $items[$item->type->value][] = $item->toArray();
-            }
-        });
+        UniversalReport::select('id', 'name', 'data_objects', 'base', 'type')
+            ->where(fn ($query) => $query
+                ->where('type', UniversalReportType::COMPANY->value)
+                ->orWhere('user_id', $user->id))
+            ->get()
+            ->each(function ($item) use (&$items) {
+                if ($item->base->checkAccess($item->data_objects)) {
+                    unset($item->data_objects, $item->base);
+                    $items[$item->type->value][] = $item->toArray();
+                }
+            });
 
         return responder()->success($items)->respond();
+    }
+
+    private function authorizeView(UniversalReport $report, Request $request): void
+    {
+        if (!$report->canBeViewedBy($request->user())) {
+            throw new NotEnoughRightsException('User rights do not allow accessing the report');
+        }
     }
 
     public function getBases()
@@ -109,18 +121,24 @@ class UniversalReportController
 
     public function show(UniversalReportShowRequest $request)
     {
-        return responder()->success(UniversalReport::find($request->id))->respond();
+        $report = UniversalReport::findOrFail($request->id);
+        $this->authorizeView($report, $request);
+
+        return responder()->success($report)->respond();
     }
 
     public function edit(UniversalReportEditRequest $request)
     {
-        $isCompany = $request->input('type') === UniversalReportType::COMPANY->value;
+        $report = UniversalReport::findOrFail($request->id);
+        $user = $request->user();
 
-        if ($isCompany && !$request->user()->isAdmin()) {
-            return throw new NotEnoughRightsException('User rights do not allow saving the report for the company');
+        $promotesToCompany = $request->input('type') === UniversalReportType::COMPANY->value && !$user->isAdmin();
+
+        if (!$report->canBeManagedBy($user) || $promotesToCompany) {
+            throw new NotEnoughRightsException('User rights do not allow saving the report');
         }
 
-        UniversalReport::where('id', $request->id)->update([
+        $report->update([
             'name' => $request->name,
             'type' => $request->type,
             'base' => $request->base,
@@ -133,6 +151,8 @@ class UniversalReportController
 
     public function __invoke(UniversalReportRequest $request): JsonResponse
     {
+        $this->authorizeView(UniversalReport::findOrFail($request->input('id')), $request);
+
         $companyTimezone = Settings::scope('core')->get('timezone', 'UTC');
 
         return responder()->success(
@@ -147,13 +167,21 @@ class UniversalReportController
 
     public function destroy(UniversalReportDestroyRequest $request)
     {
-        UniversalReport::find($request->input('id', null))->delete();
+        $report = UniversalReport::findOrFail($request->input('id'));
+
+        if (!$report->canBeManagedBy($request->user())) {
+            throw new NotEnoughRightsException('User rights do not allow deleting the report');
+        }
+
+        $report->delete();
 
         return responder()->success()->respond(204);
     }
 
     public function download(UniversalReportRequest $request): JsonResponse
     {
+        $this->authorizeView(UniversalReport::findOrFail($request->input('id')), $request);
+
         $companyTimezone = Settings::scope('core')->get('timezone', 'UTC');
         $job = new GenerateAndSendReport(
             UniversalReportExport::init(

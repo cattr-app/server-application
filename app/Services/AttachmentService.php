@@ -90,9 +90,16 @@ class AttachmentService implements \App\Contracts\AttachmentService
         }
     }
 
-    public function deleteAttachments(array $attachmentsIds): void
+    public function deleteAttachments(array $attachmentsIds, AttachmentAble $parent, int $userId): void
     {
         Attachment::whereIn('id', $attachmentsIds)
+            ->where(fn ($query) => $query
+                ->where(fn ($query) => $query
+                    ->where('attachmentable_type', $parent->getMorphClass())
+                    ->where('attachmentable_id', $parent->getKey()))
+                ->orWhere(fn ($query) => $query
+                    ->where('status', AttachmentStatus::NOT_ATTACHED)
+                    ->where('user_id', $userId)))
             ->each(fn (Attachment $attachment) => $this->deleteAttachment($attachment));
     }
 
