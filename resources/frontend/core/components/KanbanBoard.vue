@@ -68,8 +68,9 @@
                 return true;
             },
             allowedTargets(el, source) {
-                // same arguments as dragula passes to its own accepts callback
-                return this.drake.containers.filter(c => this.options.accepts(el, c, source));
+                // same arguments as dragula passes to its own accepts callback; no sibling is known before the
+                // card is moved, which dragula reports as null (append to the end)
+                return this.drake.containers.filter(c => this.options.accepts(el, c, source, null));
             },
             forbiddenTargets(el, source) {
                 const allowed = this.allowedTargets(el, source);
