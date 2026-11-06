@@ -163,10 +163,18 @@ class AboutController extends Controller
         }
     }
 
+    /**
+     * The collector receives every installed module, the response lists only the enabled ones.
+     */
     private function requestModulesInfo(): array
     {
-        $local = ModuleHelper::getModulesInfo();
+        $modules = $this->enrichModulesInfo(ModuleHelper::getModulesInfo());
 
+        return array_values(array_filter($modules, static fn (array $module) => $module['enabled']));
+    }
+
+    private function enrichModulesInfo(array $local): array
+    {
         try {
             $remote = $this->statsClient()->post('modules', $local)->throw()->json('modules');
         } catch (Exception) {
