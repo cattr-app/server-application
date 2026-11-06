@@ -6,7 +6,9 @@ use App\Enums\UniversalReportBase;
 use App\Enums\UniversalReportType;
 use App\Models\UniversalReport;
 use App\Models\User;
+use Tests\Facades\IntervalFactory;
 use Tests\Facades\ProjectFactory;
+use Tests\Facades\TaskFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
@@ -72,11 +74,27 @@ class GenerateProjectTest extends TestCase
     {
         $user = UserFactory::refresh()->create();
         $project = ProjectFactory::forUsers([$user])->create();
+        $task = TaskFactory::forProject($project)->forUser($user)->create();
+        $interval = IntervalFactory::forUser($user)->forTask($task)->create();
+        $day = now()->subDay()->startOfDay()->addHours(10);
+        $interval->forceFill([
+            'start_at' => $day,
+            'end_at' => $day->copy()->addHour(),
+        ])->save();
+        $date = $day->toDateString();
 
         $response = $this->generate($this->createReport([$project->id]));
 
         $response->assertOk();
         $response->assertJsonPath('data.reportData.' . $project->id . '.name', $project->name);
-        $response->assertJsonPath('data.reportCharts.total_spent_time_day.datasets', []);
+        $charts = $response->json('data.reportCharts');
+        $projectDataset = $charts['total_spent_time_day']['datasets'][$project->id];
+        $this->assertSame($project->name, $projectDataset['label']);
+        $this->assertEquals(3600, $projectDataset['data'][$date]);
+
+        $userDataset = $charts['total_spent_time_day_and_users_separately']['datasets'][$project->id][$user->id];
+        $this->assertSame($user->full_name, $userDataset['label']);
+        $this->assertSame($project->name, $userDataset['projectLabel']);
+        $this->assertEquals(3600, $userDataset['data'][$date]);
     }
 }
