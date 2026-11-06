@@ -22,7 +22,6 @@ class ModulesTest extends TestCase
         parent::setUp();
 
         Cache::forget('app.modules');
-
     }
 
     protected function tearDown(): void
