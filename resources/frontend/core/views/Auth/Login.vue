@@ -125,6 +125,7 @@
                 this.$Loading.start();
                 this.isLoading = true;
                 const apiService = this.$store.getters['user/apiService'];
+                let submittedRecaptcha = null;
 
                 try {
                     // The widget exists only while a recaptcha key is set; grecaptcha may stay loaded from an
@@ -133,6 +134,7 @@
                         this.$refs.recaptcha.reset();
                     }
 
+                    submittedRecaptcha = this.user.recaptcha;
                     await apiService.attemptLogin(this.user, config.loginEndpoint);
                     await apiService.getCompanyData();
 
@@ -140,6 +142,11 @@
                     this.$Loading.finish();
                 } catch (e) {
                     this.$Loading.error();
+
+                    // the submitted token is consumed; keep a newer one solved while the request was in flight
+                    if (submittedRecaptcha && this.user.recaptcha === submittedRecaptcha) {
+                        this.user.recaptcha = null;
+                    }
 
                     if (has(e, 'response.status')) {
                         if (e.response.status === 429 && this.recaptchaKey === null) {
