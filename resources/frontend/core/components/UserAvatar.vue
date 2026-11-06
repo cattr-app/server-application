@@ -38,13 +38,13 @@
 
     const getInitials = username => {
         const parts = username.split(/[ -]/);
-        let initials = parts.map(part => part.charAt(0)).join('');
+        let initials = parts.map(part => Array.from(part)[0] || '').join('');
 
-        if (initials.length > 3 && initials.search(/[A-Z]/) !== -1) {
+        if (Array.from(initials).length > 3 && initials.search(/[A-Z]/) !== -1) {
             initials = initials.replace(/[a-z]+/g, '');
         }
 
-        return initials.substr(0, 3).toUpperCase();
+        return Array.from(initials).slice(0, 3).join('').toUpperCase();
     };
 
     // Same arithmetic as vue-avatar (css-tricks "lighten/darken color"), padded to 6 hex digits as AtAvatar does
@@ -99,6 +99,11 @@
             return {
                 imgError: false,
             };
+        },
+        watch: {
+            src() {
+                this.imgError = false;
+            },
         },
         computed: {
             isImage() {

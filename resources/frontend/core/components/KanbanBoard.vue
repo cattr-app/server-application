@@ -68,7 +68,7 @@
                 return true;
             },
             allowedTargets(el, source) {
-                const block = this.blocks.find(b => b[this.idProp] === el.dataset.blockId);
+                const block = this.blocks.find(b => String(b[this.idProp]) === el.dataset.blockId);
                 return this.drake.containers.filter(c => this.options.accepts(block, c, source));
             },
             forbiddenTargets(el, source) {

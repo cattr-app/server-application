@@ -45,6 +45,7 @@ test('login is sent after leaving the page with a captcha and coming back', asyn
     // The first login attempt is answered with 429, so the captcha appears; Chrome logs the failed resource.
     consoleGuard.expect(/^Failed to load resource: the server responded with a status of 429 \(Too Many Requests\)$/);
 
+    // The callback name must match ONLOAD_CALLBACK in Recaptcha.vue.
     // Stand-in for the Google script (no network on the stand): the same global API, loaded once per tab.
     await page.route('https://www.google.com/recaptcha/api.js*', route =>
         route.fulfill({

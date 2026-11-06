@@ -108,6 +108,7 @@
             },
 
             onCaptchaExpired() {
+                this.user.recaptcha = null;
                 this.$refs.recaptcha.reset();
             },
 

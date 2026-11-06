@@ -14,7 +14,7 @@
             return apiReady;
         }
 
-        apiReady = new Promise(resolve => {
+        apiReady = new Promise((resolve, reject) => {
             if (window.grecaptcha && window.grecaptcha.render) {
                 resolve(window.grecaptcha);
                 return;
@@ -22,14 +22,26 @@
 
             window[ONLOAD_CALLBACK] = () => resolve(window.grecaptcha);
 
-            if (!document.getElementById(SCRIPT_ID)) {
-                const script = document.createElement('script');
+            let script = document.getElementById(SCRIPT_ID);
+            if (!script) {
+                script = document.createElement('script');
                 script.id = SCRIPT_ID;
                 script.src = `https://www.google.com/recaptcha/api.js?onload=${ONLOAD_CALLBACK}&render=explicit&hl=`;
                 script.async = true;
                 script.defer = true;
                 document.head.appendChild(script);
             }
+
+            // do not cache a failed load: the next mount creates a fresh script and retries
+            script.addEventListener(
+                'error',
+                () => {
+                    apiReady = null;
+                    script.remove();
+                    reject(new Error('Failed to load reCAPTCHA'));
+                },
+                { once: true },
+            );
         });
 
         return apiReady;
@@ -52,24 +64,32 @@
                 widgetId: null,
             };
         },
+        created() {
+            // plain instance property, not reactive state
+            this.destroyed = false;
+        },
         async mounted() {
-            const grecaptcha = await loadApi();
+            try {
+                const grecaptcha = await loadApi();
 
-            // the form may be gone while the script was loading
-            if (this.destroyed) {
-                return;
+                // the form may be gone while the script was loading
+                if (this.destroyed) {
+                    return;
+                }
+
+                this.widgetId = grecaptcha.render(this.$el, {
+                    sitekey: this.sitekey,
+                    theme: this.theme,
+                    size: this.size,
+                    tabindex: this.tabindex,
+                    callback: response => this.$emit('verify', response),
+                    'expired-callback': () => this.$emit('expired'),
+                    'error-callback': () => this.$emit('error'),
+                });
+                this.$emit('render', this.widgetId);
+            } catch (e) {
+                this.$emit('error', e);
             }
-
-            this.widgetId = grecaptcha.render(this.$el, {
-                sitekey: this.sitekey,
-                theme: this.theme,
-                size: this.size,
-                tabindex: this.tabindex,
-                callback: response => this.$emit('verify', response),
-                'expired-callback': () => this.$emit('expired'),
-                'error-callback': () => this.$emit('error'),
-            });
-            this.$emit('render', this.widgetId);
         },
         beforeDestroy() {
             this.destroyed = true;
