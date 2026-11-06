@@ -349,16 +349,16 @@
         },
         {
             "name": "cattr/demo-module",
-            "version": "v3.0.0",
+            "version": "v3.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cattr-app/demo-module.git",
-                "reference": "3494f85b56913a878a091c22c0448015d8eb68d2"
+                "reference": "49e08dae5d17f13e281265d3ce6a30895eb7f43e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cattr-app/demo-module/zipball/3494f85b56913a878a091c22c0448015d8eb68d2",
-                "reference": "3494f85b56913a878a091c22c0448015d8eb68d2",
+                "url": "https://api.github.com/repos/cattr-app/demo-module/zipball/49e08dae5d17f13e281265d3ce6a30895eb7f43e",
+                "reference": "49e08dae5d17f13e281265d3ce6a30895eb7f43e",
                 "shasum": ""
             },
             "type": "laravel-module",
@@ -381,9 +381,9 @@
             "description": "Demo Module for Cattr",
             "support": {
                 "issues": "https://github.com/cattr-app/demo-module/issues",
-                "source": "https://github.com/cattr-app/demo-module/tree/v3.0.0"
+                "source": "https://github.com/cattr-app/demo-module/tree/v3.1.0"
             },
-            "time": "2026-11-01T05:25:51+00:00"
+            "time": "2026-11-05T07:05:18+00:00"
         },
         {
             "name": "cattr/gitlab_integration-module",
@@ -441,16 +441,16 @@
         },
         {
             "name": "cattr/redmine_integration-module",
-            "version": "v5.2.0",
+            "version": "v5.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cattr-app/redmine-integration.git",
-                "reference": "9d5e80b00f934ac307af2c3423836f0837ad711d"
+                "reference": "9339effc9d689fa9310dc800724a52ad639d803f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cattr-app/redmine-integration/zipball/9d5e80b00f934ac307af2c3423836f0837ad711d",
-                "reference": "9d5e80b00f934ac307af2c3423836f0837ad711d",
+                "url": "https://api.github.com/repos/cattr-app/redmine-integration/zipball/9339effc9d689fa9310dc800724a52ad639d803f",
+                "reference": "9339effc9d689fa9310dc800724a52ad639d803f",
                 "shasum": ""
             },
             "require": {
@@ -493,7 +493,7 @@
                 "issues": "https://github.com/cattr-app/redmine-integration/issues",
                 "source": "https://github.com/cattr-app/redmine-integration"
             },
-            "time": "2026-11-01T20:25:32+00:00"
+            "time": "2026-11-04T22:02:37+00:00"
         },
         {
             "name": "clue/redis-protocol",
