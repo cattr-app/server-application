@@ -100,7 +100,7 @@ unchanged (only `build.sh` may need the new build command).
 ## Visual baseline
 
 Masked: avatars (`.avatar__photo`, `.vue-avatar--wrapper`), online status, screenshot images, every
-`<canvas>` (chart.js/echarts), app version on About, and the company settings menu (its item order
+`<canvas>` (chart.js/echarts), app version on About, the module table on About (the bundled modules and their versions change with every bump), and the company settings menu (its item order
 changes between loads on `main@bfafed73`). CSS animations, transitions, caret and scrollbars are off.
 
 Update **only inside the Playwright image** and review every changed PNG:

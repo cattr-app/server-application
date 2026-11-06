@@ -15,6 +15,7 @@ const GLOBAL_MASKS = [
     '.screenshots .screenshot img',
     'canvas', // chart.js / echarts: animated, rendered by JavaScript
     '.about__version', // build/version info
+    '.about__table', // modules bundled into the build and their versions change with every module bump
 ];
 
 // Pauses CSS animations/transitions and hides the caret and scrollbars, which differ between runs.
