@@ -1,6 +1,7 @@
 import DefaultLayout from '@/layouts/DefaultLayout';
 import AuthLayout from '@/layouts/AuthLayout';
 import CustomAtModal from '@/components/global/CustomModal/dialog';
+import { reverbConfig } from '@/utils/reverbConfig';
 
 import axios from 'axios';
 import Echo from 'laravel-echo';
@@ -13,9 +14,11 @@ const components = {
 };
 
 function installGlobalComponents(Vue) {
-    const reverbScheme = process.env.MIX_REVERB_SCHEME ?? window.location.protocol.replace(':', '');
-    const reverbFrontendPort =
-        process.env.MIX_REVERB_FRONTEND_PORT || window.location.port || (reverbScheme === 'https' ? 443 : 80);
+    const reverb = reverbConfig(window.location, {
+        host: process.env.MIX_REVERB_HOST,
+        path: process.env.MIX_REVERB_PATH,
+        port: process.env.MIX_REVERB_FRONTEND_PORT,
+    });
 
     for (const component in components) {
         if (components[component].name) {
@@ -28,11 +31,7 @@ function installGlobalComponents(Vue) {
     Vue.prototype.$echo = new Echo({
         broadcaster: 'pusher',
         key: process.env.MIX_REVERB_APP_KEY,
-        wsHost: process.env.MIX_REVERB_HOST ?? window.location.hostname,
-        wsPath: process.env.MIX_REVERB_PATH ?? '',
-        wsPort: reverbFrontendPort,
-        wssPort: reverbFrontendPort,
-        forceTLS: reverbScheme === 'https',
+        ...reverb,
         disableStats: true,
         enabledTransports: ['ws', 'wss'],
         Pusher,
