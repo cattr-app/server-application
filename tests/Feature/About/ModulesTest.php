@@ -135,4 +135,25 @@ class ModulesTest extends TestCase
             $this->modules()
         );
     }
+
+    public function test_installed_modules_are_kept_when_the_cached_module_list_predates_them(): void
+    {
+        Cache::forever('app.modules', ['CattrOld' => '1.0.0']);
+        Http::fake(['*/modules' => Http::response('error', 500)]);
+
+        $this->assertSame(
+            [['name' => 'CattrDemo', 'version' => 'dev', 'enabled' => false]],
+            $this->modules()
+        );
+        $this->assertSame(['CattrDemo' => 'dev'], Cache::get('app.modules'));
+    }
+
+    public function test_an_empty_cached_module_list_is_rebuilt(): void
+    {
+        Cache::forever('app.modules', []);
+        Http::fake(['*/modules' => Http::response('error', 500)]);
+
+        $this->assertCount(1, $this->modules());
+        $this->assertSame(['CattrDemo' => 'dev'], Cache::get('app.modules'));
+    }
 }

@@ -13,6 +13,8 @@ use Throwable;
 
 class Version
 {
+    private const MODULES_CACHE_KEY = 'app.modules';
+
     private string $version;
 
     /**
@@ -20,10 +22,18 @@ class Version
      */
     public function __construct(protected ?string $module = null)
     {
-        throw_if($module && !isset(self::getModules()[$module]), new RuntimeException('No such module'));
-
         if ($module) {
-            $this->version = self::getModules()[$module];
+            $modules = self::getModules();
+
+            // The cached list may predate the module (installed or enabled after it was built): rebuild it once.
+            if (!isset($modules[$module])) {
+                cache()->forget(self::MODULES_CACHE_KEY);
+                $modules = self::getModules();
+            }
+
+            throw_unless(isset($modules[$module]), new RuntimeException('No such module'));
+
+            $this->version = $modules[$module];
             return;
         }
 
@@ -32,25 +42,36 @@ class Version
 
     public static function getModules(): array
     {
-        return cache()->rememberForever('app.modules', static function () {
-            try {
-                return Module::toCollection()->map(static function (\Nwidart\Modules\Laravel\Module $module) {
-                    $modulePath = $module->getPath();
+        $cached = cache()->get(self::MODULES_CACHE_KEY);
 
+        // An empty list is never trusted: it is what a failed scan used to leave in the cache forever.
+        if (is_array($cached) && $cached !== []) {
+            return $cached;
+        }
+
+        try {
+            $modules = Module::toCollection()->map(static function (\Nwidart\Modules\Laravel\Module $module) {
+                $modulePath = $module->getPath();
+
+                try {
+                    return self::getComposerVersion($modulePath);
+                } catch (Throwable) {
                     try {
-                        return self::getComposerVersion($modulePath);
+                        return self::getFileVersion($modulePath);
                     } catch (Throwable) {
-                        try {
-                            return self::getFileVersion($modulePath);
-                        } catch (Throwable) {
-                            return 'dev';
-                        }
+                        return 'dev';
                     }
-                })->toArray();
-            } catch (Throwable) {
-                return [];
-            }
-        });
+                }
+            })->toArray();
+        } catch (Throwable) {
+            return [];
+        }
+
+        if ($modules !== []) {
+            cache()->forever(self::MODULES_CACHE_KEY, $modules);
+        }
+
+        return $modules;
     }
 
     /**
