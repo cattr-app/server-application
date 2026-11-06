@@ -31,21 +31,31 @@ class ModulesTest extends TestCase
         parent::tearDown();
     }
 
-    private function installModules(array $names): void
+    /**
+     * Like nwidart: the registry is keyed by the lowercased name, the module keeps its own name.
+     *
+     * @param string[] $names
+     * @param string[] $disabled names of the modules that are not enabled
+     */
+    private function installModules(array $names, array $disabled = []): void
     {
         $this->modulesInstalled = true;
 
         $installed = [];
         foreach ($names as $name) {
+            $enabled = !in_array($name, $disabled, true);
             $module = Mockery::mock(ModuleInstance::class)->shouldIgnoreMissing();
-            $module->shouldReceive('isStatus')->andReturn(false);
-            $module->shouldReceive('isEnabled')->andReturn(false);
+            $module->shouldReceive('getName')->andReturn($name);
+            $module->shouldReceive('isStatus')->andReturn($enabled);
+            $module->shouldReceive('isEnabled')->andReturn($enabled);
             $module->shouldReceive('getPath')->andReturn('/nonexistent/module');
-            $installed[$name] = $module;
+            $installed[strtolower($name)] = $module;
         }
 
         $repository = Module::partialMock();
         $repository->shouldReceive('all')->andReturn($installed);
+        // RegisterModulesEvents boots the providers of enabled modules: not what is under test here.
+        $repository->shouldReceive('allEnabled')->andReturn([]);
         $repository->shouldReceive('toCollection')->andReturn(new ModuleCollection($installed));
     }
 
@@ -65,7 +75,7 @@ class ModulesTest extends TestCase
         Http::fake(['*/modules' => Http::response(['statusCode' => 200, 'modules' => []])]);
 
         $this->assertSame(
-            [['name' => 'CattrDemo', 'version' => 'dev', 'enabled' => false]],
+            [['name' => 'CattrDemo', 'version' => 'dev', 'enabled' => true]],
             $this->modules()
         );
     }
@@ -90,7 +100,7 @@ class ModulesTest extends TestCase
             [
                 'name' => 'cattrdemo',
                 'version' => '9.9.9',
-                'enabled' => false,
+                'enabled' => true,
                 'vulnerable' => true,
                 'last_version' => '4.0.0',
             ],
@@ -100,7 +110,7 @@ class ModulesTest extends TestCase
             [[
                 'name' => 'CattrDemo',
                 'version' => 'dev',
-                'enabled' => false,
+                'enabled' => true,
                 'vulnerable' => true,
                 'last_version' => '4.0.0',
             ]],
@@ -115,7 +125,7 @@ class ModulesTest extends TestCase
             [
                 'name' => 'cattrdemo',
                 'version' => '9.9.9',
-                'enabled' => false,
+                'enabled' => true,
                 'vulnerable' => true,
                 'last_version' => '4.0.0',
             ],
@@ -126,11 +136,11 @@ class ModulesTest extends TestCase
                 [
                     'name' => 'CattrDemo',
                     'version' => 'dev',
-                    'enabled' => false,
+                    'enabled' => true,
                     'vulnerable' => true,
                     'last_version' => '4.0.0',
                 ],
-                ['name' => 'CattrOther', 'version' => 'dev', 'enabled' => false],
+                ['name' => 'CattrOther', 'version' => 'dev', 'enabled' => true],
             ],
             $this->modules()
         );
@@ -142,10 +152,10 @@ class ModulesTest extends TestCase
         Http::fake(['*/modules' => Http::response('error', 500)]);
 
         $this->assertSame(
-            [['name' => 'CattrDemo', 'version' => 'dev', 'enabled' => false]],
+            [['name' => 'CattrDemo', 'version' => 'dev', 'enabled' => true]],
             $this->modules()
         );
-        $this->assertSame(['CattrDemo' => 'dev'], Cache::get('app.modules'));
+        $this->assertSame(['cattrdemo' => 'dev'], Cache::get('app.modules'));
     }
 
     public function test_an_empty_cached_module_list_is_rebuilt(): void
@@ -154,6 +164,29 @@ class ModulesTest extends TestCase
         Http::fake(['*/modules' => Http::response('error', 500)]);
 
         $this->assertCount(1, $this->modules());
-        $this->assertSame(['CattrDemo' => 'dev'], Cache::get('app.modules'));
+        $this->assertSame(['cattrdemo' => 'dev'], Cache::get('app.modules'));
+    }
+
+    public function test_only_enabled_modules_are_listed_while_the_collector_receives_all_of_them(): void
+    {
+        $this->installModules(['Cattr/Gitlab_Integration', 'Cattr-Off_Module'], ['Cattr-Off_Module']);
+        Http::fake(['*/modules' => Http::response(['modules' => []])]);
+
+        $this->assertSame(
+            [['name' => 'Cattr/Gitlab_Integration', 'version' => 'dev', 'enabled' => true]],
+            $this->modules()
+        );
+
+        Http::assertSent(static fn ($request) => str_ends_with($request->url(), '/modules')
+            && $request['0']['name'] === 'Cattr/Gitlab_Integration' && $request['0']['enabled'] === true
+            && $request['1']['name'] === 'Cattr-Off_Module' && $request['1']['enabled'] === false);
+    }
+
+    public function test_the_module_list_is_empty_when_every_module_is_disabled(): void
+    {
+        $this->installModules(['CattrDemo'], ['CattrDemo']);
+        Http::fake(['*/modules' => Http::response('error', 500)]);
+
+        $this->assertSame([], $this->modules());
     }
 }

@@ -86,10 +86,10 @@ class AboutController extends Controller
      * @apiSuccess {String}     app.last_version             The latest version available for the application.
      * @apiSuccess {String}     app.message                  Any important message related to the application.
      *
-     * @apiSuccess {Object[]}   modules                      List of modules integrated into the application.
+     * @apiSuccess {Object[]}   modules                      List of enabled modules integrated into the application.
      * @apiSuccess {String}     modules.name                 Name of the module.
      * @apiSuccess {String}     modules.version              Current version of the module.
-     * @apiSuccess {Boolean}    modules.enabled              Indicates if the module is enabled.
+     * @apiSuccess {Boolean}    modules.enabled              Always true: disabled modules are not listed.
      *
      * @apiSuccess {Object}     image                        Information about the image version.
      * @apiSuccess {String}     image.version                The version of the image (if available).
@@ -111,7 +111,7 @@ class AboutController extends Controller
      *        {
      *          "name": "JiraIntegration",
      *          "version": "3.0.0",
-     *          "enabled": false
+     *          "enabled": true
      *        }
      *      ],
      *        "image": {
@@ -163,10 +163,18 @@ class AboutController extends Controller
         }
     }
 
+    /**
+     * The collector receives every installed module, the response lists only the enabled ones.
+     */
     private function requestModulesInfo(): array
     {
-        $local = ModuleHelper::getModulesInfo();
+        $modules = $this->enrichModulesInfo(ModuleHelper::getModulesInfo());
 
+        return array_values(array_filter($modules, static fn (array $module) => $module['enabled']));
+    }
+
+    private function enrichModulesInfo(array $local): array
+    {
         try {
             $remote = $this->statsClient()->post('modules', $local)->throw()->json('modules');
         } catch (Exception) {
