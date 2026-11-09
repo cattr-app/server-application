@@ -6,6 +6,7 @@ use App\Models\CronTaskWorkers;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Settings;
@@ -125,6 +126,28 @@ class DownloadTest extends TestCase
         $this->assertEquals(1.5, $rows[3][4]);
         // the last row tells when the time was calculated
         $this->assertStringContainsString('2026-03-12 04:00:00', end($rows)[1]);
+    }
+
+    public static function reportFormats(): array
+    {
+        return [
+            'csv' => [self::CSV, 'csv'],
+            'xlsx' => ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'xlsx'],
+        ];
+    }
+
+    #[DataProvider('reportFormats')]
+    public function test_report_is_generated_before_the_time_was_calculated(string $accept, string $extension): void
+    {
+        DB::table('settings')
+            ->where(['module_name' => 'core.reports', 'key' => 'planned_time_report_date'])
+            ->delete();
+
+        $response = $this->download($this->member, ['projects' => [$this->project->id]], $accept);
+
+        $response->assertOk();
+        $this->assertStringEndsWith(".$extension", $this->filePath($response));
+        $this->assertNotEmpty(Storage::disk('reports')->get($this->filePath($response)));
     }
 
     public function test_projects_filter_limits_the_report_of_admin(): void

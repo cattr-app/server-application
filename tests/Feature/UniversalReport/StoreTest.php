@@ -124,6 +124,24 @@ class StoreTest extends TestCase
         $this->assertSame(['total_spent_time_day'], $report->charts);
     }
 
+    public function test_empty_charts_are_stored(): void
+    {
+        $response = $this->store($this->user('asUser'), ['charts' => []]);
+
+        $response->assertOk();
+        $this->assertSame([], UniversalReport::findOrFail($response->json('data.id'))->charts);
+    }
+
+    public function test_charts_are_required(): void
+    {
+        $payload = $this->payload();
+        unset($payload['charts']);
+
+        $this->actingAs($this->user('asUser'))->postJson(self::URI, $payload)->assertValidationError();
+
+        $this->assertDatabaseMissing('universal_reports', ['name' => 'Weekly overview']);
+    }
+
     public function test_saved_report_can_be_read_back(): void
     {
         $user = $this->user('asUser');
@@ -191,6 +209,7 @@ class StoreTest extends TestCase
             'dataObjects is a number' => [['dataObjects' => 1]],
             'unknown data object' => [['dataObjects' => [0]]],
             'data object is not an id' => [['dataObjects' => ['abc']]],
+            'charts is null' => [['charts' => null]],
             'charts is a string' => [['charts' => 'total_spent_time_day']],
             'unknown chart' => [['charts' => ['nonexistent']]],
             'chart of another base' => [['charts' => ['total_spent_time_day_and_tasks']]],
