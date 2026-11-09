@@ -10,7 +10,7 @@ class UpdatePriorityRequest extends CattrFormRequest
 {
     public function _authorize(): bool
     {
-        return $this->user()->can('update', Priority::find(request('id')));
+        return $this->user()->can('update', Priority::class);
     }
 
     public function _rules(): array

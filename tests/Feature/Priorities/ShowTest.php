@@ -47,6 +47,25 @@ class ShowTest extends TestCase
         $response->assertJsonPath('data.id', $priority->id);
     }
 
+    public static function invalidIds(): array
+    {
+        return [
+            'missing id' => [[]],
+            'non-integer id' => [['id' => 'abc']],
+            'non-existent id' => [['id' => 999999]],
+        ];
+    }
+
+    #[DataProvider('invalidIds')]
+    public function test_invalid_id(array $data): void
+    {
+        $admin = UserFactory::asAdmin()->withTokens()->create();
+
+        $response = $this->actingAs($admin)->postJson(self::URI, $data);
+
+        $response->assertValidationError();
+    }
+
     public function test_unauthorized(): void
     {
         $response = $this->getJson(self::URI . '?id=' . Priority::firstOrFail()->id);
