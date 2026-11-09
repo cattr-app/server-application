@@ -23,7 +23,7 @@ class RegistrationController extends Controller
     public function getForm($key): JsonResponse
     {
         $invitation = Invitation::where('key', $key)
-            ->where('expires_at', '>=', time())
+            ->where('expires_at', '>=', now())
             ->first();
 
         if (!isset($invitation)) {
@@ -45,7 +45,7 @@ class RegistrationController extends Controller
     public function postForm(Request $request, string $key): JsonResponse
     {
         $invitation = Invitation::where('key', $key)
-            ->where('expires_at', '>=', time())
+            ->where('expires_at', '>=', now())
             ->first();
 
         if (!isset($invitation)) {

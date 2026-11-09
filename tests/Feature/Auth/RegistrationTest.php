@@ -127,6 +127,33 @@ class RegistrationTest extends TestCase
         $this->assertSame(1, User::withoutGlobalScopes()->where('email', $invitation->email)->count());
     }
 
+    public function test_form_of_an_expired_key_is_not_found(): void
+    {
+        $invitation = $this->invitation(['expires_at' => now()->subMinute()]);
+
+        $this->actingAs($this->caller)->getJson(self::URI . $invitation->key)->assertStatus(404);
+    }
+
+    public function test_registration_with_an_expired_key_is_not_found(): void
+    {
+        $invitation = $this->invitation(['expires_at' => now()->subMinute()]);
+
+        $this->actingAs($this->caller)
+            ->postJson(self::URI . $invitation->key, $this->registrationData($invitation))
+            ->assertStatus(404);
+
+        $this->assertDatabaseHas('invitations', ['id' => $invitation->id]);
+        $this->assertDatabaseMissing('users', ['email' => $invitation->email]);
+    }
+
+    public function test_a_key_expiring_in_the_future_still_works(): void
+    {
+        $invitation = $this->invitation(['expires_at' => now()->addMinute()]);
+
+        $this->actingAs($this->caller)->getJson(self::URI . $invitation->key)->assertOk();
+        $this->postJson(self::URI . $invitation->key, $this->registrationData($invitation))->assertOk();
+    }
+
     public function test_registration_with_an_unknown_key_is_not_found(): void
     {
         $this->actingAs($this->caller)
