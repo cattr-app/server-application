@@ -9,8 +9,6 @@ use App\Docs\OpenApi\OperationFixes;
 use App\Docs\OpenApi\ResponseEnvelopeInference;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\SecurityDocumentation\MiddlewareAuthSecurityStrategy;
-use Dedoc\Scramble\Support\Generator\Contact;
-use Dedoc\Scramble\Support\Generator\License;
 use Dedoc\Scramble\Support\Generator\OpenApi;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
 use Illuminate\Routing\Route;
@@ -75,9 +73,6 @@ class ApiDocsServiceProvider extends ServiceProvider
                     'url' => 'logo.svg', // resolved next to the published page and openapi.json
                     'altText' => 'Cattr',
                 ]);
-                $openApi->info->setContact(new Contact('Cattr', 'https://cattr.app', 'hi@cattr.app'));
-                // Same as "license" in composer.json; an SPDX identifier and a url are mutually exclusive.
-                $openApi->info->setLicense(new License('Server Side Public License, v1', 'SSPL-1.0'));
             });
     }
 }

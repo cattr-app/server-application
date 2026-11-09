@@ -7,6 +7,8 @@ rules:
   operation-4xx-response: off
   # The deprecated `POST /auth/refresh` always fails with 400 and has no successful response (the only such operation).
   operation-2xx-response: off
+  # The document intentionally has no license and contact in `info`.
+  info-license: off
 
 # Redoc options. They must live under the top-level `openapi:` key (`theme.openapi` is ignored by CLI 2.x).
 openapi:
