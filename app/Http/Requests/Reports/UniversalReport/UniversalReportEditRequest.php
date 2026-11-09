@@ -41,7 +41,7 @@ class UniversalReportEditRequest extends CattrFormRequest
             'fields.*.*' => 'required|string|in:'.implode(',', array_map(fn($item) => implode(',', $item), $enumCase->fields())),
             'dataObjects' => 'required|array',
             'dataObjects.*' => "required|int|exists:$table,id",
-            'charts' => 'nullable|array',
+            'charts' => 'present|array',
             'charts.*' => 'required|string|in:'.implode(',', array_map(fn($item) => $item, $enumCase->charts())),
             'type' => ['required', 'string', new Enum(UniversalReportType::class)],
         ];
