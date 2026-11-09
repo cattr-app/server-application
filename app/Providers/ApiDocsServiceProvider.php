@@ -61,7 +61,8 @@ class ApiDocsServiceProvider extends ServiceProvider
             ->withDocumentTransformers(ListShapedObjectTransformer::class)
             ->withDocumentTransformers(static function (OpenApi $openApi): void {
                 $openApi->info->title = 'Cattr API';
-                $openApi->info->version = '4.0.0';
+                // The release tag in CI (APP_VERSION, see .github/workflows/pages.yml), `dev` locally.
+                $openApi->info->version = (string) config('app.version');
                 $openApi->info->description = <<<'MD'
                     HTTP API of [Cattr](https://cattr.app), an open-source time tracker.
 

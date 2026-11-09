@@ -48,6 +48,8 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
+          # The API reference version is the latest release tag, which needs the history.
+          fetch-depth: 0
 
       - name: Set up PHP
         uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962  # 2.40.0
@@ -79,6 +81,8 @@ jobs:
           php artisan key:generate --no-interaction
           php artisan migrate --force --no-interaction
           mkdir -p "$(dirname "${OPENAPI_SPEC}")"
+          APP_VERSION="$(git describe --tags --abbrev=0 --match 'v[0-9]*')"
+          export APP_VERSION="${APP_VERSION#v}"
           php artisan scramble:export --path="${OPENAPI_SPEC}" --no-interaction
 
       - name: Set up Node.js and pnpm
