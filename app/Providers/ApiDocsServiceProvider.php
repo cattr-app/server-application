@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Docs\OpenApi\AnyRouteMethod;
 use App\Docs\OpenApi\ErrorEnvelopeTransformer;
+use App\Docs\OpenApi\ListShapedObjectTransformer;
 use App\Docs\OpenApi\OperationFixes;
 use App\Docs\OpenApi\ResponseEnvelopeInference;
 use Dedoc\Scramble\Scramble;
@@ -59,6 +60,7 @@ class ApiDocsServiceProvider extends ServiceProvider
             ->resolveOperationMethodsUsing((new AnyRouteMethod)(...))
             ->routes(static fn (Route $route): bool => str_starts_with($route->uri, 'api/') && $route->getName() !== 'universal_route')
             ->withDocumentTransformers(ErrorEnvelopeTransformer::class)
+            ->withDocumentTransformers(ListShapedObjectTransformer::class)
             ->withDocumentTransformers(static function (OpenApi $openApi): void {
                 $openApi->info->title = 'Cattr API';
                 $openApi->info->version = '4.0.0';
