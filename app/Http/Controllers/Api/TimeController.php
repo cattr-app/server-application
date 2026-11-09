@@ -29,47 +29,6 @@ class TimeController extends Controller
             'taskUser' => 'time.task-user',
         ];
     }
-    /**
-     * @api             {get,post} /time/total Total
-     * @apiDescription  Get total of Time
-     *
-     * @apiVersion      4.0.0
-     * @apiName         Total
-     * @apiGroup        Time
-     *
-     * @apiUse          AuthHeader
-     *
-     * @apiPermission   time_total
-     * @apiPermission   time_full_access
-     *
-     * @apiParam {String}   start_at  Start DataTime
-     * @apiParam {String}   end_at    End DataTime
-     * @apiParam {Integer}  user_id   User ID
-     *
-     * @apiParamExample {json} Request Example
-     *  {
-     *    "user_id": 1,
-     *    "start_at": "2005-01-01 00:00:00",
-     *    "end_at": "2019-01-01 00:00:00"
-     *  }
-     *
-     * @apiSuccess {Integer} time  Total time in seconds
-     * @apiSuccess {String}  start Datetime of first Time Interval start_at
-     * @apiSuccess {String}  end   Datetime of last Time Interval end_at
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "time": 338230,
-     *    "start": "2020-01-23T19:42:27+00:00",
-     *    "end": "2020-04-30T21:58:31+00:00"
-     *  }
-     *
-     * @apiUse          400Error
-     * @apiUse          UnauthorizedError
-     * @apiUse          ForbiddenError
-     * @apiUse          ValidationError
-     */
 
     /**
      * Display a total of time
@@ -121,68 +80,6 @@ class TimeController extends Controller
         ])->respond();
     }
 
-    /**
-     * @api             {get,post} /time/tasks Tasks
-     * @apiDescription  Get tasks and its total time
-     *
-     * @apiVersion      4.0.0
-     * @apiName         Tasks
-     * @apiGroup        Time
-     *
-     * @apiUse          TimeIntervalParams
-     *
-     * @apiParamExample {json} Request Example:
-     *  {
-     *    "user_id": 1,
-     *    "task_id": 1,
-     *    "project_id": 2,
-     *    "start_at": "2005-01-01 00:00:00",
-     *    "end_at": "2019-01-01 00:00:00",
-     *    "activity_fill": 42,
-     *    "mouse_fill": 43,
-     *    "keyboard_fill": 43,
-     *    "id": [">", 1]
-     *  }
-     *
-     * @apiSuccess {String}    current_datetime  Current datetime of server
-     * @apiSuccess {Object[]}  tasks             Array of objects Task
-     * @apiSuccess {Integer}   tasks.id          Tasks id
-     * @apiSuccess {Integer}   tasks.user_id     Tasks User id
-     * @apiSuccess {Integer}   tasks.project_id  Tasks Project id
-     * @apiSuccess {Integer}   tasks.time        Tasks total time in seconds
-     * @apiSuccess {String}    tasks.start       Datetime of first Tasks Time Interval start_at
-     * @apiSuccess {String}    tasks.end         Datetime of last Tasks Time Interval end_at
-     * @apiSuccess {Object[]}  total             Array of total tasks time
-     * @apiSuccess {Integer}   total.time        Total time of tasks in seconds
-     * @apiSuccess {String}    total.start       Datetime of first Time Interval start_at
-     * @apiSuccess {String}    total.end         DateTime of last Time Interval end_at
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "current_datetime": "2020-01-28T10:57:40+00:00",
-     *     "tasks": [
-     *       {
-     *         "id": 1,
-     *         "user_id": 1,
-     *         "project_id": 1,
-     *         "time": 1490,
-     *         "start": "2020-01-23T19:42:27+00:00",
-     *         "end": "2020-01-23T20:07:21+00:00"
-     *       },
-     *     ],
-     *     "total": {
-     *     "time": 971480,
-     *     "start": "2020-01-23T19:42:27+00:00",
-     *     "end": "2020-11-01T08:28:06+00:00"
-     *    }
-     *  }
-     *
-     * @apiUse          400Error
-     * @apiUse          ForbiddenError
-     * @apiUse          UnauthorizedError
-     * @apiUse          ValidationError
-     */
     /**
      * Display the Tasks and theirs total time
      *

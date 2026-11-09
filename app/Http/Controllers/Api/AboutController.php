@@ -27,38 +27,9 @@ class AboutController extends Controller
     }
 
     /**
-     * @api             {get} /about/reports Get Available Report Formats
-     * @apiDescription  Retrieves the list of available report formats and their corresponding MIME types.
+     * Get Available Report Formats
      *
-     * @apiVersion      4.0.0
-     * @apiName         GetReportFormats
-     * @apiGroup        About
-     *
-     * @apiSuccess {Object}     types                        List of available report formats and their MIME types.
-     * @apiSuccess {String}     types.csv                    MIME type for CSV format.
-     * @apiSuccess {String}     types.xlsx                   MIME type for XLSX format.
-     * @apiSuccess {String}     types.pdf                    MIME type for PDF format.
-     * @apiSuccess {String}     types.xls                    MIME type for XLS format.
-     * @apiSuccess {String}     types.ods                    MIME type for ODS format.
-     * @apiSuccess {String}     types.html                   MIME type for HTML format.
-     *
-     * @apiSuccessExample {json} Success Response:
-     *  HTTP/1.1 200 OK
-     *  {
-     *      "types": {
-     *        "csv": "text/csv",
-     *        "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-     *        "pdf": "application/pdf",
-     *        "xls": "application/vnd.ms-excel",
-     *        "ods": "application/vnd.oasis.opendocument.spreadsheet",
-     *        "html": "text/html"
-     *      }
-     *  }
-     *
-      * @apiUse         400Error
-     * @apiUse         ValidationError
-     * @apiUse         UnauthorizedError
-     * @apiUse         ForbiddenError
+     * Retrieves the list of available report formats and their corresponding MIME types.
      */
 
     public function reports(): JsonResponse
@@ -69,63 +40,9 @@ class AboutController extends Controller
     }
 
     /**
-     * Returns information about this instance.
-     */
-    /**
-     * @api             {get} /about Get Application and Module Information
-     * @apiDescription  Retrieves information about the application instance, modules, and image version details.
+     * Get Application and Module Information
      *
-     * @apiVersion      4.0.0
-     * @apiName         GetAppInfo
-     * @apiGroup        About
-     *
-     * @apiSuccess {Object}     app                          Application information.
-     * @apiSuccess {String}     app.version                  The current version of the application.
-     * @apiSuccess {String}     app.instance_id              The unique identifier of the application instance.
-     * @apiSuccess {Boolean}    app.vulnerable               Indicates if the application is vulnerable.
-     * @apiSuccess {String}     app.last_version             The latest version available for the application.
-     * @apiSuccess {String}     app.message                  Any important message related to the application.
-     *
-     * @apiSuccess {Object[]}   modules                      List of enabled modules integrated into the application.
-     * @apiSuccess {String}     modules.name                 Name of the module.
-     * @apiSuccess {String}     modules.version              Current version of the module.
-     * @apiSuccess {Boolean}    modules.enabled              Always true: disabled modules are not listed.
-     *
-     * @apiSuccess {Object}     image                        Information about the image version.
-     * @apiSuccess {String}     image.version                The version of the image (if available).
-     * @apiSuccess {Boolean}    image.vulnerable             Indicates if the image is vulnerable.
-     * @apiSuccess {String}     image.last_version           The latest available version for the image.
-     * @apiSuccess {String}     image.message                Any important message related to the image.
-     *
-     * @apiSuccessExample {json} Success Response:
-     *  HTTP/1.1 200 OK
-     *  {
-     *      "app": {
-     *        "version": "dev",
-     *        "instance_id": null,
-     *        "vulnerable": null,
-     *        "last_version": null,
-     *        "message": null
-     *      },
-     *      "modules": [
-     *        {
-     *          "name": "JiraIntegration",
-     *          "version": "3.0.0",
-     *          "enabled": true
-     *        }
-     *      ],
-     *        "image": {
-     *        "version": null,
-     *        "vulnerable": null,
-     *        "last_version": null,
-     *        "message": null
-     *     }
-     *  }
-     *
-     * @apiUse         400Error
-     * @apiUse         ValidationError
-     * @apiUse         UnauthorizedError
-     * @apiUse         ForbiddenError
+     * Retrieves information about the application instance, modules, and image version details.
      */
 
     public function __invoke(ManageStorageRequest $request): JsonResponse
@@ -210,60 +127,9 @@ class AboutController extends Controller
     }
 
     /**
-     * @throws BindingResolutionException
-     */
-    /**
-     * @api             {get} /storage Get Storage Information
-     * @apiDescription  Retrieves information about the storage space, thinning status, and available screenshots.
+     * Get Storage Information
      *
-     * @apiVersion      4.0.0
-     * @apiName         GetStorageInfo
-     * @apiGroup        Storage
-     *
-     * @apiSuccess {Object}     space                          Information about the storage space.
-     * @apiSuccess {Number}     space.left                     The amount of free space left (in bytes).
-     * @apiSuccess {Number}     space.used                     The amount of space currently used (in bytes).
-     * @apiSuccess {Number}     space.total                    The total amount of storage space available (in bytes).
-     *
-     * @apiSuccess {Number}     threshold                      The storage usage threshold percentage before thinning is needed.
-     * @apiSuccess {Boolean}    need_thinning                  Indicates if the storage requires thinning.
-     * @apiSuccess {Boolean}    rotation_supported             False on object storage (S3): space is not measured, rotation is a no-op.
-     * @apiSuccess {Number}     screenshots_available          The number of available screenshots in the storage.
-     *
-     * @apiSuccess {Object}     thinning                       Information about the thinning process.
-     * @apiSuccess {Boolean}    thinning.now                   Indicates if the thinning process is currently ongoing.
-     * @apiSuccess {String}     thinning.last                  Timestamp of the last successful thinning process.
-     * @apiSuccess {String}     thinning.status                Status of the last requested or scheduled thinning:
-     *                                                         idle, queued, running, completed, skipped (not needed)
-     *                                                         or failed (including a request no worker picked up).
-     * @apiSuccess {String}     thinning.requested_at          Timestamp of the request from the About page.
-     * @apiSuccess {String}     thinning.finished_at           Timestamp the last thinning completed, skipped or failed.
-     *
-     * @apiSuccessExample {json} Success Response:
-     *  HTTP/1.1 200 OK
-     *  {
-     *      "space": {
-     *        "left": 26579533824,
-     *        "used": 178705711104,
-     *        "total": 205285244928
-     *      },
-     *      "threshold": 75,
-     *      "need_thinning": true,
-     *      "rotation_supported": true,
-     *      "screenshots_available": 0,
-     *      "thinning": {
-     *        "now": false,
-     *        "last": "2026-10-30T12:00:00+00:00",
-     *        "status": "completed",
-     *        "requested_at": "2026-10-30T11:59:50+00:00",
-     *        "finished_at": "2026-10-30T12:00:00+00:00"
-     *      }
-     *  }
-     *
-     * @apiUse         400Error
-     * @apiUse         ValidationError
-     * @apiUse         UnauthorizedError
-     * @apiUse         ForbiddenError
+     * Retrieves information about the storage space, thinning status, and available screenshots.
      */
 
     public function storage(ManageStorageRequest $request): JsonResponse
@@ -294,25 +160,12 @@ class AboutController extends Controller
             ]
         ])->respond();
     }
-   /**
-    * @api             {post} /storage Request Storage Cleanup
-    * @apiDescription  Queues the screenshot thinning. The request is accepted, not started: follow thinning.status
-    *                  of GET /storage. Nothing is queued while a thinning is already queued or running.
-    *
-    * @apiVersion      4.1.0
-    * @apiName         StartStorageClean
-    * @apiGroup        Storage
-    *
-    * @apiSuccessExample {json} Response Example
-    *  HTTP/1.1 204 No Content
-    *  {
-    *  }
-    *
-    * @apiUse          400Error
-    * @apiUse          UnauthorizedError
-    * @apiUse          ForbiddenError
-    *
-    */
+    /**
+     * Request Storage Cleanup
+     *
+     * Queues the screenshot thinning. The request is accepted, not started: follow thinning.status
+     * of GET /storage. Nothing is queued while a thinning is already queued or running.
+     */
     public function startStorageClean(ManageStorageRequest $request): JsonResponse
     {
         $runId = StorageCleanupStatus::queue();

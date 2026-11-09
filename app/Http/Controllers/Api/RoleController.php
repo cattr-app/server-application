@@ -10,51 +10,13 @@ use Illuminate\Http\JsonResponse;
 class RoleController extends ItemController
 {
     /**
-     * @api             {post} /api/roles/list Get Roles List
-     * @apiDescription  Retrieves the list of roles available in the system.
+     * Get Roles List
      *
-     * @apiVersion      4.0.0
-     * @apiName         GetRolesList
-     * @apiGroup        Roles
+     * Retrieves the list of roles available in the system.
      *
-     * @apiSuccess {Number}   status             HTTP status code.
-     * @apiSuccess {Boolean}  success            Request success status.
-     * @apiSuccess {Object[]} data               List of roles.
-     * @apiSuccess {String}   data.name          Role name.
-     * @apiSuccess {Number}   data.id            Role ID.
+     * The role `id` is what `role_id` of a user holds: `ANY` is -1, `ADMIN` 0, `MANAGER` 1, `USER` 2, `AUDITOR` 3.
      *
-     * @apiSuccessExample {json} Success Response:
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "status": 200,
-     *    "success": true,
-     *    "data": [
-     *      {
-     *        "name": "ANY",
-     *        "id": -1
-     *      },
-     *      {
-     *        "name": "ADMIN",
-     *        "id": 0
-     *      },
-     *      {
-     *        "name": "MANAGER",
-     *        "id": 1
-     *      },
-     *      {
-     *        "name": "USER",
-     *        "id": 2
-     *      },
-     *      {
-     *        "name": "AUDITOR",
-     *        "id": 3
-     *      }
-     *    ]
-     *  }
-     *
-     * @apiUse 400Error
-     * @apiUse UnauthorizedError
-     * @apiUse ForbiddenError
+     * @response array{status: int, success: true, data: list<array{name: string, id: int}>}
      */
     public function index(): JsonResponse
     {

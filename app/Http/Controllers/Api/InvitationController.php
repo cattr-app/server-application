@@ -19,43 +19,9 @@ class InvitationController extends ItemController
     protected const MODEL = Invitation::class;
 
     /**
-     * @throws Throwable
-     * @api             {post} /invitations/show Show
-     * @apiDescription  Show invitation.
+     * Show
      *
-     * @apiVersion      1.0.0
-     * @apiName         Show Invitation
-     * @apiGroup        Invitation
-     *
-     * @apiUse          AuthHeader
-     *
-     * @apiParam {Integer} id  Invitation ID
-     *
-     * @apiParamExample {json} Request Example
-     * {
-     *   "id": 1
-     * }
-     *
-     * @apiSuccess {Array}    res      Array of records containing the id, email, key, expiration date and role id
-     *
-     * @apiUse InvitationObject
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "res": [
-     *      {
-     *          "id": 1
-     *          "email": "test@example.com",
-     *          "key": "06d4a090-9675-11ea-bf39-5f84c549e29c",
-     *          "expires_at": "2020-01-01T00:00:00.000000Z",
-     *          "role_id": 1
-     *      }
-     *  }
-     *
-     * @apiUse          400Error
-     * @apiUse          UnauthorizedError
-     *
+     * Show invitation.
      */
     public function show(ShowInvitationRequest $request): JsonResponse
     {
@@ -63,36 +29,9 @@ class InvitationController extends ItemController
     }
 
     /**
-     * @throws Exception
-     * @api             {get} /invitations/list List
-     * @apiDescription  Get list of invitations.
+     * List
      *
-     * @apiVersion      1.0.0
-     * @apiName         Invitation List
-     * @apiGroup        Invitation
-     *
-     * @apiUse          AuthHeader
-     *
-     * @apiSuccess {Array}   res      Array of records containing the id, email, key, expiration date and role id
-     *
-     * @apiUse InvitationObject
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "res": [
-     *      {
-     *          "id": 1
-     *          "email": "test@example.com",
-     *          "key": "06d4a090-9675-11ea-bf39-5f84c549e29c",
-     *          "expires_at": "2020-01-01T00:00:00.000000Z",
-     *          "role_id": 1
-     *      }
-     *  }
-     *
-     * @apiUse          400Error
-     * @apiUse          UnauthorizedError
-     *
+     * Get list of invitations.
      */
     public function index(ListInvitationRequest $request): JsonResponse
     {
@@ -100,76 +39,9 @@ class InvitationController extends ItemController
     }
 
     /**
-     * @param CreateInvitationRequest $request
-     * @return JsonResponse
-     * @throws Exception
-     * @api             {post} /invitations/create Create
-     * @apiDescription  Creates a unique invitation token and sends an email to the users
+     * Create
      *
-     * @apiVersion      1.0.0
-     * @apiName         Create Invitation
-     * @apiGroup        Invitation
-     *
-     * @apiUse          AuthHeader
-     *
-     * @apiParam {Array}    users          List of users to send an invitation to
-     * @apiParam {String}   users.email    User email
-     * @apiParam {Integer}  users.role_id  ID of the role that will be assigned to the created user
-     *
-     * @apiParamExample {json} Request Example
-     *  {
-     *    "users": [
-     *      {
-     *        "email": "test@example.com",
-     *        "role_id": 1
-     *      }
-     *    ]
-     *  }
-     *
-     * @apiSuccess {String}   res      Array of records containing the id, email, key, expiration date and role id
-     *
-     * @apiUse InvitationObject
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "res": [
-     *      {
-     *          "id": 1
-     *          "email": "test@example.com",
-     *          "key": "06d4a090-9675-11ea-bf39-5f84c549e29c",
-     *          "expires_at": "2020-01-01T00:00:00.000000Z",
-     *          "role_id": 1
-     *      }
-     *    ]
-     *  }
-     *
-     * @apiErrorExample {json} Email is not specified
-     *  HTTP/1.1 400 Bad Request
-     *  {
-     *     "error_type": "validation",
-     *     "message": "Validation error",
-     *     "info": {
-     *          "users.0.email": [
-     *              "The email field is required."
-     *         ]
-     *     }
-     * }
-     *
-     * @apiErrorExample {json} Email already exists
-     *  HTTP/1.1 400 Bad Request
-     *  {
-     *      "error_type": "validation",
-     *      "message": "Validation error",
-     *      "info": {
-     *          "users.0.email": [
-     *              "The email test@example.com has already been taken."
-     *          ]
-     *      }
-     *  }
-     *
-     * @apiUse          400Error
-     * @apiUse          UnauthorizedError
+     * Creates a unique invitation token and sends an email to the users
      */
     public function create(CreateInvitationRequest $request): JsonResponse
     {
@@ -185,57 +57,9 @@ class InvitationController extends ItemController
     }
 
     /**
-     * @param UpdateInvitationRequest $request
-     * @return JsonResponse
-     * @throws Exception
+     * Resend
      *
-     * @api             {post} /invitations/resend Resend
-     * @apiDescription  Updates the token expiration date and sends an email to the user's email address.
-     *
-     * @apiVersion      1.0.0
-     * @apiName         Update Invitation
-     * @apiGroup        Invitation
-     *
-     * @apiUse          AuthHeader
-     *
-     * @apiParam {Integer}  id  Invitation ID
-     *
-     * @apiParamExample {json} Request Example
-     *  {
-     *    "id": 1
-     *  }
-     *
-     * @apiSuccess {Array}    res      Invitation data
-     *
-     * @apiUse InvitationObject
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "res": {
-     *      "id": 1
-     *      "email": "test@example.com",
-     *      "key": "06d4a090-9675-11ea-bf39-5f84c549e29c",
-     *      "expires_at": "2020-01-01T00:00:00.000000Z",
-     *      "role_id": 1
-     *    }
-     *  }
-     *
-     * @apiErrorExample {json} The id does not exist
-     *  HTTP/1.1 400 Bad Request
-     *  {
-     *      "error_type": "validation",
-     *      "message": "Validation error",
-     *      "info": {
-     *          "id": [
-     *              "The selected id is invalid."
-     *          ]
-     *      }
-     * }
-     *
-     * @apiUse          400Error
-     * @apiUse          UnauthorizedError
-     *
+     * Updates the token expiration date and sends an email to the user's email address.
      */
     public function resend(UpdateInvitationRequest $request): JsonResponse
     {
@@ -247,35 +71,9 @@ class InvitationController extends ItemController
     }
 
     /**
-     * @throws Throwable
-     * @api             {post} /invitations/remove Destroy
-     * @apiDescription  Destroy User
+     * Destroy
      *
-     * @apiVersion      1.0.0
-     * @apiName         Destroy Invitation
-     * @apiGroup        Invitation
-     *
-     * @apiUse          AuthHeader
-     *
-     * @apiParam {Integer}  id  ID of the target invitation
-     *
-     * @apiParamExample {json} Request Example
-     * {
-     *   "id": 1
-     * }
-     *
-     * @apiSuccess {String}   message  Destroy status
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "message": "Item has been removed"
-     *  }
-     *
-     * @apiUse          400Error
-     * @apiUse          ValidationError
-     * @apiUse          ForbiddenError
-     * @apiUse          UnauthorizedError
+     * Destroy User
      */
     public function destroy(DestroyInvitationRequest $request): JsonResponse
     {
@@ -283,21 +81,9 @@ class InvitationController extends ItemController
     }
 
     /**
-     * @param ListInvitationRequest $request
-     * @return JsonResponse
-     * @throws Exception
-     */
-    /**
-     * @api             {get} /api/invitations/count Count Invitations
-     * @apiDescription  Returns the total count of invitations
+     * Count Invitations
      *
-     * @apiVersion      4.0.0
-     * @apiName         CountInvitations
-     * @apiGroup        Invitations
-     *
-     * @apiUse TotalSuccess
-     * @apiUse 400Error
-     * @apiUse UnauthorizedError
+     * Returns the total count of invitations
      */
     public function count(ListInvitationRequest $request): JsonResponse
     {

@@ -61,9 +61,11 @@ Interested in contributing or building Cattr locally?
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) and the [developer guides](docs/developer/README.md).
 
-Build the published API reference from the repository root:
+Build the published API reference (OpenAPI via dedoc/scramble, rendered with Redoc) from the repository root.
+The export needs `composer install` with dev dependencies and a migrated database:
 
 ```bash
+php artisan scramble:export --path=storage/app/tmp/openapi.json
 pnpm install --frozen-lockfile
 pnpm build:pages
 ```

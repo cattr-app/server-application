@@ -21,11 +21,69 @@ jobs:
     permissions:
       contents: read
       pages: read
+    # Throwaway database for `php artisan migrate`: the OpenAPI export introspects the schema.
+    services:
+      mysql:
+        image: mysql:8.4@sha256:76f0358884cb92d9a086d24e5671c38048d3fef40f2588703d73eb55392d6b69  # 8.4
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: cattr
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h 127.0.0.1 -ppassword"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: cattr
+      DB_USERNAME: root
+      DB_PASSWORD: password
+      OPENAPI_SPEC: storage/app/tmp/openapi.json
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
+          # The API reference version is the latest release tag, which needs the history.
+          fetch-depth: 0
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962  # 2.40.0
+        with:
+          php-version: '8.3'
+          extensions: ctype, curl, dom, fileinfo, gd, iconv, intl, json, mbstring, openssl, pdo_mysql, simplexml, tokenizer, xml, zip
+          coverage: none
+          tools: composer:v2
+
+      - name: Get Composer download cache path
+        id: composer-cache
+        run: echo "path=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer downloads
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6
+        with:
+          path: ${{ steps.composer-cache.outputs.path }}
+          key: composer-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-${{ runner.arch }}-
+
+      # Dev dependencies are required: dedoc/scramble is a require-dev package.
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Export OpenAPI document
+        run: |
+          cp .env.example .env
+          php artisan key:generate --no-interaction
+          php artisan migrate --force --no-interaction
+          mkdir -p "$(dirname "${OPENAPI_SPEC}")"
+          APP_VERSION="$(git describe --tags --abbrev=0 --match 'v[0-9]*')"
+          export APP_VERSION="${APP_VERSION#v}"
+          php artisan scramble:export --path="${OPENAPI_SPEC}" --no-interaction
 
       - name: Set up Node.js and pnpm
         uses: jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d  # v5.2.4
@@ -52,6 +110,7 @@ jobs:
         id: pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d  # v6.0.0
 
+      # Lints the exported spec (redocly.yaml), renders Redoc and assembles pages-dist.
       - name: Build API and developer documentation
         run: pnpm build:pages
 

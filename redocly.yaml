@@ -1,0 +1,20 @@
+# Redocly CLI configuration for the API reference (`pnpm build:pages`, .github/workflows/pages.yml).
+extends:
+  - recommended
+
+rules:
+  # The public status-style endpoints (`GET /status`, `POST /roles/list`) have no endpoint-specific 4xx response.
+  operation-4xx-response: off
+  # The deprecated `POST /auth/refresh` always fails with 400 and has no successful response (the only such operation).
+  operation-2xx-response: off
+  # The document intentionally has no license and contact in `info`.
+  info-license: off
+
+# Redoc options. They must live under the top-level `openapi:` key (`theme.openapi` is ignored by CLI 2.x).
+openapi:
+  hideDownloadButton: false
+  theme:
+    logo:
+      maxHeight: 80px
+      maxWidth: 80px
+      gutter: 12px
