@@ -180,6 +180,19 @@ class UploadOfflineIntervalsTest extends TestCase
         $this->assertDatabaseMissing('time_intervals', ['user_id' => $this->worker->id]);
     }
 
+    public function test_digest_encrypted_with_another_key(): void
+    {
+        $content = MessagePack::pack([$this->interval()]);
+        $anotherKey = RSA::createKey(2048)->getPublicKey();
+        $digest = $anotherKey->withPadding(RSA::ENCRYPTION_OAEP)->withHash('sha256')
+            ->encrypt(openssl_digest($content, 'sha256'));
+
+        $response = $this->uploadArchive($this->worker, $this->archive($content, $digest));
+
+        $response->assertError(400);
+        $this->assertDatabaseMissing('time_intervals', ['user_id' => $this->worker->id]);
+    }
+
     public function test_empty_list_of_intervals(): void
     {
         $response = $this->upload($this->worker, []);

@@ -36,6 +36,7 @@ use Illuminate\Support\Number;
 use Illuminate\Validation\ValidationException;
 use MessagePack\MessagePack;
 use phpseclib4\Crypt\RSA;
+use phpseclib4\Exception\BadDecryptionException;
 use Settings;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
 use Storage;
@@ -403,7 +404,11 @@ class IntervalController extends ItemController
             __('Unable to read content of Intervals or its EncryptedDigest')
         );
 
-        $digest = $privateKey->withPadding(RSA::ENCRYPTION_OAEP)->withHash('sha256')->decrypt($digestContent);
+        try {
+            $digest = $privateKey->withPadding(RSA::ENCRYPTION_OAEP)->withHash('sha256')->decrypt($digestContent);
+        } catch (BadDecryptionException) {
+            $digest = false;
+        }
         $actualDigest = openssl_digest($intervalsContent, 'sha256');
 
         abort_if(
