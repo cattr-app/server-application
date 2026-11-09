@@ -13,6 +13,6 @@ openapi:
   hideDownloadButton: false
   theme:
     logo:
-      maxHeight: 48px
-      maxWidth: 48px
+      maxHeight: 80px
+      maxWidth: 80px
       gutter: 12px
