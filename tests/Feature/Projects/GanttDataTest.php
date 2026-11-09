@@ -112,6 +112,15 @@ class GanttDataTest extends TestCase
         $this->assertSame([$this->early->id, $this->late->id], array_column($response->json('data.tasks'), 'id'));
     }
 
+    public function test_gantt_data_as_user_outside_of_the_project(): void
+    {
+        $user = UserFactory::asUser()->withTokens()->create();
+
+        $response = $this->actingAs($user)->getJson(self::URI . '?id=' . $this->project->id);
+
+        $response->assertNotFound('page_not_found');
+    }
+
     public function test_response_structure(): void
     {
         $admin = UserFactory::asAdmin()->withTokens()->create();

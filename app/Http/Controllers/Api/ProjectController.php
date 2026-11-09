@@ -85,8 +85,8 @@ class ProjectController extends ItemController
                 ], 'due_date'),
         ]));
 
-        Filter::listen(Filter::getActionFilterName(), static function (Project $item) {
-            $item->append('tasks_relations');
+        Filter::listen(Filter::getActionFilterName(), static function (?Project $item) {
+            $item?->append('tasks_relations');
             return $item;
         });
 
