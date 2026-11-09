@@ -104,7 +104,7 @@ jobs:
             fs
             --scanners misconfig
             --severity MEDIUM,HIGH,CRITICAL
-            --ignorefile .trivyignore.yaml
+            --ignorefile .github/.trivyignore.yaml
             --helm-set cattr.appUrl=https://cattr.example.com,cattr.appKey=base64:Y2ktZHVtbXktYXBwLWtleS0zMi1ieXRlcy1sb25nISE=,cattr.reverbAppSecret=ci-dummy,mysql.enabled=true,database.username=ci-dummy,database.password=ci-dummy,database.rootPassword=ci-dummy,setup.admin.enabled=false
             --exit-code 1
             --no-progress
