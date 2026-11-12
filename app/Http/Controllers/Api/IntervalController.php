@@ -37,6 +37,7 @@ use Illuminate\Validation\ValidationException;
 use MessagePack\MessagePack;
 use phpseclib4\Crypt\RSA;
 use phpseclib4\Exception\BadDecryptionException;
+use phpseclib4\Exception\KeyConstraintException;
 use Settings;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
 use Storage;
@@ -406,7 +407,7 @@ class IntervalController extends ItemController
 
         try {
             $digest = $privateKey->withPadding(RSA::ENCRYPTION_OAEP)->withHash('sha256')->decrypt($digestContent);
-        } catch (BadDecryptionException) {
+        } catch (BadDecryptionException | KeyConstraintException) {
             $digest = false;
         }
         $actualDigest = openssl_digest($intervalsContent, 'sha256');

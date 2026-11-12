@@ -171,7 +171,7 @@ class UploadOfflineIntervalsTest extends TestCase
     public function test_digest_mismatch(): void
     {
         $intervals = MessagePack::pack([$this->interval()]);
-        $otherIntervals = MessagePack::pack([$this->interval(['task_id' => 1])]);
+        $otherIntervals = MessagePack::pack([$this->interval(['task_id' => $this->task->id + 1])]);
         $archive = $this->archive($intervals, $this->encryptDigest($otherIntervals));
 
         $response = $this->uploadArchive($this->worker, $archive);
@@ -186,6 +186,17 @@ class UploadOfflineIntervalsTest extends TestCase
         $anotherKey = RSA::createKey(2048)->getPublicKey();
         $digest = $anotherKey->withPadding(RSA::ENCRYPTION_OAEP)->withHash('sha256')
             ->encrypt(openssl_digest($content, 'sha256'));
+
+        $response = $this->uploadArchive($this->worker, $this->archive($content, $digest));
+
+        $response->assertError(400);
+        $this->assertDatabaseMissing('time_intervals', ['user_id' => $this->worker->id]);
+    }
+
+    public function test_truncated_encrypted_digest(): void
+    {
+        $content = MessagePack::pack([$this->interval()]);
+        $digest = substr($this->encryptDigest($content), 0, 16);
 
         $response = $this->uploadArchive($this->worker, $this->archive($content, $digest));
 
