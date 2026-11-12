@@ -128,6 +128,40 @@ class EditTest extends TestCase
         $this->assertSame('Edited', $report->fresh()->name);
     }
 
+    public function test_charts_can_be_emptied(): void
+    {
+        $report = $this->createReport($this->user, UniversalReportType::PERSONAL);
+        $report->update(['charts' => ['total_spent_time_day']]);
+
+        $this->actingAs($this->user)
+            ->postJson(self::URI, ['charts' => []] + $this->payload($report, UniversalReportType::PERSONAL))
+            ->assertOk();
+
+        $this->assertSame([], $report->fresh()->charts);
+    }
+
+    public function test_charts_are_required(): void
+    {
+        $report = $this->createReport($this->user, UniversalReportType::PERSONAL);
+        $payload = $this->payload($report, UniversalReportType::PERSONAL);
+        unset($payload['charts']);
+
+        $this->actingAs($this->user)->postJson(self::URI, $payload)->assertValidationError();
+
+        $this->assertSame('Original', $report->fresh()->name);
+    }
+
+    public function test_charts_cannot_be_null(): void
+    {
+        $report = $this->createReport($this->user, UniversalReportType::PERSONAL);
+
+        $this->actingAs($this->user)
+            ->postJson(self::URI, ['charts' => null] + $this->payload($report, UniversalReportType::PERSONAL))
+            ->assertValidationError();
+
+        $this->assertSame('Original', $report->fresh()->name);
+    }
+
     public function test_unauthorized(): void
     {
         $this->postJson(self::URI, [])->assertUnauthorized();

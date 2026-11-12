@@ -181,7 +181,7 @@ class UniversalReportController
      *     base: string,
      *     data_objects: list<int>,
      *     fields: array<string, list<string>>,
-     *     charts: list<string>|null,
+     *     charts: list<string>,
      *     created_at: string|null,
      *     updated_at: string|null,
      * }}

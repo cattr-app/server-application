@@ -45,6 +45,10 @@ class PlannedTimeReportExport extends AppReport implements FromCollection, WithM
      */
     public function map($row): array
     {
+        if ($row === null) {
+            return [];
+        }
+
         if (is_string($row)) {
             return [
                 [],
