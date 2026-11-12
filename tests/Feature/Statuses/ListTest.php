@@ -50,11 +50,18 @@ class ListTest extends TestCase
     {
         $admin = UserFactory::asAdmin()->withTokens()->create();
 
-        $response = $this->actingAs($admin)->postJson(self::URI, ['where' => ['name' => 'Open']]);
+        Status::create([
+            'name' => 'List post status',
+            'active' => false,
+            'color' => '#aabbcc',
+            'order' => Status::max('order') + 1,
+        ]);
+
+        $response = $this->actingAs($admin)->postJson(self::URI, ['where' => ['name' => 'List post status']]);
 
         $response->assertOk();
         $response->assertJsonCount(1, 'data');
-        $response->assertJsonPath('data.0.name', 'Open');
+        $response->assertJsonPath('data.0.name', 'List post status');
     }
 
     public function test_list_with_filter(): void

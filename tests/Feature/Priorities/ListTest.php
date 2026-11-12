@@ -50,11 +50,13 @@ class ListTest extends TestCase
     {
         $admin = UserFactory::asAdmin()->withTokens()->create();
 
-        $response = $this->actingAs($admin)->postJson(self::URI, ['where' => ['name' => 'High']]);
+        Priority::create(['name' => 'List post priority']);
+
+        $response = $this->actingAs($admin)->postJson(self::URI, ['where' => ['name' => 'List post priority']]);
 
         $response->assertOk();
         $response->assertJsonCount(1, 'data');
-        $response->assertJsonPath('data.0.name', 'High');
+        $response->assertJsonPath('data.0.name', 'List post priority');
     }
 
     public function test_list_with_filter(): void
