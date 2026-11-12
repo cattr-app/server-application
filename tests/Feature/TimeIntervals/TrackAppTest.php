@@ -74,8 +74,9 @@ class TrackAppTest extends TestCase
         $data = ['title' => 'Terminal', 'executable' => 'term'];
 
         $this->actingAs($user)->putJson(self::URI, $data)->assertOk();
+        $this->actingAs($user)->putJson(self::URI, $data)->assertOk();
 
-        $this->assertSame(1, TrackedApplication::withoutGlobalScopes()->where('user_id', $user->id)->count());
+        $this->assertSame(2, TrackedApplication::withoutGlobalScopes()->where('user_id', $user->id)->count());
     }
 
     public function test_without_executable(): void
