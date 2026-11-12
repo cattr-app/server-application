@@ -15,6 +15,7 @@ use Tests\Facades\TaskFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 use Tests\TestResponse;
+use ZipArchive;
 
 class DownloadTest extends TestCase
 {
@@ -146,8 +147,20 @@ class DownloadTest extends TestCase
         $response = $this->download($this->member, ['projects' => [$this->project->id]], $accept);
 
         $response->assertOk();
+        $this->assertNull(Settings::scope('core.reports')->get('planned_time_report_date'));
         $this->assertStringEndsWith(".$extension", $this->filePath($response));
-        $this->assertNotEmpty(Storage::disk('reports')->get($this->filePath($response)));
+
+        $path = Storage::disk('reports')->path($this->filePath($response));
+        if ($extension === 'xlsx') {
+            $zip = new ZipArchive();
+            $this->assertTrue($zip->open($path));
+            $content = $zip->getFromName('xl/sharedStrings.xml');
+            $zip->close();
+        } else {
+            $content = file_get_contents($path);
+        }
+        $this->assertStringContainsString($this->project->name, $content);
+        $this->assertStringNotContainsString('Created at', $content);
     }
 
     public function test_projects_filter_limits_the_report_of_admin(): void

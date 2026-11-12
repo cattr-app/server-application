@@ -151,6 +151,10 @@ class DownloadTest extends TestCase
 
     public function test_user_gets_only_own_time(): void
     {
+        // the other worker also works on the project of the worker
+        $shared = IntervalFactory::refresh()->forUser($this->otherWorker)->forTask($this->interval->task)->create();
+        $shared->forceFill(['start_at' => '2026-03-10 12:00:00', 'end_at' => '2026-03-10 13:00:00'])->save();
+
         $response = $this->download($this->worker, ['users' => [$this->worker->id, $this->otherWorker->id]]);
 
         $response->assertOk();
