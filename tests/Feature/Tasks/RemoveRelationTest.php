@@ -157,12 +157,16 @@ class RemoveRelationTest extends TestCase
     {
         $other = TaskFactory::forProject($this->project)->create();
         $this->parent->children()->attach($other);
+        $otherParent = TaskFactory::forProject($this->project)->create();
+        $otherParent->children()->attach($this->child);
         $admin = UserFactory::asAdmin()->withTokens()->create();
 
         $this->removeRelation($admin)->assertNoContent();
 
+        // The controller detaches child_id from parent->children(), so both ids are part of the deletion
         $this->assertNotRelated();
         $this->assertDatabaseHas('tasks_relations', ['parent_id' => $this->parent->id, 'child_id' => $other->id]);
+        $this->assertDatabaseHas('tasks_relations', ['parent_id' => $otherParent->id, 'child_id' => $this->child->id]);
     }
 
     public function test_relation_is_directional(): void

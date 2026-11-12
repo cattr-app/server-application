@@ -129,6 +129,59 @@ class CalendarTest extends TestCase
         $this->assertCount(1, $response->json('data.tasks_by_week'));
     }
 
+    public function test_range_across_a_month_boundary_is_split_into_weeks(): void
+    {
+        // Monday 2026-03-30 to Sunday 2026-04-05 and Monday 2026-04-06 to Sunday 2026-04-12
+        $project = ProjectFactory::refresh()->create();
+        $firstWeek = $this->task(['start_date' => '2026-03-31', 'due_date' => '2026-04-02'], $project);
+        $secondWeek = $this->task(['start_date' => '2026-04-07', 'due_date' => '2026-04-09'], $project);
+        $both = $this->task(['start_date' => '2026-04-02', 'due_date' => '2026-04-08'], $project);
+        $admin = UserFactory::asAdmin()->withTokens()->create();
+
+        $response = $this->calendar($admin, [
+            'project_id' => $project->id,
+            'start_at' => '2026-04-01',
+            'end_at' => '2026-04-07',
+        ]);
+
+        $response->assertOk();
+        $weeks = $response->json('data.tasks_by_week');
+        $this->assertCount(2, $weeks);
+
+        $this->assertSame(
+            [[30, 3], [31, 3], [1, 4], [2, 4], [3, 4], [4, 4], [5, 4]],
+            array_map(static fn(array $day) => [$day['day'], $day['month']], $weeks[0]['days'])
+        );
+        $this->assertSame(
+            [[6, 4], [7, 4], [8, 4], [9, 4], [10, 4], [11, 4], [12, 4]],
+            array_map(static fn(array $day) => [$day['day'], $day['month']], $weeks[1]['days'])
+        );
+
+        $this->assertEqualsCanonicalizing(
+            [
+                ['task_id' => $firstWeek->id, 'start_week_day' => 1, 'end_week_day' => 3],
+                ['task_id' => $both->id, 'start_week_day' => 3, 'end_week_day' => 6],
+            ],
+            $weeks[0]['tasks']
+        );
+        $this->assertEqualsCanonicalizing(
+            [
+                ['task_id' => $both->id, 'start_week_day' => 0, 'end_week_day' => 2],
+                ['task_id' => $secondWeek->id, 'start_week_day' => 1, 'end_week_day' => 3],
+            ],
+            $weeks[1]['tasks']
+        );
+
+        $days = array_column($response->json('data.tasks_by_day'), 'task_ids', 'date');
+        $this->assertCount(14, $days);
+        $this->assertSame([$firstWeek->id], $days['2026-03-31']);
+        $this->assertEqualsCanonicalizing([$firstWeek->id, $both->id], $days['2026-04-02']);
+        $this->assertSame([$both->id], $days['2026-04-06']);
+        $this->assertEqualsCanonicalizing([$secondWeek->id, $both->id], $days['2026-04-08']);
+        $this->assertSame([$secondWeek->id], $days['2026-04-09']);
+        $this->assertSame([], $days['2026-04-12']);
+    }
+
     public function test_range_is_widened_to_whole_weeks(): void
     {
         $admin = UserFactory::asAdmin()->withTokens()->create();
