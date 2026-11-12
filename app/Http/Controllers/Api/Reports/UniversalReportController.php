@@ -109,7 +109,7 @@ class UniversalReportController
      * @response array{status: int, success: true, data: array{
      *     fields: array<string, list<string>>,
      *     dataObjects: list<array<string, mixed>>|null,
-     *     charts: list<string>,
+     *     charts: list<string>|null,
      * }}
      */
     public function getDataObjectsAndFields(Request $request)
@@ -181,7 +181,7 @@ class UniversalReportController
      *     base: string,
      *     data_objects: list<int>,
      *     fields: array<string, list<string>>,
-     *     charts: list<string>,
+     *     charts: list<string>|null,
      *     created_at: string|null,
      *     updated_at: string|null,
      * }}
