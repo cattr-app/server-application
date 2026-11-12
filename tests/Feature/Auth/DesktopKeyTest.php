@@ -3,6 +3,7 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Laravel\Sanctum\PersonalAccessToken;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -82,7 +83,13 @@ class DesktopKeyTest extends TestCase
         $response->assertOk()->assertJsonStructure(['data' => ['access_token', 'token_type']]);
         $this->assertSame($tokensBefore + 1, PersonalAccessToken::where('tokenable_id', $user->id)->count());
 
-        $this->withHeader('Authorization', 'Bearer ' . $response->json('data.access_token'))
+        $plainToken = $response->json('data.access_token');
+        $this->assertSame($user->id, PersonalAccessToken::findToken($plainToken)?->tokenable_id);
+
+        // The guards keep the user of the previous requests: drop them, so that the token itself is checked
+        Auth::forgetGuards();
+
+        $this->withHeader('Authorization', "Bearer $plainToken")
             ->getJson('auth/me')
             ->assertOk()
             ->assertJsonPath('data.id', $user->id);
