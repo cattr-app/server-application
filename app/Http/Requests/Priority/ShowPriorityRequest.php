@@ -9,7 +9,7 @@ class ShowPriorityRequest extends CattrFormRequest
 {
     public function _authorize(): bool
     {
-        return $this->user()->can('view', Priority::find(request('id')));
+        return $this->user()->can('view', Priority::class);
     }
 
     public function _rules(): array
