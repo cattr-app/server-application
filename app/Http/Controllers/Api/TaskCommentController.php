@@ -106,8 +106,8 @@ class TaskCommentController extends ItemController
         Filter::listen(
             Filter::getQueryFilterName(),
             static fn($query) => $user->hasRole([Role::ADMIN, Role::MANAGER]) ? $query :
-                $query->where(['user_id' => $user->id])
-                ->whereHas('task', static fn($taskQuery) => $taskQuery->where(['user_id' => $user->id]))
+                // The author may remove own comments on tasks still visible to them (Task global scope applies).
+                $query->where(['user_id' => $user->id])->whereHas('task')
         );
 
         return $this->_destroy($request);
