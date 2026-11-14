@@ -12,11 +12,13 @@ use App\Models\OfflineScreenshotUpload;
 use App\Models\OfflineScreenshotUploadItem;
 use App\Models\User;
 use Exception;
+use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Mockery\MockInterface;
 use RuntimeException;
 use Tests\Facades\TaskFactory;
 use Tests\Facades\UserFactory;
@@ -451,12 +453,16 @@ class OfflineScreenshotsUploadTest extends TestCase
     {
         $user = UserFactory::withTokens()->create();
         $interval = $this->createOfflineInterval($user, TaskFactory::forUser($user)->create());
-        OfflineScreenshotUpload::created(static fn () => throw new RuntimeException('Queue is down'));
+        $this->mock(Dispatcher::class, static function (MockInterface $dispatcher) {
+            $dispatcher->shouldReceive('dispatch')->once()->andThrow(new RuntimeException('Queue is down'));
+        });
 
         $this->uploadOfflineArchive($user, $this->entries($user, $interval))
             ->assertStatus(self::HTTP_INTERNAL_SERVER_ERROR);
 
+        // Neither the archive nor an upload that no job would ever process is left
         $this->assertNoStoredArchive();
+        $this->assertDatabaseCount('offline_screenshot_uploads', 0);
     }
 
     /** The disks are configured not to throw: a failed delete is only reported by the return value */
