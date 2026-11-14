@@ -17,7 +17,8 @@ class CreateAttachmentRequest extends CattrFormRequest
 
     public function _rules(): array
     {
-        $maxFileSize = AttachmentHelper::getMaxAllowedFileSize();
+        // The size rule takes kilobytes, the helper returns bytes
+        $maxFileSize = AttachmentHelper::getMaxAllowedFileSize() / 1024;
         return [
             'attachment' => "file|required|max:$maxFileSize",
         ];
