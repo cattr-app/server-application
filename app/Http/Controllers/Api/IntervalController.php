@@ -219,7 +219,9 @@ class IntervalController extends ItemController
      * Create Time Interval
      *
      * The interval is created together with its screenshot: if the screenshot cannot be stored, nothing is
-     * created and the request fails with a server error, so it can be retried as is.
+     * created and the request fails with a server error, so it can be retried as is. A failure to queue the
+     * follow-up jobs (thumbnail, apps) after the commit is reported but does not fail the request: the interval
+     * is already persisted and is returned.
      *
      * Required permission (any of): `time_intervals_create`, `time_intervals_full_access`
      */
@@ -264,7 +266,15 @@ class IntervalController extends ItemController
             Filter::getAfterActionEventName(),
             static function ($data) {
                 if (User::find($data['user_id'])->web_and_app_monitoring) {
-                    AssignAppsToTimeInterval::dispatch($data)->afterCommit();
+                    // After commit the interval is persisted: a failed dispatch is reported, not thrown, or the
+                    // client's retry would duplicate the interval
+                    DB::afterCommit(static function () use ($data) {
+                        try {
+                            AssignAppsToTimeInterval::dispatch($data);
+                        } catch (Throwable $e) {
+                            report($e);
+                        }
+                    });
                 }
             }
         );

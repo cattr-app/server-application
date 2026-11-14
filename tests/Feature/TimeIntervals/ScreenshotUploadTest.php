@@ -8,7 +8,10 @@ use App\Models\CronTaskWorkers;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\User;
+use App\Jobs\AssignAppsToTimeInterval;
+use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Tests\Facades\IntervalFactory;
@@ -105,6 +108,45 @@ class ScreenshotUploadTest extends TestCase
         $this->assertSame(0, TimeInterval::whereUserId($this->admin->id)->count());
         $this->assertSame(0, CronTaskWorkers::whereUserId($this->admin->id)->count());
         $this->assertSame([], Storage::allFiles(), 'Neither the screenshot nor a thumbnail of the rolled back interval is left');
+    }
+
+    public function test_failed_thumbnail_dispatch_after_commit_is_reported_and_does_not_fail_the_request(): void
+    {
+        Exceptions::fake();
+        $intervalData = $this->intervalDataWithScreenshot();
+        // The sync queue builds the thumbnail inside the request, after the commit
+        $real = Storage::disk('local');
+        $disk = \Mockery::mock(Storage::disk('local'))->makePartial();
+        $disk->shouldReceive('put')->with(\Mockery::pattern('#/' . ScreenshotService::THUMBS_FOLDER . '#'), \Mockery::any())->andReturn(false);
+        $disk->shouldReceive('put')->andReturnUsing(fn (...$args) => $real->put(...$args));
+        Storage::set('local', $disk);
+
+        $this->actingAs($this->admin)->post(self::CREATE_URI, $intervalData, ['Accept' => 'application/json'])
+            ->assertOk();
+
+        $interval = TimeInterval::whereUserId($this->admin->id)->sole();
+        Exceptions::assertReported(
+            fn (RuntimeException $e) => str_contains($e->getMessage(), 'Cannot write the screenshot thumbnail'),
+        );
+        Storage::assertExists($this->screenshotService->getScreenshotPath($interval));
+    }
+
+    public function test_failed_apps_dispatch_after_commit_is_reported_and_does_not_fail_the_request(): void
+    {
+        Exceptions::fake();
+        $this->admin->update(['web_and_app_monitoring' => true]);
+        $intervalData = $this->intervalDataWithScreenshot();
+        unset($intervalData['screenshot']);
+        $this->mock(Dispatcher::class)
+            ->shouldReceive('dispatch')
+            ->with(\Mockery::type(AssignAppsToTimeInterval::class))
+            ->andThrow(new RuntimeException('queue is down'));
+
+        $this->actingAs($this->admin)->post(self::CREATE_URI, $intervalData, ['Accept' => 'application/json'])
+            ->assertOk();
+
+        $this->assertSame(1, TimeInterval::whereUserId($this->admin->id)->count());
+        Exceptions::assertReported(fn (RuntimeException $e) => $e->getMessage() === 'queue is down');
     }
 
     private function intervalDataWithScreenshot(): array

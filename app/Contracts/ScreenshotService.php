@@ -57,8 +57,16 @@ abstract class ScreenshotService
             });
         }
 
-        // After commit: inside a transaction (interval creation) the job must not outlive a rollback
-        GenerateScreenshotThumbnail::dispatch($timeInterval)->afterCommit();
+        // After commit: inside a transaction (interval creation) the job must not outlive a rollback. By then the
+        // interval is persisted, so a failed dispatch (queue down, or the thumbnail built inline by the sync queue)
+        // is reported, not thrown: the request must not fail, or the client's retry would duplicate the interval.
+        DB::afterCommit(static function () use ($timeInterval) {
+            try {
+                GenerateScreenshotThumbnail::dispatch($timeInterval);
+            } catch (Throwable $e) {
+                report($e);
+            }
+        });
     }
 
     public function createThumbnail(TimeInterval|int $timeInterval): void
