@@ -89,7 +89,21 @@ class EditTest extends TestCase
         ]);
     }
 
-    public function test_edit_without_parent_makes_group_a_root(): void
+    public function test_edit_without_parent_id_keeps_parent(): void
+    {
+        $admin = UserFactory::asAdmin()->withTokens()->create();
+
+        $response = $this->actingAs($admin)->postJson(self::URI, ['id' => $this->group->id, 'name' => 'Renamed']);
+
+        $response->assertOk();
+        $this->assertDatabaseHas('project_groups', [
+            'id' => $this->group->id,
+            'name' => 'Renamed',
+            'parent_id' => $this->parent->id,
+        ]);
+    }
+
+    public function test_edit_with_null_parent_makes_group_a_root(): void
     {
         $admin = UserFactory::asAdmin()->withTokens()->create();
 
