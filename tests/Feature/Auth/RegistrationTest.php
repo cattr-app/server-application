@@ -12,7 +12,7 @@ use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
 /**
- * The registration routes sit behind auth:sanctum, so every request here is made by an already signed-in user.
+ * The registration routes are public: an invitee has no token yet.
  */
 class RegistrationTest extends TestCase
 {
@@ -56,15 +56,17 @@ class RegistrationTest extends TestCase
         ];
     }
 
-    public function test_guest_cannot_open_or_submit_the_form(): void
+    public function test_guest_can_open_and_submit_the_form(): void
     {
         $invitation = $this->invitation();
 
-        $this->getJson(self::URI . $invitation->key)->assertUnauthorized();
-        $this->postJson(self::URI . $invitation->key, $this->registrationData($invitation))->assertUnauthorized();
+        $this->getJson(self::URI . $invitation->key)
+            ->assertOk()
+            ->assertJsonPath('data.email', $invitation->email);
+        $this->postJson(self::URI . $invitation->key, $this->registrationData($invitation))->assertOk();
 
-        $this->assertDatabaseHas('invitations', ['id' => $invitation->id]);
-        $this->assertDatabaseMissing('users', ['email' => $invitation->email]);
+        $this->assertDatabaseMissing('invitations', ['id' => $invitation->id]);
+        $this->assertDatabaseHas('users', ['email' => $invitation->email]);
     }
 
     #[DataProvider('roles')]
