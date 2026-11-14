@@ -105,9 +105,9 @@ class CreateTest extends TestCase
     public function test_a_file_over_the_upload_limit_is_rejected(): void
     {
         $user = UserFactory::refresh()->asUser()->withTokens()->create();
-        $limit = (int)AttachmentHelper::getMaxAllowedFileSize();
-        // The rule takes the limit in kilobytes; the fake file only reports its size, no bytes are written
-        $file = UploadedFile::fake()->create('big.bin', $limit + 1);
+        $limitKb = intdiv((int)AttachmentHelper::getMaxAllowedFileSize(), 1024);
+        // The fake file only reports its size (in kilobytes), no bytes are written
+        $file = UploadedFile::fake()->create('big.bin', $limitKb + 1);
 
         $this->actingAs($user)->postJson(self::URI, ['attachment' => $file])
             ->assertValidationError();
