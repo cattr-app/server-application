@@ -28,11 +28,11 @@ class CronTaskWorkers extends Model
      * @var array
      */
     protected $fillable = [
-        'user_id' => 'integer',
-        'task_id' => 'integer',
-        'duration' => 'integer',
-        'offset' => 'integer',
-        'created_by_cron' => 'boolean'
+        'user_id',
+        'task_id',
+        'duration',
+        'offset',
+        'created_by_cron',
     ];
 
     /**
