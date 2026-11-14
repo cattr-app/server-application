@@ -96,15 +96,25 @@
                         size="large"
                         icon="icon-upload"
                         type="primary"
+                        :disabled="screenshotsUploading"
                         @click="uploadScreenshots"
                         >{{ $t('offline_sync.import') }}
                     </at-button>
                     <div v-if="screenshotsUploadProgress != null" class="screenshots-upload-progress">
+                        <span class="screenshots-upload-progress__title">{{ $t('offline_sync.uploading') }}</span>
                         <at-progress :percent="screenshotsUploadProgress.progress" :stroke-width="15" />
                         <span class="screenshots-upload-progress__total">{{
                             screenshotsUploadProgress.humanReadable
                         }}</span>
                         <span class="screenshots-upload-progress__speed">{{ screenshotsUploadProgress.speed }}</span>
+                    </div>
+                    <div v-if="screenshotsUpload != null" class="screenshots-processing">
+                        <span class="screenshots-processing__title">{{ screenshotsUploadStatusText }}</span>
+                        <at-progress
+                            :percent="screenshotsUploadPercent"
+                            :stroke-width="15"
+                            :status="screenshotsUpload.status === 'failed' ? 'error' : undefined"
+                        />
                     </div>
                 </div>
             </div>
@@ -119,6 +129,7 @@
 </template>
 
 <script>
+    import { mapGetters } from 'vuex';
     import { ValidationObserver, ValidationProvider } from 'vee-validate';
     import OfflineSyncService from '../services/offline-sync.service';
     import { formatDurationString } from '@/utils/time';
@@ -126,6 +137,7 @@
     import ResourceSelect from '@/components/ResourceSelect.vue';
     import UsersService from '@/services/resource/user.service';
     import { humanFileSize } from '@/utils/file';
+    import { createRequestGuard } from '../services/requestGuard';
 
     const formatImportResultMessage = (h, params) => {
         const getResultIcon = () => {
@@ -262,7 +274,42 @@
                 userId: null,
                 usersService: new UsersService(),
                 screenshotsUploadProgress: null,
+                screenshotsUploading: false,
+                screenshotsUpload: null,
+                screenshotsPollTimer: null,
+                screenshotsChannel: null,
+                screenshotsRefreshing: false,
             };
+        },
+        computed: {
+            ...mapGetters('user', ['user']),
+            screenshotsUploadPercent() {
+                const { total, processed, status } = this.screenshotsUpload;
+                if (status === 'completed' || total === 0) {
+                    return 100;
+                }
+                return Math.min(100, Math.round((processed / total) * 100));
+            },
+            screenshotsUploadStatusText() {
+                const { status, total, processed } = this.screenshotsUpload;
+                if (status === 'failed') {
+                    return this.$t('offline_sync.processing_failed', { processed, total });
+                }
+                if (status === 'completed') {
+                    return this.$t('offline_sync.processing_completed', { processed, total });
+                }
+                return status === 'pending'
+                    ? this.$t('offline_sync.processing_pending')
+                    : this.$t('offline_sync.processing', { processed, total });
+            },
+        },
+        created() {
+            // Not reactive on purpose: decides which upload request may still change the state
+            this.screenshotsUploadGuard = createRequestGuard();
+        },
+        beforeDestroy() {
+            this.screenshotsUploadGuard.dispose();
+            this.stopTrackingScreenshotsUpload();
         },
         methods: {
             async exportTasks() {
@@ -309,25 +356,106 @@
                 const { valid } = await this.$refs.screenshots_file.validate(file);
 
                 if (valid) {
-                    const result = await this.service.uploadScreenshots(file, this.onUploadProgress.bind(this));
-                    if (result.success) {
-                        this.addedScreenshots = result.data.map(el => {
-                            const timeDiff = el.interval
-                                ? moment(el.interval['end_at']).diff(moment(el.interval['start_at'])) / 1000
-                                : '-';
-                            const totalTime = el.interval ? Math.round((timeDiff + Number.EPSILON) * 100) / 100 : '-';
+                    // A newer upload replaces the previous one: its tracking is stopped and the response of its
+                    // request, if it arrives later, is ignored
+                    const token = this.screenshotsUploadGuard.begin();
+                    this.stopTrackingScreenshotsUpload();
+                    this.addedScreenshots = [];
+                    this.screenshotsUpload = null;
+                    this.screenshotsUploadProgress = null;
+                    this.screenshotsUploading = true;
 
-                            return {
-                                ...el.interval,
-                                message: el.message,
-                                success: el.success,
-                                total_time: el.interval ? formatDurationString(totalTime) : '-',
-                            };
-                        });
-                    } else {
-                        this.addedScreenshots = [];
+                    try {
+                        const result = await this.service.uploadScreenshots(file, progressEvent =>
+                            this.screenshotsUploadGuard.isCurrent(token) ? this.onUploadProgress(progressEvent) : null,
+                        );
+                        if (!this.screenshotsUploadGuard.isCurrent(token)) {
+                            return;
+                        }
+
+                        if (result.success) {
+                            // The archive is queued: its screenshots are attached by a queue worker
+                            this.screenshotsUpload = result.data;
+                            this.trackScreenshotsUpload(result.data.id);
+                        }
+                    } finally {
+                        if (this.screenshotsUploadGuard.isCurrent(token)) {
+                            this.screenshotsUploading = false;
+                        }
                     }
                 }
+            },
+            /**
+             * Follows the upload with the Reverb events of the private channel, which only trigger an extra refresh,
+             * and polls as well: the polling is the only source of the status when Reverb is not available.
+             */
+            trackScreenshotsUpload(id) {
+                // The timer and the channel subscription have one owner: the upload tracked now
+                this.stopTrackingScreenshotsUpload();
+
+                if (this.user?.id && this.$echo) {
+                    try {
+                        this.screenshotsChannel = `offline-sync.${this.user.id}`;
+                        this.$echo
+                            .private(this.screenshotsChannel)
+                            .listen(
+                                '.offline-sync.upload',
+                                data => data.id === id && this.refreshScreenshotsUpload(id),
+                            );
+                    } catch (e) {
+                        this.screenshotsChannel = null;
+                    }
+                }
+
+                this.screenshotsPollTimer = setInterval(() => this.refreshScreenshotsUpload(id), 3000);
+            },
+            stopTrackingScreenshotsUpload() {
+                clearInterval(this.screenshotsPollTimer);
+                this.screenshotsPollTimer = null;
+
+                if (this.screenshotsChannel) {
+                    this.$echo?.leave(this.screenshotsChannel);
+                    this.screenshotsChannel = null;
+                }
+            },
+            async refreshScreenshotsUpload(id) {
+                if (this.screenshotsPollTimer === null || this.screenshotsRefreshing) {
+                    return;
+                }
+
+                this.screenshotsRefreshing = true;
+                try {
+                    const result = await this.service.getScreenshotsUpload(id);
+                    if (!result.success || this.screenshotsPollTimer === null || this.screenshotsUpload?.id !== id) {
+                        return;
+                    }
+
+                    this.screenshotsUpload = result.data;
+                    if (result.data.status === 'completed' || result.data.status === 'failed') {
+                        this.stopTrackingScreenshotsUpload();
+                        this.addedScreenshots = this.formatScreenshotsResults(result.data.results);
+                    }
+                } catch (e) {
+                    // Keep polling: a failed request is not a failed upload
+                } finally {
+                    this.screenshotsRefreshing = false;
+                }
+            },
+            formatScreenshotsResults(results) {
+                return results.map(el => {
+                    const timeDiff = el.interval
+                        ? moment(el.interval['end_at']).diff(moment(el.interval['start_at'])) / 1000
+                        : '-';
+                    const totalTime = el.interval ? Math.round((timeDiff + Number.EPSILON) * 100) / 100 : '-';
+
+                    return {
+                        ...el.interval,
+                        user_id: el.user_id,
+                        message: el.message,
+                        success: el.success,
+                        total_time: el.interval ? formatDurationString(totalTime) : '-',
+                    };
+                });
             },
             onUploadProgress(progressEvent) {
                 this.screenshotsUploadProgress = {
@@ -385,6 +513,11 @@
 
         &__added {
             margin-top: $spacing-03;
+        }
+
+        .screenshots-processing {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
         }
 
         .screenshots-upload-progress {

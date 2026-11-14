@@ -85,4 +85,23 @@ class PutScreenshotAuthorizationTest extends TestCase
             Queue::assertNotPushed(GenerateScreenshotThumbnail::class);
         }
     }
+
+    public function test_failed_screenshot_write_is_an_error_and_queues_no_thumbnail(): void
+    {
+        $owner = UserFactory::withTokens()->create();
+        $interval = IntervalFactory::forUser($owner)->forTask(TaskFactory::forUser($owner)->create())->create();
+        // The disks do not throw: a failed write is only reported by the return value
+        $disk = \Mockery::mock(Storage::disk('local'))->makePartial();
+        $disk->shouldReceive('put')->andReturn(false);
+        Storage::set('local', $disk);
+
+        $this->actingAs($owner)->post(
+            "time-intervals/{$interval->id}/screenshot",
+            ['screenshot' => UploadedFile::fake()->image('screenshot.png', 640, 480)],
+            ['Accept' => 'application/json'],
+        )->assertStatus(self::HTTP_INTERNAL_SERVER_ERROR);
+
+        Storage::assertMissing(app(ScreenshotService::class)->getScreenshotPath($interval));
+        Queue::assertNotPushed(GenerateScreenshotThumbnail::class);
+    }
 }

@@ -5,8 +5,11 @@ namespace App\Contracts;
 use App\Helpers\StorageHelper;
 use App\Jobs\GenerateScreenshotThumbnail;
 use App\Models\TimeInterval;
+use DB;
 use Intervention\Image\ImageManagerStatic as Image;
 use Intervention\Image\Constraint;
+use RuntimeException;
+use Throwable;
 use Storage;
 use URL;
 
@@ -25,6 +28,10 @@ abstract class ScreenshotService
     /** Get screenshot thumbnail path by interval */
     abstract public function getThumbPath(TimeInterval|int $interval): string;
 
+    /**
+     * @throws RuntimeException If the screenshot could not be written: the disks do not throw, so a failed write
+     *                          must not be taken for success (and its thumbnail must not be queued)
+     */
     public function saveScreenshot($file, $timeInterval): void
     {
         // $file is a local path or UploadedFile; the result goes to the default disk (local or S3).
@@ -33,9 +40,35 @@ abstract class ScreenshotService
 
         $image = Image::make($path);
 
-        Storage::put($this->getScreenshotPath($timeInterval), (string)$image->encode(self::FILE_FORMAT, self::QUALITY));
+        $screenshotPath = $this->getScreenshotPath($timeInterval);
+        if (!Storage::put($screenshotPath, (string)$image->encode(self::FILE_FORMAT, self::QUALITY))) {
+            throw new RuntimeException("Cannot write the screenshot $screenshotPath");
+        }
 
-        GenerateScreenshotThumbnail::dispatch($timeInterval);
+        if (DB::transactionLevel() > 0) {
+            // The interval may be rolled back after the file is written (a later step fails): do not leave the
+            // screenshot under an id that will never exist. A process that dies mid-request cannot clean up.
+            DB::afterRollBack(function () use ($timeInterval) {
+                try {
+                    $this->destroyScreenshot($timeInterval);
+                } catch (Throwable $e) {
+                    // Must not replace the exception that caused the rollback, even if reporting fails
+                    rescue(static fn () => report($e), report: false);
+                }
+            });
+        }
+
+        // After commit: inside a transaction (interval creation) the job must not outlive a rollback. By then the
+        // interval is persisted, so a failed dispatch (queue down, or the thumbnail built inline by the sync queue)
+        // is reported, not thrown: the request must not fail, or the client's retry would duplicate the interval.
+        DB::afterCommit(static function () use ($timeInterval) {
+            try {
+                GenerateScreenshotThumbnail::dispatch($timeInterval);
+            } catch (Throwable $e) {
+                // Reporting itself may fail (e.g. unwritable log); that must not escape after the commit either
+                rescue(static fn () => report($e), report: false);
+            }
+        });
     }
 
     public function createThumbnail(TimeInterval|int $timeInterval): void
@@ -44,7 +77,10 @@ abstract class ScreenshotService
 
         $thumb = $image->resize(self::THUMB_WIDTH, null, fn(Constraint $constraint) => $constraint->aspectRatio());
 
-        Storage::put($this->getThumbPath($timeInterval), (string)$thumb->encode(self::FILE_FORMAT, self::QUALITY));
+        $thumbPath = $this->getThumbPath($timeInterval);
+        if (!Storage::put($thumbPath, (string)$thumb->encode(self::FILE_FORMAT, self::QUALITY))) {
+            throw new RuntimeException("Cannot write the screenshot thumbnail $thumbPath");
+        }
     }
 
     public function destroyScreenshot(TimeInterval|int $interval): void

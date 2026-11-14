@@ -3,9 +3,11 @@
 namespace Tests\Feature\Routes;
 
 use App\Enums\AttachmentStatus;
+use App\Enums\OfflineScreenshotUploadStatus;
 use App\Enums\UniversalReportBase;
 use App\Enums\UniversalReportType;
 use App\Models\Attachment;
+use App\Models\OfflineScreenshotUpload;
 use App\Models\Priority;
 use App\Models\ProjectGroup;
 use App\Models\Status;
@@ -87,7 +89,14 @@ class GetRoutesSmokeTest extends TestCase
         $report->user_id = $this->admin->id;
         $report->save();
 
+        $upload = OfflineScreenshotUpload::create([
+            'user_id' => $this->admin->id,
+            'status' => OfflineScreenshotUploadStatus::COMPLETED,
+            'total' => 0,
+        ]);
+
         $this->parameters = [
+            'id' => $upload->id,
             'key' => $invitation->key,
             'user' => $user->id,
             'interval' => $interval->id,

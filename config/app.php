@@ -38,14 +38,19 @@ return [
     // Requests per minute and IP to the public signed screenshot routes (time-intervals/{id}/screenshot|thumb).
     // A timeline day of a user with 1-minute screenshots holds up to ~600 thumbnails (10 h of work).
     'screenshots_rate_limit' => (int) env('SCREENSHOTS_RATE_LIMIT', 600),
-    // Offline screenshots (offline-sync/upload-screenshots) are processed within the upload request, which must
-    // finish within Octane's max_execution_time (90 s). Larger archives are rejected before anything is extracted.
-    // 150 entries ≈ 1.5 working days of 96 screenshots: ~11 s at ~75 ms per 1920×1080 screenshot on the local disk,
-    // ~47 s at ~310 ms on S3, leaving headroom for extraction, queries and the response.
+    // Offline screenshot archives (offline-sync/upload-screenshots) are validated within the upload request, stored on
+    // the default (shared) disk and attached by a queue job. Archives above these limits are rejected before that.
     'offline_screenshots' => [
-        'max_files' => (int) env('OFFLINE_SCREENSHOTS_MAX_FILES', 150),
+        // 1000 entries ≈ 10 working days of 96 screenshots; a job needs ~75 ms per screenshot on the local disk and
+        // ~310 ms on S3, i.e. up to ~5 min, within the job timeout.
+        'max_files' => (int) env('OFFLINE_SCREENSHOTS_MAX_FILES', 1000),
         // Total uncompressed size of all archive entries
         'max_size' => (int) env('OFFLINE_SCREENSHOTS_MAX_SIZE_BYTES', 1024 * 1024 * 1024),
+        // Seconds a queue worker lets one attempt of the job run. Keep it below QUEUE_RETRY_AFTER (960): the job
+        // resumes after the entries already processed, so a timed-out attempt is continued by the next one
+        // (a timeout fails the job only when it ends the last of job_tries attempts).
+        'job_timeout' => (int) env('OFFLINE_SCREENSHOTS_JOB_TIMEOUT', 900),
+        'job_tries' => (int) env('OFFLINE_SCREENSHOTS_JOB_TRIES', 3),
     ],
     'user_activity' => [
         'online_status_time' => 60,

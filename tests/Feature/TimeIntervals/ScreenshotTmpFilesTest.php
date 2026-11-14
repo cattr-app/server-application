@@ -6,6 +6,8 @@ use App\Contracts\ScreenshotService;
 use App\Enums\Role;
 use App\Enums\ScreenshotsState;
 use App\Jobs\GenerateScreenshotThumbnail;
+use App\Jobs\ProcessOfflineScreenshotsUpload;
+use App\Models\OfflineScreenshotUpload;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\User;
@@ -23,10 +25,9 @@ use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
 /**
- * Uploaded screenshots must be processed within the request and leave nothing in storage/app/tmp.
- *
- * The queue is faked: the worker may run in another container without access to the local disk of the web
- * container, so nothing that reads local temporary files may depend on queued jobs.
+ * Uploaded screenshots must leave nothing in storage/app/tmp. Screenshots of interval requests are processed within
+ * the request; offline archives are stored on the default disk and attached by a queue job, which is run here
+ * explicitly (the queue is faked).
  */
 class ScreenshotTmpFilesTest extends TestCase
 {
@@ -91,19 +92,21 @@ class ScreenshotTmpFilesTest extends TestCase
         $this->assertTmpIsEmpty();
     }
 
-    public function test_offline_screenshots_are_attached_within_the_request(): void
+    public function test_offline_screenshots_are_attached_by_the_job(): void
     {
         $user = UserFactory::withTokens()->create();
         $task = TaskFactory::forUser($user)->create();
         $interval = $this->createOfflineInterval($user, $task);
 
-        $response = $this->uploadOfflineArchive($user, [
+        $response = $this->uploadAndProcessOfflineArchive($user, [
             "{$user->id}_$interval->screenshot_id" => UploadedFile::fake()->image('s.png', 640, 480)->getContent(),
         ]);
 
         $response->assertOk()
-            ->assertJsonPath('data.0.success', true)
-            ->assertJsonPath('data.0.message', __('validation.offline-sync.screenshot_attached'));
+            ->assertJsonPath('data.status', 'completed')
+            ->assertJsonPath('data.results.0.success', true)
+            ->assertJsonPath('data.results.0.message', __('validation.offline-sync.screenshot_attached'))
+            ->assertJsonPath('data.results.0.interval.id', $interval->id);
 
         $interval->refresh();
         $this->assertNull($interval->screenshot_id);
@@ -111,6 +114,7 @@ class ScreenshotTmpFilesTest extends TestCase
         Queue::assertPushed(GenerateScreenshotThumbnail::class);
 
         $this->assertTmpIsEmpty();
+        $this->assertNoStoredArchive();
     }
 
     public static function userIds(): array
@@ -132,20 +136,22 @@ class ScreenshotTmpFilesTest extends TestCase
         $task = TaskFactory::forUser($user)->create();
         $interval = $this->createOfflineInterval($user, $task);
 
-        $response = $this->uploadOfflineArchive($user, [
-            "{$userId}_$interval->screenshot_id" => UploadedFile::fake()->image('s.png', 640, 480)->getContent(),
+        $screenshotId = $interval->screenshot_id;
+        $response = $this->uploadAndProcessOfflineArchive($user, [
+            "{$userId}_$screenshotId" => UploadedFile::fake()->image('s.png', 640, 480)->getContent(),
         ]);
 
         $response->assertOk()
-            ->assertJsonPath('data.0.success', true)
-            ->assertJsonPath('data.0.user_id', $userId)
-            ->assertJsonPath('data.0.screenshot_id', $interval->screenshot_id);
+            ->assertJsonPath('data.results.0.success', true)
+            ->assertJsonPath('data.results.0.user_id', $userId)
+            ->assertJsonPath('data.results.0.screenshot_id', $screenshotId);
 
         $interval->refresh();
         $this->assertNull($interval->screenshot_id);
         Storage::assertExists($this->screenshotService->getScreenshotPath($interval));
 
         $this->assertTmpIsEmpty();
+        $this->assertNoStoredArchive();
     }
 
     public static function wrongFileNames(): array
@@ -170,6 +176,9 @@ class ScreenshotTmpFilesTest extends TestCase
             ->assertStatus(self::HTTP_BAD_REQUEST)
             ->assertJsonPath('error.message', __('Wrong screenshot file name'));
 
+        $this->assertSame(0, OfflineScreenshotUpload::count());
+        Queue::assertNotPushed(ProcessOfflineScreenshotsUpload::class);
+        $this->assertNoStoredArchive();
         $this->assertTmpIsEmpty();
     }
 
@@ -180,19 +189,21 @@ class ScreenshotTmpFilesTest extends TestCase
         $interval = $this->createOfflineInterval($user, $task);
         $screenshotId = $interval->screenshot_id;
 
-        $response = $this->uploadOfflineArchive($user, [
+        $response = $this->uploadAndProcessOfflineArchive($user, [
             "{$user->id}_$screenshotId" => 'this is not an image',
         ]);
 
         $response->assertOk()
-            ->assertJsonPath('data.0.success', false)
-            ->assertJsonPath('data.0.message', __('validation.offline-sync.screenshot_not_attached'));
+            ->assertJsonPath('data.status', 'completed')
+            ->assertJsonPath('data.results.0.success', false)
+            ->assertJsonPath('data.results.0.message', __('validation.offline-sync.screenshot_not_attached'));
 
         $interval->refresh();
         $this->assertSame($screenshotId, $interval->screenshot_id);
         Storage::assertMissing($this->screenshotService->getScreenshotPath($interval));
 
         $this->assertTmpIsEmpty();
+        $this->assertNoStoredArchive();
     }
 
     /**
@@ -239,21 +250,21 @@ class ScreenshotTmpFilesTest extends TestCase
         $screenshotId = $interval->screenshot_id;
         $uploader = $createUploader($task);
 
-        $response = $this->uploadOfflineArchive($uploader, [
+        $response = $this->uploadAndProcessOfflineArchive($uploader, [
             "{$owner->id}_$screenshotId" => UploadedFile::fake()->image('s.png', 640, 480)->getContent(),
         ]);
 
-        $response->assertOk()->assertJsonPath('data.0.success', $attached);
+        $response->assertOk()->assertJsonPath('data.results.0.success', $attached);
 
         $interval->refresh();
         if ($attached) {
-            $response->assertJsonPath('data.0.message', __('validation.offline-sync.screenshot_attached'));
+            $response->assertJsonPath('data.results.0.message', __('validation.offline-sync.screenshot_attached'));
             $this->assertNull($interval->screenshot_id);
             Storage::assertExists($this->screenshotService->getScreenshotPath($interval));
         } else {
             // Reported exactly like a missing interval, without the interval data
-            $response->assertJsonPath('data.0.message', __('validation.offline-sync.cannot_find_interval'))
-                ->assertJsonPath('data.0.interval', null);
+            $response->assertJsonPath('data.results.0.message', __('validation.offline-sync.cannot_find_interval'))
+                ->assertJsonPath('data.results.0.interval', null);
             $this->assertSame($screenshotId, $interval->screenshot_id);
             Storage::assertMissing($this->screenshotService->getScreenshotPath($interval));
             $this->assertSame([], Storage::disk('local')->allFiles(), 'Nothing must be stored');
@@ -261,6 +272,7 @@ class ScreenshotTmpFilesTest extends TestCase
         }
 
         $this->assertTmpIsEmpty();
+        $this->assertNoStoredArchive();
     }
 
     private function createTask(User $user, ScreenshotsState $projectState): Task

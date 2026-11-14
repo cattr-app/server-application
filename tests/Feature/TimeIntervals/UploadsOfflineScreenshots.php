@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\TimeIntervals;
 
+use App\Jobs\ProcessOfflineScreenshotsUpload;
+use App\Models\OfflineScreenshotUpload;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\User;
@@ -15,7 +17,8 @@ use Tests\Factories\UserFactory as UserFactoryInstance;
 use ZipArchive;
 
 /**
- * Helpers for offline-sync/upload-screenshots: an archive of `<user_id>_<screenshot_id>` entries.
+ * Helpers for offline-sync/upload-screenshots: an archive of `<user_id>_<screenshot_id>` entries that is stored by the
+ * request and attached by a queue job. The tests fake the queue and run the job explicitly.
  */
 trait UploadsOfflineScreenshots
 {
@@ -87,6 +90,53 @@ trait UploadsOfflineScreenshots
             ['file' => new UploadedFile($zipPath, 'screenshots.cattr', 'application/zip', null, true)],
             ['Accept' => 'application/json'],
         );
+    }
+
+    /**
+     * Uploads the archive, runs the queued job like a worker would and returns the polled upload.
+     *
+     * @param array<string, string> $entries File name => content
+     */
+    private function uploadAndProcessOfflineArchive(User $user, array $entries): TestResponse
+    {
+        $this->uploadOfflineArchive($user, $entries)->assertStatus(self::HTTP_ACCEPTED);
+
+        return $this->processOfflineUpload($user, OfflineScreenshotUpload::query()->latest('id')->firstOrFail());
+    }
+
+    private function processOfflineUpload(User $user, OfflineScreenshotUpload $upload): TestResponse
+    {
+        $this->runOfflineUploadJob($upload);
+
+        return $this->pollOfflineUpload($user, $upload->id);
+    }
+
+    private function runOfflineUploadJob(OfflineScreenshotUpload $upload): void
+    {
+        $job = new ProcessOfflineScreenshotsUpload($upload);
+        app()->call([$job, 'handle']);
+    }
+
+    private function pollOfflineUpload(User $user, int $uploadId): TestResponse
+    {
+        // Several users read within one test: the guard keeps the user of the previous request otherwise
+        $this->app['auth']->forgetGuards();
+
+        return $this->actingAs($this->tokens[$user->id] ?? $user)
+            ->get("offline-sync/uploads/$uploadId", ['Accept' => 'application/json']);
+    }
+
+    /**
+     * @return array<int, string> Stored archives on the default disk
+     */
+    private function storedOfflineArchives(): array
+    {
+        return Storage::disk(config('filesystems.default'))->allFiles(OfflineScreenshotUpload::ARCHIVE_DIRECTORY);
+    }
+
+    private function assertNoStoredArchive(): void
+    {
+        $this->assertSame([], $this->storedOfflineArchives(), 'Archives left on the default disk');
     }
 
     private function assertTmpIsEmpty(): void
