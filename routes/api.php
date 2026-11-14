@@ -42,16 +42,15 @@ Route::group([
         $router->get('me', [AuthController::class, 'me'])
             ->name('auth.me');
 
-        $router->get('register/{key}', [RegistrationController::class, 'getForm'])
-            ->name('auth.register.form');
-        $router->post('register/{key}', [RegistrationController::class, 'postForm'])
-            ->name('auth.register.process');
-
         $router->get('desktop-key', [AuthController::class, 'issueDesktopKey'])
             ->name('auth.desktop.request');
     });
 
     $router->withoutMiddleware('auth:sanctum')->group(static function (Router $router) {
+        $router->get('register/{key}', [RegistrationController::class, 'getForm'])
+            ->name('auth.register.form');
+        $router->post('register/{key}', [RegistrationController::class, 'postForm'])
+            ->name('auth.register.process');
         $router->post('login', [AuthController::class, 'login'])
             ->name('auth.login');
         $router->post('password/reset/request', [PasswordResetController::class, 'request'])
