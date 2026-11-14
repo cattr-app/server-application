@@ -272,7 +272,8 @@ class IntervalController extends ItemController
                         try {
                             AssignAppsToTimeInterval::dispatch($data);
                         } catch (Throwable $e) {
-                            report($e);
+                            // Reporting itself may fail (e.g. unwritable log); that must not escape after the commit either
+                            rescue(static fn () => report($e), report: false);
                         }
                     });
                 }

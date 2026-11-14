@@ -10,6 +10,7 @@ use App\Models\TimeInterval;
 use App\Models\User;
 use App\Jobs\AssignAppsToTimeInterval;
 use Illuminate\Contracts\Bus\Dispatcher;
+use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Queue;
@@ -147,6 +148,47 @@ class ScreenshotUploadTest extends TestCase
 
         $this->assertSame(1, TimeInterval::whereUserId($this->admin->id)->count());
         Exceptions::assertReported(fn (RuntimeException $e) => $e->getMessage() === 'queue is down');
+    }
+
+    public function test_failing_reporter_does_not_fail_the_request_after_a_failed_thumbnail_dispatch(): void
+    {
+        $intervalData = $this->intervalDataWithScreenshot();
+        $real = Storage::disk('local');
+        $disk = \Mockery::mock(Storage::disk('local'))->makePartial();
+        $disk->shouldReceive('put')->with(\Mockery::pattern('#/' . ScreenshotService::THUMBS_FOLDER . '#'), \Mockery::any())->andReturn(false);
+        $disk->shouldReceive('put')->andReturnUsing(fn (...$args) => $real->put(...$args));
+        Storage::set('local', $disk);
+        $this->failReporting();
+
+        $this->actingAs($this->admin)->post(self::CREATE_URI, $intervalData, ['Accept' => 'application/json'])
+            ->assertOk();
+
+        $this->assertSame(1, TimeInterval::whereUserId($this->admin->id)->count());
+    }
+
+    public function test_failing_reporter_does_not_fail_the_request_after_a_failed_apps_dispatch(): void
+    {
+        $this->admin->update(['web_and_app_monitoring' => true]);
+        $intervalData = $this->intervalDataWithScreenshot();
+        unset($intervalData['screenshot']);
+        $this->mock(Dispatcher::class)
+            ->shouldReceive('dispatch')
+            ->with(\Mockery::type(AssignAppsToTimeInterval::class))
+            ->andThrow(new RuntimeException('queue is down'));
+        $this->failReporting();
+
+        $this->actingAs($this->admin)->post(self::CREATE_URI, $intervalData, ['Accept' => 'application/json'])
+            ->assertOk();
+
+        $this->assertSame(1, TimeInterval::whereUserId($this->admin->id)->count());
+    }
+
+    /** Reporting itself throws, e.g. the log file is not writable */
+    private function failReporting(): void
+    {
+        $handler = \Mockery::mock($this->app->make(ExceptionHandler::class))->makePartial();
+        $handler->shouldReceive('report')->andThrow(new RuntimeException('log is not writable'));
+        $this->app->instance(ExceptionHandler::class, $handler);
     }
 
     private function intervalDataWithScreenshot(): array
