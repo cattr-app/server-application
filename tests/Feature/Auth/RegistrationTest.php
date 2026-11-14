@@ -157,7 +157,11 @@ class RegistrationTest extends TestCase
     public function test_registration_with_an_unknown_key_is_not_found(): void
     {
         $this->actingAs($this->caller)
-            ->postJson(self::URI . fake()->uuid(), ['email' => 'nobody@example.com', 'password' => 'secret-pass'])
+            ->postJson(self::URI . fake()->uuid(), [
+                'email' => 'nobody@example.com',
+                'full_name' => 'Nobody',
+                'password' => 'secret-pass',
+            ])
             ->assertStatus(404);
 
         $this->assertDatabaseMissing('users', ['email' => 'nobody@example.com']);
@@ -177,5 +181,42 @@ class RegistrationTest extends TestCase
 
         $this->assertDatabaseHas('invitations', ['id' => $invitation->id]);
         $this->assertDatabaseMissing('users', ['email' => 'other@example.com']);
+    }
+
+    public static function invalidPayloads(): array
+    {
+        return [
+            'missing full_name' => [['full_name' => null], 'full_name'],
+            'missing password' => [['password' => null], 'password'],
+            'missing email' => [['email' => null], 'email'],
+            'malformed email' => [['email' => 'not-an-email'], 'email'],
+            'short password' => [['password' => '12345'], 'password'],
+            'non-string full_name' => [['full_name' => ['a']], 'full_name'],
+        ];
+    }
+
+    #[DataProvider('invalidPayloads')]
+    public function test_invalid_data_is_rejected_with_a_validation_error(array $overrides, string $field): void
+    {
+        $invitation = $this->invitation();
+        $data = array_filter($this->registrationData($invitation, $overrides), fn ($v) => $v !== null);
+
+        $this->actingAs($this->caller)
+            ->postJson(self::URI . $invitation->key, $data)
+            ->assertValidationError()
+            ->assertJsonStructure(['error' => ['fields' => [$field]]]);
+
+        $this->assertDatabaseHas('invitations', ['id' => $invitation->id]);
+        $this->assertDatabaseMissing('users', ['email' => $invitation->email]);
+    }
+
+    public function test_only_an_email_is_rejected_instead_of_failing_with_a_server_error(): void
+    {
+        $invitation = $this->invitation();
+
+        $this->actingAs($this->caller)
+            ->postJson(self::URI . $invitation->key, ['email' => $invitation->email])
+            ->assertValidationError()
+            ->assertJsonStructure(['error' => ['fields' => ['full_name', 'password']]]);
     }
 }
