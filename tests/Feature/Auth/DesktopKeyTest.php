@@ -109,10 +109,26 @@ class DesktopKeyTest extends TestCase
     {
         $key = $this->issueKey($this->user());
 
-        $this->putJson(self::URI, [], ['Authorization' => "desktop $key"])->assertOk();
         $this->withServerVariables(['REMOTE_ADDR' => '10.20.30.40'])
             ->putJson(self::URI, [], ['Authorization' => "desktop $key"])
             ->assertUnauthorized();
+
+        // A rejected attempt from another address does not consume the key
+        $this->assertTrue(Cache::store('octane')->has($this->cacheKey($key)));
+    }
+
+    public function test_the_key_is_consumed_by_the_exchange(): void
+    {
+        $user = $this->user();
+        $key = $this->issueKey($user);
+
+        $this->putJson(self::URI, [], ['Authorization' => "desktop $key"])->assertOk();
+        $this->assertFalse(Cache::store('octane')->has($this->cacheKey($key)));
+
+        $tokensBefore = PersonalAccessToken::where('tokenable_id', $user->id)->count();
+
+        $this->putJson(self::URI, [], ['Authorization' => "desktop $key"])->assertUnauthorized();
+        $this->assertSame($tokensBefore, PersonalAccessToken::where('tokenable_id', $user->id)->count());
     }
 
     public function test_an_expired_key_is_unauthorized(): void

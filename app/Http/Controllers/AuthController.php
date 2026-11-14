@@ -153,7 +153,8 @@ class AuthController extends BaseController
      * Exchange desktop key to JWT
      *
      * Send the key from `GET /auth/desktop-key` as `Authorization: desktop <key>` from the same IP address.
-     * Returns a bearer token of the key's user.
+     * Returns a bearer token of the key's user. The key is single-use: it is consumed by the exchange, a repeated
+     * exchange answers `401`.
      *
      * @response array{status: int, success: true, data: array{
      *     access_token: string,
@@ -177,11 +178,18 @@ class AuthController extends BaseController
 
         $token = explode(' ', $token);
 
-        if (count($token) !== 2 || $token[0] !== 'desktop' || !Cache::store('octane')->has(sha1($request->ip()) . ":$token[1]")) {
+        if (count($token) !== 2 || $token[0] !== 'desktop') {
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
 
-        $user = auth()->loginUsingId(Cache::store('octane')->get(sha1($request->ip()) . ":$token[1]"));
+        // The key is single-use: pull() reads and removes it, so a repeated exchange is unauthorized
+        $userId = Cache::store('octane')->pull(sha1($request->ip()) . ":$token[1]");
+
+        if ($userId === null) {
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
+        }
+
+        $user = auth()->loginUsingId($userId);
 
         if (!optional($user)->active) {
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_USER_DISABLED);
