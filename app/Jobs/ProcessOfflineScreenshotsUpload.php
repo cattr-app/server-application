@@ -40,12 +40,15 @@ class ProcessOfflineScreenshotsUpload implements ShouldQueue
     /** Delete the job if the upload no longer exists (e.g. the uploader was deleted). */
     public bool $deleteWhenMissingModels = true;
 
-    /** Seconds the worker lets one attempt run; always below QUEUE_RETRY_AFTER, see config/app.php */
+    /**
+     * Seconds the worker lets one attempt run; always below QUEUE_RETRY_AFTER, see config/app.php.
+     *
+     * A timed-out attempt is retried while tries remain ($failOnTimeout is deliberately not set): the worker fails
+     * the job, and so calls failed(), only when the last attempt times out.
+     */
     public int $timeout;
 
     public int $tries;
-
-    public bool $failOnTimeout = true;
 
     /** Seconds before the next attempt after an error */
     public int $backoff = 30;

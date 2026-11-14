@@ -47,7 +47,8 @@ return [
         // Total uncompressed size of all archive entries
         'max_size' => (int) env('OFFLINE_SCREENSHOTS_MAX_SIZE_BYTES', 1024 * 1024 * 1024),
         // Seconds a queue worker lets one attempt of the job run. Keep it below QUEUE_RETRY_AFTER (960): the job
-        // resumes after the entries already processed, so a timed-out attempt is continued by the next one.
+        // resumes after the entries already processed, so a timed-out attempt is continued by the next one
+        // (a timeout fails the job only when it ends the last of job_tries attempts).
         'job_timeout' => (int) env('OFFLINE_SCREENSHOTS_JOB_TIMEOUT', 900),
         'job_tries' => (int) env('OFFLINE_SCREENSHOTS_JOB_TRIES', 3),
     ],

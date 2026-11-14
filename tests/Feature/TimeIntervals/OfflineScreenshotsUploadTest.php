@@ -300,7 +300,8 @@ class OfflineScreenshotsUploadTest extends TestCase
 
         $this->assertSame(123, $job->timeout);
         $this->assertSame(4, $job->tries);
-        $this->assertTrue($job->failOnTimeout);
+        // A timeout fails the job (and so deletes the archive in failed()) only when no attempts remain
+        $this->assertFalse(property_exists($job, 'failOnTimeout') && $job->failOnTimeout);
     }
 
     public function test_progress_is_broadcast_to_the_uploader(): void
