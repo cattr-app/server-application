@@ -70,6 +70,17 @@ class CreateTest extends TestCase
         ]);
     }
 
+    public function test_create_with_removed_parent_is_rejected(): void
+    {
+        $admin = UserFactory::asAdmin()->withTokens()->create();
+        $parent = ProjectGroup::create(['name' => 'Removed parent']);
+        $parent->delete();
+
+        $response = $this->actingAs($admin)->postJson(self::URI, ['name' => 'Child', 'parent_id' => $parent->id]);
+
+        $response->assertValidationError();
+    }
+
     public function test_create_with_null_parent(): void
     {
         $admin = UserFactory::asAdmin()->withTokens()->create();
