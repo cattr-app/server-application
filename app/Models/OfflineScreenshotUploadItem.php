@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Scopes\TimeIntervalAccessScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -31,10 +30,11 @@ class OfflineScreenshotUploadItem extends Model
     ];
 
     /**
-     * Only the uploader reads the results, and only intervals they could attach screenshots to are stored.
+     * The interval as far as the current user may read it: if the uploader lost the access since the screenshot was
+     * attached, the relation is empty, but the result stays.
      */
     public function interval(): BelongsTo
     {
-        return $this->belongsTo(TimeInterval::class, 'interval_id')->withoutGlobalScope(TimeIntervalAccessScope::class);
+        return $this->belongsTo(TimeInterval::class, 'interval_id');
     }
 }

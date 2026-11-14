@@ -4,6 +4,7 @@ namespace Tests\Feature\TimeIntervals;
 
 use App\Contracts\ScreenshotService;
 use App\Enums\OfflineScreenshotUploadStatus;
+use App\Enums\Role;
 use App\Events\OfflineScreenshotsUploadProgress;
 use App\Jobs\GenerateScreenshotThumbnail;
 use App\Jobs\ProcessOfflineScreenshotsUpload;
@@ -359,6 +360,29 @@ class OfflineScreenshotsUploadTest extends TestCase
         }
 
         $this->pollOfflineUpload($uploader, $uploadId + 1000)->assertNotFound('page_not_found');
+    }
+
+    public function test_result_stays_but_the_interval_is_hidden_when_the_uploader_can_no_longer_read_it(): void
+    {
+        $uploader = $this->createOfflineAdmin();
+        $owner = UserFactory::create();
+        $interval = $this->createOfflineInterval($owner, TaskFactory::forUser($owner)->create());
+        $screenshotId = $interval->screenshot_id;
+
+        $this->uploadAndProcessOfflineArchive($uploader, ["{$owner->id}_$screenshotId" => $this->image()])
+            ->assertOk()
+            ->assertJsonPath('data.results.0.interval.id', $interval->id);
+
+        $uploader->update(['role_id' => Role::USER->value]);
+
+        $this->pollOfflineUpload($uploader, OfflineScreenshotUpload::firstOrFail()->id)
+            ->assertOk()
+            ->assertJsonPath('data.status', 'completed')
+            ->assertJsonPath('data.processed', 1)
+            ->assertJsonPath('data.results.0.interval', null)
+            ->assertJsonPath('data.results.0.success', true)
+            ->assertJsonPath('data.results.0.screenshot_id', $screenshotId)
+            ->assertJsonPath('data.results.0.message', __('validation.offline-sync.screenshot_attached'));
     }
 
     public function test_unauthenticated_user_cannot_read_an_upload(): void
