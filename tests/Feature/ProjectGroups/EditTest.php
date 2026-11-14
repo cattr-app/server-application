@@ -62,11 +62,14 @@ class EditTest extends TestCase
     public function test_edit_with_removed_parent_is_rejected(): void
     {
         $admin = UserFactory::asAdmin()->withTokens()->create();
-        $this->parent->delete();
+        $removedParent = ProjectGroup::create(['name' => 'Removed parent']);
+        $removedParent->delete();
 
-        $response = $this->actingAs($admin)->postJson(self::URI, ['id' => $this->group->id, 'parent_id' => $this->parent->id]);
+        $response = $this->actingAs($admin)->postJson(self::URI, ['id' => $this->group->id, 'parent_id' => $removedParent->id]);
 
         $response->assertValidationError();
+        $response->assertJsonValidationErrors(['parent_id'], 'error.fields');
+        $this->assertArrayNotHasKey('id', $response->json('error.fields'));
     }
 
     #[DataProvider('allowedRoles')]
