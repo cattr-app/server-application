@@ -52,7 +52,8 @@ abstract class ScreenshotService
                 try {
                     $this->destroyScreenshot($timeInterval);
                 } catch (Throwable $e) {
-                    report($e);
+                    // Must not replace the exception that caused the rollback, even if reporting fails
+                    rescue(static fn () => report($e), report: false);
                 }
             });
         }

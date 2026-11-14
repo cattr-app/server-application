@@ -19,6 +19,7 @@ use Tests\Facades\IntervalFactory;
 use Tests\Facades\TaskFactory;
 use Tests\Facades\UserFactory;
 use RuntimeException;
+use Throwable;
 use Tests\TestCase;
 use CatEvent;
 
@@ -181,6 +182,32 @@ class ScreenshotUploadTest extends TestCase
             ->assertOk();
 
         $this->assertSame(1, TimeInterval::whereUserId($this->admin->id)->count());
+    }
+
+    public function test_failing_cleanup_after_a_rollback_does_not_replace_the_original_error(): void
+    {
+        $intervalData = $this->intervalDataWithScreenshot();
+        $real = Storage::disk('local');
+        $disk = \Mockery::mock($real)->makePartial();
+        $disk->shouldReceive('put')->andReturnUsing(fn (...$args) => $real->put(...$args));
+        $disk->shouldReceive('delete')->andThrow(new RuntimeException('disk is gone'));
+        Storage::set('local', $disk);
+        CatEvent::listen('event.after.action.*', static function () {
+            throw new RuntimeException('a later step failed');
+        });
+        // Only the cleanup failure cannot be reported; the original error is reported as usual
+        $handler = \Mockery::mock($this->app->make(ExceptionHandler::class))->makePartial();
+        $handler->shouldReceive('report')
+            ->with(\Mockery::on(static fn (Throwable $e) => $e->getMessage() === 'disk is gone'))
+            ->andThrow(new RuntimeException('log is not writable'));
+        $this->app->instance(ExceptionHandler::class, $handler);
+
+        $response = $this->actingAs($this->admin)
+            ->post(self::CREATE_URI, $intervalData, ['Accept' => 'application/json'])
+            ->assertStatus(self::HTTP_INTERNAL_SERVER_ERROR);
+
+        $this->assertSame('a later step failed', $response->exception?->getMessage());
+        $this->assertSame(0, TimeInterval::whereUserId($this->admin->id)->count());
     }
 
     /** Reporting itself throws, e.g. the log file is not writable */
