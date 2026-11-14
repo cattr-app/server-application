@@ -79,7 +79,7 @@ class RemoveTest extends TestCase
 
         $response = $this->actingAs($admin)->postJson(self::URI, ['id' => $this->group->id]);
 
-        $response->assertNotFound('page_not_found');
+        $response->assertValidationError();
     }
 
     public function test_not_existing_group(): void

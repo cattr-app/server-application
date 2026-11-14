@@ -28,8 +28,8 @@ class CreateProjectRequest extends CattrFormRequest
             'statuses.*.color' => 'sometimes|nullable|string|regex:/^#[a-f0-9]{6}$/i',
             'phases' => 'sometimes|array',
             'phases.*.name' => 'required|string|min:1|max:255',
-            'group' => Rule::when(!is_array($this->input('group')), 'sometimes|nullable|integer|exists:project_groups,id'),
-            'group.id' => Rule::when(is_array($this->input('group')), 'sometimes|nullable|integer|exists:project_groups,id'),
+            'group' => Rule::when(!is_array($this->input('group')), ['sometimes', 'nullable', 'integer', Rule::exists('project_groups', 'id')->whereNull('deleted_at')]),
+            'group.id' => Rule::when(is_array($this->input('group')), ['sometimes', 'nullable', 'integer', Rule::exists('project_groups', 'id')->whereNull('deleted_at')]),
         ];
     }
 }

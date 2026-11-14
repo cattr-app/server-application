@@ -74,14 +74,14 @@ class ShowTest extends TestCase
         $response->assertJsonPath('data.can', ['update' => false, 'destroy' => false]);
     }
 
-    public function test_removed_group_is_not_found(): void
+    public function test_removed_group_is_rejected(): void
     {
         $admin = UserFactory::asAdmin()->withTokens()->create();
         $this->group->delete();
 
         $response = $this->actingAs($admin)->getJson(self::URI . "?id={$this->group->id}");
 
-        $response->assertNotFound('page_not_found');
+        $response->assertValidationError();
     }
 
     public function test_not_existing_group(): void

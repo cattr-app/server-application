@@ -5,6 +5,7 @@ namespace App\Http\Requests\ProjectGroup;
 use App\Helpers\QueryHelper;
 use App\Http\Requests\CattrFormRequest;
 use App\Models\ProjectGroup;
+use Illuminate\Validation\Rule;
 
 class ShowProjectGroupRequest extends CattrFormRequest
 {
@@ -17,7 +18,7 @@ class ShowProjectGroupRequest extends CattrFormRequest
     {
         return array_merge(
             QueryHelper::getValidationRules(),
-            ['id' => 'required|int|exists:project_groups,id'],
+            ['id' => ['required', 'int', Rule::exists('project_groups', 'id')->whereNull('deleted_at')]],
         );
     }
 }

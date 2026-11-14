@@ -49,6 +49,29 @@ class EditTest extends TestCase
         ];
     }
 
+    public function test_removed_group_cannot_be_edited(): void
+    {
+        $admin = UserFactory::asAdmin()->withTokens()->create();
+        $this->group->delete();
+
+        $response = $this->actingAs($admin)->postJson(self::URI, ['id' => $this->group->id, 'name' => 'Renamed']);
+
+        $response->assertValidationError();
+    }
+
+    public function test_edit_with_removed_parent_is_rejected(): void
+    {
+        $admin = UserFactory::asAdmin()->withTokens()->create();
+        $removedParent = ProjectGroup::create(['name' => 'Removed parent']);
+        $removedParent->delete();
+
+        $response = $this->actingAs($admin)->postJson(self::URI, ['id' => $this->group->id, 'parent_id' => $removedParent->id]);
+
+        $response->assertValidationError();
+        $response->assertJsonValidationErrors(['parent_id'], 'error.fields');
+        $this->assertArrayNotHasKey('id', $response->json('error.fields'));
+    }
+
     #[DataProvider('allowedRoles')]
     public function test_edit(string $role): void
     {

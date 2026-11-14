@@ -4,6 +4,7 @@ namespace App\Http\Requests\ProjectGroup;
 
 use App\Http\Requests\CattrFormRequest;
 use App\Models\ProjectGroup;
+use Illuminate\Validation\Rule;
 
 class CreateProjectGroupRequest extends CattrFormRequest
 {
@@ -16,7 +17,7 @@ class CreateProjectGroupRequest extends CattrFormRequest
     {
         return [
             'name' => 'required|string',
-            'parent_id' => 'nullable|sometimes|integer|exists:project_groups,id',
+            'parent_id' => ['nullable', 'sometimes', 'integer', Rule::exists('project_groups', 'id')->whereNull('deleted_at')],
         ];
     }
 }
