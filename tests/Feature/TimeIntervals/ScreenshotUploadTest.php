@@ -199,6 +199,7 @@ class ScreenshotUploadTest extends TestCase
         $handler = \Mockery::mock($this->app->make(ExceptionHandler::class))->makePartial();
         $handler->shouldReceive('report')
             ->with(\Mockery::on(static fn (Throwable $e) => $e->getMessage() === 'disk is gone'))
+            ->once()
             ->andThrow(new RuntimeException('log is not writable'));
         $this->app->instance(ExceptionHandler::class, $handler);
 
