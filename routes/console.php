@@ -22,5 +22,6 @@ Schedule::command(CalculateEfficiency::class)->daily()->runInBackground()->witho
 
 Schedule::command(FindSusFiles::class)->weekly()->runInBackground()->withoutOverlapping();
 
-// Leftovers in storage/app/tmp of the local disk (older versions never deleted some uploads there).
+// Leftovers in storage/app/tmp of the local disk (older versions never deleted some uploads there), stored archives
+// of lost offline screenshot uploads and the results of uploads finished more than 7 days ago.
 Schedule::command(CleanTmpFiles::class)->daily()->runInBackground()->withoutOverlapping();
