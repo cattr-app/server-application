@@ -399,7 +399,7 @@ class TaskController extends ItemController
      */
     public function downloadProjectsAndTasks(User $user): Response
     {
-        $projectsAndTasks = collect($user->load([
+        $user->load([
             'projects' => fn(BelongsToMany $q) => $q->select([
                 'projects.id',
                 'projects.name',
@@ -417,14 +417,12 @@ class TaskController extends ItemController
                 'tasks.status_id',
                 'tasks.updated_at'
             ])->withoutGlobalScopes(),
-        ]))->only(['id', 'projects', 'tasks'])->all();
+        ]);
 
-        foreach ($projectsAndTasks['projects'] as $project) {
-            unset($project['pivot']);
-        }
-        foreach ($projectsAndTasks['tasks'] as $task) {
-            unset($task['pivot']);
-        }
+        $user->projects->makeHidden('pivot');
+        $user->tasks->makeHidden('pivot');
+
+        $projectsAndTasks = collect($user)->only(['id', 'projects', 'tasks'])->all();
 
         $packed = MessagePack::pack($projectsAndTasks);
 
