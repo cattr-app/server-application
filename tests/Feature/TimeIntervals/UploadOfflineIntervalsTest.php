@@ -130,6 +130,18 @@ class UploadOfflineIntervalsTest extends TestCase
         $this->assertSame(2, TimeInterval::where('user_id', $this->worker->id)->count());
     }
 
+    public function test_unknown_task_is_reported_without_failing_the_upload(): void
+    {
+        $response = $this->upload($this->worker, [
+            $this->interval(['task_id' => Task::withoutGlobalScopes()->max('id') + 1000]),
+            $this->interval(['start_at' => '2026-03-10T14:00:00+00:00', 'end_at' => '2026-03-10T14:05:00+00:00']),
+        ]);
+
+        $response->assertOk();
+        $this->assertSame([false, true], array_column($response->json('data'), 'success'));
+        $this->assertSame(1, TimeInterval::where('user_id', $this->worker->id)->count());
+    }
+
     public function test_overlapping_interval_is_not_added_again(): void
     {
         $this->upload($this->worker, [$this->interval()])->assertOk();
