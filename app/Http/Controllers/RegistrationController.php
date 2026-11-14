@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Enums\ScreenshotsState;
+use App\Http\Requests\Auth\RegistrationRequest;
 use App\Models\Invitation;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Settings;
 
 /**
@@ -38,11 +38,11 @@ class RegistrationController extends Controller
     /**
      * Creates a new user.
      *
-     * @param Request $request
+     * @param RegistrationRequest $request
      * @param string $key
      * @return JsonResponse
      */
-    public function postForm(Request $request, string $key): JsonResponse
+    public function postForm(RegistrationRequest $request, string $key): JsonResponse
     {
         $invitation = Invitation::where('key', $key)
             ->where('expires_at', '>=', now())
