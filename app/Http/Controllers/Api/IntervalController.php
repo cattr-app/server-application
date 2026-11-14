@@ -29,6 +29,7 @@ use App\Models\Task;
 use App\Models\TrackedApplication;
 use App\Models\User;
 use CatEvent;
+use DB;
 use Filter;
 use App\Models\TimeInterval;
 use Carbon\Carbon;
@@ -217,6 +218,9 @@ class IntervalController extends ItemController
      *
      * Create Time Interval
      *
+     * The interval is created together with its screenshot: if the screenshot cannot be stored, nothing is
+     * created and the request fails with a server error, so it can be retried as is.
+     *
      * Required permission (any of): `time_intervals_create`, `time_intervals_full_access`
      */
     public function create(CreateTimeIntervalRequest $request): JsonResponse
@@ -260,12 +264,14 @@ class IntervalController extends ItemController
             Filter::getAfterActionEventName(),
             static function ($data) {
                 if (User::find($data['user_id'])->web_and_app_monitoring) {
-                    AssignAppsToTimeInterval::dispatch($data);
+                    AssignAppsToTimeInterval::dispatch($data)->afterCommit();
                 }
             }
         );
 
-        return $this->_create($request);
+        // The interval, its screenshot and the jobs queued for it are one unit: when the screenshot cannot be
+        // written the interval is rolled back (and the jobs are not queued), so the client can safely retry.
+        return DB::transaction(fn () => $this->_create($request));
     }
 
     /**

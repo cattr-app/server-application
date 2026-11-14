@@ -5,9 +5,11 @@ namespace App\Contracts;
 use App\Helpers\StorageHelper;
 use App\Jobs\GenerateScreenshotThumbnail;
 use App\Models\TimeInterval;
+use DB;
 use Intervention\Image\ImageManagerStatic as Image;
 use Intervention\Image\Constraint;
 use RuntimeException;
+use Throwable;
 use Storage;
 use URL;
 
@@ -43,7 +45,20 @@ abstract class ScreenshotService
             throw new RuntimeException("Cannot write the screenshot $screenshotPath");
         }
 
-        GenerateScreenshotThumbnail::dispatch($timeInterval);
+        if (DB::transactionLevel() > 0) {
+            // The interval may be rolled back after the file is written (a later step fails): do not leave the
+            // screenshot under an id that will never exist. A process that dies mid-request cannot clean up.
+            DB::afterRollBack(function () use ($timeInterval) {
+                try {
+                    $this->destroyScreenshot($timeInterval);
+                } catch (Throwable $e) {
+                    report($e);
+                }
+            });
+        }
+
+        // After commit: inside a transaction (interval creation) the job must not outlive a rollback
+        GenerateScreenshotThumbnail::dispatch($timeInterval)->afterCommit();
     }
 
     public function createThumbnail(TimeInterval|int $timeInterval): void

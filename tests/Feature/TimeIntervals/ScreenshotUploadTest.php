@@ -3,15 +3,20 @@
 namespace Tests\Feature\TimeIntervals;
 
 use App\Contracts\ScreenshotService;
+use App\Jobs\GenerateScreenshotThumbnail;
+use App\Models\CronTaskWorkers;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Tests\Facades\IntervalFactory;
 use Tests\Facades\TaskFactory;
 use Tests\Facades\UserFactory;
+use RuntimeException;
 use Tests\TestCase;
+use CatEvent;
 
 /**
  * Screenshots uploaded by the desktop app must be stored together with their thumbnail.
@@ -55,6 +60,60 @@ class ScreenshotUploadTest extends TestCase
         $interval = TimeInterval::whereUserId($this->admin->id)->whereTaskId($this->task->id)->sole();
 
         $this->assertScreenshotAndThumbnailStored($interval, 1280, 720);
+    }
+
+    public function test_create_with_unwritable_screenshot_creates_nothing_and_can_be_retried(): void
+    {
+        Queue::fake();
+        $intervalData = $this->intervalDataWithScreenshot();
+        // The disks do not throw: a failed write is only reported by the return value
+        $disk = \Mockery::mock(Storage::disk('local'))->makePartial();
+        $disk->shouldReceive('put')->andReturn(false);
+        Storage::set('local', $disk);
+
+        $this->actingAs($this->admin)->post(self::CREATE_URI, $intervalData, ['Accept' => 'application/json'])
+            ->assertStatus(self::HTTP_INTERNAL_SERVER_ERROR);
+
+        $this->assertSame(0, TimeInterval::whereUserId($this->admin->id)->count());
+        $this->assertSame(0, CronTaskWorkers::whereUserId($this->admin->id)->count());
+        Queue::assertNotPushed(GenerateScreenshotThumbnail::class);
+
+        Storage::fake();
+        $this->actingAs($this->admin)->post(self::CREATE_URI, $intervalData, ['Accept' => 'application/json'])
+            ->assertOk();
+
+        $interval = TimeInterval::whereUserId($this->admin->id)->sole();
+        Storage::assertExists($this->screenshotService->getScreenshotPath($interval));
+        Queue::assertPushed(GenerateScreenshotThumbnail::class);
+    }
+
+    public function test_rolled_back_create_removes_the_written_screenshot(): void
+    {
+        // The real (sync) queue: Queue::fake() ignores afterCommit(), the job must not run after the rollback
+        $intervalData = $this->intervalDataWithScreenshot();
+        $written = [];
+        // Runs after the screenshot listener of the controller
+        CatEvent::listen('event.after.action.*', static function () use (&$written) {
+            $written = Storage::allFiles();
+            throw new RuntimeException('a later step failed');
+        });
+
+        $this->actingAs($this->admin)->post(self::CREATE_URI, $intervalData, ['Accept' => 'application/json'])
+            ->assertStatus(self::HTTP_INTERNAL_SERVER_ERROR);
+
+        $this->assertNotEmpty($written, 'The screenshot was written before the failure');
+        $this->assertSame(0, TimeInterval::whereUserId($this->admin->id)->count());
+        $this->assertSame(0, CronTaskWorkers::whereUserId($this->admin->id)->count());
+        $this->assertSame([], Storage::allFiles(), 'Neither the screenshot nor a thumbnail of the rolled back interval is left');
+    }
+
+    private function intervalDataWithScreenshot(): array
+    {
+        $intervalData = IntervalFactory::createRandomModelData();
+        $intervalData['task_id'] = $this->task->id;
+        $intervalData['user_id'] = $this->admin->id;
+
+        return $intervalData + ['screenshot' => UploadedFile::fake()->image('screenshot.png', 640, 480)];
     }
 
     public function test_put_screenshot_stores_screenshot_and_thumbnail(): void
