@@ -18,7 +18,7 @@ class PlannedTimeReportController
      *
      * Generate a report on planned tasks and associated time for a given project
      *
-     * Required permission (any of): `report_generate`, `report_full_access`
+     * Any authenticated user may call it; the data is limited by the role's scope.
      *
      * Without `projects` all projects are included.
      * `reportDate` is the time when the worked time of the tasks was last calculated (`null` if it never was).
@@ -72,7 +72,7 @@ class PlannedTimeReportController
      *
      * Generate and download a report on planned time for specific projects.
      *
-     * Required permission (any of): `report_generate`, `report_full_access`
+     * Any authenticated user may call it; the data is limited by the role's scope.
      *
      * @throws Throwable
      */

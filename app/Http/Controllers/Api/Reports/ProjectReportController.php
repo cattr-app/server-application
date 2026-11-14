@@ -20,7 +20,7 @@ class ProjectReportController
      *
      * Retrieve detailed project report data including user tasks and time intervals.
      *
-     * Required permission (any of): `report_view`, `report_full_access`
+     * Any authenticated user may call it; the data is limited by the role's scope.
      *
      * Without `users` all users are included, without `projects` all projects.
      * Times are in seconds. `items` of a day are the intervals grouped by hour, each hour is reduced to a few

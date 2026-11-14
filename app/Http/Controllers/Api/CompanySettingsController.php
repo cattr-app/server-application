@@ -58,7 +58,7 @@ class CompanySettingsController extends Controller
      *
      * Retrieves the public key for offline synchronization.
      *
-     * Required permission (any of): `offline_sync_view`, `offline_sync_full_access`
+     * Any authenticated user may call it.
      *
      * `key` is `null` if no key is stored.
      *
