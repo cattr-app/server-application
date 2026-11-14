@@ -34,7 +34,8 @@ export default class OfflineSyncService {
     }
 
     /**
-     * Upload Screenshots.cattr file
+     * Upload Screenshots.cattr file: the archive is validated and queued, its screenshots are attached in the
+     * background (see getScreenshotsUpload)
      * @returns {Promise<void>}
      * @param payload
      * @param progressCallback
@@ -46,6 +47,16 @@ export default class OfflineSyncService {
         const { data } = await axios.post(this.getItemRequestUri() + '/upload-screenshots', formData, {
             onUploadProgress: progressCallback,
         });
+        return data;
+    }
+
+    /**
+     * Status, progress and per-screenshot results of an uploaded Screenshots.cattr file
+     * @param id
+     * @returns {Promise<Object>}
+     */
+    async getScreenshotsUpload(id) {
+        const { data } = await axios.get(this.getItemRequestUri() + `/uploads/${id}`);
         return data;
     }
 }

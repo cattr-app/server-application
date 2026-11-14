@@ -16,6 +16,11 @@
     "start_at":  "От",
     "end_at": "До",
     "result":  "Результат",
-    "total_time": "Продолжительность"
+    "total_time": "Продолжительность",
+    "uploading": "Загрузка",
+    "processing_pending": "Ожидание начала обработки",
+    "processing": "Обработка: {processed} из {total} скриншотов",
+    "processing_completed": "Обработано {processed} из {total} скриншотов",
+    "processing_failed": "Обработка не удалась: обработано {processed} из {total} скриншотов"
   }
 }

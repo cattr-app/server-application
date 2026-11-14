@@ -17,6 +17,11 @@
     "start_at":  "Start",
     "end_at": "End",
     "result":  "Result",
-    "total_time": "Duration"
+    "total_time": "Duration",
+    "uploading": "Uploading",
+    "processing_pending": "Waiting for processing to start",
+    "processing": "Processing: {processed} of {total} screenshots",
+    "processing_completed": "Processed {processed} of {total} screenshots",
+    "processing_failed": "Processing failed: {processed} of {total} screenshots were processed"
   }
 }
