@@ -124,6 +124,22 @@ class StoreTest extends TestCase
         $this->assertSame(['total_spent_time_day'], $report->charts);
     }
 
+    public static function invalidFields(): array
+    {
+        return [
+            'unknown section' => [['nonsense_section' => ['name']]],
+            'field of another section' => [['base' => ['task_name']]],
+            'unknown field' => [['base' => ['nonsense']]],
+        ];
+    }
+
+    #[DataProvider('invalidFields')]
+    public function test_fields_are_validated_against_their_section(array $fields): void
+    {
+        $this->store($this->user('asUser'), ['fields' => $fields])->assertValidationError();
+        $this->assertDatabaseMissing('universal_reports', ['name' => 'Weekly overview']);
+    }
+
     public function test_empty_charts_are_stored(): void
     {
         $response = $this->store($this->user('asUser'), ['charts' => []]);

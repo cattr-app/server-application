@@ -67,7 +67,7 @@ class DashboardController
      *
      * Generate and download a dashboard report
      *
-     * Required permission (any of): `report_generate`, `report_full_access`
+     * Any authenticated user may call it; the data is limited by the role's scope.
      */
     public function download(DashboardRequest $request): JsonResponse
     {

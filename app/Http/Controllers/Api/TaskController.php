@@ -392,7 +392,7 @@ class TaskController extends ItemController
      *
      * Downloads all projects and tasks associated with a specific user.
      *
-     * Required permission (any of): `users_download_projects_tasks`, `users_full_access`
+     * Any authenticated user may call it; users without access to other users' data can only download their own.
      *
      * The response is not JSON: it is the file `ProjectsAndTasks.cattr`, a MessagePack document with the `id`
      * of the user and the `projects` and `tasks` assigned to them.

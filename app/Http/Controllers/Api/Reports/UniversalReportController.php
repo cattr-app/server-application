@@ -302,8 +302,7 @@ class UniversalReportController
             ReportHelper::getReportFormat($request),
         );
 
-        $job->handle();
-     //   app(Dispatcher::class)->dispatchSync($job);
+        app(Dispatcher::class)->dispatchSync($job);
 
         return responder()->success(['url' => $job->getPublicPath()])->respond();
     }
