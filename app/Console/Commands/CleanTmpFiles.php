@@ -19,12 +19,16 @@ use Symfony\Component\Console\Attribute\AsCommand;
  * requests that are still running are kept. Symbolic links are removed, never followed.
  *
  * Also removes the stored archives of offline screenshot uploads whose job was lost (or never finished) from the
- * default disk, which may be a shared volume or S3: the upload is marked as failed.
+ * default disk, which may be a shared volume or S3: the upload is marked as failed. Finished uploads (with
+ * their per-screenshot results) are deleted after UPLOAD_RETENTION_DAYS.
  */
 #[AsCommand(name: 'cattr:tmp:clean')]
 class CleanTmpFiles extends Command
 {
     public const DEFAULT_HOURS = 24;
+
+    /** Days the result of a finished offline screenshot upload stays available */
+    public const UPLOAD_RETENTION_DAYS = 7;
 
     protected $signature = 'cattr:tmp:clean
         {--hours=' . self::DEFAULT_HOURS . ' : Delete entries not modified for at least this many hours}';
@@ -45,6 +49,7 @@ class CleanTmpFiles extends Command
 
         $tmpFailed = $this->cleanTmp($files, $hours, $threshold);
         $archivesFailed = $this->cleanOfflineScreenshotArchives($hours, $threshold);
+        $this->pruneFinishedOfflineScreenshotUploads();
 
         return $tmpFailed + $archivesFailed > 0 ? self::FAILURE : self::SUCCESS;
     }
@@ -140,5 +145,21 @@ class CleanTmpFiles extends Command
         }
 
         return $failed;
+    }
+
+    /**
+     * Deletes the finished uploads and, by cascade, their results. An upload whose archive could not be deleted
+     * yet is kept, so that the archive can still be found and removed.
+     */
+    private function pruneFinishedOfflineScreenshotUploads(): void
+    {
+        $deleted = OfflineScreenshotUpload::query()
+            ->whereIn('status', [OfflineScreenshotUploadStatus::COMPLETED, OfflineScreenshotUploadStatus::FAILED])
+            ->whereNull('path')
+            ->where('finished_at', '<', now()->subDays(self::UPLOAD_RETENTION_DAYS))
+            ->delete();
+
+        $this->info("Deleted $deleted offline screenshot uploads finished more than "
+            . self::UPLOAD_RETENTION_DAYS . ' days ago.');
     }
 }

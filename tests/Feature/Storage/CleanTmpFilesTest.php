@@ -142,4 +142,53 @@ class CleanTmpFilesTest extends TestCase
         $this->assertTrue($disk->exists('offline-screenshots/orphan-new.cattr'));
         $this->assertTrue($disk->exists('screenshots/old.jpg'));
     }
+
+    public function test_deletes_finished_offline_screenshot_uploads_after_seven_days(): void
+    {
+        $user = UserFactory::create();
+        $make = function (OfflineScreenshotUploadStatus $status, int $finishedDaysAgo, ?string $path = null) use ($user) {
+            return OfflineScreenshotUpload::create([
+                'user_id' => $user->id,
+                'status' => $status,
+                'disk' => 'local',
+                'path' => $path,
+                'total' => 1,
+                'finished_at' => now()->subDays($finishedDaysAgo)->subHour(),
+            ]);
+        };
+
+        $oldCompleted = $make(OfflineScreenshotUploadStatus::COMPLETED, 7);
+        $oldFailed = $make(OfflineScreenshotUploadStatus::FAILED, 8);
+        $recent = $make(OfflineScreenshotUploadStatus::COMPLETED, 6);
+        $withArchive = $make(OfflineScreenshotUploadStatus::COMPLETED, 7, 'offline-screenshots/kept.cattr');
+        $unfinished = OfflineScreenshotUpload::create([
+            'user_id' => $user->id,
+            'status' => OfflineScreenshotUploadStatus::PROCESSING,
+            'disk' => 'local',
+            'path' => 'offline-screenshots/running.cattr',
+            'total' => 1,
+        ]);
+        $screenshotId = (string)\Illuminate\Support\Str::uuid();
+        $oldCompleted->items()->create([
+            'entry_name' => "{$user->id}_$screenshotId",
+            'user_id' => $user->id,
+            'screenshot_id' => $screenshotId,
+            'success' => true,
+            'message' => 'validation.offline-sync.screenshot_added',
+        ]);
+
+        // The archives are not on the disk, so only the rows can be pruned; the one with a path is not
+        OfflineScreenshotUpload::whereKey([$withArchive->id, $unfinished->id])->update(['updated_at' => now()]);
+
+        $this->artisan('cattr:tmp:clean')
+            ->expectsOutputToContain('Deleted 2 offline screenshot uploads finished more than 7 days ago')
+            ->assertSuccessful();
+
+        $this->assertModelMissing($oldCompleted);
+        $this->assertModelMissing($oldFailed);
+        $this->assertModelExists($recent);
+        $this->assertModelExists($withArchive);
+        $this->assertModelExists($unfinished);
+        $this->assertDatabaseCount('offline_screenshot_upload_items', 0);
+    }
 }
