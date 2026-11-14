@@ -10,7 +10,7 @@ Cattr keeps three kinds of files. Each of them lives either on the local disk (`
 
 Temporary files (uploads being processed, local copies of archives) always stay on the local disk of the container (`storage/app/tmp`).
 
-Offline screenshot archives (`POST /api/offline-sync/upload-screenshots`) are the exception: the request validates the archive and stores it under `offline-screenshots/` on the default disk, which is shared with the queue workers (the PVC or S3), and a queue job attaches the screenshots. The job copies the archive to a local temporary file, deletes it from the default disk after the last attempt and the scheduled `cattr:tmp:clean` removes the archives of lost jobs. A queue worker is required; limits are set by `OFFLINE_SCREENSHOTS_MAX_FILES` (1000), `OFFLINE_SCREENSHOTS_MAX_SIZE_BYTES`, `OFFLINE_SCREENSHOTS_JOB_TIMEOUT` (900 s, keep it below `QUEUE_RETRY_AFTER`) and `OFFLINE_SCREENSHOTS_JOB_TRIES`.
+Offline screenshot archives (`POST /api/offline-sync/upload-screenshots`) are the exception: the request validates the archive and stores it under `offline-screenshots/` on the default disk, which is shared with the queue workers (the PVC or S3), and a queue job attaches the screenshots. The job copies the archive to a local temporary file, deletes it from the default disk after the last attempt and the scheduled `cattr:tmp:clean` removes the archives of lost jobs and, after 7 days, the rows of finished uploads with their results. A queue worker is required; limits are set by `OFFLINE_SCREENSHOTS_MAX_FILES` (1000), `OFFLINE_SCREENSHOTS_MAX_SIZE_BYTES`, `OFFLINE_SCREENSHOTS_JOB_TIMEOUT` (900 s, keep it below `QUEUE_RETRY_AFTER`) and `OFFLINE_SCREENSHOTS_JOB_TRIES`.
 
 ## S3 settings
 
