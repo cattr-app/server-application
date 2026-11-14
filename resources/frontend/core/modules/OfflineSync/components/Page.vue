@@ -96,6 +96,7 @@
                         size="large"
                         icon="icon-upload"
                         type="primary"
+                        :disabled="screenshotsUploading"
                         @click="uploadScreenshots"
                         >{{ $t('offline_sync.import') }}
                     </at-button>
@@ -136,6 +137,7 @@
     import ResourceSelect from '@/components/ResourceSelect.vue';
     import UsersService from '@/services/resource/user.service';
     import { humanFileSize } from '@/utils/file';
+    import { createRequestGuard } from '../services/requestGuard';
 
     const formatImportResultMessage = (h, params) => {
         const getResultIcon = () => {
@@ -272,6 +274,7 @@
                 userId: null,
                 usersService: new UsersService(),
                 screenshotsUploadProgress: null,
+                screenshotsUploading: false,
                 screenshotsUpload: null,
                 screenshotsPollTimer: null,
                 screenshotsChannel: null,
@@ -300,7 +303,12 @@
                     : this.$t('offline_sync.processing', { processed, total });
             },
         },
+        created() {
+            // Not reactive on purpose: decides which upload request may still change the state
+            this.screenshotsUploadGuard = createRequestGuard();
+        },
         beforeDestroy() {
+            this.screenshotsUploadGuard.dispose();
             this.stopTrackingScreenshotsUpload();
         },
         methods: {
@@ -348,15 +356,32 @@
                 const { valid } = await this.$refs.screenshots_file.validate(file);
 
                 if (valid) {
+                    // A newer upload replaces the previous one: its tracking is stopped and the response of its
+                    // request, if it arrives later, is ignored
+                    const token = this.screenshotsUploadGuard.begin();
                     this.stopTrackingScreenshotsUpload();
                     this.addedScreenshots = [];
                     this.screenshotsUpload = null;
+                    this.screenshotsUploadProgress = null;
+                    this.screenshotsUploading = true;
 
-                    const result = await this.service.uploadScreenshots(file, this.onUploadProgress.bind(this));
-                    if (result.success) {
-                        // The archive is queued: its screenshots are attached by a queue worker
-                        this.screenshotsUpload = result.data;
-                        this.trackScreenshotsUpload(result.data.id);
+                    try {
+                        const result = await this.service.uploadScreenshots(file, progressEvent =>
+                            this.screenshotsUploadGuard.isCurrent(token) ? this.onUploadProgress(progressEvent) : null,
+                        );
+                        if (!this.screenshotsUploadGuard.isCurrent(token)) {
+                            return;
+                        }
+
+                        if (result.success) {
+                            // The archive is queued: its screenshots are attached by a queue worker
+                            this.screenshotsUpload = result.data;
+                            this.trackScreenshotsUpload(result.data.id);
+                        }
+                    } finally {
+                        if (this.screenshotsUploadGuard.isCurrent(token)) {
+                            this.screenshotsUploading = false;
+                        }
                     }
                 }
             },
@@ -365,6 +390,9 @@
              * and polls as well: the polling is the only source of the status when Reverb is not available.
              */
             trackScreenshotsUpload(id) {
+                // The timer and the channel subscription have one owner: the upload tracked now
+                this.stopTrackingScreenshotsUpload();
+
                 if (this.user?.id && this.$echo) {
                     try {
                         this.screenshotsChannel = `offline-sync.${this.user.id}`;
