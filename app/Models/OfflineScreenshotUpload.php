@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 use Throwable;
 
 /**
@@ -50,6 +51,11 @@ class OfflineScreenshotUpload extends Model
 
     /**
      * Deletes the stored archive; the row keeps no reference to it afterwards.
+     *
+     * The disks do not throw on failures: if the archive could not be deleted, the row keeps its disk and path, so
+     * that cattr:tmp:clean can find the archive and try again.
+     *
+     * @throws RuntimeException If the archive could not be deleted
      */
     public function deleteArchive(): void
     {
@@ -57,7 +63,10 @@ class OfflineScreenshotUpload extends Model
             return;
         }
 
-        Storage::disk($this->disk)->delete($this->path);
+        if (!Storage::disk($this->disk)->delete($this->path)) {
+            throw new RuntimeException("Cannot delete the archive of the offline screenshot upload $this->id");
+        }
+
         $this->forceFill(['disk' => null, 'path' => null])->save();
     }
 

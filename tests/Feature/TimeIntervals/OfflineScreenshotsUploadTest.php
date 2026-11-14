@@ -409,6 +409,44 @@ class OfflineScreenshotsUploadTest extends TestCase
         $this->assertNoStoredArchive();
     }
 
+    public function test_archive_that_cannot_be_deleted_stays_referenced_by_the_upload(): void
+    {
+        $user = UserFactory::withTokens()->create();
+        $interval = $this->createOfflineInterval($user, TaskFactory::forUser($user)->create());
+        $this->uploadOfflineArchive($user, $this->entries($user, $interval))->assertStatus(self::HTTP_ACCEPTED);
+        $upload = OfflineScreenshotUpload::firstOrFail();
+        $path = $upload->path;
+        $this->failDeletingFromTheLocalDisk();
+
+        try {
+            $upload->deleteArchive();
+            $this->fail('A failed delete must be reported');
+        } catch (RuntimeException) {
+            // expected
+        }
+
+        $upload->refresh();
+        $this->assertSame('local', $upload->disk);
+        $this->assertSame($path, $upload->path);
+
+        // The job does not fail because of it: the result is complete, the sweep removes the archive later
+        $this->runOfflineUploadJob($upload);
+        $upload->refresh();
+        $this->assertSame(OfflineScreenshotUploadStatus::COMPLETED, $upload->status);
+        $this->assertSame($path, $upload->path);
+
+        // A failed upload keeps the reference as well, and cattr:tmp:clean reports what it cannot delete
+        $upload->forceFill(['status' => OfflineScreenshotUploadStatus::FAILED])->save();
+        $upload->markFailed();
+        $this->assertSame($path, $upload->refresh()->path);
+
+        OfflineScreenshotUpload::whereKey($upload->id)->update(['updated_at' => now()->subDays(2)]);
+        $this->artisan('cattr:tmp:clean')
+            ->expectsOutputToContain('Could not delete 1 offline screenshot archives')
+            ->assertFailed();
+        $this->assertSame($path, $upload->refresh()->path);
+    }
+
     public function test_archive_is_removed_if_the_job_cannot_be_queued(): void
     {
         $user = UserFactory::withTokens()->create();
@@ -419,6 +457,14 @@ class OfflineScreenshotsUploadTest extends TestCase
             ->assertStatus(self::HTTP_INTERNAL_SERVER_ERROR);
 
         $this->assertNoStoredArchive();
+    }
+
+    /** The disks are configured not to throw: a failed delete is only reported by the return value */
+    private function failDeletingFromTheLocalDisk(): void
+    {
+        $disk = \Mockery::mock(Storage::disk('local'))->makePartial();
+        $disk->shouldReceive('delete')->andReturn(false);
+        Storage::set('local', $disk);
     }
 
     /**
