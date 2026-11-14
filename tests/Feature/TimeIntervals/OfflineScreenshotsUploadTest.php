@@ -215,6 +215,27 @@ class OfflineScreenshotsUploadTest extends TestCase
         $this->assertTmpIsEmpty();
     }
 
+    public function test_screenshot_that_cannot_be_written_is_reported_and_not_lost(): void
+    {
+        $user = UserFactory::withTokens()->create();
+        $interval = $this->createOfflineInterval($user, TaskFactory::forUser($user)->create());
+        $screenshotId = $interval->screenshot_id;
+        $this->uploadOfflineArchive($user, $this->entries($user, $interval))->assertStatus(self::HTTP_ACCEPTED);
+        $upload = OfflineScreenshotUpload::firstOrFail();
+        $this->failWritingToTheLocalDisk();
+
+        $this->runOfflineUploadJob($upload);
+
+        $this->pollOfflineUpload($user, $upload->id)->assertOk()
+            ->assertJsonPath('data.status', 'completed')
+            ->assertJsonPath('data.results.0.success', false)
+            ->assertJsonPath('data.results.0.interval.id', $interval->id)
+            ->assertJsonPath('data.results.0.message', __('validation.offline-sync.screenshot_not_attached'));
+        $this->assertSame($screenshotId, $interval->refresh()->screenshot_id, 'The interval still waits for its screenshot');
+        Storage::assertMissing($this->screenshotService->getScreenshotPath($interval));
+        Queue::assertNotPushed(GenerateScreenshotThumbnail::class);
+    }
+
     public function test_job_run_again_after_completion_does_nothing(): void
     {
         $user = UserFactory::withTokens()->create();
@@ -463,6 +484,14 @@ class OfflineScreenshotsUploadTest extends TestCase
         // Neither the archive nor an upload that no job would ever process is left
         $this->assertNoStoredArchive();
         $this->assertDatabaseCount('offline_screenshot_uploads', 0);
+    }
+
+    /** The disks are configured not to throw: a failed write is only reported by the return value */
+    private function failWritingToTheLocalDisk(): void
+    {
+        $disk = \Mockery::mock(Storage::disk('local'))->makePartial();
+        $disk->shouldReceive('put')->andReturn(false);
+        Storage::set('local', $disk);
     }
 
     /** The disks are configured not to throw: a failed delete is only reported by the return value */

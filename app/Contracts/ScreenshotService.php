@@ -7,6 +7,7 @@ use App\Jobs\GenerateScreenshotThumbnail;
 use App\Models\TimeInterval;
 use Intervention\Image\ImageManagerStatic as Image;
 use Intervention\Image\Constraint;
+use RuntimeException;
 use Storage;
 use URL;
 
@@ -25,6 +26,10 @@ abstract class ScreenshotService
     /** Get screenshot thumbnail path by interval */
     abstract public function getThumbPath(TimeInterval|int $interval): string;
 
+    /**
+     * @throws RuntimeException If the screenshot could not be written: the disks do not throw, so a failed write
+     *                          must not be taken for success (and its thumbnail must not be queued)
+     */
     public function saveScreenshot($file, $timeInterval): void
     {
         // $file is a local path or UploadedFile; the result goes to the default disk (local or S3).
@@ -33,7 +38,10 @@ abstract class ScreenshotService
 
         $image = Image::make($path);
 
-        Storage::put($this->getScreenshotPath($timeInterval), (string)$image->encode(self::FILE_FORMAT, self::QUALITY));
+        $screenshotPath = $this->getScreenshotPath($timeInterval);
+        if (!Storage::put($screenshotPath, (string)$image->encode(self::FILE_FORMAT, self::QUALITY))) {
+            throw new RuntimeException("Cannot write the screenshot $screenshotPath");
+        }
 
         GenerateScreenshotThumbnail::dispatch($timeInterval);
     }
@@ -44,7 +52,10 @@ abstract class ScreenshotService
 
         $thumb = $image->resize(self::THUMB_WIDTH, null, fn(Constraint $constraint) => $constraint->aspectRatio());
 
-        Storage::put($this->getThumbPath($timeInterval), (string)$thumb->encode(self::FILE_FORMAT, self::QUALITY));
+        $thumbPath = $this->getThumbPath($timeInterval);
+        if (!Storage::put($thumbPath, (string)$thumb->encode(self::FILE_FORMAT, self::QUALITY))) {
+            throw new RuntimeException("Cannot write the screenshot thumbnail $thumbPath");
+        }
     }
 
     public function destroyScreenshot(TimeInterval|int $interval): void
