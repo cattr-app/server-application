@@ -2,7 +2,10 @@
 
 namespace Tests\Feature\Storage;
 
+use App\Enums\OfflineScreenshotUploadStatus;
+use App\Models\OfflineScreenshotUpload;
 use Illuminate\Support\Facades\Storage;
+use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
 class CleanTmpFilesTest extends TestCase
@@ -76,5 +79,67 @@ class CleanTmpFilesTest extends TestCase
     {
         $time = now()->subHours($hours)->getTimestamp();
         touch(Storage::disk('local')->path($path), $time, $time);
+    }
+
+    public function test_removes_archives_of_lost_offline_screenshot_uploads(): void
+    {
+        $disk = Storage::disk('local');
+        $user = UserFactory::create();
+        $make = function (string $name, OfflineScreenshotUploadStatus $status, int $ageHours) use ($disk, $user) {
+            $path = "offline-screenshots/$name.cattr";
+            $disk->put($path, 'archive');
+            $upload = OfflineScreenshotUpload::create([
+                'user_id' => $user->id,
+                'status' => $status,
+                'disk' => 'local',
+                'path' => $path,
+                'total' => 1,
+            ]);
+            OfflineScreenshotUpload::whereKey($upload->id)->update(['updated_at' => now()->subHours($ageHours)]);
+
+            return $upload;
+        };
+
+        $lost = $make('lost', OfflineScreenshotUploadStatus::PENDING, 25);
+        $stuck = $make('stuck', OfflineScreenshotUploadStatus::PROCESSING, 25);
+        $leftover = $make('leftover', OfflineScreenshotUploadStatus::COMPLETED, 25);
+        $running = $make('running', OfflineScreenshotUploadStatus::PROCESSING, 1);
+        $queued = $make('queued', OfflineScreenshotUploadStatus::PENDING, 1);
+
+        $this->artisan('cattr:tmp:clean')->assertSuccessful();
+
+        foreach (['lost', 'stuck', 'leftover'] as $name) {
+            $this->assertFalse($disk->exists("offline-screenshots/$name.cattr"), "$name must be deleted");
+        }
+        $this->assertTrue($disk->exists('offline-screenshots/running.cattr'));
+        $this->assertTrue($disk->exists('offline-screenshots/queued.cattr'));
+
+        $this->assertSame(OfflineScreenshotUploadStatus::FAILED, $lost->refresh()->status);
+        $this->assertSame(OfflineScreenshotUploadStatus::FAILED, $stuck->refresh()->status);
+        $this->assertNull($lost->path);
+        $this->assertSame(OfflineScreenshotUploadStatus::COMPLETED, $leftover->refresh()->status);
+        $this->assertNull($leftover->path);
+        $this->assertSame(OfflineScreenshotUploadStatus::PROCESSING, $running->refresh()->status);
+        $this->assertNotNull($running->path);
+        $this->assertSame(OfflineScreenshotUploadStatus::PENDING, $queued->refresh()->status);
+    }
+
+    public function test_removes_old_archives_without_an_upload_from_the_default_disk(): void
+    {
+        config(['filesystems.default' => 's3']);
+        $disk = Storage::fake('s3');
+        $disk->put('offline-screenshots/orphan-old.cattr', 'x');
+        $disk->put('offline-screenshots/orphan-new.cattr', 'x');
+        $disk->put('screenshots/old.jpg', 'outside');
+        touch($disk->path('offline-screenshots/orphan-old.cattr'), now()->subHours(25)->getTimestamp());
+        touch($disk->path('screenshots/old.jpg'), now()->subHours(25)->getTimestamp());
+
+        $this->artisan('cattr:tmp:clean')
+            ->expectsOutputToContain('Deleted 1 offline screenshot archives older than 24 h')
+            ->assertSuccessful();
+
+        $this->assertFalse($disk->exists('offline-screenshots/orphan-old.cattr'));
+        $this->assertTrue($disk->exists('offline-screenshots/orphan-new.cattr'));
+        $this->assertTrue($disk->exists('screenshots/old.jpg'));
     }
 }

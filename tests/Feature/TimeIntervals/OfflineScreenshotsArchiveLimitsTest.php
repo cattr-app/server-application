@@ -4,11 +4,11 @@ namespace Tests\Feature\TimeIntervals;
 
 use App\Contracts\ScreenshotService;
 use App\Jobs\GenerateScreenshotThumbnail;
+use App\Jobs\ProcessOfflineScreenshotsUpload;
+use App\Models\OfflineScreenshotUpload;
 use App\Models\TimeInterval;
 use App\Models\User;
-use App\Services\ProductionScreenshotService;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -19,9 +19,9 @@ use Tests\TestCase;
 use ZipArchive;
 
 /**
- * Offline screenshot archives are processed within the request, so an archive that cannot be processed in time
- * (too many entries, too large unpacked) or whose entries are not plain file names (Zip Slip) is rejected
- * before anything is extracted or attached.
+ * Offline screenshot archives are validated within the request, so an archive that is too large (too many entries,
+ * too large unpacked), damaged or whose entries are not plain file names (Zip Slip) is rejected before it is stored
+ * and queued.
  */
 class OfflineScreenshotsArchiveLimitsTest extends TestCase
 {
@@ -50,7 +50,10 @@ class OfflineScreenshotsArchiveLimitsTest extends TestCase
     {
         $limits = $this->offlineScreenshotsConfig([])['offline_screenshots'];
 
-        $this->assertSame(150, $limits['max_files']);
+        $this->assertSame(1000, $limits['max_files']);
+        $this->assertSame(900, $limits['job_timeout']);
+        $this->assertSame(3, $limits['job_tries']);
+        $this->assertLessThan(config('queue.connections.database.retry_after'), $limits['job_timeout']);
         $this->assertSame(1024 * 1024 * 1024, $limits['max_size']);
     }
 
@@ -59,8 +62,12 @@ class OfflineScreenshotsArchiveLimitsTest extends TestCase
         $limits = $this->offlineScreenshotsConfig([
             'OFFLINE_SCREENSHOTS_MAX_FILES' => '42',
             'OFFLINE_SCREENSHOTS_MAX_SIZE_BYTES' => '1048576',
+            'OFFLINE_SCREENSHOTS_JOB_TIMEOUT' => '600',
+            'OFFLINE_SCREENSHOTS_JOB_TRIES' => '5',
         ])['offline_screenshots'];
 
+        $this->assertSame(600, $limits['job_timeout']);
+        $this->assertSame(5, $limits['job_tries']);
         $this->assertSame(42, $limits['max_files']);
         $this->assertSame(1024 * 1024, $limits['max_size']);
     }
@@ -85,7 +92,12 @@ class OfflineScreenshotsArchiveLimitsTest extends TestCase
      */
     private function offlineScreenshotsConfig(array $values): array
     {
-        $names = ['OFFLINE_SCREENSHOTS_MAX_FILES', 'OFFLINE_SCREENSHOTS_MAX_SIZE_BYTES'];
+        $names = [
+            'OFFLINE_SCREENSHOTS_MAX_FILES',
+            'OFFLINE_SCREENSHOTS_MAX_SIZE_BYTES',
+            'OFFLINE_SCREENSHOTS_JOB_TIMEOUT',
+            'OFFLINE_SCREENSHOTS_JOB_TRIES',
+        ];
         $saved = [];
         foreach ($names as $name) {
             $saved[$name] = [$_ENV[$name] ?? null, $_SERVER[$name] ?? null, getenv($name)];
@@ -123,12 +135,12 @@ class OfflineScreenshotsArchiveLimitsTest extends TestCase
     {
         config(['app.offline_screenshots.max_files' => 2]);
 
-        $response = $this->uploadOfflineArchive($this->user, $this->validEntry() + [
+        $response = $this->uploadAndProcessOfflineArchive($this->user, $this->validEntry() + [
             "{$this->user->id}_" . Str::uuid() => $this->image(),
         ]);
 
-        $response->assertOk()->assertJsonCount(2, 'data');
-        $result = collect($response->json('data'))->firstWhere('screenshot_id', $this->screenshotId);
+        $response->assertOk()->assertJsonCount(2, 'data.results')->assertJsonPath('data.total', 2);
+        $result = collect($response->json('data.results'))->firstWhere('screenshot_id', $this->screenshotId);
         $this->assertTrue($result['success']);
         $this->interval->refresh();
         $this->assertNull($this->interval->screenshot_id);
@@ -173,9 +185,9 @@ class OfflineScreenshotsArchiveLimitsTest extends TestCase
         $entries = $this->validEntry() + ["{$this->user->id}_" . Str::uuid() => str_repeat("\0", 70 * 1024)];
         config(['app.offline_screenshots.max_size' => array_sum(array_map('strlen', $entries))]);
 
-        $response = $this->uploadOfflineArchive($this->user, $entries);
+        $response = $this->uploadAndProcessOfflineArchive($this->user, $entries);
 
-        $response->assertOk()->assertJsonCount(2, 'data');
+        $response->assertOk()->assertJsonCount(2, 'data.results');
         $this->interval->refresh();
         $this->assertNull($this->interval->screenshot_id);
         $this->assertTmpIsEmpty();
@@ -189,8 +201,6 @@ class OfflineScreenshotsArchiveLimitsTest extends TestCase
     {
         $maxSize = 1024 * 1024;
         config(['app.offline_screenshots.max_size' => $maxSize]);
-        $extractedFileSizes = $this->recordExtractedFileSizesOnAttach();
-
         // 3 MiB of zeros, ~3 KiB packed; the CRC stays the one of the real content
         $name = "{$this->user->id}_$this->screenshotId";
         $zipPath = $this->createOfflineArchive([$name => str_repeat("\0", 3 * $maxSize)]);
@@ -203,8 +213,7 @@ class OfflineScreenshotsArchiveLimitsTest extends TestCase
 
         $response = $this->uploadOfflineArchiveFile($this->user, $zipPath);
 
-        // Without the limit on extraction the 3 MiB file is written and handed over to the screenshot service
-        $this->assertSame([], $extractedFileSizes->all(), 'Sizes of the extracted files when attaching');
+        // Without the scan of the unpacked bytes the archive would be stored and the job would write the 3 MiB file
         $this->assertRejected($response, __('validation.offline-sync.too_large', ['max' => '1 MB']));
     }
 
@@ -214,7 +223,6 @@ class OfflineScreenshotsArchiveLimitsTest extends TestCase
      */
     public function test_archive_with_an_entry_shorter_than_declared_is_rejected(): void
     {
-        $extractedFileSizes = $this->recordExtractedFileSizesOnAttach();
         $name = "{$this->user->id}_$this->screenshotId";
         $image = $this->image();
         $zipPath = $this->createOfflineArchive([$name => $image]);
@@ -224,9 +232,9 @@ class OfflineScreenshotsArchiveLimitsTest extends TestCase
 
         $response->assertStatus(self::HTTP_BAD_REQUEST);
         $this->assertStringContainsString(__('Cannot open file.'), $response->getContent());
-        $this->assertSame([], $extractedFileSizes->all(), 'Sizes of the extracted files when attaching');
         $this->interval->refresh();
         $this->assertSame($this->screenshotId, $this->interval->screenshot_id, 'The screenshot was attached');
+        $this->assertNothingStoredOrQueued();
         $this->assertTmpIsEmpty();
     }
 
@@ -249,6 +257,7 @@ class OfflineScreenshotsArchiveLimitsTest extends TestCase
         $this->assertStringContainsString(__('Cannot open file.'), $response->getContent());
         $this->interval->refresh();
         $this->assertSame($this->screenshotId, $this->interval->screenshot_id, 'The screenshot was attached');
+        $this->assertNothingStoredOrQueued();
         $this->assertTmpIsEmpty();
     }
 
@@ -299,33 +308,6 @@ class OfflineScreenshotsArchiveLimitsTest extends TestCase
     }
 
     /**
-     * Replaces the screenshot service with one that records the size of every file in storage/app/tmp whenever a
-     * screenshot is attached, i.e. after the archive has been extracted.
-     *
-     * @return Collection<int, int>
-     */
-    private function recordExtractedFileSizesOnAttach(): Collection
-    {
-        $sizes = new Collection();
-        $this->app->instance(ScreenshotService::class, new class ($sizes) extends ProductionScreenshotService {
-            public function __construct(private readonly Collection $sizes)
-            {
-            }
-
-            public function saveScreenshot($file, $timeInterval): void
-            {
-                $disk = Storage::disk('local');
-                foreach ($disk->allFiles('tmp') as $path) {
-                    $this->sizes->push($disk->size($path));
-                }
-                parent::saveScreenshot($file, $timeInterval);
-            }
-        });
-
-        return $sizes;
-    }
-
-    /**
      * @return array<string, string> A screenshot that would be attached to the interval if the archive were accepted
      */
     private function validEntry(): array
@@ -347,6 +329,27 @@ class OfflineScreenshotsArchiveLimitsTest extends TestCase
         $this->assertSame($this->screenshotId, $this->interval->screenshot_id, 'The screenshot was attached');
         Storage::assertMissing($this->screenshotService->getScreenshotPath($this->interval));
         Queue::assertNotPushed(GenerateScreenshotThumbnail::class);
+        $this->assertNothingStoredOrQueued();
         $this->assertTmpIsEmpty();
+    }
+
+    private function assertNothingStoredOrQueued(): void
+    {
+        Queue::assertNotPushed(ProcessOfflineScreenshotsUpload::class);
+        $this->assertSame(0, OfflineScreenshotUpload::count());
+        $this->assertNoStoredArchive();
+    }
+
+    public function test_duplicate_entry_names_are_rejected(): void
+    {
+        $name = "{$this->user->id}_$this->screenshotId";
+        $other = "{$this->user->id}_" . Str::uuid();
+        $zipPath = $this->createOfflineArchive([$name => $this->image(), $other => $this->image()]);
+        // ZipArchive does not add two entries with one name: rename the second one in the headers
+        file_put_contents($zipPath, str_replace($other, $name, file_get_contents($zipPath)));
+
+        $response = $this->uploadOfflineArchiveFile($this->user, $zipPath);
+
+        $this->assertRejected($response, __('validation.offline-sync.wrong_file_name'));
     }
 }

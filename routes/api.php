@@ -237,6 +237,9 @@ Route::group([
             ->name('offline_sync.upload_intervals');
         $router->post('offline-sync/upload-screenshots', [IntervalController::class, 'uploadOfflineScreenshots'])
             ->name('offline_sync.upload_screenshots');
+        $router->get('offline-sync/uploads/{id}', [IntervalController::class, 'showOfflineScreenshotsUpload'])
+            ->where('id', '[0-9]+')
+            ->name('offline_sync.show_upload');
         $router->get('offline-sync/public-key', [CompanySettingsController::class, 'getOfflineSyncPublicKey'])
             ->name('offline_sync.public_key');
 

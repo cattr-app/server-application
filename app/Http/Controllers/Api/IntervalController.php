@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Contracts\ScreenshotService;
+use App\Enums\OfflineScreenshotUploadStatus;
 use App\Enums\ScreenshotsState;
 use App\Exceptions\Entities\AuthorizationException;
 use App\Http\Requests\Interval\BulkDestroyTimeIntervalRequest;
@@ -14,11 +15,16 @@ use App\Http\Requests\Interval\IntervalTotalRequest;
 use App\Http\Requests\Interval\ListIntervalRequest;
 use App\Http\Requests\Interval\PutScreenshotRequest;
 use App\Http\Requests\Interval\ScreenshotRequest;
+use App\Helpers\OfflineScreenshotsArchive;
 use App\Http\Requests\Interval\ShowIntervalRequest;
+use App\Http\Requests\Interval\ShowOfflineScreenshotsUploadRequest;
 use App\Http\Requests\Interval\TrackAppRequest;
 use App\Http\Requests\Interval\UploadOfflineIntervalsRequest;
 use App\Http\Requests\Interval\UploadOfflineScreenshotsRequest;
 use App\Jobs\AssignAppsToTimeInterval;
+use App\Jobs\ProcessOfflineScreenshotsUpload;
+use App\Models\OfflineScreenshotUpload;
+use App\Models\OfflineScreenshotUploadItem;
 use App\Models\Task;
 use App\Models\TrackedApplication;
 use App\Models\User;
@@ -33,8 +39,7 @@ use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Number;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Collection;
 use MessagePack\MessagePack;
 use phpseclib4\Crypt\RSA;
 use phpseclib4\Exception\BadDecryptionException;
@@ -43,6 +48,7 @@ use Settings;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
 use Storage;
 use Str;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use RuntimeException;
 use Throwable;
@@ -52,8 +58,6 @@ use ZipArchive;
 class IntervalController extends ItemController
 {
     protected const MODEL = TimeInterval::class;
-
-    private const OFFLINE_SCREENSHOTS_EXTRACTION_CHUNK_SIZE = 64 * 1024;
 
     public function __construct(protected ScreenshotService $screenshotService)
     {
@@ -530,25 +534,26 @@ class IntervalController extends ItemController
     /**
      * Upload offline screenshots
      *
-     * Attaches the screenshots recorded while the desktop application was offline to their intervals. The `file`
-     * field (`multipart/form-data`) is a ZIP archive named `*.cattr` with a flat list of files named
+     * Queues the screenshots recorded while the desktop application was offline for attaching to their intervals. The
+     * `file` field (`multipart/form-data`) is a ZIP archive named `*.cattr` with a flat list of files named
      * `<user_id>_<screenshot_id>` (the screenshot ID is a UUID). An archive that exceeds the configured number of
-     * files or unpacked size, or contains directories, is rejected with 422; an archive that cannot be read, or
-     * a file with another name, with 400.
+     * files or unpacked size, contains directories or duplicate names, or unpacks to more than the unpacked size, is
+     * rejected with 422; an archive that cannot be read, or a file with another name, with 400.
      *
-     * Each file is attached to the interval of that user with that `screenshot_id`, if the current user may create such
-     * an interval. The response is 200 and reports each file separately: `interval` is `null` if no suitable interval
-     * was found.
+     * A valid archive is stored on the default disk and processed by a queue worker: the response is 202 with the
+     * upload to poll with `GET /offline-sync/uploads/{id}` (a `private-offline-sync.{user_id}` broadcast event
+     * `offline-sync.upload` reports its progress as well). Each file is attached to the interval of that user with
+     * that `screenshot_id`, if the current user may create such an interval.
      *
      * Any authenticated user may call it.
      *
-     * @response array{status: int, success: true, data: list<array{
-     *     interval: \App\Models\TimeInterval|null,
-     *     user_id: int,
-     *     screenshot_id: string,
-     *     message: string,
-     *     success: bool,
-     * }>}
+     * @response 202 array{status: int, success: true, data: array{
+     *     id: int,
+     *     status: 'pending'|'processing'|'completed'|'failed',
+     *     total: int,
+     *     processed: int,
+     *     results: list<array{}>,
+     * }}
      */
     public function uploadOfflineScreenshots(UploadOfflineScreenshotsRequest $request): JsonResponse
     {
@@ -557,227 +562,97 @@ class IntervalController extends ItemController
          */
         $file = $request->validated()['file'];
 
-        $zip = new ZipArchive;
-        $zipOpenResult = $zip->open($file->path());
-        abort_if(
-            $zipOpenResult === false || (is_int($zipOpenResult) && $zipOpenResult > 0),
-            400,
-            __('Cannot open file.' . is_int($zipOpenResult) ? " ZipArchive error code: $zipOpenResult" : ""),
-        );
+        // Everything that can be checked without the interval data is checked before the archive is stored: the
+        // names and sizes in the headers, then the bytes the entries actually unpack to.
+        $archive = OfflineScreenshotsArchive::open($file->path());
+        try {
+            $archive->validate();
+            $archive->scan();
+            $total = $archive->count();
+        } finally {
+            $archive->close();
+        }
 
-        // Before the temporary directory is created: a rejected archive leaves nothing behind.
-        $this->validateOfflineScreenshotsArchive($zip);
-
-        // The archive is extracted to the local disk of this web container and processed within the request,
-        // so the queue worker does not need access to these files. The directory is removed when the request
-        // ends, also on failure; leftovers of interrupted requests are removed by cattr:tmp:clean.
-        $temporaryDirectory = (new TemporaryDirectory())
-            ->location(Storage::disk('local')->path('tmp'))->force()->create();
+        // The default disk is shared with the queue workers: the PVC or S3, unlike storage/app/tmp of this container
+        $diskName = config('filesystems.default');
+        $path = Storage::disk($diskName)->putFileAs(OfflineScreenshotUpload::ARCHIVE_DIRECTORY, $file, Str::uuid() . '.cattr');
+        if ($path === false) {
+            throw new RuntimeException('Unable to store the offline screenshots archive');
+        }
 
         try {
-            $this->extractOfflineScreenshotsArchive($zip, $temporaryDirectory->path());
-            $zip->close();
-
-            $creationResult = $this->attachOfflineScreenshots(
-                'tmp/' . basename($temporaryDirectory->path()),
-                $request->user(),
-            );
-        } finally {
-            $temporaryDirectory->delete();
-        }
-
-        return responder()->success($creationResult)->respond();
-    }
-
-    /**
-     * Rejects the archive before anything is extracted or attached if it cannot be processed within the request
-     * (too many entries or too large when unpacked) or if an entry is not a plain file name.
-     *
-     * The desktop application exports a flat list of `<user_id>_<screenshot_id>` entries without directories.
-     *
-     * @throws ValidationException
-     */
-    private function validateOfflineScreenshotsArchive(ZipArchive $zip): void
-    {
-        $maxFiles = (int)config('app.offline_screenshots.max_files');
-        $maxSize = (int)config('app.offline_screenshots.max_size');
-
-        $fileCount = $zip->count();
-        if ($fileCount > $maxFiles) {
-            throw ValidationException::withMessages([
-                'file' => __('validation.offline-sync.too_many_files', ['count' => $fileCount, 'max' => $maxFiles]),
+            $upload = OfflineScreenshotUpload::query()->create([
+                'user_id' => $request->user()->id,
+                'status' => OfflineScreenshotUploadStatus::PENDING,
+                'disk' => $diskName,
+                'path' => $path,
+                'total' => $total,
             ]);
+
+            ProcessOfflineScreenshotsUpload::dispatch($upload);
+        } catch (Throwable $e) {
+            Storage::disk($diskName)->delete($path);
+            OfflineScreenshotUpload::query()->where('disk', $diskName)->where('path', $path)->delete();
+
+            throw $e;
         }
 
-        $totalSize = 0;
-        for ($index = 0; $index < $fileCount; $index++) {
-            $name = $zip->getNameIndex($index);
-            $stat = $zip->statIndex($index);
-
-            if (!is_string($name) || $stat === false || !self::isPlainArchiveEntryName($name)) {
-                throw ValidationException::withMessages([
-                    'file' => __('validation.offline-sync.wrong_file_name'),
-                ]);
-            }
-
-            $totalSize += $stat['size'];
-            if ($totalSize > $maxSize) {
-                throw self::offlineScreenshotsArchiveTooLarge($maxSize);
-            }
-        }
+        return responder()->success($this->offlineScreenshotsUploadData($upload, collect()))
+            ->respond(Response::HTTP_ACCEPTED);
     }
 
     /**
-     * Extracts the validated archive into the directory, counting the bytes that are actually written.
+     * Offline screenshots upload
      *
-     * The sizes checked by validateOfflineScreenshotsArchive() come from the zip headers and can be forged, while
-     * ZipArchive::extractTo() writes whatever the entries decompress to. Here no more than the configured total
-     * size is ever written: each entry is copied in chunks of at most the remaining budget plus one byte, and the
-     * archive is rejected as soon as that extra byte is read.
+     * The status, progress and per-screenshot results of an upload from `POST /offline-sync/upload-screenshots`. The
+     * `results` are the files processed so far: `interval` is `null` if no suitable interval was found.
      *
-     * @throws ValidationException
+     * Only the user who uploaded the archive may read it, for anyone else the upload does not exist (404).
+     *
+     * @urlParam id int required The upload ID. Example: 1
+     *
+     * @response array{status: int, success: true, data: array{
+     *     id: int,
+     *     status: 'pending'|'processing'|'completed'|'failed',
+     *     total: int,
+     *     processed: int,
+     *     results: list<array{
+     *         interval: \App\Models\TimeInterval|null,
+     *         user_id: int,
+     *         screenshot_id: string,
+     *         message: string,
+     *         success: bool,
+     *     }>,
+     * }}
      */
-    private function extractOfflineScreenshotsArchive(ZipArchive $zip, string $directory): void
+    public function showOfflineScreenshotsUpload(ShowOfflineScreenshotsUploadRequest $request, int $id): JsonResponse
     {
-        $maxSize = (int)config('app.offline_screenshots.max_size');
-        $remaining = $maxSize;
+        // Not found for anyone but the uploader, like a missing upload
+        $upload = OfflineScreenshotUpload::query()->where('user_id', $request->user()->id)->findOrFail($id);
 
-        $fileCount = $zip->count();
-        for ($index = 0; $index < $fileCount; $index++) {
-            // The names were checked to be plain file names by validateOfflineScreenshotsArchive()
-            $name = $zip->getNameIndex($index);
-            $stat = $zip->statIndex($index);
-            $source = $name === false || $stat === false ? false : $zip->getStreamIndex($index);
-            abort_if($source === false, 400, __('Cannot open file.'));
-            $written = 0;
+        $items = $upload->items()->with('interval')->orderBy('id')->get();
 
-            try {
-                $target = fopen($directory . DIRECTORY_SEPARATOR . $name, 'wb');
-                if ($target === false) {
-                    throw new RuntimeException("Unable to create the extracted file for archive entry $index");
-                }
-                try {
-                    while (!feof($source)) {
-                        // Undecodable compressed data is reported as a warning and a failed read
-                        $chunk = @fread($source, min(self::OFFLINE_SCREENSHOTS_EXTRACTION_CHUNK_SIZE, $remaining + 1));
-                        abort_if($chunk === false, 400, __('Cannot open file.'));
-
-                        if (strlen($chunk) > $remaining) {
-                            throw self::offlineScreenshotsArchiveTooLarge($maxSize);
-                        }
-
-                        // A short write (e.g. a full disk) must not leave a truncated screenshot behind
-                        if (fwrite($target, $chunk) !== strlen($chunk)) {
-                            throw new RuntimeException("Unable to write the extracted file for archive entry $index");
-                        }
-                        $remaining -= strlen($chunk);
-                        $written += strlen($chunk);
-                    }
-                } finally {
-                    fclose($target);
-                }
-
-                // A damaged entry can end early without a read error; never pass on a truncated screenshot
-                abort_if($written !== $stat['size'], 400, __('Cannot open file.'));
-            } finally {
-                fclose($source);
-            }
-        }
-    }
-
-    private static function offlineScreenshotsArchiveTooLarge(int $maxSize): ValidationException
-    {
-        return ValidationException::withMessages([
-            'file' => __('validation.offline-sync.too_large', [
-                'max' => Number::fileSize($maxSize, maxPrecision: 2),
-            ]),
-        ]);
+        return responder()->success($this->offlineScreenshotsUploadData($upload, $items))->respond();
     }
 
     /**
-     * A plain file name: not `.`, no directories, no parent references, no absolute or drive paths and no NUL bytes.
+     * @param Collection<int, OfflineScreenshotUploadItem> $items
      */
-    private static function isPlainArchiveEntryName(string $name): bool
+    private function offlineScreenshotsUploadData(OfflineScreenshotUpload $upload, Collection $items): array
     {
-        return $name !== ''
-            && $name !== '.'
-            && strpbrk($name, "/\\\0") === false
-            && !str_contains($name, '..')
-            && preg_match('/^[A-Za-z]:/', $name) !== 1;
-    }
-
-    /**
-     * Saves the extracted offline screenshots synchronously, so that failures are reported in the result.
-     *
-     * @param string $dirPath Directory with the extracted screenshots, relative to the local disk
-     * @param User $uploader Screenshots are attached only to intervals this user may create
-     * @return array
-     */
-    private function attachOfflineScreenshots(string $dirPath, User $uploader): array
-    {
-        $allScreenshots = Storage::disk('local')->files($dirPath);
-
-        $creationResult = [];
-
-        // Same rule as for the offline intervals upload: whoever may create the interval may attach its screenshot.
-        $canAttach = static fn(TimeInterval $interval) => $uploader->can(
-            'create',
-            [
-                TimeInterval::class,
-                $interval->user_id,
-                $interval->task_id,
-                false,
-            ],
-        );
-
-        foreach ($allScreenshots as $screenshotPath) {
-            // File names are <user_id>_<screenshot_uuid>
-            abort_unless(
-                preg_match('/^(\d+)_(.+)\z/', basename($screenshotPath), $matches) === 1 && Str::isUuid($matches[2]),
-                400,
-                __('Wrong screenshot file name')
-            );
-
-            $userId = (int)$matches[1];
-            $screenshotId = $matches[2];
-
-            $interval = TimeInterval::where('user_id', $userId)->where('screenshot_id', $screenshotId)->first();
-            // An interval of someone the uploader may not track time for is reported exactly like a missing one
-            if ($interval === null || !$canAttach($interval)) {
-                $creationResult[] = [
-                    'interval' => null,
-                    'user_id' => $userId,
-                    'screenshot_id' => $screenshotId,
-                    'message' => __('validation.offline-sync.cannot_find_interval'),
-                    'success' => false
-                ];
-                continue;
-            }
-            try {
-                $this->screenshotService->saveScreenshot(Storage::disk('local')->path($screenshotPath), $interval);
-                $interval->screenshot_id = null;
-                $interval->save();
-
-                $creationResult[] = [
-                    'interval' => $interval,
-                    'user_id' => $userId,
-                    'screenshot_id' => $screenshotId,
-                    'message' => __('validation.offline-sync.screenshot_attached'),
-                    'success' => true
-                ];
-            } catch (\Exception $e) {
-                $creationResult[] = [
-                    'interval' => $interval,
-                    'user_id' => $userId,
-                    'screenshot_id' => $screenshotId,
-                    'message' => __('validation.offline-sync.screenshot_not_attached'),
-                    'success' => false
-                ];
-                \Log::error($e);
-            }
-        }
-
-        return $creationResult;
+        return [
+            'id' => $upload->id,
+            'status' => $upload->status->value,
+            'total' => $upload->total,
+            'processed' => $items->count(),
+            'results' => $items->map(static fn (OfflineScreenshotUploadItem $item) => [
+                'interval' => $item->interval,
+                'user_id' => $item->user_id,
+                'screenshot_id' => $item->screenshot_id,
+                'message' => __($item->message),
+                'success' => $item->success,
+            ])->all(),
+        ];
     }
 
     /**
