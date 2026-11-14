@@ -143,6 +143,61 @@ class CleanTmpFilesTest extends TestCase
         $this->assertTrue($disk->exists('screenshots/old.jpg'));
     }
 
+    public function test_keeps_an_old_archive_that_an_upload_still_refers_to(): void
+    {
+        $disk = Storage::disk('local');
+        $user = UserFactory::create();
+        $disk->put('offline-screenshots/referenced.cattr', 'x');
+        $disk->put('offline-screenshots/orphan.cattr', 'x');
+        foreach (['referenced', 'orphan'] as $name) {
+            touch($disk->path("offline-screenshots/$name.cattr"), now()->subHours(25)->getTimestamp());
+        }
+        $upload = OfflineScreenshotUpload::create([
+            'user_id' => $user->id,
+            'status' => OfflineScreenshotUploadStatus::PROCESSING,
+            'disk' => 'local',
+            'path' => 'offline-screenshots/referenced.cattr',
+            'total' => 1,
+        ]);
+
+        $this->artisan('cattr:tmp:clean')->assertSuccessful();
+
+        $this->assertTrue($disk->exists('offline-screenshots/referenced.cattr'));
+        $this->assertFalse($disk->exists('offline-screenshots/orphan.cattr'));
+        $this->assertSame(OfflineScreenshotUploadStatus::PROCESSING, $upload->refresh()->status);
+        $this->assertNotNull($upload->path);
+    }
+
+    public function test_processes_every_upload_when_there_are_more_than_one_chunk(): void
+    {
+        $user = UserFactory::create();
+        $old = now()->subHours(25);
+        $rows = [];
+        // 1001 rows: more than one chunk of eachById(); marking an upload failed removes it from the selection,
+        // so reading by offset would skip the rows that move into the first page
+        for ($i = 1; $i <= 1001; $i++) {
+            $rows[] = [
+                'user_id' => $user->id,
+                'status' => OfflineScreenshotUploadStatus::PENDING->value,
+                'disk' => 'local',
+                'path' => "offline-screenshots/$i.cattr",
+                'total' => 1,
+                'created_at' => $old,
+                'updated_at' => $old,
+            ];
+        }
+        foreach (array_chunk($rows, 500) as $chunk) {
+            OfflineScreenshotUpload::query()->insert($chunk);
+        }
+
+        $this->artisan('cattr:tmp:clean')
+            ->expectsOutputToContain('Deleted 1001 offline screenshot archives')
+            ->assertSuccessful();
+
+        $this->assertSame(1001, OfflineScreenshotUpload::where('status', OfflineScreenshotUploadStatus::FAILED)->count());
+        $this->assertSame(1001, OfflineScreenshotUpload::query()->whereNull('path')->count());
+    }
+
     public function test_deletes_finished_offline_screenshot_uploads_after_seven_days(): void
     {
         $user = UserFactory::create();

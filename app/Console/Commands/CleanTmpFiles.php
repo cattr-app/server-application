@@ -101,11 +101,13 @@ class CleanTmpFiles extends Command
         $failed = 0;
         $before = now()->setTimestamp($threshold);
 
+        // Both queries below change the rows they select, so they are read by id: a paging by offset skips rows.
+
         // Uploads whose job never finished (lost, or waiting longer than the threshold) can never be completed
         OfflineScreenshotUpload::query()
             ->whereIn('status', [OfflineScreenshotUploadStatus::PENDING, OfflineScreenshotUploadStatus::PROCESSING])
             ->where('updated_at', '<', $before)
-            ->each(function (OfflineScreenshotUpload $upload) use (&$deleted, &$failed) {
+            ->eachById(function (OfflineScreenshotUpload $upload) use (&$deleted, &$failed) {
                 $upload->markFailed();
                 $upload->path === null ? $deleted++ : $failed++;
             });
@@ -114,7 +116,7 @@ class CleanTmpFiles extends Command
         OfflineScreenshotUpload::query()
             ->whereNotNull('path')
             ->where('updated_at', '<', $before)
-            ->each(function (OfflineScreenshotUpload $upload) use (&$deleted, &$failed) {
+            ->eachById(function (OfflineScreenshotUpload $upload) use (&$deleted, &$failed) {
                 try {
                     $upload->deleteArchive();
                     $deleted++;
@@ -124,11 +126,15 @@ class CleanTmpFiles extends Command
                 }
             });
 
-        // Archives without an upload row
-        $disk = Storage::disk(config('filesystems.default'));
+        // Archives without an upload row: an archive that a row still refers to belongs to its job (or to the
+        // retry above), however old the file is
+        $diskName = config('filesystems.default');
+        $disk = Storage::disk($diskName);
         try {
             foreach ($disk->files(OfflineScreenshotUpload::ARCHIVE_DIRECTORY) as $path) {
-                if ($disk->lastModified($path) > $threshold) {
+                if ($disk->lastModified($path) > $threshold
+                    || OfflineScreenshotUpload::query()->where('disk', $diskName)->where('path', $path)->exists()
+                ) {
                     continue;
                 }
 
