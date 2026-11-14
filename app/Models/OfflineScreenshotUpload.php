@@ -6,6 +6,7 @@ use App\Enums\OfflineScreenshotUploadStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Throwable;
@@ -71,12 +72,64 @@ class OfflineScreenshotUpload extends Model
     }
 
     /**
+     * Takes the upload for processing: PENDING becomes PROCESSING, and an interrupted PROCESSING is resumed.
+     *
+     * The row is locked while it is checked and changed, so an upload that cattr:tmp:clean has already failed is
+     * not overwritten, and the cleanup (a conditional UPDATE) waits for this change and then sees a fresh
+     * updated_at. A conditional UPDATE alone cannot be used: a resumed PROCESSING changes nothing but updated_at,
+     * which MySQL does not count as a changed row within the same second.
+     *
+     * @return bool False if the upload is already finished or gone, so nothing must be processed
+     */
+    public function claimForProcessing(): bool
+    {
+        return DB::transaction(function () {
+            $locked = static::query()->whereKey($this->getKey())->lockForUpdate()->first();
+            if ($locked === null || $locked->status->isFinished()) {
+                return false;
+            }
+
+            $locked->forceFill(['status' => OfflineScreenshotUploadStatus::PROCESSING, 'updated_at' => now()])->save();
+            $this->setRawAttributes($locked->getAttributes(), true);
+
+            return true;
+        });
+    }
+
+    /**
+     * Fails the upload and deletes its archive, but only if it is still unfinished and has not been touched since
+     * $before. The check and the change are one UPDATE, so a job that has started in the meantime wins.
+     *
+     * @return bool False if the upload was not stale any more, nothing is changed then
+     */
+    public function markFailedIfStale(\DateTimeInterface $before): bool
+    {
+        $claimed = static::query()
+            ->whereKey($this->getKey())
+            ->whereIn('status', [OfflineScreenshotUploadStatus::PENDING, OfflineScreenshotUploadStatus::PROCESSING])
+            ->where('updated_at', '<', $before)
+            ->update(['status' => OfflineScreenshotUploadStatus::FAILED, 'finished_at' => now()]) === 1;
+
+        if ($claimed) {
+            $this->refresh();
+            $this->deleteArchiveQuietly();
+        }
+
+        return $claimed;
+    }
+
+    /**
      * Marks the upload as finished without a complete result and deletes its archive.
      */
     public function markFailed(): void
     {
         $this->forceFill(['status' => OfflineScreenshotUploadStatus::FAILED, 'finished_at' => now()])->save();
 
+        $this->deleteArchiveQuietly();
+    }
+
+    private function deleteArchiveQuietly(): void
+    {
         try {
             $this->deleteArchive();
         } catch (Throwable $e) {

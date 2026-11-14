@@ -124,6 +124,50 @@ class CleanTmpFilesTest extends TestCase
         $this->assertSame(OfflineScreenshotUploadStatus::PENDING, $queued->refresh()->status);
     }
 
+    public function test_cleanup_does_not_fail_an_upload_that_a_job_has_started_since_it_was_loaded(): void
+    {
+        $disk = Storage::disk('local');
+        $upload = OfflineScreenshotUpload::create([
+            'user_id' => UserFactory::create()->id,
+            'status' => OfflineScreenshotUploadStatus::PENDING,
+            'disk' => 'local',
+            'path' => 'offline-screenshots/raced.cattr',
+            'total' => 1,
+        ]);
+        $disk->put($upload->path, 'archive');
+        OfflineScreenshotUpload::whereKey($upload->id)->update(['updated_at' => now()->subHours(25)]);
+
+        // The cleanup has loaded the stale row; then the worker takes it
+        $loaded = OfflineScreenshotUpload::findOrFail($upload->id);
+        $this->assertTrue($upload->claimForProcessing());
+
+        $this->assertFalse($loaded->markFailedIfStale(now()->subHours(24)));
+
+        $this->assertTrue($disk->exists('offline-screenshots/raced.cattr'));
+        $this->assertSame(OfflineScreenshotUploadStatus::PROCESSING, $upload->refresh()->status);
+        $this->assertNull($upload->finished_at);
+    }
+
+    public function test_job_does_not_overwrite_an_upload_that_cleanup_has_failed(): void
+    {
+        $upload = OfflineScreenshotUpload::create([
+            'user_id' => UserFactory::create()->id,
+            'status' => OfflineScreenshotUploadStatus::PENDING,
+            'disk' => 'local',
+            'path' => 'offline-screenshots/raced.cattr',
+            'total' => 1,
+        ]);
+        OfflineScreenshotUpload::whereKey($upload->id)->update(['updated_at' => now()->subHours(25)]);
+
+        // The job has loaded the row as pending; then the cleanup fails it
+        $loaded = OfflineScreenshotUpload::findOrFail($upload->id);
+        $this->assertTrue($upload->markFailedIfStale(now()->subHours(24)));
+
+        $this->assertFalse($loaded->claimForProcessing());
+        $this->assertSame(OfflineScreenshotUploadStatus::FAILED, $upload->refresh()->status);
+        $this->assertNull($upload->path);
+    }
+
     public function test_removes_old_archives_without_an_upload_from_the_default_disk(): void
     {
         config(['filesystems.default' => 's3']);

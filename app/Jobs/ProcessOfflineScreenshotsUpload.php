@@ -74,7 +74,10 @@ class ProcessOfflineScreenshotsUpload implements ShouldQueue
             return;
         }
 
-        $upload->forceFill(['status' => OfflineScreenshotUploadStatus::PROCESSING])->save();
+        // Conditional: an upload that cleanup has failed in the meantime stays failed and is not processed
+        if (!$upload->claimForProcessing()) {
+            return;
+        }
 
         $processedNames = $upload->items()->pluck('entry_name')->flip();
         $processed = $processedNames->count();

@@ -107,9 +107,11 @@ class CleanTmpFiles extends Command
         OfflineScreenshotUpload::query()
             ->whereIn('status', [OfflineScreenshotUploadStatus::PENDING, OfflineScreenshotUploadStatus::PROCESSING])
             ->where('updated_at', '<', $before)
-            ->eachById(function (OfflineScreenshotUpload $upload) use (&$deleted, &$failed) {
-                $upload->markFailed();
-                $upload->path === null ? $deleted++ : $failed++;
+            ->eachById(function (OfflineScreenshotUpload $upload) use (&$deleted, &$failed, $before) {
+                // The row was loaded earlier: a job may have started since, then it is not stale any more
+                if ($upload->markFailedIfStale($before)) {
+                    $upload->path === null ? $deleted++ : $failed++;
+                }
             });
 
         // Finished uploads whose archive could not be deleted at that time
