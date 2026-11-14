@@ -107,6 +107,11 @@ class SettingsProviderService implements SettingsProvider
 
         if (is_array($key)) {
             foreach ($key as $_key => $_value) {
+                if ($_value === null) {
+                    $this->forgetValue($scope, $_key, $onlyIfNotExists);
+                    continue;
+                }
+
                 if ($onlyIfNotExists &&
                     $this->model::where([
                         'module_name' => $scope,
@@ -123,6 +128,8 @@ class SettingsProviderService implements SettingsProvider
                     'value' => $_value,
                 ]);
             }
+        } elseif ($value === null) {
+            $this->forgetValue($scope, $key, $onlyIfNotExists);
         } else {
             if ($onlyIfNotExists &&
                 $this->model::where([
@@ -146,6 +153,19 @@ class SettingsProviderService implements SettingsProvider
         } catch (Exception) {
             // DO NOTHING
         }
+    }
+
+    /**
+     * The value column is not nullable, so `null` means "no value": the record is removed
+     * and `get()` falls back to its default.
+     */
+    private function forgetValue(string $scope, string $key, bool $onlyIfNotExists): void
+    {
+        if ($onlyIfNotExists) {
+            return;
+        }
+
+        $this->model::where(['module_name' => $scope, 'key' => $key])->delete();
     }
 
     /**
