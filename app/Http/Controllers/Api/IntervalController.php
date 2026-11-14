@@ -30,6 +30,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Number;
@@ -438,15 +439,22 @@ class IntervalController extends ItemController
             __('User not found')
         );
 
-        $canCreate = fn($interval) => $request->user()->can(
-            'create',
-            [
-                TimeInterval::class,
-                $interval['user_id'],
-                $interval['task_id'],
-                false,
-            ],
-        );
+        $canCreate = function ($interval) use ($request) {
+            try {
+                return $request->user()->can(
+                    'create',
+                    [
+                        TimeInterval::class,
+                        $interval['user_id'],
+                        $interval['task_id'],
+                        false,
+                    ],
+                );
+            } catch (ModelNotFoundException) {
+                // The policy cannot resolve the project of an unknown task: report this interval only
+                return false;
+            }
+        };
 
         $tasksScreenshotsState = Task::with('project:id,screenshots_state')
             ->whereIn('id', collect($intervals)->pluck('task_id'))
