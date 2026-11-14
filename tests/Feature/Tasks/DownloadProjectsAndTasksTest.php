@@ -5,7 +5,6 @@ namespace Tests\Feature\Tasks;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
-use Illuminate\Support\Arr;
 use MessagePack\MessagePack;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Facades\ProjectFactory;
@@ -78,14 +77,14 @@ class DownloadProjectsAndTasksTest extends TestCase
                 'source' => 'internal',
                 'updated_at' => $project->updated_at->toJSON(),
             ],
-            Arr::except($data['projects'][0], 'pivot')
+            $data['projects'][0]
         );
         $this->assertSame($task->id, $data['tasks'][0]['id']);
         $this->assertSame($project->id, $data['tasks'][0]['project_id']);
         $this->assertSame($task->task_name, $data['tasks'][0]['task_name']);
         $this->assertSame(
             ['id', 'project_id', 'task_name', 'description', 'url', 'priority_id', 'status_id', 'updated_at'],
-            array_keys(Arr::except($data['tasks'][0], 'pivot'))
+            array_keys($data['tasks'][0])
         );
     }
 
