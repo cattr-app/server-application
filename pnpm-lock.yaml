@@ -170,8 +170,8 @@ importers:
   .:
     dependencies:
       '@amazingcat/cattr-demo-module':
-        specifier: ^3.0.0
-        version: 3.0.0
+        specifier: ^3.1.0
+        version: 3.1.0
       '@amazingcat/cattr-gitlab-integration':
         specifier: ^3.1.9
         version: 3.1.9
@@ -386,8 +386,8 @@ importers:
 
 packages:
 
-  '@amazingcat/cattr-demo-module@3.0.0':
-    resolution: {integrity: sha512-B0sn3ANGfNLBrgMjavuBsq05FPDP6/sRpfhG2xF1MHnwVsWpCNl1K5mu7TnoAsytktMwfxopxPuIXCBD1rckSw==}
+  '@amazingcat/cattr-demo-module@3.1.0':
+    resolution: {integrity: sha512-eiTP8g5tNeVz/wYPVbn+ergUwMGaKGVrsgeR/wMEK6H1C9dKMsgbZlfCWqEZzncBFrcwZfHyhthskcnUN/SU2w==}
 
   '@amazingcat/cattr-gitlab-integration@3.1.9':
     resolution: {integrity: sha512-1PRzsWBR+BL7Y6yEhOHwVwsWc6AGSDtd2LIEow5p6K2RzOHtciOB2JUEC8YOMRjxGsFJmnq7N+g4TNQow8r+tw==}
@@ -5176,7 +5176,7 @@ packages:
 
 snapshots:
 
-  '@amazingcat/cattr-demo-module@3.0.0': {}
+  '@amazingcat/cattr-demo-module@3.1.0': {}
 
   '@amazingcat/cattr-gitlab-integration@3.1.9': {}
 
