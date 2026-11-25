@@ -31,7 +31,10 @@ jobs:
           coverage: none
           tools: composer:v2
       - run: composer install --no-interaction --no-progress --prefer-dist --no-scripts
-      - run: vendor/bin/phpunit tests/Unit/OidcClientTest.php tests/Feature/Auth/OidcTest.php
+      - run: |
+          vendor/bin/phpunit tests/Unit/OidcClientTest.php
+          vendor/bin/phpunit tests/Feature/Auth/OidcTest.php
+          vendor/bin/phpunit tests/Feature/Auth/OidcDesktopConcurrencyTest.php
 
   frontend:
     runs-on: ubuntu-latest
